@@ -73,6 +73,13 @@ body {
   color: #444;
 }
 
+.center-text {
+  text-align: center;
+  font-size: 2rem;
+  font-weight: 600;
+  margin-top: 10vh; /* bylo 20vh – sníženo, aby text seděl výš */
+}
+
 /* 🌙 Dark Mode (automaticky podle systému) */
 @media (prefers-color-scheme: dark) {
   body {
