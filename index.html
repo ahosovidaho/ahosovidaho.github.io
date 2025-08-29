@@ -4,75 +4,52 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Viktor Tamayo</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <style>
-    :root {
-      --bg: #ffffff;
-      --text: #000000;
-      --link: #0077cc;
+    body, html { margin: 0; height: 100%; font-family: 'Inter', sans-serif; }
+    .hero {
+      position: relative;
+      width: 100%;
+      height: 100vh;
+      background: url('profile_pic.jpeg') no-repeat center/cover;
     }
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --bg: #121212;
-        --text: #ffffff;
-        --link: #4da3ff;
-      }
+    .overlay {
+      position: absolute;
+      top:0; left:0; right:0; bottom:0;
+      background: rgba(0,0,0,0.4);
+      display:flex; 
+      flex-direction:column;
+      justify-content:center; 
+      align-items:center;
+      text-align:center;
+      color:#fff;
     }
-
-    body {
-      margin: 0;
-      font-family: system-ui, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      min-height: 100vh;
-      justify-content: center;
-      text-align: center;
-      padding: 2rem;
-    }
-
-    img {
-      max-width: 90%;
-      height: auto;
-      border-radius: 16px;
-      margin: 2rem 0;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-    }
-
-    nav a {
-      margin: 0 1rem;
+    h1 { font-size: 3rem; margin-bottom: 1rem; }
+    p { font-size: 1.3rem; margin-bottom: 2rem; }
+    a {
+      margin: 0 10px;
       text-decoration: none;
-      color: var(--link);
-      font-weight: 500;
-    }
-
-    footer {
-      margin-top: 2rem;
-    }
-
-    footer a {
-      margin: 0 0.5rem;
-      text-decoration: none;
-      color: var(--link);
+      font-weight: 600;
+      color: #0a84ff;
     }
   </style>
 </head>
 <body>
-  <h1>Viktor Tamayo</h1>
-  <nav>
-    <a href="about.html">O mně</a>
-    <a href="autodevadesatky.html">AutoDevadesátky</a>
-    <a href="contact.html">Kontakt</a>
-  </nav>
-
-  <img src="profile_pic.jpeg" alt="Viktor Tamayo">
-
-  <footer>
-    <a href="https://www.linkedin.com/in/viktor-tamayo">LinkedIn</a> |
-    <a href="https://www.tiktok.com/@autodevadesatky">TikTok</a> |
-    <a href="https://www.instagram.com/viktortamayo">Instagram</a> |
-    <a href="https://www.youtube.com/@viki1982">YouTube</a> |
+  <div class="hero">
+    <div class="overlay">
+      <h1>Viktor Tamayo</h1>
+      <p>Komunikace • Auta • Digitální svět</p>
+      <div>
+        <a href="about.html">O mně</a>
+        <a href="autodevadesatky.html">AutoDevadesátky</a>
+        <a href="contact.html">Kontakt</a>
+      </div>
+    </div>
+  </div>
+  <footer style="text-align:center; padding:2rem;">
+    <a href="https://www.tiktok.com/@autodevadesatky">TikTok</a>
+    <a href="https://www.instagram.com/viktortamayo">Instagram</a>
+    <a href="https://www.youtube.com/@viki1982">YouTube</a>
     <a href="https://x.com/viktor_tamayo">X</a>
   </footer>
 </body>
