@@ -1,3 +1,12 @@
 title: Viktor Tamayo
 description: Osobní portfolio
 theme: jekyll-theme-cayman
+plugins:
+  - jekyll-remote-theme
+
+remote_theme: pages-themes/cayman@v0.2.0
+
+# Připojení vlastního CSS
+sass:
+  load_paths:
+    - assets/css
