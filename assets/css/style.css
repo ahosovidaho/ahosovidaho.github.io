@@ -1,0 +1,28 @@
+/* Vlastní úpravy pro Cayman theme */
+
+:root {
+  --primary-bg: #ffffff; /* bílé pozadí */
+  --primary-text: #000000; /* černý text */
+  --accent-color: #1a1a1a; /* tmavě šedá */
+}
+
+/* Nastavení těla stránky */
+body {
+  background-color: var(--primary-bg);
+  color: var(--primary-text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* Nadpisy */
+h1, h2, h3 {
+  color: var(--accent-color);
+}
+
+/* Centrování obrázku */
+img {
+  display: block;
+  margin: 0 auto;
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px; /* jemně zaoblené rohy */
+}
