@@ -33,7 +33,44 @@ img {
   --primary-text: #000000;
   --accent-color: #1a1a1a;
 }
+/* Globální typografie */
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
+  font-weight: 400;
+  line-height: 1.6;
+  color: #111;
+  background-color: #fff;
+  margin: 0;
+  padding: 0;
+  text-align: center;
+}
 
+/* Responzivní obrázek */
+.profile-pic {
+  width: 100%;
+  height: auto;
+  max-height: 500px;
+  object-fit: cover;
+  display: block;
+}
+
+/* Textová část */
+.intro-text {
+  max-width: 700px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+
+.intro-text h1 {
+  font-size: 2.5rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.intro-text p {
+  font-size: 1.2rem;
+  color: #444;
+}
 /* Light režim */
 @media (prefers-color-scheme: light) {
   :root {
