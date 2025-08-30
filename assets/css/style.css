@@ -1,87 +1,111 @@
-/* Google font */
-body {
+/* Reset */
+* {
   margin: 0;
-  font-family: 'Inter', sans-serif;
-  color: #fff;
-  background: #000;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-.hero {
-  position: relative;
-  height: 100vh;
-  background: url("https://picsum.photos/1600/900?grayscale") center/cover no-repeat;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+/* Pozadí s překryvem */
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  color: white;
   text-align: center;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+  overflow: hidden;
 }
 
-.hero .overlay {
-  position: absolute;
+body::before {
+  content: "";
+  position: fixed;
   top: 0;
   left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0,0,0,0.45); /* tmavý překryv pro čitelnost */
+  width: 100%;
+  height: 100%;
+  background: url("../profile_pic.jpeg") no-repeat center center fixed;
+  background-size: cover;
+  z-index: -2;
 }
 
-.hero .content {
-  position: relative;
-  z-index: 1;
-  max-width: 800px;
-  padding: 20px;
+body::after {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.45); /* tmavý překryv */
+  z-index: -1;
 }
 
-.hero h1 {
-  font-size: 3rem;
-  margin-bottom: 0.5rem;
-}
-
-.hero p {
-  font-size: 1.2rem;
-  margin-bottom: 2rem;
-}
-
-.buttons {
+/* Header */
+header {
   display: flex;
-  gap: 1rem;
-  justify-content: center;
-  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 2rem;
 }
 
-.btn {
-  padding: 12px 24px;
-  border-radius: 30px;
-  border: 1px solid #fff;
-  color: #fff;
-  text-decoration: none;
-  font-weight: 600;
-  transition: 0.3s;
-  background: transparent;
+.logo {
+  margin-top: 4vh; /* posunutí nad obličej */
 }
 
-.btn:hover {
-  background: #fff;
-  color: #000;
+.logo h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
 }
 
-.btn.apple {
-  font-family: system-ui, sans-serif;
+.logo p {
   font-size: 1.2rem;
+  margin-top: 0.5rem;
 }
 
-main {
-  background: #fff;
-  color: #000;
-  padding: 60px 20px;
+.socials a {
+  color: white;
+  font-size: 1.5rem;
+  margin-left: 1rem;
+  transition: color 0.3s;
 }
 
-main section {
-  max-width: 900px;
-  margin: 0 auto 60px auto;
+.socials a:hover {
+  color: #aaa;
 }
 
-main h2 {
-  font-size: 2rem;
-  margin-bottom: 1rem;
+/* Intro sekce */
+.intro {
+  margin-top: 20vh;
+}
+
+.apple-button {
+  background: white;
+  color: black;
+  font-size: 1.2rem;
+  padding: 0.6rem 1.2rem;
+  border-radius: 999px;
+  border: none;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.apple-button:hover {
+  background: #ddd;
+}
+
+/* Footer */
+footer {
+  padding: 1rem;
+}
+
+footer a {
+  color: white;
+  text-decoration: none;
+  font-size: 1rem;
+}
+
+footer a:hover {
+  text-decoration: underline;
 }
