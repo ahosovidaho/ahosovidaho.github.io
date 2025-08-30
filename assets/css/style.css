@@ -1,142 +1,87 @@
-/* Reset a základní nastavení */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
+/* Google font */
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
-  color: var(--text-color);
-  background-color: var(--bg-color);
-  line-height: 1.6;
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  color: #fff;
+  background: #000;
 }
 
-:root {
-  --bg-color: #fff;
-  --text-color: #111;
-  --overlay: rgba(0,0,0,0.45);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg-color: #111;
-    --text-color: #f5f5f5;
-    --overlay: rgba(0,0,0,0.55);
-  }
-}
-
-/* Hero sekce */
 .hero {
   position: relative;
-  background: url("profile_pic.jpeg") no-repeat center center/cover;
   height: 100vh;
+  background: url("https://picsum.photos/1600/900?grayscale") center/cover no-repeat;
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
   text-align: center;
-  color: #fff;
 }
 
-.overlay {
-  position: absolute;
-  inset: 0;
-  background: var(--overlay);
-}
-
-header {
+.hero .overlay {
   position: absolute;
   top: 0;
   left: 0;
-  width: 100%;
-  padding: 20px 40px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  z-index: 10;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.45); /* tmavý překryv pro čitelnost */
 }
 
-header .logo {
-  font-weight: 600;
-  font-size: 1.1rem;
-  color: #fff;
-}
-
-nav ul {
-  list-style: none;
-  display: flex;
-  gap: 20px;
-}
-
-nav ul li a {
-  text-decoration: none;
-  color: #fff;
-  font-size: 0.95rem;
-  transition: opacity 0.2s;
-}
-
-nav ul li a:hover {
-  opacity: 0.7;
-}
-
-.social-icons a {
-  margin-left: 15px;
-  color: #fff;
-  font-size: 1.2rem;
-  transition: opacity 0.2s;
-}
-
-.social-icons a:hover {
-  opacity: 0.7;
-}
-
-.hero-text {
+.hero .content {
   position: relative;
-  z-index: 5;
-  margin-top: -10vh; /* posun textu výše */
+  z-index: 1;
+  max-width: 800px;
+  padding: 20px;
 }
 
 .hero h1 {
-  font-size: 2.5rem;
-  font-weight: 700;
+  font-size: 3rem;
+  margin-bottom: 0.5rem;
 }
 
 .hero p {
-  margin: 15px 0;
   font-size: 1.2rem;
-  opacity: 0.9;
+  margin-bottom: 2rem;
 }
 
-.apple-btn {
-  display: inline-block;
-  margin-top: 15px;
-  padding: 12px 28px;
-  background: #fff;
-  color: #111;
-  border-radius: 999px;
+.buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.btn {
+  padding: 12px 24px;
+  border-radius: 30px;
+  border: 1px solid #fff;
+  color: #fff;
   text-decoration: none;
-  font-weight: 500;
-  transition: all 0.3s;
+  font-weight: 600;
+  transition: 0.3s;
+  background: transparent;
 }
 
-.apple-btn:hover {
-  background: #e5e5e5;
+.btn:hover {
+  background: #fff;
+  color: #000;
 }
 
-/* Sekce */
-section {
-  padding: 80px 10%;
-  text-align: center;
+.btn.apple {
+  font-family: system-ui, sans-serif;
+  font-size: 1.2rem;
 }
 
-section h2 {
+main {
+  background: #fff;
+  color: #000;
+  padding: 60px 20px;
+}
+
+main section {
+  max-width: 900px;
+  margin: 0 auto 60px auto;
+}
+
+main h2 {
   font-size: 2rem;
-  margin-bottom: 20px;
-}
-
-footer {
-  text-align: center;
-  padding: 20px;
-  font-size: 0.85rem;
-  opacity: 0.6;
+  margin-bottom: 1rem;
 }
