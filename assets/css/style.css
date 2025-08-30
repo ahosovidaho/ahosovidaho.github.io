@@ -1,128 +1,142 @@
-/* Vlastní úpravy pro Cayman theme */
-
-:root {
-  --primary-bg: #ffffff; /* bílé pozadí */
-  --primary-text: #000000; /* černý text */
-  --accent-color: #1a1a1a; /* tmavě šedá */
-}
-
-/* Nastavení těla stránky */
-body {
-  background-color: var(--primary-bg);
-  color: var(--primary-text);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-}
-
-/* Nadpisy */
-h1, h2, h3 {
-  color: var(--accent-color);
-}
-
-/* Centrování obrázku */
-img {
-  display: block;
-  margin: 0 auto;
-  max-width: 100%;
-  height: auto;
-  border-radius: 8px; /* jemně zaoblené rohy */
-}
-/* Vlastní úpravy pro Cayman theme s podporou dark/light mode */
-
-:root {
-  --primary-bg: #ffffff;
-  --primary-text: #000000;
-  --accent-color: #1a1a1a;
-}
-/* Globální typografie */
-body {
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
-  font-weight: 400;
-  line-height: 1.6;
-  color: #111;
-  background-color: #fff;
+/* Reset a základní nastavení */
+* {
   margin: 0;
   padding: 0;
-  text-align: center;
-  transition: background-color 0.3s ease, color 0.3s ease;
+  box-sizing: border-box;
 }
 
-/* Responzivní obrázek */
-.profile-pic {
-  width: 100%;
-  height: auto;
-  max-height: 500px;
-  object-fit: cover;
-  display: block;
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+  color: var(--text-color);
+  background-color: var(--bg-color);
+  line-height: 1.6;
 }
 
-/* Textová část */
-.intro-text {
-  max-width: 700px;
-  margin: 2rem auto;
-  padding: 0 1rem;
+:root {
+  --bg-color: #fff;
+  --text-color: #111;
+  --overlay: rgba(0,0,0,0.45);
 }
 
-.intro-text h1 {
-  font-size: 2.5rem;
-  font-weight: 600;
-  margin-bottom: 1rem;
-}
-
-.intro-text p {
-  font-size: 1.2rem;
-  color: #444;
-}
-
-.center-text {
-  text-align: center;
-  font-size: 2rem;
-  font-weight: 600;
-  margin-top: 3vh; /* bylo 20vh – sníženo, aby text seděl výš */
-}
-
-.apple-button {
-  display: inline-block;
-  margin-top: 2vh;
-  padding: 12px 28px;
-  font-size: 16px;
-  font-weight: 500;
-  border-radius: 999px;
-  border: none;
-  background-color: rgba(0,0,0,0.75);
-  color: white;
-  text-decoration: none;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-  transition: all 0.3s ease;
-  backdrop-filter: blur(6px);
-}
-
-.apple-button:hover {
-  background-color: rgba(0,0,0,0.9);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 18px rgba(0,0,0,0.25);
-}
-
-@media (prefers-color-scheme: light) {
-  .apple-button {
-    background-color: rgba(255,255,255,0.75);
-    color: black;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-  }
-
-  .apple-button:hover {
-    background-color: rgba(255,255,255,0.9);
-    box-shadow: 0 6px 18px rgba(0,0,0,0.2);
-  }
-}
-
-/* 🌙 Dark Mode (automaticky podle systému) */
 @media (prefers-color-scheme: dark) {
-  body {
-    background-color: #111;
-    color: #f5f5f5;
+  :root {
+    --bg-color: #111;
+    --text-color: #f5f5f5;
+    --overlay: rgba(0,0,0,0.55);
   }
+}
 
-  .intro-text p {
-    color: #ccc;
-  }
+/* Hero sekce */
+.hero {
+  position: relative;
+  background: url("profile_pic.jpeg") no-repeat center center/cover;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  color: #fff;
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  background: var(--overlay);
+}
+
+header {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  padding: 20px 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 10;
+}
+
+header .logo {
+  font-weight: 600;
+  font-size: 1.1rem;
+  color: #fff;
+}
+
+nav ul {
+  list-style: none;
+  display: flex;
+  gap: 20px;
+}
+
+nav ul li a {
+  text-decoration: none;
+  color: #fff;
+  font-size: 0.95rem;
+  transition: opacity 0.2s;
+}
+
+nav ul li a:hover {
+  opacity: 0.7;
+}
+
+.social-icons a {
+  margin-left: 15px;
+  color: #fff;
+  font-size: 1.2rem;
+  transition: opacity 0.2s;
+}
+
+.social-icons a:hover {
+  opacity: 0.7;
+}
+
+.hero-text {
+  position: relative;
+  z-index: 5;
+  margin-top: -10vh; /* posun textu výše */
+}
+
+.hero h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+}
+
+.hero p {
+  margin: 15px 0;
+  font-size: 1.2rem;
+  opacity: 0.9;
+}
+
+.apple-btn {
+  display: inline-block;
+  margin-top: 15px;
+  padding: 12px 28px;
+  background: #fff;
+  color: #111;
+  border-radius: 999px;
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.3s;
+}
+
+.apple-btn:hover {
+  background: #e5e5e5;
+}
+
+/* Sekce */
+section {
+  padding: 80px 10%;
+  text-align: center;
+}
+
+section h2 {
+  font-size: 2rem;
+  margin-bottom: 20px;
+}
+
+footer {
+  text-align: center;
+  padding: 20px;
+  font-size: 0.85rem;
+  opacity: 0.6;
 }
