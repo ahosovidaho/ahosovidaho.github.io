@@ -41,6 +41,29 @@ body::after {
   z-index: -1;
 }
 
+/* Hero sekce */
+.hero {
+  position: relative;
+  height: 100vh;
+  background: url('profile_pic.jpeg') no-repeat center center/cover;
+  display: flex;
+  justify-content: center;   /* horizontální centrování */
+  align-items: center;       /* vertikální centrování */
+  text-align: center;
+  color: white;
+}
+
+.hero::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.45); /* tmavý overlay */
+  z-index: 1;
+}
+
 /* Header */
 header {
   display: flex;
