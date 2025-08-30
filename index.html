@@ -274,98 +274,176 @@
       line-height: 1.7;
     }
 
-    /* Zkušenosti sekce */
-    .experience {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-    }
+   /* Zkušenosti sekce */
+.experience {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
 
-    .experience-content {
-      display: grid;
-      grid-template-columns: 2fr 1fr;
-      gap: 120px;
-      align-items: center;
-    }
+.experience-content {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 60px;
+  align-items: center;
+}
 
-    .timeline {
-      position: relative;
-    }
+.timeline {
+  position: relative;
+}
 
-    .timeline::before {
-      content: '';
-      position: absolute;
-      left: 135px;
-      top: 0;
-      height: 100%;
-      width: 3px;
-      background: linear-gradient(to bottom, rgba(255,255,255,0.8), rgba(255,255,255,0.3));
-      border-radius: 2px;
-    }
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 135px;
+  top: 0;
+  height: 100%;
+  width: 3px;
+  background: linear-gradient(to bottom, rgba(255,255,255,0.8), rgba(255,255,255,0.3));
+  border-radius: 2px;
+}
 
-    .timeline-item {
-      display: flex;
-      margin-bottom: 40px;
-      position: relative;
-      align-items: flex-start;
-    }
+.timeline-item {
+  display: flex;
+  margin-bottom: 40SAMO;
+  position: relative;
+  align-items: flex-start;
+}
 
-    .timeline-item::before {
-      content: '';
-      position: absolute;
-      left: 120px;
-      top: 8px;
-      width: 25px;
-      height: 25px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #007AFF, #0056CC);
-      border: 4px solid white;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    }
+.timeline-item::before {
+  content: '';
+  position: absolute;
+  left: 120px;
+  top: 8px;
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #007AFF, #0056CC);
+  border: 4px solid white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
 
-    .timeline-year {
-      min-width: 100px;
-      font-weight: 600;
-      font-size: 0.9rem;
-      color: rgba(255, 255, 255, 0.8);
-      margin-right: 40px;
-      text-align: right;
-      padding-top: 5px;
-    }
+.timeline-year {
+  min-width: 120px; /* Zvýšena šířka pro větší prostor */
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.8);
+  margin-right: 60px; /* Zvýšen margin pro posun textu doprava */
+  text-align: right;
+  padding-top: 5px;
+}
 
-    .timeline-content h3 {
-      font-size: 1.4rem;
-      font-weight: 700;
-      margin-bottom: 8px;
-      color: white;
-    }
+.timeline-content {
+  padding-left: 20px; /* Přidán padding pro odstup od osy času */
+}
 
-    .timeline-content p {
-      color: rgba(255, 255, 255, 0.9);
-      line-height: 1.5;
-      font-size: 1rem;
-    }
+.timeline-content h3 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: white;
+}
 
-    .experience-image {
-      width: 100%;
-      max-width: 400px;
-      height: 280px;
-      border-radius: 20px;
-      overflow: hidden;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-      transition: transform 0.3s ease;
-      justify-self: end;
-    }
+.timeline-content p {
+  color: rgba(255, 255, 255, 0.9);
+  line-height: 1.5;
+  font-size: 1rem;
+}
 
-    .experience-image:hover {
-      transform: scale(1.05);
-    }
+.experience-image {
+  width: 100%;
+  max-width: 400px;
+  height: 280px;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  transition: transform 0.3s ease;
+  justify-self: end;
+}
 
-    .experience-image img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      object-position: center center;
-    }
+.experience-image:hover {
+  transform: scale(1.05);
+}
+
+.experience-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center center;
+}
+
+/* Responzivní design pro Zkušenosti */
+@media (max-width: 768px) {
+  .experience-content {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+
+  .experience-image {
+    justify-self: center;
+    order: -1; /* Obrázek se posune nad časovou osu */
+    max-width: 300px;
+    height: 200px;
+  }
+
+  .timeline::before {
+    left: 20px; /* Posun osy času na menších obrazovkách */
+  }
+
+  .timeline-item::before {
+    left: 5px; /* Posun teček */
+  }
+
+  .timeline-year {
+    min-width: 60px;
+    margin-right: 20px;
+    font-size: 0.8rem;
+  }
+
+  .timeline-content {
+    padding-left: 40px; /* Větší odstup textu od osy času */
+  }
+
+  .timeline-content h3 {
+    font-size: 1.2rem;
+  }
+
+  .timeline-content p {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .timeline::before {
+    left: 15px;
+  }
+
+  .timeline-item::before {
+    left: 0;
+  }
+
+  .timeline-year {
+    min-width: 50px;
+    margin-right: 15px;
+    font-size: 0.75rem;
+  }
+
+  .timeline-content {
+    padding-left: 30px;
+  }
+
+  .timeline-content h3 {
+    font-size: 1.1rem;
+  }
+
+  .timeline-content p {
+    font-size: 0.85rem;
+  }
+
+  .experience-image {
+    max-width: 250px;
+    height: 180px;
+  }
+}
     .automotive {
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       color: white;
