@@ -4,121 +4,52 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Viktor Tamayo</title>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-  <style>
-    body, html {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background-color: var(--bg);
-      color: var(--text);
-    }
-
-    :root {
-      --bg: #ffffff;
-      --text: #000000;
-    }
-
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --bg: #000000;
-        --text: #ffffff;
-      }
-    }
-
-    header {
-      background: url('profile_pic.jpeg') no-repeat center center/cover;
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-start;
-      text-align: center;
-      position: relative;
-      color: white;
-    }
-
-    nav {
-      display: flex;
-      justify-content: space-between;
-      padding: 1.5rem 2rem;
-      position: absolute;
-      width: 100%;
-      top: 0;
-      left: 0;
-    }
-
-    nav a {
-      margin: 0 1rem;
-      color: white;
-      text-decoration: none;
-      font-weight: 500;
-    }
-
-    .social-icons {
-      display: flex;
-      gap: 1rem;
-    }
-
-    .social-icons a {
-      color: white;
-      font-size: 1.2rem;
-    }
-
-    .hero-text {
-      margin-top: 30vh; /* posune text nahoru/dolů */
-    }
-
-    section {
-      padding: 4rem 2rem;
-      max-width: 900px;
-      margin: auto;
-    }
-
-    h1, h2 {
-      margin-bottom: 1rem;
-    }
-
-    footer {
-      text-align: center;
-      padding: 2rem;
-      font-size: 0.9rem;
-    }
-  </style>
+  <link rel="stylesheet" href="style.css">
+  <!-- Ikonky -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-  <header>
-    <nav>
-      <div>
-        <a href="#home">Domů</a>
-        <a href="#portfolio">Portfolio</a>
-        <a href="#social">Sociální sítě</a>
-      </div>
+  <div class="hero">
+    <div class="overlay"></div>
+    <header>
+      <div class="logo">Viktor Tamayo</div>
+      <nav>
+        <ul>
+          <li><a href="#portfolio">Portfolio</a></li>
+          <li><a href="#social">Sociální sítě</a></li>
+          <li><a href="#kontakt">Kontakt</a></li>
+        </ul>
+      </nav>
       <div class="social-icons">
-        <a href="https://www.linkedin.com/in/viktor-tamayo"><i class="fab fa-linkedin"></i></a>
-        <a href="www.x.com/viktor_tamayo"><i class="fab fa-twitter"></i></a>
-        <a href="https://www.youtube.com/viki1982"><i class="fab fa-youtube"></i></a>
-        <a href="https://www.tiktok.com/@autodevadesatky"><i class="fab fa-TikTok"></i></a>
+        <a href="#"><i class="fab fa-linkedin"></i></a>
+        <a href="#"><i class="fab fa-instagram"></i></a>
+        <a href="#"><i class="fab fa-youtube"></i></a>
       </div>
-    </nav>
+    </header>
     <div class="hero-text">
       <h1>Viktor Tamayo</h1>
       <p>Communication, media & automotive enthusiast</p>
+      <a href="#portfolio" class="apple-btn">Zjistit více</a>
     </div>
-  </header>
+  </div>
 
   <section id="portfolio">
     <h2>Portfolio</h2>
-    <p>Moje projekty budou brzy doplněny.</p>
+    <p>Zde bude portfolio projektů a ukázky práce.</p>
   </section>
 
   <section id="social">
     <h2>Sociální sítě</h2>
-    <p>Zde budou odkazy na mé sociální profily.</p>
+    <p>Odkazy na mé profily: LinkedIn, Instagram, YouTube.</p>
+  </section>
+
+  <section id="kontakt">
+    <h2>Kontakt</h2>
+    <p>Email: <a href="mailto:viktor@example.com">viktor@example.com</a></p>
   </section>
 
   <footer>
-    &copy; 2025 Viktor Tamayo
+    <p>© 2025 Viktor Tamayo</p>
   </footer>
 </body>
 </html>
