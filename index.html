@@ -881,80 +881,120 @@
   </footer>
 
   <script>
-    // Smooth scroll pro navigaci
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-      anchor.addEventListener('click', function (e) {
-        e.preventDefault();
-        const target = document.querySelector(this.getAttribute('href'));
-        if (target) {
-          target.scrollIntoView({
-            behavior: 'smooth',
-            block: 'start'
-          });
+    document.addEventListener('DOMContentLoaded', function() {
+      // Smooth scroll pro navigaci
+      document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+          e.preventDefault();
+          const target = document.querySelector(this.getAttribute('href'));
+          if (target) {
+            target.scrollIntoView({
+              behavior: 'smooth',
+              block: 'start'
+            });
+          }
+        });
+      });
+
+      // Scroll efekty pro navigaci
+      window.addEventListener('scroll', function() {
+        const nav = document.getElementById('navbar');
+        if (window.scrollY > 50) {
+          nav.classList.add('scrolled');
+        } else {
+          nav.classList.remove('scrolled');
         }
       });
-    });
 
-    // Scroll efekty pro navigaci
-    window.addEventListener('scroll', function() {
-      const nav = document.getElementById('navbar');
-      if (window.scrollY > 50) {
-        nav.classList.add('scrolled');
-      } else {
-        nav.classList.remove('scrolled');
+      // Parallax efekt pro pozadí
+      document.addEventListener('mousemove', function(e) {
+        const background = document.querySelector('.hero-background');
+        const x = (e.clientX / window.innerWidth) * 10;
+        const y = (e.clientY / window.innerHeight) * 10;
+        background.style.transform = `translate(${x}px, ${y}px) scale(1.02)`;
+      });
+
+      // Animace při scrollování
+      const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+      };
+
+      const observer = new IntersectionObserver(function(entries) {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+          }
+        });
+      }, observerOptions);
+
+      // Sledování všech sekcí pro animace
+      document.querySelectorAll('.section-title, .section-content').forEach(el => {
+        observer.observe(el);
+      });
+
+      // Kontaktní formulář - Formspree s přesměrováním
+      const contactForm = document.getElementById('contact-form');
+      if (contactForm) {
+        contactForm.addEventListener('submit', async function(e) {
+          e.preventDefault();
+          
+          const form = e.target;
+          const submitBtn = document.getElementById('submit-btn');
+          const formData = new FormData(form);
+          
+          // Změnit text tlačítka během odesílání
+          submitBtn.innerHTML = 'Odesílám...';
+          submitBtn.disabled = true;
+          
+          try {
+            const response = await fetch(form.action, {
+              method: form.method,
+              body: formData,
+              headers: {
+                'Accept': 'application/json'
+              }
+            });
+            
+            if (response.ok) {
+              // Úspěšné odeslání - přesměruj na děkujeme stránku
+              window.location.href = 'dekuji.html';
+            } else {
+              throw new Error('Chyba při odesílání');
+            }
+          } catch (error) {
+            // V případě chyby
+            alert('Omlouváme se, zpráva se nepodařila odeslat. Zkuste to prosím znovu.');
+            submitBtn.innerHTML = 'Odeslat zprávu';
+            submitBtn.disabled = false;
+          }
+        });
       }
+
+      // Aktivní sekce v navigaci
+      function updateActiveNav() {
+        const sections = document.querySelectorAll('.section, .hero');
+        const navLinks = document.querySelectorAll('.nav-links a');
+        
+        let current = '';
+        sections.forEach(section => {
+          const sectionTop = section.offsetTop;
+          const sectionHeight = section.clientHeight;
+          if (scrollY >= (sectionTop - 200)) {
+            current = section.getAttribute('id');
+          }
+        });
+
+        navLinks.forEach(link => {
+          link.classList.remove('active');
+          if (link.getAttribute('href') === '#' + current) {
+            link.classList.add('active');
+          }
+        });
+      }
+
+      window.addEventListener('scroll', updateActiveNav);
     });
-
-    // Parallax efekt pro pozadí
-    document.addEventListener('mousemove', function(e) {
-      const background = document.querySelector('.hero-background');
-      const x = (e.clientX / window.innerWidth) * 10;
-      const y = (e.clientY / window.innerHeight) * 10;
-      background.style.transform = `translate(${x}px, ${y}px) scale(1.02)`;
-    });
-
-    // Animace při scrollování
-    const observerOptions = {
-      threshold: 0.1,
-      rootMargin: '0px 0px -50px 0px'
-    };
-
-    const observer = new IntersectionObserver(function(entries) {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('visible');
-        }
-      });
-    }, observerOptions);
-
-    // Sledování všech sekcí pro animace
-    document.querySelectorAll('.section-title, .section-content').forEach(el => {
-      observer.observe(el);
-    });
-
-    // Aktivní sekce v navigaci
-    function updateActiveNav() {
-      const sections = document.querySelectorAll('.section, .hero');
-      const navLinks = document.querySelectorAll('.nav-links a');
-      
-      let current = '';
-      sections.forEach(section => {
-        const sectionTop = section.offsetTop;
-        const sectionHeight = section.clientHeight;
-        if (scrollY >= (sectionTop - 200)) {
-          current = section.getAttribute('id');
-        }
-      });
-
-      navLinks.forEach(link => {
-        link.classList.remove('active');
-        if (link.getAttribute('href') === '#' + current) {
-          link.classList.add('active');
-        }
-      });
-    }
-
-    window.addEventListener('scroll', updateActiveNav);
   </script>
 </body>
 </html>
