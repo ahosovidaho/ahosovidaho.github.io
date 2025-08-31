@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VTTV.CZ - Viktor Tamayo TV</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #000;
+      color: white;
+      line-height: 1.6;
+    }
+
+    /* Navigation */
+    .navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: rgba(0, 0, 0, 0.9);
+      backdrop-filter: blur(20px);
+      padding: 15px 0;
+      z-index: 1000;
+      transition: all 0.3s ease;
+    }
+
+    .navbar.scrolled {
+      background: rgba(0, 0, 0, 0.95);
+    }
+
+    .nav-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo-nav {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: white;
+      text-decoration: none;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 25px;
+      align-items: center;
+    }
+
+    .nav-links a {
+      color: white;
+      text-decoration: none;
+      transition: color 0.3s ease;
+      font-weight: 500;
+    }
+
+    .nav-links a:hover {
+      color: #007AFF;
+    }
+
+    /* Hero Section */
+    .hero {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 120px 0 80px;
+      text-align: center;
+      position: relative;
+      margin-top: 0;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0.5) 100%);
+      z-index: 1;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    .hero h1 {
+      font-size: clamp(2.5rem, 5vw, 4rem);
+      font-weight: 700;
+      margin-bottom: 20px;
+      text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .hero-subtitle {
+      font-size: clamp(1rem, 2.5vw, 1.3rem);
+      margin-bottom: 40px;
+      opacity: 0.9;
+    }
+
+    .hero-stats {
+      display: flex;
+      gap: 40px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .stat-item {
+      text-align: center;
+    }
+
+    .stat-number {
+      font-size: 2.2rem;
+      font-weight: 700;
+      color: #007AFF;
+      display: block;
+    }
+
+    .stat-label {
+      font-size: 0.9rem;
+      opacity: 0.8;
+    }
+
+    /* Filters */
+    .filters-section {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(20px);
+      padding: 30px 0;
+      position: sticky;
+      top: 70px;
+      z-index: 100;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .filters-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    .search-bar {
+      width: 100%;
+      max-width: 500px;
+      margin: 0 auto 25px;
+      display: block;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 25px;
+      padding: 12px 20px;
+      color: white;
+      font-size: 16px;
+      transition: all 0.3s ease;
+    }
+
+    .search-bar:focus {
+      outline: none;
+      border-color: #007AFF;
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    .search-bar::placeholder {
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    .filter-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: center;
+    }
+
+    .filter-tag {
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .filter-tag:hover, .filter-tag.active {
+      background: #007AFF;
+      border-color: #007AFF;
+      transform: translateY(-2px);
+    }
+
+    .filter-tag .count {
+      opacity: 0.7;
+      font-size: 12px;
+      margin-left: 5px;
+    }
+
+    /* Main Content */
+    .main-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+
+    .videos-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 30px;
+    }
+
+    .video-card {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(20px);
+      border-radius: 20px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      transition: all 0.3s ease;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .video-card:hover {
+      transform: translateY(-10px);
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .video-thumbnail {
+      position: relative;
+      width: 100%;
+      height: 200px;
+      background: #333;
+      overflow: hidden;
+    }
+
+    .video-thumbnail img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.3s ease;
+    }
+
+    .video-card:hover .video-thumbnail img {
+      transform: scale(1.05);
+    }
+
+    .play-button {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 70px;
+      height: 70px;
+      background: rgba(0, 0, 0, 0.8);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      color: white;
+      opacity: 0.9;
+      transition: all 0.3s ease;
+    }
+
+    .video-card:hover .play-button {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1.1);
+      background: rgba(0, 122, 255, 0.9);
+    }
+
+    .video-info {
+      padding: 20px;
+    }
+
+    .video-title {
+      font-size: 1.3rem;
+      font-weight: 600;
+      margin-bottom: 10px;
+      color: white;
+      line-height: 1.4;
+    }
+
+    .video-description {
+      font-size: 0.9rem;
+      opacity: 0.8;
+      margin-bottom: 15px;
+      line-height: 1.5;
+    }
+
+    .video-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 15px;
+    }
+
+    .video-tag {
+      background: rgba(0, 122, 255, 0.2);
+      color: #007AFF;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      border: 1px solid rgba(0, 122, 255, 0.3);
+      font-weight: 500;
+    }
+
+    .video-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.85rem;
+      opacity: 0.6;
+      margin-top: 10px;
+    }
+
+    .platform-badge {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .platform-badge.youtube {
+      color: #FF0000;
+    }
+
+    .platform-badge.tiktok {
+      color: #00f2ea;
+    }
+
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.95);
+      z-index: 2000;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(10px);
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(30px);
+      border-radius: 20px;
+      padding: 0;
+      max-width: 95vw;
+      max-height: 95vh;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .modal-video {
+      width: 90vw;
+      height: 50.625vw;
+      max-width: 1200px;
+      max-height: 675px;
+      min-width: 640px;
+      min-height: 360px;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: rgba(0, 0, 0, 0.8);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      cursor: pointer;
+      font-size: 24px;
+      z-index: 2001;
+      transition: all 0.3s ease;
+    }
+
+    .modal-close:hover {
+      background: rgba(255, 59, 48, 0.8);
+      transform: scale(1.1);
+    }
+
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 80px 20px;
+      opacity: 0.6;
+    }
+
+    .empty-state i {
+      font-size: 4rem;
+      margin-bottom: 30px;
+      opacity: 0.3;
+    }
+
+    .empty-state h3 {
+      font-size: 1.5rem;
+      margin-bottom: 15px;
+    }
+
+    .empty-state p {
+      font-size: 1rem;
+      line-height: 1.6;
+    }
+
+    /* Loading */
+    .loading {
+      text-align: center;
+      padding: 40px;
+      font-size: 1.1rem;
+    }
+
+    .loading i {
+      animation: spin 1s linear infinite;
+      margin-right: 10px;
+    }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    /* Sort Controls */
+    .sort-controls {
+      display: flex;
+      gap: 15px;
+      align-items: center;
+      margin-bottom: 30px;
+      flex-wrap: wrap;
+    }
+
+    .sort-label {
+      font-weight: 500;
+      opacity: 0.8;
+    }
+
+    .sort-select {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 10px;
+      padding: 8px 12px;
+      color: white;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    .sort-select:focus {
+      outline: none;
+      border-color: #007AFF;
+    }
+
+    /* Footer */
+    .footer {
+      background: rgba(255, 255, 255, 0.05);
+      padding: 40px 0;
+      text-align: center;
+      margin-top: 60px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .footer p {
+      opacity: 0.7;
+      margin-bottom: 20px;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 30px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .footer-links a {
+      color: rgba(255, 255, 255, 0.7);
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+
+    .footer-links a:hover {
+      color: white;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .nav-content {
+        padding: 0 15px;
+      }
+
+      .nav-links {
+        gap: 15px;
+      }
+
+      .hero-stats {
+        gap: 25px;
+      }
+
+      .videos-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .modal-video {
+        width: 95vw;
+        height: 53.4vw;
+        min-width: 320px;
+        min-height: 180px;
+      }
+
+      .filter-tags {
+        justify-content: flex-start;
+      }
+
+      .sort-controls {
+        justify-content: center;
+      }
+
+      .footer-links {
+        flex-direction: column;
+        gap: 15px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .hero {
+        padding: 100px 0 60px;
+      }
+
+      .filters-section {
+        padding: 20px 0;
+      }
+
+      .main-content {
+        padding: 20px 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="navbar" id="navbar">
+    <div class="nav-content">
+      <a href="#" class="logo-nav">VTTV.CZ</a>
+      <div class="nav-links">
+        <a href="autotesty_page.html"><i class="fas fa-home"></i> Hlavní stránka</a>
+        <a href="#" onclick="openAdminPanel()"><i class="fas fa-cog"></i> Administrace</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-content">
+      <h1>VTTV.CZ</h1>
+      <p class="hero-subtitle">Viktor Tamayo TV - Kompletní galerie autotestů a recenzí</p>
+      <div class="hero-stats" id="heroStats">
+        <div class="stat-item">
+          <span class="stat-number" id="totalVideosHero">0</span>
+          <span class="stat-label">videí</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-number" id="totalTagsHero">0</span>
+          <span class="stat-label">značek aut</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-number" id="platformsCount">2</span>
+          <span class="stat-label">platformy</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Filters -->
+  <section class="filters-section">
+    <div class="filters-content">
+      <input type="text" class="search-bar" id="searchBar" placeholder="🔍 Hledat videa podle názvu, popisu nebo značky..." oninput="filterVideos()">
+      <div class="filter-tags" id="filterTags">
+        <div class="filter-tag active" data-tag="all" onclick="filterByTag('all')">
+          Všechna videa <span class="count" id="allCount">(0)</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <div class="sort-controls">
+      <span class="sort-label">Řadit podle:</span>
+      <select class="sort-select" id="sortSelect" onchange="sortVideos()">
+        <option value="newest">Nejnovější</option>
+        <option value="oldest">Nejstarší</option>
+        <option value="alphabetical">Podle názvu A-Z</option>
+        <option value="alphabetical-desc">Podle názvu Z-A</option>
+      </select>
+    </div>
+
+    <div id="videosContainer">
+      <div class="loading">
+        <i class="fas fa-spinner"></i>
+        Načítám videa...
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="main-content">
+      <p>&copy; 2025 Viktor Tamayo. Všechna práva vyhrazena.</p>
+      <div class="footer-links">
+        <a href="autotesty_page.html">O autotestech</a>
+        <a href="mailto:viktor@tamayo.cz">Kontakt</a>
+        <a href="https://youtube.com/@viktortamayo" target="_blank">YouTube</a>
+        <a href="https://tiktok.com/@autodevadesatky" target="_blank">TikTok</a>
+        <a href="https://instagram.com/viktortamayo" target="_blank">Instagram</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Video Modal -->
+  <div class="modal" id="videoModal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeModal()" title="Zavřít (ESC)">&times;</button>
+      <iframe class="modal-video" id="modalVideo" src="" frameborder="0" allowfullscreen allow="autoplay"></iframe>
+    </div>
+  </div>
+
+  <script>
+    let videos = [];
+    let filteredVideos = [];
+    let allTags = new Set();
+    let currentFilter = 'all';
+    let currentSort = 'newest';
+
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      loadVideos();
+      renderVideos();
+      updateStats();
+      
+      // Add scroll effect for navbar
+      window.addEventListener('scroll', function() {
+        const navbar = document.getElementById('navbar');
+        if (window.scrollY > 100) {
+          navbar.classList.add('scrolled');
+        } else {
+          navbar.classList.remove('scrolled');
+        }
+      });
+    });
+
+    function openAdminPanel() {
+      // Otevřít administrační panel
+      window.open('vttv_admin.html', '_blank');
+    }
+
+    function loadVideos() {
+      try {
+        const savedVideos = localStorage.getItem('vttv_videos');
+        if (savedVideos) {
+          videos = JSON.parse(savedVideos);
+          
+          // Collect all tags
+          allTags.clear();
+          videos.forEach(video => {
+            video.tags.forEach(tag => allTags.add(tag));
+          });
+          
+          console.log('Videos loaded:', videos.length);
+        } else {
+          videos = [];
+          console.log('No videos found in localStorage');
+        }
+      } catch (error) {
+        console.error('Error loading videos:', error);
+        videos = [];
+      }
+      
+      renderFilterTags();
+    }
+
+    function filterByTag(tag) {
+      currentFilter = tag;
+      
+      // Update active filter button
+      document.querySelectorAll('.filter-tag').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      document.querySelector(`[data-tag="${tag}"]`).classList.add('active');
+      
+      filterVideos();
+    }
+
+    function filterVideos() {
+      let filtered = [...videos];
+      
+      // Filter by tag
+      if (currentFilter !== 'all') {
+        filtered = filtered.filter(video => video.tags.includes(currentFilter));
+      }
+      
+      // Filter by search term
+      const searchTerm = document.getElementById('searchBar').value.toLowerCase();
+      if (searchTerm) {
+        filtered = filtered.filter(video => 
+          video.title.toLowerCase().includes(searchTerm) ||
+          video.description.toLowerCase().includes(searchTerm) ||
+          video.tags.some(tag => tag.toLowerCase().includes(searchTerm))
+        );
+      }
+      
+      filteredVideos = filtered;
+      sortVideos();
+    }
+
+    function sortVideos() {
+      const sortBy = document.getElementById('sortSelect').value;
+      currentSort = sortBy;
+      
+      switch (sortBy) {
+        case 'newest':
+          filteredVideos.sort((a, b) => new Date(b.publishDate || b.dateAdded) - new Date(a.publishDate || a.dateAdded));
+          break;
+        case 'oldest':
+          filteredVideos.sort((a, b) => new Date(a.publishDate || a.dateAdded) - new Date(b.publishDate || b.dateAdded));
+          break;
+        case 'alphabetical':
+          filteredVideos.sort((a, b) => a.title.localeCompare(b.title));
+          break;
+        case 'alphabetical-desc':
+          filteredVideos.sort((a, b) => b.title.localeCompare(a.title));
+          break;
+      }
+      
+      renderVideos();
+    }
+
+    function renderFilterTags() {
+      const filterContainer = document.getElementById('filterTags');
+      const tags = Array.from(allTags).sort();
+      
+      // Count videos per tag
+      const tagCounts = {};
+      tags.forEach(tag => {
+        tagCounts[tag] = videos.filter(video => video.tags.includes(tag)).length;
+      });
+      
+      const allVideosCount = videos.length;
+      
+      // Update all videos count
+      document.getElementById('allCount').textContent = `(${allVideosCount})`;
+      
+      const tagsHTML = tags.map(tag => `
+        <div class="filter-tag ${currentFilter === tag ? 'active' : ''}" data-tag="${tag}" onclick="filterByTag('${tag}')">
+          ${tag} <span class="count">(${tagCounts[tag]})</span>
+        </div>
+      `).join('');
+      
+      // Keep the "All videos" button and add tag buttons
+      filterContainer.innerHTML = `
+        <div class="filter-tag ${currentFilter === 'all' ? 'active' : ''}" data-tag="all" onclick="filterByTag('all')">
+          Všechna videa <span class="count" id="allCount">(${allVideosCount})</span>
+        </div>
+        ${tagsHTML}
+      `;
+    }
+
+    function renderVideos() {
+      const container = document.getElementById('videosContainer');
+      
+      if (filteredVideos.length === 0) {
+        if (videos.length === 0) {
+          container.innerHTML = `
+            <div class="empty-state">
+              <i class="fas fa-video"></i>
+              <h3>Zatím zde nejsou žádná videa</h3>
+              <p>Videa můžete přidat prostřednictvím administračního panelu.<br>
+              <a href="#" onclick="openAdminPanel()" style="color: #007AFF; text-decoration: none;">Otevřít administraci →</a></p>
+            </div>
+          `;
+        } else {
+          container.innerHTML = `
+            <div class="empty-state">
+              <i class="fas fa-search"></i>
+              <h3>Žádná videa nenalezena</h3>
+              <p>Zkuste změnit vyhledávací kritéria nebo zvolte jiný tag.</p>
+            </div>
+          `;
+        }
+        return;
+      }
+
+      const videosHTML = filteredVideos.map(video => {
+        const thumbnailUrl = video.platform === 'youtube' 
+          ? `https://img.youtube.com/vi/${video.videoId}/maxresdefault.jpg`
+          : 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300"><rect width="400" height="300" fill="%23333"/><text x="200" y="150" text-anchor="middle" fill="white" font-family="Arial" font-size="20">TikTok</text></svg>';
+        
+        const formattedDate = video.publishDate ? 
+          new Date(video.publishDate).toLocaleDateString('cs-CZ') : 
+          video.dateAdded;
+
+        return `
+          <div class="video-card" onclick="playVideo(${JSON.stringify(video).replace(/"/g, '&quot;')})">
+            <div class="video-thumbnail">
+              <img src="${thumbnailUrl}" alt="${video.title}" 
+                   onerror="this.src='data:image/svg+xml,<svg xmlns=&quot;http://www.w3.org/2000/svg&quot; width=&quot;400&quot; height=&quot;300&quot; viewBox=&quot;0 0 400 300&quot;><rect width=&quot;400&quot; height=&quot;300&quot; fill=&quot;%23333&quot;/><text x=&quot;200&quot; y=&quot;150&quot; text-anchor=&quot;middle&quot; fill=&quot;white&quot; font-family=&quot;Arial&quot; font-size=&quot;16&quot;>${video.platform}</text></svg>'">
+              <div class="play-button">
+                <i class="fas fa-play"></i>
+              </div>
+            </div>
+            <div class="video-info">
+              <h3 class="video-title">${video.title}</h3>
+              <p class="video-description">${video.description || 'Žádný popis k dispozici'}</p>
+              <div class="video-tags">
+                ${video.tags.map(tag => `<span class="video-tag">${tag}</span>`).join('')}
+              </div>
+              <div class="video-meta">
+                <span class="platform-badge ${video.platform}">
+                  <i class="fab fa-${video.platform}"></i>
+                  ${video.platform === 'youtube' ? 'YouTube' : 'TikTok'}
+                </span>
+                <span>${formattedDate}</span>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      container.innerHTML = `<div class="videos-grid">${videosHTML}</div>`;
+    }
+
+    function updateStats() {
+      const totalVideos = videos.length;
+      const totalTags = allTags.size;
+      
+      document.getElementById('totalVideosHero').textContent = totalVideos;
+      document.getElementById('totalTagsHero').textContent = totalTags;
+    }
+
+    function playVideo(video) {
+      const modal = document.getElementById('videoModal');
+      const modalVideo = document.getElementById('modalVideo');
+      
+      if (video.platform === 'youtube') {
+        modalVideo.src = `https://www.youtube.com/embed/${video.videoId}?autoplay=1&rel=0`;
+      } else if (video.platform === 'tiktok') {
+        // Pro TikTok zatím fallback
+        alert('TikTok videa se otevřou na externí stránce');
+        window.open(`https://tiktok.com/@autodevadesatky`, '_blank');
+        return;
+      }
+      
+      modal.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+      const modal = document.getElementById('videoModal');
+      const modalVideo = document.getElementById('modalVideo');
+      modal.classList.remove('active');
+      modalVideo.src = '';
+      document.body.style.overflow = '';
+    }
+
+    // Event listeners
+    document.getElementById('videoModal').addEventListener('click', function(e) {
+      if (e.target === this) {
+        closeModal();
+      }
+    });
+
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        closeModal();
+      }
+    });
+
+    // Auto-refresh videos every 10 seconds to sync with admin changes
+    setInterval(() => {
+      const currentVideosCount = videos.length;
+      loadVideos();
+      if (videos.length !== currentVideosCount) {
+        filterVideos();
+        updateStats();
+        renderFilterTags();
+      }
+    }, 10000);
+
+    // Initial load
+    filterVideos();
+  </script>
+</body>
+</html>
