@@ -348,7 +348,7 @@
 
     .experience-image {
       width: 100%;
-      max-width: 700px;
+      max-width: 400px;
       height: 280px;
       border-radius: 20px;
       overflow: hidden;
@@ -781,7 +781,7 @@
             </div>
           </div>
           <div class="experience-image">
-            <img src="exp.jpg" alt="Viktor Tamayo - Práce">
+            <img src="vt.jpeg" alt="Viktor Tamayo - Práce">
           </div>
         </div>
       </div>
@@ -846,7 +846,7 @@
         <h2 class="section-title">Kontakt</h2>
         <div class="section-content">
           <p style="font-size: 1.2rem; margin-bottom: 40px; opacity: 0.9;">Máte projekt nebo nápad? Napište mi!</p>
-          <form class="contact-form">
+          <form class="contact-form" action="https://formspree.io/f/xjkergle" method="POST">
             <div class="form-group">
               <label for="name">Jméno</label>
               <input type="text" id="name" name="name" placeholder="Vaše jméno" required>
@@ -863,6 +863,10 @@
               <label for="message">Zpráva</label>
               <textarea id="message" name="message" rows="5" placeholder="Vaše zpráva..." required></textarea>
             </div>
+            <!-- Skryté pole pro přesměrování -->
+            <input type="hidden" name="_next" value="https://ahosovidaho.github.io/dekuji.html">
+            <!-- Honeypot pole proti spamu -->
+            <input type="text" name="_gotcha" style="display:none">
             <button type="submit" class="apple-button" style="margin-top: 20px;">Odeslat zprávu</button>
           </form>
         </div>
@@ -926,12 +930,6 @@
     // Sledování všech sekcí pro animace
     document.querySelectorAll('.section-title, .section-content').forEach(el => {
       observer.observe(el);
-    });
-
-    // Kontaktní formulář
-    document.querySelector('.contact-form').addEventListener('submit', function(e) {
-      e.preventDefault();
-      alert('Zpráva byla odeslána! (Demo verze)');
     });
 
     // Aktivní sekce v navigaci
