@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VTTV.CZ - Administrace</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #000;
+      color: white;
+      line-height: 1.6;
+    }
+
+    /* Header */
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 60px 0 40px;
+      text-align: center;
+      position: relative;
+    }
+
+    .header::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0.5) 100%);
+      z-index: 1;
+    }
+
+    .header-content {
+      position: relative;
+      z-index: 2;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    .logo {
+      font-size: 3rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+      text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .tagline {
+      font-size: 1.2rem;
+      opacity: 0.9;
+      margin-bottom: 30px;
+    }
+
+    .nav-buttons {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .nav-btn {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      text-decoration: none;
+      padding: 12px 24px;
+      border-radius: 25px;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      transition: all 0.3s ease;
+      font-weight: 500;
+    }
+
+    .nav-btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: translateY(-2px);
+    }
+
+    .nav-btn.primary {
+      background: #007AFF;
+      border-color: #007AFF;
+    }
+
+    .nav-btn.primary:hover {
+      background: #0056CC;
+    }
+
+    /* Admin Panel */
+    .admin-panel {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(20px);
+      border-radius: 20px;
+      padding: 30px;
+      margin: 30px auto;
+      max-width: 800px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .panel-header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .panel-title {
+      font-size: 2rem;
+      margin-bottom: 10px;
+    }
+
+    .panel-subtitle {
+      opacity: 0.8;
+      font-size: 1.1rem;
+    }
+
+    .admin-form {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .form-group.full-width {
+      grid-column: 1 / -1;
+    }
+
+    .form-group label {
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 14px;
+    }
+
+    .form-group input, .form-group textarea, .form-group select {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 10px;
+      padding: 12px 16px;
+      color: white;
+      font-size: 16px;
+      transition: all 0.3s ease;
+    }
+
+    .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+      outline: none;
+      border-color: #007AFF;
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    .form-group input::placeholder, .form-group textarea::placeholder {
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    .tags-section {
+      grid-column: 1 / -1;
+    }
+
+    .tags-input-container {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .tags-input-container input {
+      flex: 1;
+    }
+
+    .add-tag-btn {
+      background: #007AFF;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.3s ease;
+    }
+
+    .add-tag-btn:hover {
+      background: #0056CC;
+    }
+
+    .tags-display {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .tag {
+      background: #007AFF;
+      color: white;
+      padding: 6px 12px;
+      border-radius: 15px;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .tag .remove {
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 16px;
+    }
+
+    .tag .remove:hover {
+      color: #ffcccc;
+    }
+
+    .submit-section {
+      grid-column: 1 / -1;
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    .add-video-btn {
+      background: #34C759;
+      color: white;
+      border: none;
+      padding: 16px 40px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .add-video-btn:hover {
+      background: #28A745;
+      transform: translateY(-2px);
+    }
+
+    .add-video-btn:disabled {
+      background: #555;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Management buttons */
+    .management-buttons {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin-bottom: 30px;
+      flex-wrap: wrap;
+    }
+
+    .mgmt-btn {
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 10px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .mgmt-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .mgmt-btn.danger {
+      border-color: rgba(255, 59, 48, 0.5);
+      color: #FF3B30;
+    }
+
+    .mgmt-btn.danger:hover {
+      background: rgba(255, 59, 48, 0.1);
+    }
+
+    /* Stats */
+    .stats {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 15px;
+      padding: 20px;
+      margin: 20px auto;
+      max-width: 800px;
+      text-align: center;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 20px;
+    }
+
+    .stat-item {
+      text-align: center;
+    }
+
+    .stat-number {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #007AFF;
+      display: block;
+    }
+
+    .stat-label {
+      font-size: 0.9rem;
+      opacity: 0.8;
+      margin-top: 5px;
+    }
+
+    /* Success message */
+    .success-message {
+      background: rgba(52, 199, 89, 0.2);
+      border: 1px solid rgba(52, 199, 89, 0.5);
+      color: #34C759;
+      padding: 15px;
+      border-radius: 10px;
+      margin: 20px auto;
+      max-width: 800px;
+      text-align: center;
+      display: none;
+    }
+
+    .success-message.show {
+      display: block;
+      animation: slideIn 0.3s ease;
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .admin-form {
+        grid-template-columns: 1fr;
+      }
+
+      .tags-input-container {
+        flex-direction: column;
+      }
+
+      .management-buttons {
+        flex-direction: column;
+      }
+
+      .nav-buttons {
+        flex-direction: column;
+        align-items: center;
+      }
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="header-content">
+      <h1 class="logo">VTTV.CZ</h1>
+      <p class="tagline">Administrace video portálu</p>
+      <div class="nav-buttons">
+        <a href="#" onclick="openPublicSite()" class="nav-btn primary">
+          <i class="fas fa-external-link-alt"></i> Zobrazit veřejný web
+        </a>
+        <a href="autotesty_page.html" class="nav-btn">
+          <i class="fas fa-home"></i> Zpět na hlavní stránku
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+    <!-- Stats -->
+    <div class="stats">
+      <h3 style="margin-bottom: 20px;">Statistiky</h3>
+      <div class="stats-grid" id="statsGrid">
+        <div class="stat-item">
+          <span class="stat-number" id="totalVideos">0</span>
+          <span class="stat-label">Celkem videí</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-number" id="totalTags">0</span>
+          <span class="stat-label">Různých tagů</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-number" id="youtubeVideos">0</span>
+          <span class="stat-label">YouTube videí</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-number" id="tiktokVideos">0</span>
+          <span class="stat-label">TikTok videí</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Success message -->
+    <div class="success-message" id="successMessage">
+      <i class="fas fa-check-circle"></i> Video bylo úspěšně přidáno!
+    </div>
+
+    <!-- Admin Panel -->
+    <div class="admin-panel">
+      <div class="panel-header">
+        <h2 class="panel-title">Přidat nové video</h2>
+        <p class="panel-subtitle">Vyplňte údaje o videu a přidejte ho do galerie</p>
+      </div>
+
+      <!-- Management buttons -->
+      <div class="management-buttons">
+        <button onclick="exportVideos()" class="mgmt-btn">
+          <i class="fas fa-download"></i> Exportovat videa
+        </button>
+        <button onclick="document.getElementById('importFile').click()" class="mgmt-btn">
+          <i class="fas fa-upload"></i> Importovat videa
+        </button>
+        <button onclick="clearAllVideos()" class="mgmt-btn danger">
+          <i class="fas fa-trash"></i> Smazat všechna videa
+        </button>
+        <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importVideos(event)">
+      </div>
+      
+      <form class="admin-form" id="adminForm">
+        <div class="form-group">
+          <label><i class="fas fa-heading"></i> Název videa</label>
+          <input type="text" id="videoTitle" placeholder="Zadejte název videa" required>
+        </div>
+        
+        <div class="form-group">
+          <label><i class="fab fa-youtube"></i> YouTube ID nebo URL</label>
+          <input type="text" id="videoUrl" placeholder="dQw4w9WgXcQ nebo celá URL" required>
+        </div>
+        
+        <div class="form-group full-width">
+          <label><i class="fas fa-align-left"></i> Popis videa</label>
+          <textarea id="videoDescription" placeholder="Krátký popis videa" rows="3"></textarea>
+        </div>
+        
+        <div class="form-group">
+          <label><i class="fas fa-play-circle"></i> Platforma</label>
+          <select id="videoPlatform">
+            <option value="youtube">YouTube</option>
+            <option value="tiktok">TikTok</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label><i class="fas fa-calendar"></i> Datum publikování</label>
+          <input type="date" id="videoDate" value="">
+        </div>
+        
+        <div class="form-group tags-section">
+          <label><i class="fas fa-tags"></i> Tagy (značky aut, kategorie)</label>
+          <div class="tags-input-container">
+            <input type="text" id="newTag" placeholder="BMW, Tesla, SUV, sedan...">
+            <button type="button" class="add-tag-btn" onclick="addTag()">
+              <i class="fas fa-plus"></i> Přidat
+            </button>
+          </div>
+          <div class="tags-display" id="tagsContainer"></div>
+        </div>
+        
+        <div class="submit-section">
+          <button type="submit" class="add-video-btn">
+            <i class="fas fa-plus-circle"></i> Přidat video do galerie
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    let videos = [];
+    let selectedTags = [];
+    let allTags = new Set();
+
+    // Nastavit dnešní datum jako výchozí
+    document.addEventListener('DOMContentLoaded', function() {
+      document.getElementById('videoDate').value = new Date().toISOString().split('T')[0];
+      loadVideos();
+      updateStats();
+      
+      // Form submit
+      document.getElementById('adminForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        addVideo();
+      });
+
+      // Enter key pro přidání tagu
+      document.getElementById('newTag').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          addTag();
+        }
+      });
+    });
+
+    function openPublicSite() {
+      // Otevřít veřejnou stránku VTTV.CZ
+      window.open('vttv_public.html', '_blank');
+    }
+
+    function addTag() {
+      const tagInput = document.getElementById('newTag');
+      const tag = tagInput.value.trim();
+      
+      if (tag && !selectedTags.includes(tag)) {
+        selectedTags.push(tag);
+        tagInput.value = '';
+        renderSelectedTags();
+      }
+    }
+
+    function removeTag(tag) {
+      selectedTags = selectedTags.filter(t => t !== tag);
+      renderSelectedTags();
+    }
+
+    function renderSelectedTags() {
+      const container = document.getElementById('tagsContainer');
+      container.innerHTML = selectedTags.map(tag => 
+        `<div class="tag">
+          ${tag}
+          <span class="remove" onclick="removeTag('${tag}')" title="Odstranit tag">&times;</span>
+        </div>`
+      ).join('');
+    }
+
+    function extractVideoId(url) {
+      if (url.length === 11 && !url.includes('/')) {
+        return url;
+      }
+      
+      const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+      const match = url.match(regExp);
+      return (match && match[2].length === 11) ? match[2] : null;
+    }
+
+    function addVideo() {
+      const title = document.getElementById('videoTitle').value;
+      const url = document.getElementById('videoUrl').value;
+      const description = document.getElementById('videoDescription').value;
+      const platform = document.getElementById('videoPlatform').value;
+      const date = document.getElementById('videoDate').value;
+      
+      let videoId;
+      if (platform === 'youtube') {
+        videoId = extractVideoId(url);
+        if (!videoId) {
+          alert('Neplatné YouTube ID nebo URL');
+          return;
+        }
+      } else {
+        videoId = url;
+      }
+
+      const video = {
+        id: Date.now(),
+        title,
+        description,
+        platform,
+        videoId,
+        tags: [...selectedTags],
+        dateAdded: new Date().toLocaleDateString('cs-CZ'),
+        publishDate: date || new Date().toISOString().split('T')[0]
+      };
+
+      videos.push(video);
+      
+      // Přidat nové tagy do seznamu všech tagů
+      selectedTags.forEach(tag => allTags.add(tag));
+      
+      saveVideos();
+      updateStats();
+      
+      // Reset form
+      document.getElementById('adminForm').reset();
+      document.getElementById('videoDate').value = new Date().toISOString().split('T')[0];
+      selectedTags = [];
+      renderSelectedTags();
+      
+      // Show success message
+      showSuccessMessage();
+    }
+
+    function showSuccessMessage() {
+      const message = document.getElementById('successMessage');
+      message.classList.add('show');
+      setTimeout(() => {
+        message.classList.remove('show');
+      }, 3000);
+    }
+
+    function updateStats() {
+      const totalVideos = videos.length;
+      const totalTags = new Set();
+      let youtubeCount = 0;
+      let tiktokCount = 0;
+
+      videos.forEach(video => {
+        video.tags.forEach(tag => totalTags.add(tag));
+        if (video.platform === 'youtube') youtubeCount++;
+        if (video.platform === 'tiktok') tiktokCount++;
+      });
+
+      document.getElementById('totalVideos').textContent = totalVideos;
+      document.getElementById('totalTags').textContent = totalTags.size;
+      document.getElementById('youtubeVideos').textContent = youtubeCount;
+      document.getElementById('tiktokVideos').textContent = tiktokCount;
+    }
+
+    function exportVideos() {
+      if (videos.length === 0) {
+        alert('Nejsou k dispozici žádná videa k exportu.');
+        return;
+      }
+      
+      const dataStr = JSON.stringify(videos, null, 2);
+      const dataBlob = new Blob([dataStr], {type: 'application/json'});
+      const url = URL.createObjectURL(dataBlob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `vttv_videos_${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    }
+
+    function importVideos(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const importedVideos = JSON.parse(e.target.result);
+          if (Array.isArray(importedVideos)) {
+            if (confirm(`Chcete importovat ${importedVideos.length} videí? Toto přepíše všechna současná videa.`)) {
+              videos = importedVideos;
+              saveVideos();
+              updateStats();
+              alert('Videa byla úspěšně importována!');
+            }
+          } else {
+            alert('Neplatný formát souboru.');
+          }
+        } catch (error) {
+          alert('Chyba při načítání souboru: ' + error.message);
+        }
+      };
+      reader.readAsText(file);
+      event.target.value = '';
+    }
+
+    function clearAllVideos() {
+      if (videos.length === 0) {
+        alert('Nejsou k dispozici žádná videa ke smazání.');
+        return;
+      }
+      
+      if (confirm(`Opravdu chcete smazat všechna videa (${videos.length})? Tato akce je nevratná!`)) {
+        videos = [];
+        allTags.clear();
+        saveVideos();
+        updateStats();
+        alert('Všechna videa byla smazána.');
+      }
+    }
+
+    function saveVideos() {
+      try {
+        localStorage.setItem('vttv_videos', JSON.stringify(videos));
+        console.log('Videos saved to localStorage:', videos);
+      } catch (error) {
+        console.error('Error saving videos:', error);
+        alert('Chyba při ukládání videí. Zkontrolujte místo v prohlížeči.');
+      }
+    }
+
+    function loadVideos() {
+      try {
+        const savedVideos = localStorage.getItem('vttv_videos');
+        if (savedVideos) {
+          videos = JSON.parse(savedVideos);
+          videos.forEach(video => {
+            video.tags.forEach(tag => allTags.add(tag));
+          });
+        }
+      } catch (error) {
+        console.error('Error loading videos:', error);
+        videos = [];
+      }
+    }
+  </script>
+</body>
+</html>
