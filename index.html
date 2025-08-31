@@ -367,6 +367,8 @@
       object-fit: cover;
       object-position: center center;
     }
+
+    /* Automotive sekce */
     .automotive {
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       color: white;
@@ -506,6 +508,118 @@
     .form-group input::placeholder,
     .form-group textarea::placeholder {
       color: rgba(255, 255, 255, 0.7);
+    }
+
+    /* Systémové téma - přepíšeme pozadí podle nastavení */
+    @media (prefers-color-scheme: light) {
+      .about, .experience, .automotive, .social-section, .contact {
+        background: #ffffff !important;
+        color: #1d1d1f !important;
+      }
+
+      .about .section-title, .experience .section-title, .automotive .section-title, 
+      .social-section .section-title, .contact .section-title {
+        color: #1d1d1f !important;
+      }
+
+      .about-text h3, .timeline-content h3 {
+        color: #1d1d1f !important;
+      }
+
+      .about-text p, .timeline-content p {
+        color: rgba(29, 29, 31, 0.8) !important;
+      }
+
+      .timeline-year {
+        color: rgba(29, 29, 31, 0.6) !important;
+      }
+
+      .automotive-card, .social-card {
+        background: rgba(29, 29, 31, 0.05) !important;
+        color: #1d1d1f !important;
+        border: 1px solid rgba(29, 29, 31, 0.1) !important;
+      }
+
+      .automotive-card:hover, .social-card:hover {
+        background: rgba(29, 29, 31, 0.1) !important;
+        color: #1d1d1f !important;
+      }
+
+      .automotive-card p, .social-card p {
+        color: rgba(29, 29, 31, 0.8) !important;
+      }
+
+      .automotive-card h3, .social-card h3 {
+        color: #1d1d1f !important;
+      }
+
+      .form-group input, .form-group textarea {
+        background: rgba(29, 29, 31, 0.05) !important;
+        color: #1d1d1f !important;
+        border: 1px solid rgba(29, 29, 31, 0.2) !important;
+      }
+
+      .form-group input:focus, .form-group textarea:focus {
+        background: rgba(29, 29, 31, 0.1) !important;
+        border-color: rgba(29, 29, 31, 0.4) !important;
+      }
+
+      .form-group input::placeholder, .form-group textarea::placeholder {
+        color: rgba(29, 29, 31, 0.6) !important;
+      }
+
+      .form-group label {
+        color: #1d1d1f !important;
+      }
+
+      .contact p {
+        color: rgba(29, 29, 31, 0.8) !important;
+      }
+
+      .social-section p {
+        color: rgba(29, 29, 31, 0.8) !important;
+      }
+
+      .timeline::before {
+        background: linear-gradient(to bottom, rgba(29,29,31,0.3), rgba(29,29,31,0.1)) !important;
+      }
+
+      .timeline-item::before {
+        border: 4px solid #1d1d1f !important;
+      }
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .about, .experience, .automotive, .social-section, .contact {
+        background: #000000 !important;
+        color: white !important;
+      }
+
+      .automotive-card, .social-card {
+        background: rgba(255, 255, 255, 0.05) !important;
+        color: white !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+      }
+
+      .automotive-card:hover, .social-card:hover {
+        background: rgba(255, 255, 255, 0.1) !important;
+        color: white !important;
+      }
+
+      .form-group input, .form-group textarea {
+        background: rgba(255, 255, 255, 0.05) !important;
+        color: white !important;
+        border: 1px solid rgba(255, 255, 255, 0.2) !important;
+      }
+
+      .form-group input:focus, .form-group textarea:focus {
+        background: rgba(255, 255, 255, 0.1) !important;
+        border-color: rgba(255, 255, 255, 0.4) !important;
+      }
+
+      .form-group input::placeholder, .form-group textarea::placeholder {
+        color: rgba(255, 255, 255, 0.6) !important;
+      }
     }
 
     /* Společné styly pro sekce */
@@ -801,7 +915,7 @@
             <div class="automotive-card" onclick="window.open('https://tiktok.com/@autodevadesatky', '_blank')" style="cursor: pointer;">
               <i class="fas fa-video"></i>
               <h3>Autodevadesátky</h3>
-              <p>Vždycky jsem říkal, že není umění udělat půlhodinový test, ale naopak dát vše důležité do podstatně kratšího obsahu. A tak vznikly "AutoDevadesátky" - tedy testy aut v 90 sekundách.</p>
+              <p>Vždy jsem říkal, že není umění udělat půlhodinový test, ale naopak dát vše důležité do podstatně kratšího obsahu. A tak vznikly "AutoDevadesátky" - tedy testy aut v 90 sekundách.</p>
             </div>
             <div class="automotive-card" onclick="window.open('https://usporne.info', '_blank')" style="cursor: pointer;">
               <i class="fas fa-users"></i>
@@ -828,12 +942,12 @@
             <a href="https://x.com/viktor_tamayo" target="_blank" class="social-card">
               <i class="fab fa-x-twitter"></i>
               <h3>X</h3>
-              <p>Aktuálně, osobně a stručně – na X</p>
+              <p>Aktuálně, osobně a stručně na X</p>
             </a>
             <a href="https://www.instagram.com/viktortamayo/" target="_blank" class="social-card">
               <i class="fab fa-instagram"></i>
               <h3>Instagram</h3>
-              <p>střípky ze soukromého a pracovního života</p>
+              <p>Střípky ze soukromého a pracovního života</p>
             </a>
           </div>
         </div>
