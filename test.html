@@ -343,17 +343,60 @@
     .video-tags {
       display: flex;
       flex-wrap: wrap;
-      gap: 8px;
-      margin-bottom: 15px;
+      gap: 4px;
+      margin-bottom: 8px;
+      max-height: 18px;
+      overflow: hidden;
+      position: relative;
+      align-items: flex-start;
     }
 
     .video-tag {
-      background: rgba(0, 122, 255, 0.2);
-      color: #007AFF;
-      padding: 4px 10px;
-      border-radius: 12px;
-      font-size: 12px;
+      background: rgba(0, 122, 255, 0.15);
+      color: rgba(0, 122, 255, 0.9);
+      padding: 1px 5px;
+      border-radius: 6px;
+      font-size: 9px;
       font-weight: 500;
+      white-space: nowrap;
+      opacity: 0.8;
+      line-height: 1.2;
+      height: 14px;
+      display: inline-flex;
+      align-items: center;
+    }
+
+    .video-card:hover .video-tag {
+      opacity: 1;
+    }
+
+    /* Zobrazit pouze první 3 tagy, zbytek skrýt */
+    .video-tag:nth-child(4),
+    .video-tag:nth-child(5),
+    .video-tag:nth-child(6),
+    .video-tag:nth-child(7),
+    .video-tag:nth-child(8) {
+      display: none !important;
+    }
+
+    /* Indikátor pro více tagů */
+    .video-tags::after {
+      content: attr(data-more);
+      background: rgba(255, 255, 255, 0.1);
+      color: rgba(255, 255, 255, 0.6);
+      padding: 1px 5px;
+      border-radius: 6px;
+      font-size: 9px;
+      font-weight: 500;
+      white-space: nowrap;
+      display: none;
+      line-height: 1.2;
+      height: 14px;
+      align-items: center;
+    }
+
+    .video-tags.has-more::after {
+      display: inline-flex;
     }
 
     .video-meta {
@@ -731,6 +774,7 @@
             <span class="video-tag">cr-v</span>
             <span class="video-tag">suv</span>
             <span class="video-tag">test</span>
+            <span class="video-tag">recenze</span>
           </div>
           <div class="video-meta">
             <span>15. prosince 2024</span>
@@ -763,6 +807,8 @@
             <span class="video-tag">golf</span>
             <span class="video-tag">variant</span>
             <span class="video-tag">kombi</span>
+            <span class="video-tag">test</span>
+            <span class="video-tag">recenze</span>
           </div>
           <div class="video-meta">
             <span>10. prosince 2024</span>
@@ -858,10 +904,19 @@
     function loadVideos() {
       const cards = document.querySelectorAll('.video-card');
       
-      // Sběr všech tagů z existujících videí
+      // Sběr všech tagů z existujících videí a optimalizace zobrazení
       allTags.clear();
       cards.forEach(card => {
         const tags = card.dataset.tags.split(',');
+        const tagsContainer = card.querySelector('.video-tags');
+        
+        // Počet tagů pro indikátor
+        if (tags.length > 3) {
+          const moreCount = tags.length - 3;
+          tagsContainer.setAttribute('data-more', `+${moreCount}`);
+          tagsContainer.classList.add('has-more');
+        }
+        
         tags.forEach(tag => allTags.add(tag.trim()));
       });
 
