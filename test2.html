@@ -1,0 +1,1581 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Viktor Tamayo - Galerie Videí</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    /* Reset */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      color: white;
+      background: #000;
+      overflow-x: hidden;
+      line-height: 1.6;
+    }
+
+    /* Pozadí s gradientem jako na hlavní stránce */
+    .background-gradient {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100vh;
+      background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #667eea 100%);
+      z-index: -1;
+      opacity: 0.95;
+    }
+
+    /* Header s Apple stylem jako na hlavní stránce */
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      padding: 20px 40px;
+      background: rgba(0, 0, 0, 0.1);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      z-index: 1000;
+      transition: all 0.3s ease;
+    }
+
+    .nav-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .logo-nav {
+      font-size: 18px;
+      font-weight: 600;
+      color: white;
+      text-decoration: none;
+      opacity: 0;
+      animation: fadeInDown 1s ease 0.5s forwards;
+    }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      opacity: 0;
+      animation: fadeInDown 1s ease 0.7s forwards;
+    }
+
+    .search-container {
+      position: relative;
+    }
+
+    .search-box {
+      padding: 8px 35px 8px 15px;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 20px;
+      font-size: 14px;
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      transition: all 0.3s ease;
+      width: 200px;
+    }
+
+    .search-box:focus {
+      outline: none;
+      border-color: rgba(255, 255, 255, 0.5);
+      background: rgba(255, 255, 255, 0.15);
+      width: 250px;
+    }
+
+    .search-box::placeholder {
+      color: rgba(255, 255, 255, 0.6);
+    }
+
+    .search-icon {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 14px;
+    }
+
+    .back-btn {
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      padding: 8px 16px;
+      border-radius: 20px;
+      text-decoration: none;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .back-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+      border-color: rgba(255, 255, 255, 0.5);
+      color: white;
+    }
+
+    /* Main container */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 120px 40px 80px;
+    }
+
+    /* Hero section stejně jako na hlavní stránce */
+    .hero {
+      text-align: center;
+      margin-bottom: 80px;
+    }
+
+    .hero h1 {
+      font-size: clamp(3rem, 8vw, 6rem);
+      font-weight: 700;
+      margin-bottom: 20px;
+      opacity: 0;
+      animation: fadeInUp 1s ease 0.3s forwards;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-subtitle {
+      font-size: clamp(1.2rem, 3vw, 1.8rem);
+      margin-bottom: 40px;
+      opacity: 0.9;
+      opacity: 0;
+      animation: fadeInUp 1s ease 0.5s forwards;
+      font-weight: 300;
+      line-height: 1.4;
+    }
+
+    /* Filtr tagy jako Apple tlačítka */
+    .filter-section {
+      text-align: center;
+      margin-bottom: 60px;
+      opacity: 0;
+      animation: fadeInUp 1s ease 0.7s forwards;
+    }
+
+    .filter-tags {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin-bottom: 30px;
+    }
+
+    .tag-filter {
+      background: rgba(255, 255, 255, 0.9);
+      color: #1d1d1f;
+      font-size: 14px;
+      font-weight: 500;
+      padding: 10px 20px;
+      border-radius: 50px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(20px);
+      min-width: 100px;
+    }
+
+    .tag-filter:hover {
+      background: white;
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .tag-filter.active {
+      background: #007AFF;
+      color: white;
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(0, 122, 255, 0.4);
+    }
+
+    .stats {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 14px;
+    }
+
+    /* Video grid s Apple kartami */
+    .video-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+      gap: 40px;
+      margin-bottom: 80px;
+    }
+
+    .video-card {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(20px);
+      border-radius: 20px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      transition: all 0.3s ease;
+      cursor: pointer;
+      opacity: 0;
+      transform: translateY(30px);
+      animation: fadeInUp 0.6s ease forwards;
+    }
+
+    .video-card:nth-child(1) { animation-delay: 0.9s; }
+    .video-card:nth-child(2) { animation-delay: 1.0s; }
+    .video-card:nth-child(3) { animation-delay: 1.1s; }
+    .video-card:nth-child(4) { animation-delay: 1.2s; }
+    .video-card:nth-child(5) { animation-delay: 1.3s; }
+    .video-card:nth-child(6) { animation-delay: 1.4s; }
+
+    .video-card:hover {
+      transform: translateY(-10px);
+      background: rgba(255, 255, 255, 0.15);
+      border-color: rgba(255, 255, 255, 0.3);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    .video-thumbnail {
+      position: relative;
+      width: 100%;
+      height: 200px;
+      overflow: hidden;
+    }
+
+    .video-thumbnail img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.3s ease;
+    }
+
+    .video-card:hover .video-thumbnail img {
+      transform: scale(1.05);
+    }
+
+    .play-overlay {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(10px);
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 20px;
+      transition: all 0.3s ease;
+    }
+
+    .video-card:hover .play-overlay {
+      background: rgba(0, 122, 255, 0.9);
+      transform: translate(-50%, -50%) scale(1.1);
+    }
+
+    .platform-badge {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      background: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 4px 10px;
+      border-radius: 10px;
+      font-size: 11px;
+      font-weight: 600;
+      backdrop-filter: blur(10px);
+    }
+
+    .platform-badge.youtube {
+      background: rgba(255, 0, 0, 0.9);
+    }
+
+    .platform-badge.tiktok {
+      background: rgba(0, 0, 0, 0.9);
+    }
+
+    .video-info {
+      padding: 25px;
+    }
+
+    .video-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-bottom: 10px;
+      color: white;
+      line-height: 1.4;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .video-description {
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 0.95rem;
+      margin-bottom: 15px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      line-height: 1.5;
+    }
+
+    .video-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-bottom: 8px;
+      max-height: 18px;
+      overflow: hidden;
+      position: relative;
+      align-items: flex-start;
+    }
+
+    .video-tag {
+      background: rgba(0, 122, 255, 0.15);
+      color: rgba(0, 122, 255, 0.9);
+      padding: 1px 5px;
+      border-radius: 6px;
+      font-size: 9px;
+      font-weight: 500;
+      white-space: nowrap;
+      opacity: 0.8;
+      line-height: 1.2;
+      height: 14px;
+      display: inline-flex;
+      align-items: center;
+    }
+
+    .video-card:hover .video-tag {
+      opacity: 1;
+    }
+
+    /* Zobrazit pouze první 3 tagy, zbytek skrýt */
+    .video-tag:nth-child(4),
+    .video-tag:nth-child(5),
+    .video-tag:nth-child(6),
+    .video-tag:nth-child(7),
+    .video-tag:nth-child(8) {
+      display: none !important;
+    }
+
+    /* Indikátor pro více tagů */
+    .video-tags::after {
+      content: attr(data-more);
+      background: rgba(255, 255, 255, 0.1);
+      color: rgba(255, 255, 255, 0.6);
+      padding: 1px 5px;
+      border-radius: 6px;
+      font-size: 9px;
+      font-weight: 500;
+      white-space: nowrap;
+      display: none;
+      line-height: 1.2;
+      height: 14px;
+      align-items: center;
+    }
+
+    .video-tags.has-more::after {
+      display: inline-flex;
+    }
+
+    .video-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.85rem;
+      color: rgba(255, 255, 255, 0.6);
+    }
+
+    /* Modal s Apple stylem */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.95);
+      backdrop-filter: blur(20px);
+      z-index: 2000;
+      overflow-y: auto;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .modal.active {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px;
+      opacity: 1;
+    }
+
+    .modal-content {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      max-width: 1000px;
+      width: 100%;
+      max-height: 90vh;
+      overflow: hidden;
+      position: relative;
+      transform: scale(0.9);
+      transition: transform 0.3s ease;
+    }
+
+    .modal.active .modal-content {
+      transform: scale(1);
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: rgba(0, 0, 0, 0.7);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      cursor: pointer;
+      font-size: 18px;
+      z-index: 10;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-close:hover {
+      background: rgba(0, 0, 0, 0.9);
+      transform: scale(1.1);
+    }
+
+    .modal-video {
+      width: 100%;
+      aspect-ratio: 16/9;
+      border-radius: 20px 20px 0 0;
+    }
+
+    .modal-info {
+      padding: 30px;
+    }
+
+    .modal-title {
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-bottom: 15px;
+      color: white;
+    }
+
+    .modal-description {
+      color: rgba(255, 255, 255, 0.8);
+      margin-bottom: 25px;
+      line-height: 1.6;
+      font-size: 1.1rem;
+    }
+
+    .modal-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 25px;
+    }
+
+    .modal-tag {
+      background: rgba(0, 122, 255, 0.2);
+      color: #007AFF;
+      padding: 8px 16px;
+      border-radius: 15px;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .modal-meta {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 20px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .modal-meta-item {
+      text-align: center;
+    }
+
+    .modal-meta-label {
+      font-size: 0.9rem;
+      color: rgba(255, 255, 255, 0.6);
+      margin-bottom: 5px;
+    }
+
+    .modal-meta-value {
+      font-weight: 600;
+      color: white;
+    }
+
+    /* Empty state */
+    .empty-state {
+      text-align: center;
+      padding: 100px 20px;
+      opacity: 0;
+      animation: fadeInUp 1s ease 1.5s forwards;
+    }
+
+    .empty-state i {
+      font-size: 4rem;
+      color: rgba(255, 255, 255, 0.3);
+      margin-bottom: 20px;
+    }
+
+    .empty-state h3 {
+      font-size: 1.5rem;
+      color: rgba(255, 255, 255, 0.7);
+      margin-bottom: 10px;
+    }
+
+    .empty-state p {
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    /* Animace stejné jako na hlavní stránce */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Scroll efekty */
+    nav.scrolled {
+      background: rgba(0, 0, 0, 0.9);
+      border-bottom-color: rgba(255, 255, 255, 0.2);
+    }
+
+    /* Responsive design */
+    @media (max-width: 1024px) {
+      .container {
+        padding: 100px 30px 60px;
+      }
+      
+      .video-grid {
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 30px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      nav {
+        padding: 15px 20px;
+      }
+
+      .nav-content {
+        flex-direction: column;
+        gap: 15px;
+      }
+
+      .nav-right {
+        width: 100%;
+        justify-content: space-between;
+      }
+
+      .search-box {
+        width: 180px;
+      }
+
+      .search-box:focus {
+        width: 200px;
+      }
+
+      .container {
+        padding: 140px 20px 60px;
+      }
+
+      .hero {
+        margin-bottom: 50px;
+      }
+
+      .filter-tags {
+        gap: 10px;
+      }
+
+      .tag-filter {
+        padding: 8px 16px;
+        min-width: 80px;
+        font-size: 13px;
+      }
+
+      .video-grid {
+        grid-template-columns: 1fr;
+        gap: 25px;
+      }
+
+      .modal.active {
+        padding: 20px;
+      }
+
+      .modal-content {
+        max-height: 95vh;
+      }
+
+      .modal-info {
+        padding: 20px;
+      }
+
+      .modal-title {
+        font-size: 1.4rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .nav-content {
+        gap: 10px;
+      }
+
+      .search-box {
+        width: 150px;
+        font-size: 13px;
+      }
+
+      .search-box:focus {
+        width: 170px;
+      }
+
+      .back-btn {
+        padding: 6px 12px;
+        font-size: 13px;
+      }
+
+      .hero h1 {
+        font-size: 2.5rem;
+      }
+
+      .hero-subtitle {
+        font-size: 1.1rem;
+      }
+
+      .filter-tags {
+        justify-content: center;
+      }
+
+      .tag-filter {
+        padding: 6px 12px;
+        font-size: 12px;
+        min-width: 70px;
+      }
+
+      .video-info {
+        padding: 20px;
+      }
+
+      .video-title {
+        font-size: 1.1rem;
+      }
+
+      .modal-close {
+        top: 15px;
+        right: 15px;
+        width: 35px;
+        height: 35px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="background-gradient"></div>
+
+  <nav id="navbar">
+    <div class="nav-content">
+      <a href="#" class="logo-nav">Viktor Tamayo</a>
+      <div class="nav-right">
+        <div class="search-container">
+          <input type="text" class="search-box" id="searchBox" placeholder="Hledat videa...">
+          <i class="fas fa-search search-icon"></i>
+        </div>
+        <a href="index.html" class="back-btn">
+          <i class="fas fa-arrow-left"></i>
+          <span class="back-text">Zpět</span>
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container">
+    <!-- Hero sekce -->
+    <div class="hero">
+      <h1>Galerie Videí</h1>
+      <p class="hero-subtitle">Všechna moje videa z YouTube na jednom místě</p>
+    </div>
+
+    <!-- Filter sekce -->
+    <div class="filter-section">
+      <div class="filter-tags" id="filterTags">
+        <button class="tag-filter active" data-tag="all">Všechna videa</button>
+      </div>
+      <div class="stats">
+        Zobrazeno <span id="visibleVideos">0</span> z <span id="totalVideos">0</span> videí
+      </div>
+    </div>
+
+    <!-- Video mřížka -->
+    <div class="video-grid" id="videoGrid">
+      
+      <!-- TADY ZAČNE ČÁST 2 S VIDEI -->
+
+<!-- NEJNOVĚJŠÍ VIDEA 2025 -->
+      
+      <!-- Hyundai Staria HEV 2025 -->
+      <div class="video-card" data-tags="hyundai,staria,hev,hybrid,test,recenze,2025" onclick="openModal(this)">
+        <div class="video-thumbnail">
+          <img src="https://img.youtube.com/vi/UL9T2vQBTe0/maxresdefault.jpg" alt="Hyundai Staria HEV Test">
+          <div class="play-overlay">
+            <i class="fas fa-play"></i>
+          </div>
+          <div class="platform-badge youtube">YOUTUBE</div>
+        </div>
+        <div class="video-info">
+          <h3 class="video-title">Hyundai Staria HEV 2025</h3>
+          <p class="video-description">Test velkého hybridního MPV od Hyundai. Jak si vede Staria s hybridním pohonem v praxi?</p>
+          <div class="video-tags">
+            <span class="video-tag">hyundai</span>
+            <span class="video-tag">staria</span>
+            <span class="video-tag">hev</span>
+            <span class="video-tag">hybrid</span>
+            <span class="video-tag">test</span>
+            <span class="video-tag">recenze</span>
+            <span class="video-tag">2025</span>
+          </div>
+          <div class="video-meta">
+            <span>1. září 2025</span>
+            <span><i class="fab fa-youtube"></i></span>
+          </div>
+        </div>
+        <div class="video-data" style="display: none;">
+          <span class="video-url">https://youtu.be/UL9T2vQBTe0</span>
+          <span class="video-platform">youtube</span>
+          <span class="video-date">2025-09-01</span>
+          <span class="video-full-description">Test velkého hybridního MPV od Hyundai. Testujeme prostornost, komfort a hybridní pohon. Jak si vede Staria s hybridním pohonem v praxi?</span>
+        </div>
+      </div>
+
+      <!-- Hyundai Santa Fe 1.6 T-GDI HEV 2025 -->
+      <div class="video-card" data-tags="hyundai,santa fe,hybrid,suv,test,recenze,2025" onclick="openModal(this)">
+        <div class="video-thumbnail">
+          <img src="https://img.youtube.com/vi/NearFPfKMgY/maxresdefault.jpg" alt="Hyundai Santa Fe HEV Test">
+          <div class="play-overlay">
+            <i class="fas fa-play"></i>
+          </div>
+          <div class="platform-badge youtube">YOUTUBE</div>
+        </div>
+        <div class="video-info">
+          <h3 class="video-title">Hyundai Santa Fe 1.6 T-GDI HEV 2025</h3>
+          <p class="video-description">Test nového hybridního SUV Hyundai Santa Fe. Jak se osvědčuje kombinace benzínu a elektřiny?</p>
+          <div class="video-tags">
+            <span class="video-tag">hyundai</span>
+            <span class="video-tag">santa fe</span>
+            <span class="video-tag">hybrid</span>
+            <span class="video-tag">suv</span>
+            <span class="video-tag">test</span>
+            <span class="video-tag">recenze</span>
+            <span class="video-tag">2025</span>
+          </div>
+          <div class="video-meta">
+            <span>25. srpna 2025</span>
+            <span><i class="fab fa-youtube"></i></span>
+          </div>
+        </div>
+        <div class="video-data" style="display: none;">
+          <span class="video-url">https://youtu.be/NearFPfKMgY</span>
+          <span class="video-platform">youtube</span>
+          <span class="video-date">2025-08-25</span>
+          <span class="video-full-description">Test nového hybridního SUV Hyundai Santa Fe. Testujeme výkon, spotřebu a praktičnost. Jak se osvědčuje kombinace benzínu a elektřiny?</span>
+        </div>
+      </div>
+
+      <!-- Mazda CX-80 PHEV 2025 -->
+      <div class="video-card" data-tags="mazda,cx-80,phev,plug-in,hybrid,suv,test,recenze,2025" onclick="openModal(this)">
+        <div class="video-thumbnail">
+          <img src="https://img.youtube.com/vi/9FTqOMy1XKA/maxresdefault.jpg" alt="Mazda CX-80 PHEV Test">
+          <div class="play-overlay">
+            <i class="fas fa-play"></i>
+          </div>
+          <div class="platform-badge youtube">YOUTUBE</div>
+        </div>
+        <div class="video-info">
+          <h3 class="video-title">Mazda CX-80 PHEV 2025</h3>
+          <p class="video-description">Test nového plug-in hybridního SUV od Mazda. CX-80 s možností nabíjení ze sítě.</p>
+          <div class="video-tags">
+            <span class="video-tag">mazda</span>
+            <span class="video-tag">cx-80</span>
+            <span class="video-tag">phev</span>
+            <span class="video-tag">plug-in</span>
+            <span class="video-tag">hybrid</span>
+            <span class="video-tag">suv</span>
+            <span class="video-tag">test</span>
+          </div>
+          <div class="video-meta">
+            <span>20. srpna 2025</span>
+            <span><i class="fab fa-youtube"></i></span>
+          </div>
+        </div>
+        <div class="video-data" style="display: none;">
+          <span class="video-url">https://youtu.be/9FTqOMy1XKA</span>
+          <span class="video-platform">youtube</span>
+          <span class="video-date">2025-08-20</span>
+          <span class="video-full-description">Test nového plug-in hybridního SUV od Mazda. CX-80 s možností nabíjení ze sítě. Testujeme elektrický dojezd a spotřebu.</span>
+        </div>
+      </div>
+
+      <!-- Opel Combo XL 2025 -->
+      <div class="video-card" data-tags="opel,combo,xl,užitkové,test,recenze,2025" onclick="openModal(this)">
+        <div class="video-thumbnail">
+          <img src="https://img.youtube.com/vi/aqo_495cZw8/maxresdefault.jpg" alt="Opel Combo XL Test">
+          <div class="play-overlay">
+            <i class="fas fa-play"></i>
+          </div>
+          <div class="platform-badge youtube">YOUTUBE</div>
+        </div>
+        <div class="video-info">
+          <h3 class="video-title">Opel Combo XL 2025</h3>
+          <p class="video-description">Test praktického užitkového vozu Opel Combo XL. Jak si vede v praxi pro práci i rodinu?</p>
+          <div class="video-tags">
+            <span class="video-tag">opel</span>
+            <span class="video-tag">combo</span>
+            <span class="video-tag">xl</span>
+            <span class="video-tag">užitkové</span>
+            <span class="video-tag">test</span>
+            <span class="video-tag">recenze</span>
+            <span class="video-tag">2025</span>
+          </div>
+          <div class="video-meta">
+            <span>1. ledna 2025</span>
+            <span><i class="fab fa-youtube"></i></span>
+          </div>
+        </div>
+        <div class="video-data" style="display: none;">
+          <span class="video-url">https://youtu.be/aqo_495cZw8</span>
+          <span class="video-platform">youtube</span>
+          <span class="video-date">2025-01-01</span>
+          <span class="video-full-description">Test praktického užitkového vozu Opel Combo XL. Testujeme prostornost, praktičnost a jízdní vlastnosti. Jak si vede v praxi pro práci i rodinu?</span>
+        </div>
+      </div>
+
+      <!-- Toyota Prius PHEV 2024 -->
+      <div class="video-card" data-tags="toyota,prius,phev,plug-in,hybrid,test,recenze,2024" onclick="openModal(this)">
+        <div class="video-thumbnail">
+          <img src="https://img.youtube.com/vi/Y1XgsbQpI1M/maxresdefault.jpg" alt="Toyota Prius PHEV Test">
+          <div class="play-overlay">
+            <i class="fas fa-play"></i>
+          </div>
+          <div class="platform-badge youtube">YOUTUBE</div>
+        </div>
+        <div class="video-info">
+          <h3 class="video-title">Toyota Prius PHEV 2024</h3>
+          <p class="video-description">Test nové generace Toyota Prius s plug-in hybridním pohonem. Jak se vyvinula ikona hybridů?</p>
+          <div class="video-tags">
+            <span class="video-tag">toyota</span>
+            <span class="video-tag">prius</span>
+            <span class="video-tag">phev</span>
+            <span class="video-tag">plug-in</span>
+            <span class="video-tag">hybrid</span>
+            <span class="video-tag">test</span>
+            <span class="video-tag">recenze</span>
+          </div>
+          <div class="video-meta">
+            <span>1. prosince 2024</span>
+            <span><i class="fab fa-youtube"></i></span>
+          </div>
+        </div>
+        <div class="video-data" style="display: none;">
+          <span class="video-url">https://youtu.be/Y1XgsbQpI1M</span>
+          <span class="video-platform">youtube</span>
+          <span class="video-date">2024-12-01</span>
+          <span class="video-full-description">Test nové generace Toyota Prius s plug-in hybridním pohonem. Testujeme elektrický dojezd, spotřebu a jízdní vlastnosti. Jak se vyvinula ikona hybridů?</span>
+        </div>
+      </div>
+
+      <!-- Toyota Yaris 1.5 Hybrid 2024 -->
+      <div class="video-card" data-tags="toyota,yaris,hybrid,test,recenze,hatchback,2024" onclick="openModal(this)">
+        <div class="video-thumbnail">
+          <img src="https://img.youtube.com/vi/Thls9pBTJ6Y/maxresdefault.jpg" alt="Toyota Yaris Hybrid Test">
+          <div class="play-overlay">
+            <i class="fas fa-play"></i>
+          </div>
+          <div class="platform-badge youtube">YOUTUBE</div>
+        </div>
+        <div class="video-info">
+          <h3 class="video-title">Toyota Yaris 1.5 Hybrid 2024</h3>
+          <p class="video-description">Test malého hybridního hatchbacku Toyota Yaris. Jak si vede v městském provozu?</p>
+          <div class="video-tags">
+            <span class="video-tag">toyota</span>
+            <span class="video-tag">yaris</span>
+            <span class="video-tag">hybrid</span>
+            <span class="video-tag">test</span>
+            <span class="video-tag">recenze</span>
+            <span class="video-tag">hatchback</span>
+          </div>
+          <div class="video-meta">
+            <span>1. listopadu 2024</span>
+            <span><i class="fab fa-youtube"></i></span>
+          </div>
+        </div>
+        <div class="video-data" style="display: none;">
+          <span class="video-url">https://youtu.be/Thls9pBTJ6Y</span>
+          <span class="video-platform">youtube</span>
+          <span class="video-date">2024-11-01</span>
+          <span class="video-full-description">Test malého hybridního hatchbacku Toyota Yaris. Testujeme spotřebu, jízdní vlastnosti a praktičnost. Jak si vede v městském provozu?</span>
+        </div>
+      </div>
+
+<!-- VIDEA Z ROKU 2019 -->
+
+      <!-- Ford Focus 2019 -->
+      <div class="video-card" data-tags="ford,focus,test,recenze,hatchback,2019" onclick="openModal(this)">
+        <div class="video-thumbnail">
+          <img src="https://img.youtube.com/vi/JRqjbaq--IE/maxresdefault.jpg" alt="Ford Focus Test">
+          <div class="play-overlay">
+            <i class="fas fa-play"></i>
+          </div>
+          <div class="platform-badge youtube">YOUTUBE</div>
+        </div>
+        <div class="video-info">
+          <h3 class="video-title">Ford Focus 2019</h3>
+          <p class="video-description">Test nové generace Ford Focus. Jak si vede proti konkurenci v kompaktní třídě?</p>
+          <div class="video-tags">
+            <span class="video-tag">ford</span>
+            <span class="video-tag">focus</span>
+            <span class="video-tag">test</span>
+            <span class="video-tag">recenze</span>
+            <span class="video-tag">hatchback</span>
+            <span class="video-tag">2019</span>
+          </div>
+          <div class="video-meta">
+            <span>8. února 2019</span>
+            <span><i class="fab fa-youtube"></i></span>
+          </div>
+        </div>
+        <div class="video-data" style="display: none;">
+          <span class="video-url">https://www.youtube.com/watch?v=JRqjbaq--IE</span>
+          <span class="video-platform">youtube</span>
+          <span class="video-date">2019-02-08</span>
+          <span class="video-full-description">Test nové generace Ford Focus. Testujeme jízdní vlastnosti, komfort a technologie. Jak si vede proti konkurenci v kompaktní třídě?</span>
+        </div>
+      </div>
+
+      <!-- VIDEA Z ROKU 2018 -->
+
+      <!-- Mitsubishi Outlander 2018 -->
+      <div class="video-card" data-tags="mitsubishi,outlander,suv,test,recenze,2018" onclick="openModal(this)">
+        <div class="video-thumbnail">
+          <img src="https://img.youtube.com/vi/XRsT38d_ujI/maxresdefault.jpg" alt="Mitsubishi Outlander Test">
+          <div class="play-overlay">
+            <i class="fas fa-play"></i>
+          </div>
+          <div class="platform-badge youtube">YOUTUBE</div>
+        </div>
+        <div class="video-info">
+          <h3 class="video-title">Mitsubishi Outlander 2018</h3>
+          <p class="video-description">Test velkého SUV od Mitsubishi. Jak si vede Outlander v konkurenci sedmimístných vozů?</p>
+          <div class="video-tags">
+            <span class="video-tag">mitsubishi</span>
+            <span class="video-tag">outlander</span>
+            <span class="video-tag">suv</span>
+            <span class="video-tag">test</span>
+            <span class="video-tag">recenze</span>
+            <span class="video-tag">2018</span>
+          </div>
+          <div class="video-meta">
+            <span>30. října 2018</span>
+            <span><i class="fab fa-youtube"></i></span>
+          </div>
+        </div>
+        <div class="video-data" style="display: none;">
+          <span class="video-url">https://www.youtube.com/watch?v=XRsT38d_ujI</span>
+          <span class="video-platform">youtube</span>
+          <span class="video-date">2018-10-30</span>
+          <span class="video-full-description">Test velkého SUV od Mitsubishi. Testujeme prostornost, jízdní vlastnosti a praktičnost sedmi míst. Jak si vede Outlander v konkurenci sedmimístných vozů?</span>
+        </div>
+      </div>
+
+      <!-- Mitsubishi ASX 2018 -->
+      <div class="video-card" data-tags="mitsubishi,asx,suv,crossover,test,recenze,2018" onclick="openModal(this)">
+        <div class="video-thumbnail">
+          <img src="https://img.youtube.com/vi/o2dheFK1OEw/maxresdefault.jpg" alt="Mitsubishi ASX Test">
+          <div class="play-overlay">
+            <i class="fas fa-play"></i>
+          </div>
+          <div class="platform-badge youtube">YOUTUBE</div>
+        </div>
+        <div class="video-info">
+          <h3 class="video-title">Mitsubishi ASX 2018</h3>
+          <p class="video-description">Test kompaktního crossoveru Mitsubishi ASX. Jak se osvědčuje v městském provozu?</p>
+          <div class="video-tags">
+            <span class="video-tag">mitsubishi</span>
+            <span class="video-tag">asx</span>
+            <span class="video-tag">suv</span>
+            <span class="video-tag">crossover</span>
+            <span class="video-tag">test</span>
+            <span class="video-tag">recenze</span>
+            <span class="video-tag">2018</span>
+          </div>
+          <div class="video-meta">
+            <span>25. října 2018</span>
+            <span><i class="fab fa-youtube"></i></span>
+          </div>
+        </div>
+        <div class="video-data" style="display: none;">
+          <span class="video-url">https://www.youtube.com/watch?v=o2dheFK1OEw</span>
+          <span class="video-platform">youtube</span>
+          <span class="video-date">2018-10-25</span>
+          <span class="video-full-description">Test kompaktního crossoveru Mitsubishi ASX. Testujeme jízdní vlastnosti, komfort a praktičnost. Jak se osvědčuje v městském provozu?</span>
+        </div>
+      </div>
+
+      <!-- Mazda CX-5 2018 -->
+      <div class="video-card" data-tags="mazda,cx-5,suv,test,recenze,2018" onclick="openModal(this)">
+        <div class="video-thumbnail">
+          <img src="https://img.youtube.com/vi/HpXe9RBb-3E/maxresdefault.jpg" alt="Mazda CX-5 Test">
+          <div class="play-overlay">
+            <i class="fas fa-play"></i>
+          </div>
+          <div class="platform-badge youtube">YOUTUBE</div>
+        </div>
+        <div class="video-info">
+          <h3 class="video-title">Mazda CX-5 2018</h3>
+          <p class="video-description">Test druhé generace Mazda CX-5. Jak si vede v konkurenci kompaktních SUV?</p>
+          <div class="video-tags">
+            <span class="video-tag">mazda</span>
+            <span class="video-tag">cx-5</span>
+            <span class="video-tag">suv</span>
+            <span class="video-tag">test</span>
+            <span class="video-tag">recenze</span>
+            <span class="video-tag">2018</span>
+          </div>
+          <div class="video-meta">
+            <span>24. října 2018</span>
+            <span><i class="fab fa-youtube"></i></span>
+          </div>
+        </div>
+        <div class="video-data" style="display: none;">
+          <span class="video-url">https://youtu.be/HpXe9RBb-3E</span>
+          <span class="video-platform">youtube</span>
+          <span class="video-date">2018-10-24</span>
+          <span class="video-full-description">Test druhé generace Mazda CX-5. Testujeme jízdní vlastnosti, komfort a technologie. Jak si vede v konkurenci kompaktních SUV?</span>
+        </div>
+      </div>
+
+      <!-- Mazda CX-3 2018 -->
+      <div class="video-card" data-tags="mazda,cx-3,crossover,test,recenze,2018" onclick="openModal(this)">
+        <div class="video-thumbnail">
+          <img src="https://img.youtube.com/vi/JysRDjaXblY/maxresdefault.jpg" alt="Mazda CX-3 Test">
+          <div class="play-overlay">
+            <i class="fas fa-play"></i>
+          </div>
+          <div class="platform-badge youtube">YOUTUBE</div>
+        </div>
+        <div class="video-info">
+          <h3 class="video-title">Mazda CX-3 2018</h3>
+          <p class="video-description">Test malého crossoveru Mazda CX-3. Sportovní jízdní vlastnosti v kompaktním balení.</p>
+          <div class="video-tags">
+            <span class="video-tag">mazda</span>
+            <span class="video-tag">cx-3</span>
+            <span class="video-tag">crossover</span>
+            <span class="video-tag">test</span>
+            <span class="video-tag">recenze</span>
+            <span class="video-tag">2018</span>
+          </div>
+          <div class="video-meta">
+            <span>1. října 2018</span>
+            <span><i class="fab fa-youtube"></i></span>
+          </div>
+        </div>
+        <div class="video-data" style="display: none;">
+          <span class="video-url">https://www.youtube.com/watch?v=JysRDjaXblY</span>
+          <span class="video-platform">youtube</span>
+          <span class="video-date">2018-10-01</span>
+          <span class="video-full-description">Test malého crossoveru Mazda CX-3. Testujeme jízdní vlastnosti, spotřebu a praktičnost. Sportovní jízdní vlastnosti v kompaktním balení.</span>
+        </div>
+      </div>
+
+      <!-- Opel Grandland 2018 -->
+      <div class="video-card" data-tags="opel,grandland,suv,test,recenze,2018" onclick="openModal(this)">
+        <div class="video-thumbnail">
+          <img src="https://img.youtube.com/vi/gp9QY9HpJ2U/maxresdefault.jpg" alt="Opel Grandland Test">
+          <div class="play-overlay">
+            <i class="fas fa-play"></i>
+          </div>
+          <div class="platform-badge youtube">YOUTUBE</div>
+        </div>
+        <div class="video-info">
+          <h3 class="video-title">Opel Grandland 2018</h3>
+          <p class="video-description">Test velkého SUV od Opelu. Grandland X v konkurenci kompaktních SUV.</p>
+          <div class="video-tags">
+            <span class="video-tag">opel</span>
+            <span class="video-tag">grandland</span>
+            <span class="video-tag">suv</span>
+            <span class="video-tag">test</span>
+            <span class="video-tag">recenze</span>
+            <span class="video-tag">2018</span>
+          </div>
+          <div class="video-meta">
+            <span>14. září 2018</span>
+            <span><i class="fab fa-youtube"></i></span>
+          </div>
+        </div>
+        <div class="video-data" style="display: none;">
+          <span class="video-url">https://www.youtube.com/watch?v=gp9QY9HpJ2U</span>
+          <span class="video-platform">youtube</span>
+          <span class="video-date">2018-09-14</span>
+          <span class="video-full-description">Test velkého SUV od Opelu. Testujeme prostornost, jízdní vlastnosti a technologie. Grandland X v konkurenci kompaktních SUV.</span>
+        </div>
+      </div>
+
+      <!-- Opel Mokka 2018 -->
+      <div class="video-card" data-tags="opel,mokka,crossover,test,recenze,2018" onclick="openModal(this)">
+        <div class="video-thumbnail">
+          <img src="https://img.youtube.com/vi/KJxFcA7vQdY/maxresdefault.jpg" alt="Opel Mokka Test">
+          <div class="play-overlay">
+            <i class="fas fa-play"></i>
+          </div>
+          <div class="platform-badge youtube">YOUTUBE</div>
+        </div>
+        <div class="video-info">
+          <h3 class="video-title">Opel Mokka 2018</h3>
+          <p class="video-description">Test kompaktního crossoveru Opel Mokka. Jak si vede v městském provozu?</p>
+          <div class="video-tags">
+            <span class="video-tag">opel</span>
+            <span class="video-tag">mokka</span>
+            <span class="video-tag">crossover</span>
+            <span class="video-tag">test</span>
+            <span class="video-tag">recenze</span>
+            <span class="video-tag">2018</span>
+          </div>
+          <div class="video-meta">
+            <span>13. září 2018</span>
+            <span><i class="fab fa-youtube"></i></span>
+          </div>
+        </div>
+        <div class="video-data" style="display: none;">
+          <span class="video-url">https://youtu.be/KJxFcA7vQdY</span>
+          <span class="video-platform">youtube</span>
+          <span class="video-date">2018-09-13</span>
+          <span class="video-full-description">Test kompaktního crossoveru Opel Mokka. Testujeme jízdní vlastnosti, komfort a praktičnost. Jak si vede v městském provozu?</span>
+        </div>
+      </div>
+
+      <!-- Mitsubishi Eclipse Cross 2018 -->
+      <div class="video-card" data-tags="mitsubishi,eclipse,cross,suv,test,recenze,2018" onclick="openModal(this)">
+        <div class="video-thumbnail">
+          <img src="https://img.youtube.com/vi/AdjrozyNiCE/maxresdefault.jpg" alt="Mitsubishi Eclipse Cross Test">
+          <div class="play-overlay">
+            <i class="fas fa-play"></i>
+          </div>
+          <div class="platform-badge youtube">YOUTUBE</div>
+        </div>
+        <div class="video-info">
+          <h3 class="video-title">Mitsubishi Eclipse Cross 2018</h3>
+          <p class="video-description">Test nového crossoveru Mitsubishi Eclipse Cross. Návrat legendární značky Eclipse.</p>
+          <div class="video-tags">
+            <span class="video-tag">mitsubishi</span>
+            <span class="video-tag">eclipse</span>
+            <span class="video-tag">cross</span>
+            <span class="video-tag">suv</span>
+            <span class="video-tag">test</span>
+            <span class="video-tag">recenze</span>
+            <span class="video-tag">2018</span>
+          </div>
+          <div class="video-meta">
+            <span>12. července 2018</span>
+            <span><i class="fab fa-youtube"></i></span>
+          </div>
+        </div>
+        <div class="video-data" style="display: none;">
+          <span class="video-url">https://www.youtube.com/watch?v=AdjrozyNiCE</span>
+          <span class="video-platform">youtube</span>
+          <span class="video-date">2018-07-12</span>
+          <span class="video-full-description">Test nového crossoveru Mitsubishi Eclipse Cross. Testujeme design, jízdní vlastnosti a technologie. Návrat legendární značky Eclipse.</span>
+        </div>
+      </div>
+
+      <!-- Ford Kuga 2018 -->
+      <div class="video-card" data-tags="ford,kuga,suv,test,recenze,2018" onclick="openModal(this)">
+        <div class="video-thumbnail">
+          <img src="https://img.youtube.com/vi/4GQPofq9GCs/maxresdefault.jpg" alt="Ford Kuga Test">
+          <div class="play-overlay">
+            <i class="fas fa-play"></i>
+          </div>
+          <div class="platform-badge youtube">YOUTUBE</div>
+        </div>
+        <div class="video-info">
+          <h3 class="video-title">Ford Kuga 2018</h3>
+          <p class="video-description">Test kompaktního SUV Ford Kuga. Jak si vede v konkurenci německých značek?</p>
+          <div class="video-tags">
+            <span class="video-tag">ford</span>
+            <span class="video-tag">kuga</span>
+            <span class="video-tag">suv</span>
+            <span class="video-tag">test</span>
+            <span class="video-tag">recenze</span>
+            <span class="video-tag">2018</span>
+          </div>
+          <div class="video-meta">
+            <span>11. července 2018</span>
+            <span><i class="fab fa-youtube"></i></span>
+          </div>
+        </div>
+        <div class="video-data" style="display: none;">
+          <span class="video-url">https://youtu.be/4GQPofq9GCs</span>
+          <span class="video-platform">youtube</span>
+          <span class="video-date">2018-07-11</span>
+          <span class="video-full-description">Test kompaktního SUV Ford Kuga. Testujeme výkon, komfort a praktičnost. Jak si vede v konkurenci německých značek?</span>
+        </div>
+      </div>
+
+      <!-- Volvo XC60 2018 -->
+      <div class="video-card" data-tags="volvo,xc60,suv,luxury,test,recenze,2018" onclick="openModal(this)">
+        <div class="video-thumbnail">
+          <img src="https://img.youtube.com/vi/jodGwHdt-kg/maxresdefault.jpg" alt="Volvo XC60 Test">
+          <div class="play-overlay">
+            <i class="fas fa-play"></i>
+          </div>
+          <div class="platform-badge youtube">YOUTUBE</div>
+        </div>
+        <div class="video-info">
+          <h3 class="video-title">Volvo XC60 2018</h3>
+          <p class="video-description">Test luxusního SUV Volvo XC60. Bezpečnost a komfort ve švédském podání.</p>
+          <div class="video-tags">
+            <span class="video-tag">volvo</span>
+            <span class="video-tag">xc60</span>
+            <span class="video-tag">suv</span>
+            <span class="video-tag">luxury</span>
+            <span class="video-tag">test</span>
+            <span class="video-tag">recenze</span>
+            <span class="video-tag">2018</span>
+          </div>
+          <div class="video-meta">
+            <span>21. května 2018</span>
+            <span><i class="fab fa-youtube"></i></span>
+          </div>
+        </div>
+        <div class="video-data" style="display: none;">
+          <span class="video-url">https://youtu.be/jodGwHdt-kg</span>
+          <span class="video-platform">youtube</span>
+          <span class="video-date">2018-05-21</span>
+          <span class="video-full-description">Test luxusního SUV Volvo XC60. Testujeme bezpečnostní systémy, komfort a jízdní vlastnosti. Bezpečnost a komfort ve švédském podání.</span>
+        </div>
+      </div>
+
+      <!-- Autosalon Ženeva 2018 - playlist -->
+      <div class="video-card" data-tags="autosalon,ženeva,novinky,test,reportáž,2018" onclick="openModal(this)">
+        <div class="video-thumbnail">
+          <img src="https://img.youtube.com/vi/LH5JYt_j__YQVGER/maxresdefault.jpg" alt="Autosalon Ženeva 2018">
+          <div class="play-overlay">
+            <i class="fas fa-play"></i>
+          </div>
+          <div class="platform-badge youtube">YOUTUBE</div>
+        </div>
+        <div class="video-info">
+          <h3 class="video-title">Autosalon Ženeva 2018</h3>
+          <p class="video-description">Reportáže z Autosalonu Ženeva 2018. Nejnovější automobilové novinky z celého světa.</p>
+          <div class="video-tags">
+            <span class="video-tag">autosalon</span>
+            <span class="video-tag">ženeva</span>
+            <span class="video-tag">novinky</span>
+            <span class="video-tag">test</span>
+            <span class="video-tag">reportáž</span>
+            <span class="video-tag">2018</span>
+          </div>
+          <div class="video-meta">
+            <span>10. března 2018</span>
+            <span><i class="fab fa-youtube"></i></span>
+          </div>
+        </div>
+        <div class="video-data" style="display: none;">
+          <span class="video-url">https://youtube.com/playlist?list=PLOVkY_GpJRo0r3UCbKWueD79Gtyaea4ZA</span>
+          <span class="video-platform">youtube</span>
+          <span class="video-date">2018-03-10</span>
+          <span class="video-full-description">Reportáže z Autosalonu Ženeva 2018. Série videí z nejdůležitějšího evropského autosalonu s nejnovějšími automobilovými novinkami z celého světa.</span>
+        </div>
+      </div>
+
+  </div>
+
+    <!-- Prázdný stav -->
+    <div class="empty-state" id="emptyState" style="display: none;">
+      <i class="fas fa-video"></i>
+      <h3>Žádná videa nenalezena</h3>
+      <p>Zkuste změnit vyhledávací kritéria.</p>
+    </div>
+  </div>
+
+  <!-- Modal pro přehrání videa -->
+  <div class="modal" id="videoModal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeModal()">&times;</button>
+      <div id="modalVideoContainer"></div>
+      <div class="modal-info">
+        <h2 class="modal-title" id="modalTitle"></h2>
+        <p class="modal-description" id="modalDescription"></p>
+        <div class="modal-tags" id="modalTags"></div>
+        <div class="modal-meta">
+          <div class="modal-meta-item">
+            <div class="modal-meta-label">Platforma</div>
+            <div class="modal-meta-value" id="modalPlatform"></div>
+          </div>
+          <div class="modal-meta-item">
+            <div class="modal-meta-label">Publikováno</div>
+            <div class="modal-meta-value" id="modalDate"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let allTags = new Set();
+    let currentFilter = 'all';
+    let searchQuery = '';
+
+    // Inicializace
+    document.addEventListener('DOMContentLoaded', function() {
+      loadVideos();
+      setupEventListeners();
+      updateStats();
+    });
+
+    function setupEventListeners() {
+      // Vyhledávání
+      document.getElementById('searchBox').addEventListener('input', function(e) {
+        searchQuery = e.target.value.toLowerCase();
+        filterVideos();
+      });
+
+      // Scroll efekty pro navigaci
+      window.addEventListener('scroll', function() {
+        const nav = document.getElementById('navbar');
+        if (window.scrollY > 50) {
+          nav.classList.add('scrolled');
+        } else {
+          nav.classList.remove('scrolled');
+        }
+      });
+
+      // Zavření modalu kliknutím mimo obsah
+      document.getElementById('videoModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+          closeModal();
+        }
+      });
+
+      // ESC klávesa pro zavření modalu
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+          closeModal();
+        }
+      });
+    }
+
+    function loadVideos() {
+      const cards = document.querySelectorAll('.video-card');
+      
+      // Sběr všech tagů z existujících videí a optimalizace zobrazení
+      allTags.clear();
+      cards.forEach(card => {
+        const tags = card.dataset.tags.split(',');
+        const tagsContainer = card.querySelector('.video-tags');
+        
+        // Počet tagů pro indikátor
+        if (tags.length > 3) {
+          const moreCount = tags.length - 3;
+          tagsContainer.setAttribute('data-more', `+${moreCount}`);
+          tagsContainer.classList.add('has-more');
+        }
+        
+        tags.forEach(tag => allTags.add(tag.trim()));
+      });
+
+      // Aktualizace filtrovacích tlačítek
+      updateFilterTags();
+      filterVideos();
+    }
+
+    function updateFilterTags() {
+      const container = document.getElementById('filterTags');
+      container.innerHTML = '<button class="tag-filter active" data-tag="all">Všechna videa</button>';
+
+      Array.from(allTags).sort().forEach(tag => {
+        const button = document.createElement('button');
+        button.className = 'tag-filter';
+        button.dataset.tag = tag;
+        button.textContent = tag;
+        button.onclick = () => setFilter(tag);
+        container.appendChild(button);
+      });
+    }
+
+    function setFilter(tag) {
+      currentFilter = tag;
+      
+      // Aktualizace aktivního tlačítka
+      document.querySelectorAll('.tag-filter').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.dataset.tag === tag) {
+          btn.classList.add('active');
+        }
+      });
+
+      filterVideos();
+    }
+
+    function filterVideos() {
+      const cards = document.querySelectorAll('.video-card');
+      let visibleCount = 0;
+
+      cards.forEach(card => {
+        const title = card.querySelector('.video-title').textContent.toLowerCase();
+        const description = card.querySelector('.video-description').textContent.toLowerCase();
+        const tags = card.dataset.tags.toLowerCase();
+
+        const matchesSearch = !searchQuery || 
+                            title.includes(searchQuery) || 
+                            description.includes(searchQuery) || 
+                            tags.includes(searchQuery);
+
+        const matchesFilter = currentFilter === 'all' || 
+                             tags.split(',').map(t => t.trim()).includes(currentFilter);
+
+        if (matchesSearch && matchesFilter) {
+          card.style.display = 'block';
+          visibleCount++;
+        } else {
+          card.style.display = 'none';
+        }
+      });
+
+      // Zobrazení prázdného stavu
+      const emptyState = document.getElementById('emptyState');
+      const videoGrid = document.getElementById('videoGrid');
+      
+      if (visibleCount === 0) {
+        emptyState.style.display = 'block';
+        videoGrid.style.display = 'none';
+      } else {
+        emptyState.style.display = 'none';
+        videoGrid.style.display = 'grid';
+      }
+
+      updateStats(visibleCount);
+    }
+
+    function updateStats(visible = null) {
+      const totalCards = document.querySelectorAll('.video-card').length;
+      document.getElementById('totalVideos').textContent = totalCards;
+      document.getElementById('visibleVideos').textContent = visible !== null ? visible : totalCards;
+    }
+
+    function extractYouTubeId(url) {
+      const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/);
+      return match ? match[1] : null;
+    }
+
+    function openModal(cardElement) {
+      const modal = document.getElementById('videoModal');
+      const container = document.getElementById('modalVideoContainer');
+      
+      // Získání dat z karty
+      const title = cardElement.querySelector('.video-title').textContent;
+      const description = cardElement.querySelector('.video-data .video-full-description').textContent;
+      const url = cardElement.querySelector('.video-data .video-url').textContent;
+      const platform = cardElement.querySelector('.video-data .video-platform').textContent;
+      const date = cardElement.querySelector('.video-data .video-date').textContent;
+      const tags = cardElement.dataset.tags.split(',').map(tag => tag.trim());
+      
+      // Generování embed kódu
+      let embedCode = '';
+      if (platform === 'youtube') {
+        const videoId = extractYouTubeId(url);
+        embedCode = `<iframe class="modal-video" src="https://www.youtube.com/embed/${videoId}" frameborder="0" allowfullscreen></iframe>`;
+      } else if (platform === 'tiktok') {
+        embedCode = `<div class="modal-video" style="display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.05); color: white;">
+          <div style="text-align: center;">
+            <i class="fab fa-tiktok" style="font-size: 3rem; margin-bottom: 20px;"></i>
+            <p style="margin-bottom: 20px;">TikTok video se otevře v novém okně</p>
+            <a href="${url}" target="_blank" style="background: #000; color: white; padding: 12px 24px; border-radius: 25px; text-decoration: none; font-weight: 600;">Otevřít na TikTok</a>
+          </div>
+        </div>`;
+      }
+      
+      container.innerHTML = embedCode;
+      
+      // Naplnění informací o videu
+      document.getElementById('modalTitle').textContent = title;
+      document.getElementById('modalDescription').textContent = description;
+      document.getElementById('modalPlatform').textContent = platform.toUpperCase();
+      document.getElementById('modalDate').textContent = new Date(date).toLocaleDateString('cs-CZ');
+      
+      // Tagy
+      const modalTags = document.getElementById('modalTags');
+      modalTags.innerHTML = tags.map(tag => `<span class="modal-tag">${tag}</span>`).join('');
+      
+      // Zobrazení modalu s animací
+      modal.style.display = 'flex';
+      setTimeout(() => {
+        modal.classList.add('active');
+      }, 10);
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+      const modal = document.getElementById('videoModal');
+      modal.classList.remove('active');
+      
+      setTimeout(() => {
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+        // Vyčištění obsahu pro zastavení přehrávání
+        document.getElementById('modalVideoContainer').innerHTML = '';
+      }, 300);
+    }
+
+  </script>
+
+
+
+</body>
+</html>
