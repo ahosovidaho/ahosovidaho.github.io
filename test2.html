@@ -390,22 +390,6 @@
       font-size: 1.1rem;
     }
 
-    .modal-tags {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-bottom: 25px;
-    }
-
-    .modal-tag {
-      background: rgba(0, 122, 255, 0.2);
-      color: #007AFF;
-      padding: 8px 16px;
-      border-radius: 15px;
-      font-size: 14px;
-      font-weight: 500;
-    }
-
     .modal-meta {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -636,12 +620,7 @@
       <h1>Galerie Videí</h1>
       <p class="hero-subtitle">Všechna moje videa z YouTube na jednom místě</p>
     </div>
-
-    <!-- Filter sekce -->
-    <div class="filter-section">
-      <div class="filter-tags" id="filterTags">
-        <button class="tag-filter active" data-tag="all">Všechna videa</button>
-      </div>
+    
       <div class="stats">
         Zobrazeno <span id="visibleVideos">0</span> z <span id="totalVideos">0</span> videí
       </div>
