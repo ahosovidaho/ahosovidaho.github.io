@@ -292,65 +292,6 @@
       line-height: 1.5;
     }
 
-    .video-tags {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 4px;
-      margin-bottom: 8px;
-      max-height: 18px;
-      overflow: hidden;
-      position: relative;
-      align-items: flex-start;
-    }
-
-    .video-tag {
-      background: rgba(0, 122, 255, 0.15);
-      color: rgba(0, 122, 255, 0.9);
-      padding: 1px 5px;
-      border-radius: 6px;
-      font-size: 9px;
-      font-weight: 500;
-      white-space: nowrap;
-      opacity: 0.8;
-      line-height: 1.2;
-      height: 14px;
-      display: inline-flex;
-      align-items: center;
-    }
-
-    .video-card:hover .video-tag {
-      opacity: 1;
-    }
-
-    /* Zobrazit pouze první 3 tagy, zbytek skrýt */
-    .video-tag:nth-child(4),
-    .video-tag:nth-child(5),
-    .video-tag:nth-child(6),
-    .video-tag:nth-child(7),
-    .video-tag:nth-child(8) {
-      display: none !important;
-    }
-
-    /* Indikátor pro více tagů */
-    .video-tags::after {
-      content: attr(data-more);
-      background: rgba(255, 255, 255, 0.1);
-      color: rgba(255, 255, 255, 0.6);
-      padding: 1px 5px;
-      border-radius: 6px;
-      font-size: 9px;
-      font-weight: 500;
-      white-space: nowrap;
-      display: none;
-      line-height: 1.2;
-      height: 14px;
-      align-items: center;
-    }
-
-    .video-tags.has-more::after {
-      display: inline-flex;
-    }
-
     .video-meta {
       display: flex;
       justify-content: space-between;
@@ -1500,10 +1441,6 @@
       document.getElementById('modalDescription').textContent = description;
       document.getElementById('modalPlatform').textContent = platform.toUpperCase();
       document.getElementById('modalDate').textContent = new Date(date).toLocaleDateString('cs-CZ');
-      
-      // Tagy
-      const modalTags = document.getElementById('modalTags');
-      modalTags.innerHTML = tags.map(tag => `<span class="modal-tag">${tag}</span>`).join('');
       
       // Zobrazení modalu s animací
       modal.style.display = 'flex';
