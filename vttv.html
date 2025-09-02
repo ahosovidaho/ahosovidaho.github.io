@@ -167,7 +167,20 @@
       font-weight: 300;
       line-height: 1.4;
     }
-    
+
+    /* Počítadlo videí */
+    .video-stats {
+      text-align: center;
+      margin-bottom: 60px;
+      opacity: 0;
+      animation: fadeInUp 1s ease 0.7s forwards;
+    }
+
+    .stats {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 14px;
+    }
+
     /* Video grid s Apple kartami */
     .video-grid {
       display: grid;
@@ -584,16 +597,6 @@
         margin-bottom: 50px;
       }
 
-      .filter-tags {
-        gap: 10px;
-      }
-
-      .tag-filter {
-        padding: 8px 16px;
-        min-width: 80px;
-        font-size: 13px;
-      }
-
       .video-grid {
         grid-template-columns: 1fr;
         gap: 25px;
@@ -643,16 +646,6 @@
         font-size: 1.1rem;
       }
 
-      .filter-tags {
-        justify-content: center;
-      }
-
-      .tag-filter {
-        padding: 6px 12px;
-        font-size: 12px;
-        min-width: 70px;
-      }
-
       .video-info {
         padding: 20px;
       }
@@ -675,7 +668,7 @@
 
   <nav id="navbar">
     <div class="nav-content">
-      <a href="https://www.tamayo.cz" class="logo-nav">Viktor Tamayo</a>
+      <a href="#" class="logo-nav">Viktor Tamayo</a>
       <div class="nav-right">
         <div class="search-container">
           <input type="text" class="search-box" id="searchBox" placeholder="Hledat videa...">
@@ -692,8 +685,15 @@
   <div class="container">
     <!-- Hero sekce -->
     <div class="hero">
-      <h1>VTTV</h1>
-      <p class="hero-subtitle">Všechna má videa s testy aut na jednom místě</p>
+      <h1>Galerie Videí</h1>
+      <p class="hero-subtitle">Všechna moje videa z YouTube na jednom místě</p>
+    </div>
+
+    <!-- Počítadlo videí -->
+    <div class="video-stats">
+      <div class="stats">
+        Zobrazeno <span id="visibleVideos">0</span> z <span id="totalVideos">0</span> videí
+      </div>
     </div>
 
     <!-- Video mřížka -->
