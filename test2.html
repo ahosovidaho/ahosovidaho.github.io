@@ -292,6 +292,65 @@
       line-height: 1.5;
     }
 
+    .video-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-bottom: 8px;
+      max-height: 18px;
+      overflow: hidden;
+      position: relative;
+      align-items: flex-start;
+    }
+
+    .video-tag {
+      background: rgba(0, 122, 255, 0.15);
+      color: rgba(0, 122, 255, 0.9);
+      padding: 1px 5px;
+      border-radius: 6px;
+      font-size: 9px;
+      font-weight: 500;
+      white-space: nowrap;
+      opacity: 0.8;
+      line-height: 1.2;
+      height: 14px;
+      display: inline-flex;
+      align-items: center;
+    }
+
+    .video-card:hover .video-tag {
+      opacity: 1;
+    }
+
+    /* Zobrazit pouze první 3 tagy, zbytek skrýt */
+    .video-tag:nth-child(4),
+    .video-tag:nth-child(5),
+    .video-tag:nth-child(6),
+    .video-tag:nth-child(7),
+    .video-tag:nth-child(8) {
+      display: none !important;
+    }
+
+    /* Indikátor pro více tagů */
+    .video-tags::after {
+      content: attr(data-more);
+      background: rgba(255, 255, 255, 0.1);
+      color: rgba(255, 255, 255, 0.6);
+      padding: 1px 5px;
+      border-radius: 6px;
+      font-size: 9px;
+      font-weight: 500;
+      white-space: nowrap;
+      display: none;
+      line-height: 1.2;
+      height: 14px;
+      align-items: center;
+    }
+
+    .video-tags.has-more::after {
+      display: inline-flex;
+    }
+
     .video-meta {
       display: flex;
       justify-content: space-between;
@@ -388,6 +447,22 @@
       margin-bottom: 25px;
       line-height: 1.6;
       font-size: 1.1rem;
+    }
+
+    .modal-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 25px;
+    }
+
+    .modal-tag {
+      background: rgba(0, 122, 255, 0.2);
+      color: #007AFF;
+      padding: 8px 16px;
+      border-radius: 15px;
+      font-size: 14px;
+      font-weight: 500;
     }
 
     .modal-meta {
@@ -509,6 +584,16 @@
         margin-bottom: 50px;
       }
 
+      .filter-tags {
+        gap: 10px;
+      }
+
+      .tag-filter {
+        padding: 8px 16px;
+        min-width: 80px;
+        font-size: 13px;
+      }
+
       .video-grid {
         grid-template-columns: 1fr;
         gap: 25px;
@@ -609,11 +694,6 @@
     <div class="hero">
       <h1>Galerie Videí</h1>
       <p class="hero-subtitle">Všechna moje videa z YouTube na jednom místě</p>
-    </div>
-    
-      <div class="stats">
-        Zobrazeno <span id="visibleVideos">0</span> z <span id="totalVideos">0</span> videí
-      </div>
     </div>
 
     <!-- Video mřížka -->
@@ -1196,7 +1276,1565 @@
         </div>
       </div>
 
-  </div>
+</div>
+      </div>
+
+      <!-- Hyundai Ioniq 2017 -->
+      <div class="video-card" data-tags="hyundai,ioniq,hybrid,electric,test,recenze,2017" onclick="openModal(this)">
+        <div class="video-thumbnail">
+          <img src="https://img.youtube.com/vi/7_qhbw8IJVM/maxresdefault.jpg" alt="Hyundai Ioniq Test">
+          <div class="play-overlay">
+            <i class="fas fa-play"></i>
+          </div>
+          <div class="platform-badge youtube">YOUTUBE</div>
+        </div>
+        <div class="video-info">
+          <h3 class="video-title">Audi Q7 E-TRON 2017</h3>
+          <p class="video-description">Test plug-in hybridního SUV Audi Q7 E-TRON. Luxus s možností elektrické jízdy.</p>
+          <div class="video-tags">
+            <span class="video-tag">audi</span>
+            <span class="video-tag">q7</span>
+            <span class="video-tag">e-tron</span>
+            <span class="video-tag">hybrid</span>
+            <span class="video-tag">plug-in</span>
+            <span class="video-tag">luxury</span>
+            <span class="video-tag">suv</span>
+          </div>
+          <div class="video-meta">
+            <span>2. února 2017</span>
+            <span><i class="fab fa-youtube"></i></span>
+          </div>
+        </div>
+        <div class="video-data" style="display: none;">
+          <span class="video-url">https://www.youtube.com/watch?v=n4ewH8bUNFM</span>
+          <span class="video-platform">youtube</span>
+          <span class="video-date">2017-02-02</span>
+          <span class="video-full-description">Test plug-in hybridního SUV Audi Q7 E-TRON. Testujeme luxusní výbavu, elektrický dojezd a jízdní vlastnosti. Luxus s možností elektrické jízdy.</span>
+        </div>
+      </div>
+
+      <!-- Kia Niro 2017 -->
+      <div class="video-card" data-tags="kia,niro,hybrid,crossover,test,recenze,2017" onclick="openModal(this)">
+        <div class="video-thumbnail">
+          <img src="https://img.youtube.com/vi/fCO4tnd9q6E/maxresdefault.jpg" alt="Kia Niro Test">
+          <div class="play-overlay">
+            <i class="fas fa-play"></i>
+          </div>
+          <div class="platform-badge youtube">YOUTUBE</div>
+        </div>
+        <div class="video-info">
+          <h3 class="video-title">Kia Niro 2017</h3>
+          <p class="video-description">Test hybridního crossoveru Kia Niro. Praktičnost a úspornost v jednom balení.</p>
+          <div class="video-tags">
+            <span class="video-tag">kia</span>
+            <span class="video-tag">niro</span>
+            <span class="video-tag">hybrid</span>
+            <span class="video-tag">crossover</span>
+            <span class="video-tag">test</span>
+            <span class="video-tag">recenze</span>
+            <span class="video-tag">2017</span>
+          </div>
+          <div class="video-meta">
+            <span>1. ledna 2017</span>
+            <span><i class="fab fa-youtube"></i></span>
+          </div>
+        </div>
+        <div class="video-data" style="display: none;">
+          <span class="video-url">https://www.youtube.com/watch?v=fCO4tnd9q6E</span>
+          <span class="video-platform">youtube</span>
+          <span class="video-date">2017-01-01</span>
+          <span class="video-full-description">Test hybridního crossoveru Kia Niro. Testujeme praktičnost, spotřebu a hybridní systém. Praktičnost a úspornost v jednom balení.</span>
+        </div>
+      </div>
+
+      <!-- VIDEA Z ROKU 2016 -->
+
+      <!-- Audi A4 Allroad 3.0 TDI 2016 -->
+      <div class="video-card" data-tags="audi,a4,allroad,tdi,quattro,kombi,luxury,test,recenze,2016" onclick="openModal(this)">
+        <div class="video-thumbnail">
+          <img src="https://img.youtube.com/vi/JrR331do3lE/maxresdefault.jpg" alt="Audi A4 Allroad Test">
+          <div class="play-overlay">
+            <i class="fas fa-play"></i>
+          </div>
+          <div class="platform-badge youtube">YOUTUBE</div>
+        </div>
+        <div class="video-info">
+          <h3 class="video-title">Audi A4 Allroad 3.0 TDI 2016</h3>
+          <p class="video-description">Test terénního kombi Audi A4 Allroad. Elegance pro všechny cesty.</p>
+          <div class="video-tags">
+            <span class="video-tag">audi</span>
+            <span class="video-tag">a4</span>
+            <span class="video-tag">allroad</span>
+            <span class="video-tag">tdi</span>
+            <span class="video-tag">quattro</span>
+            <span class="video-tag">kombi</span>
+            <span class="video-tag">luxury</span>
+          </div>
+          <div class="video-meta">
+            <span>2. prosince 2016</span>
+            <span><i class="fab fa-youtube"></i></span>
+          </div>
+        </div>
+        <div class="video-data" style="display: none;">
+          <span class="video-url">https://www.youtube.com/watch?v=JrR331do3lE</span>
+          <span class="video-platform">youtube</span>
+          <span class="video-date">2016-12-02</span>
+          <span class="video-full-description">Test terénního kombi Audi A4 Allroad. Testujeme jízdní vlastnosti na silnici i v terénu, luxusní výbavu a praktičnost. Elegance pro všechny cesty.</span>
+        </div>
+      </div>
+
+      <!-- Mercedes-Benz E 220d 2016 -->
+      <div class="video-card" data-tags="mercedes,e-class,220d,sedan,luxury,test,recenze,2016" onclick="openModal(this)">
+        <div class="video-thumbnail">
+          <img src="https://img.youtube.com/vi/Y3TVc2gRYn4/maxresdefault.jpg" alt="Mercedes E-Class Test">
+          <div class="play-overlay">
+            <i class="fas fa-play"></i>
+          </div>
+          <div class="platform-badge youtube">YOUTUBE</div>
+        </div>
+        <div class="video-info">
+          <h3 class="video-title">Mercedes-Benz E 220d 2016</h3>
+          <p class="video-description">Test nové generace Mercedes E-Class. Německý luxus v plné kráse.</p>
+          <div class="video-tags">
+            <span class="video-tag">mercedes</span>
+            <span class="video-tag">e-class</span>
+            <span class="video-tag">220d</span>
+            <span class="video-tag">sedan</span>
+            <span class="video-tag">luxury</span>
+            <span class="video-tag">test</span>
+            <span class="video-tag">recenze</span>
+          </div>
+          <div class="video-meta">
+            <span>1. prosince 2016</span>
+            <span><i class="fab fa-youtube"></i></span>
+          </div>
+        </div>
+        <div class="video-data" style="display: none;">
+          <span class="video-url">https://www.youtube.com/watch?v=Y3TVc2gRYn4</span>
+          <span class="video-platform">youtube</span>
+          <span class="video-date">2016-12-01</span>
+          <span class="video-full-description">Test nové generace Mercedes E-Class. Testujeme luxusní výbavu, komfort, technologie a jízdní vlastnosti. Německý luxus v plné kráse.</span>
+        </div>
+      </div>
+
+      <!-- Seat Ateca vs Hyundai Tucson vs Škoda Yeti 2016 -->
+      <div class="video-card" data-tags="seat,ateca,hyundai,tucson,škoda,yeti,porovnání,suv,test,2016" onclick="openModal(this)">
+        <div class="video-thumbnail">
+          <img src="https://img.youtube.com/vi/RGDKv58FEG8/maxresdefault.jpg" alt="SUV Porovnání Test">
+          <div class="play-overlay">
+            <i class="fas fa-play"></i>
+          </div>
+          <div class="platform-badge youtube">YOUTUBE</div>
+        </div>
+        <div class="video-info">
+          <h3 class="video-title">Seat Ateca vs Hyundai Tucson vs Škoda Yeti 2016</h3>
+          <p class="video-description">Velký srovnávací test kompaktních SUV. Které je nejlepší volbou?</p>
+          <div class="video-tags">
+            <span class="video-tag">seat</span>
+            <span class="video-tag">ateca</span>
+            <span class="video-tag">hyundai</span>
+            <span class="video-tag">tucson</span>
+            <span class="video-tag">škoda</span>
+            <span class="video-tag">yeti</span>
+            <span class="video-tag">porovnání</span>
+          </div>
+          <div class="video-meta">
+            <span>14. listopadu 2016</span>
+            <span><i class="fab fa-youtube"></i></span>
+          </div>
+        </div>
+        <div class="video-data" style="display: none;">
+          <span class="video-url">https://www.youtube.com/watch?v=RGDKv58FEG8</span>
+          <span class="video-platform">youtube</span>
+          <span class="video-date">2016-11-14</span>
+          <span class="video-full-description">Velký srovnávací test kompaktních SUV. Porovnáváme Seat Ateca, Hyundai Tucson a Škoda Yeti. Testujeme praktičnost, jízdní vlastnosti a cenu. Které je nejlepší volbou?</span>
+        </div>
+      </div>
+            <i class="fas fa-play"></i>
+          </div>
+          <div class="platform-badge youtube">YOUTUBE</div>
+        </div>
+        <div class="video-info">
+          <h3 class="video-title">Hyundai Ioniq 2017</h3>
+          <p class="video-description">Test hybridního vozů Hyundai Ioniq. Korejská odpověď na Toyota Prius.</p>
+          <div class="video-tags">
+            <span class="video-tag">hyundai</span>
+            <span class="video-tag">ioniq</span>
+            <span class="video-tag">hybrid</span>
+            <span class="video-tag">electric</span>
+            <span class="video-tag">test</span>
+            <span class="video-tag">recenze</span>
+            <span class="video-tag">2017</span>
+          </div>
+          <div class="video-meta">
+            <span>13. března 2017</span>
+            <span><i class="fab fa-youtube"></i></span>
+          </div>
+        </div>
+        <div class="video-data" style="display: none;">
+          <span class="video-url">https://youtu.be/7_qhbw8IJVM</span>
+          <span class="video-platform">youtube</span>
+          <span class="video-date">2017-03-13</span>
+          <span class="video-full-description">Test hybridního vozu Hyundai Ioniq. Korejská odpověď na Toyota Prius. Testujeme hybridní systém, spotřebu a jízdní vlastnosti.</span>
+        </div>
+      </div>
+
+      <!-- Volvo S90 2017 -->
+      <div class="video-card" data-tags="volvo,s90,sedan,luxury,test,recenze,2017" onclick="openModal(this)">
+        <div class="video-thumbnail">
+          <img src="https://img.youtube.com/vi/v_z_tznMP7A/maxresdefault.jpg" alt="Volvo S90 Test">
+          <div class="play-overlay">
+            <i class="fas fa-play"></i>
+          </div>
+          <div class="platform-badge youtube">YOUTUBE</div>
+        </div>
+        <div class="video-info">
+          <h3 class="video-title">Volvo S90 2017</h3>
+          <p class="video-description">Test luxusního sedanu Volvo S90. Švédská elegance a nejvyšší bezpečnost.</p>
+          <div class="video-tags">
+            <span class="video-tag">volvo</span>
+            <span class="video-tag">s90</span>
+            <span class="video-tag">sedan</span>
+            <span class="video-tag">luxury</span>
+            <span class="video-tag">test</span>
+            <span class="video-tag">recenze</span>
+            <span class="video-tag">2017</span>
+          </div>
+          <div class="video-meta">
+            <span>10. března 2017</span>
+            <span><i class="fab fa-youtube"></i></span>
+          </div>
+        </div>
+        <div class="video-data" style="display: none;">
+          <span class="video-url">https://youtu.be/v_z_tznMP7A</span>
+          <span class="video-platform">youtube</span>
+          <span class="video-date">2017-03-10</span>
+          <span class="video-full-description">Test luxusního sedanu Volvo S90. Testujeme švédskou eleganci, bezpečnostní systémy a komfort. Švédská elegance a nejvyšší bezpečnost.</span>
+        </div>
+      </div>
+
+      <!-- Tesla Model S 2017 -->
+      <div class="video-card" data-tags="tesla,model s,electric,luxury,test,recenze,2017" onclick="openModal(this)">
+        <div class="video-thumbnail">
+          <img src="https://img.youtube.com/vi/ioGCfBW3EVs/maxresdefault.jpg" alt="Tesla Model S Test">
+          <div class="play-overlay">
+            <i class="fas fa-play"></i>
+          </div>
+          <div class="platform-badge youtube">YOUTUBE</div>
+        </div>
+        <div class="video-info">
+          <h3 class="video-title">Tesla Model S 2017</h3>
+          <p class="video-description">Test revolučního elektromobilu Tesla Model S. Budoucnost automobilů už dnes.</p>
+          <div class="video-tags">
+            <span class="video-tag">tesla</span>
+            <span class="video-tag">model s</span>
+            <span class="video-tag">electric</span>
+            <span class="video-tag">luxury</span>
+            <span class="video-tag">test</span>
+            <span class="video-tag">recenze</span>
+            <span class="video-tag">2017</span>
+          </div>
+          <div class="video-meta">
+            <span>9. března 2017</span>
+            <span><i class="fab fa-youtube"></i></span>
+          </div>
+        </div>
+        <div class="video-data" style="display: none;">
+          <span class="video-url">https://youtu.be/ioGCfBW3EVs</span>
+          <span class="video-platform">youtube</span>
+          <span class="video-date">2017-03-09</span>
+          <span class="video-full-description">Test revolučního elektromobilu Tesla Model S. Testujeme výkon, dojezd a inovativní technologie. Budoucnost automobilů už dnes.</span>
+        </div>
+      </div>
+
+      <!-- Autosalon Ženeva 2017 -->
+      <div class="video-card" data-tags="autosalon,ženeva,novinky,test,reportáž,2017" onclick="openModal(this)">
+        <div class="video-thumbnail">
+          <img src="https://img.youtube.com/vi/mkPKwZZM6wQQUFi7/maxresdefault.jpg" alt="Autosalon Ženeva 2017">
+          <div class="play-overlay">
+            <i class="fas fa-play"></i>
+          </div>
+          <div class="platform-badge youtube">YOUTUBE</div>
+        </div>
+        <div class="video-info">
+          <h3 class="video-title">Autosalon Ženeva 2017</h3>
+          <p class="video-description">Reportáže z Autosalonu Ženeva 2017. Nejnovější automobilové trendy a koncepční vozy.</p>
+          <div class="video-tags">
+            <span class="video-tag">autosalon</span>
+            <span class="video-tag">ženeva</span>
+            <span class="video-tag">novinky</span>
+            <span class="video-tag">test</span>
+            <span class="video-tag">reportáž</span>
+            <span class="video-tag">2017</span>
+          </div>
+          <div class="video-meta">
+            <span>3. března 2017</span>
+            <span><i class="fab fa-youtube"></i></span>
+          </div>
+        </div>
+        <div class="video-data" style="display: none;">
+          <span class="video-url">https://youtube.com/playlist?list=PLOVkY_GpJRo2KCcbrQavKZyzAaoir0roZ</span>
+          <span class="video-platform">youtube</span>
+          <span class="video-date">2017-03-03</span>
+          <span class="video-full-description">Reportáže z Autosalonu Ženeva 2017. Série videí z prestižního evropského autosalonu s nejnovějšími automobilovými trendy a koncepčními vozy.</span>
+        </div>
+      </div>
+
+      <!-- Audi Q7 E-TRON 2017 -->
+      <div class="video-card" data-tags="audi,q7,e-tron,hybrid,plug-in,luxury,suv,test,recenze,2017" onclick="openModal(this)">
+        <div class="video-thumbnail">
+          <img src="https://img.youtube.com/vi/n4ewH8bUNFM/maxresdefault.jpg" alt="Audi Q7 E-TRON Test">
+          <div class="play-overlay">
+                  <!-- VIDEA Z ROKU 2017 -->
+
+      <!-- Mazda CX-5 2017 -->
+      <div class="video-card" data-tags="mazda,cx-5,suv,test,recenze,2017" onclick="openModal(this)">
+        <div class="video-thumbnail">
+          <img src="https://img.youtube.com/vi/VLjTj3IaFxU/maxresdefault.jpg" alt="Mazda CX-5 Test">
+          <div class="play-overlay">
+            <i class="fas fa-play"></i>
+          </div>
+          <div class="platform-badge youtube">YOUTUBE</div>
+        </div>
+        <div class="video-info">
+          <h3 class="video-title">Mazda CX-5 2017</h3>
+          <p class="video-description">Test nové generace Mazda CX-5. Jak pokračuje úspěšný japonský crossover?</p>
+          <div class="video-tags">
+            <span class="video-tag">mazda</span>
+            <span class="video-tag">cx-5</span>
+            <span class="video-tag">suv</span>
+            <span class="video-tag">test</span>
+            <span class="video-tag">recenze</span>
+            <span class="video-tag">2017</span>
+          </div>
+          <div class="video-meta">
+            <span>22. listopadu 2017</span>
+            <span><i class="fab fa-youtube"></i></span>
+          </div>
+        </div>
+        <div class="video-data" style="display: none;">
+          <span class="video-url">https://www.youtube.com/watch?v=VLjTj3IaFxU</span>
+          <span class="video-platform">youtube</span>
+          <span class="video-date">2017-11-22</span>
+          <span class="video-full-description">Test nové generace Mazda CX-5. Testujeme jízdní vlastnosti, komfort a design. Jak pokračuje úspěšný japonský crossover?</span>
+        </div>
+      </div>
+
+      <!-- Škoda Karoq 2017 -->
+      <div class="video-card" data-tags="škoda,karoq,suv,test,recenze,2017" onclick="openModal(this)">
+        <div class="video-thumbnail">
+          <img src="https://img.youtube.com/vi/Yv6HbBstsCc/maxresdefault.jpg" alt="Škoda Karoq Test">
+          <div class="play-overlay">
+            <i class="fas fa-play"></i>
+          </div>
+          <div class="platform-badge youtube">YOUTUBE</div>
+        </div>
+        <div class="video-info">
+          <h3 class="video-title">Škoda Karoq 2017</h3>
+          <p class="video-description">Test nového kompaktního SUV Škoda Karoq. Nástupce úspěšného modelu Yeti.</p>
+          <div class="video-tags">
+            <span class="video-tag">škoda</span>
+            <span class="video-tag">karoq</span>
+            <span class="video-tag">suv</span>
+            <span class="video-tag">test</span>
+            <span class="video-tag">recenze</span>
+            <span class="video-tag">2017</span>
+          </div>
+          <div class="video-meta">
+            <span>18. října 2017</span>
+            <span><i class="fab fa-youtube"></i></span>
+          </div>
+        </div>
+        <div class="video-data" style="display: none;">
+          <span class="video-url">https://youtu.be/Yv6HbBstsCc</span>
+          <span class="video-platform">youtube</span>
+          <span class="video-date">2017-10-18</span>
+          <span class="video-full-description">Test nového kompaktního SUV Škoda Karoq. Nástupce úspěšného modelu Yeti. Testujeme praktičnost, jízdní vlastnosti a technologie.</span>
+        </div>
+      </div>
+
+      <!-- Opel Insignia 2017 -->
+      <div class="video-card" data-tags="opel,insignia,sedan,test,recenze,2017" onclick="openModal(this)">
+        <div class="video-thumbnail">
+          <img src="https://img.youtube.com/vi/hLRWVx9ZdAU/maxresdefault.jpg" alt="Opel Insignia Test">
+          <div class="play-overlay">
+            <i class="fas fa-play"></i>
+          </div>
+          <div class="platform-badge youtube">YOUTUBE</div>
+        </div>
+        <div class="video-info">
+          <h3 class="video-title">Opel Insignia 2017</h3>
+          <p class="video-description">Test nové generace Opel Insignia. Elegantní sedan ve sportovním kabátu.</p>
+          <div class="video-tags">
+            <span class="video-tag">opel</span>
+            <span class="video-tag">insignia</span>
+            <span class="video-tag">sedan</span>
+            <span class="video-tag">test</span>
+            <span class="video-tag">recenze</span>
+            <span class="video-tag">2017</span>
+          </div>
+          <div class="video-meta">
+            <span>13. září 2017</span>
+            <span><i class="fab fa-youtube"></i></span>
+          </div>
+        </div>
+        <div class="video-data" style="display: none;">
+          <span class="video-url">https://youtu.be/hLRWVx9ZdAU</span>
+          <span class="video-platform">youtube</span>
+          <span class="video-date">2017-09-13</span>
+          <span class="video-full-description">Test nové generace Opel Insignia. Testujeme eleganci, komfort a jízdní vlastnosti. Elegantní sedan ve sportovním kabátu.</span>
+        </div>
+      </div>
+
+      <!-- Autosalon Frankfurt 2017 -->
+      <div class="video-card" data-tags="autosalon,frankfurt,novinky,test,reportáž,2017" onclick="openModal(this)">
+        <div class="video-thumbnail">
+          <img src="https://img.youtube.com/vi/KV8BVp1PWnkjLuQI/maxresdefault.jpg" alt="Autosalon Frankfurt 2017">
+          <div class="play-overlay">
+            <i class="fas fa-play"></i>
+          </div>
+          <div class="platform-badge youtube">YOUTUBE</div>
+        </div>
+        <div class="video-info">
+          <h3 class="video-title">Autosalon Frankfurt 2017</h3>
+          <p class="video-description">Reportáže z Autosalonu Frankfurt 2017. Nejnovější trendy a technologie v automotivním průmyslu.</p>
+          <div class="video-tags">
+            <span class="video-tag">autosalon</span>
+            <span class="video-tag">frankfurt</span>
+            <span class="video-tag">novinky</span>
+            <span class="video-tag">test</span>
+            <span class="video-tag">reportáž</span>
+            <span class="video-tag">2017</span>
+          </div>
+          <div class="video-meta">
+            <span>1. září 2017</span>
+            <span><i class="fab fa-youtube"></i></span>
+          </div>
+        </div>
+        <div class="video-data" style="display: none;">
+          <span class="video-url">https://youtube.com/playlist?list=PLOVkY_GpJRo0h4HvibUtzXLYdfgY5CmTz</span>
+          <span class="video-platform">youtube</span>
+          <span class="video-date">2017-09-01</span>
+          <span class="video-full-description">Reportáže z Autosalonu Frankfurt 2017. Série videí z největšího německého autosalonu s nejnovějšími trendy a technologiemi v automotivním průmyslu.</span>
+        </div>
+      </div>
+
+      <!-- Audi Q5 TDI 2017 -->
+      <div class="video-card" data-tags="audi,q5,tdi,suv,luxury,test,recenze,2017" onclick="openModal(this)">
+        <div class="video-thumbnail">
+          <img src="https://img.youtube.com/vi/7BNg4LfkQ1g/maxresdefault.jpg" alt="Audi Q5 TDI Test">
+          <div class="play-overlay">
+            <i class="fas fa-play"></i>
+          </div>
+          <div class="platform-badge youtube">YOUTUBE</div>
+        </div>
+        <div class="video-info">
+          <h3 class="video-title">Audi Q5 TDI 2017</h3>
+          <p class="video-description">Test nové generace Audi Q5 s dieselovým motorem. Luxus a efektivita v jednom.</p>
+          <div class="video-tags">
+            <span class="video-tag">audi</span>
+            <span class="video-tag">q5</span>
+            <span class="video-tag">tdi</span>
+            <span class="video-tag">suv</span>
+            <span class="video-tag">luxury</span>
+            <span class="video-tag">test</span>
+            <span class="video-tag">recenze</span>
+          </div>
+          <div class="video-meta">
+            <span>20. května 2017</span>
+            <span><i class="fab fa-youtube"></i></span>
+          </div>
+        </div>
+        <div class="video-data" style="display: none;">
+          <span class="video-url">https://www.youtube.com/watch?v=7BNg4LfkQ1g</span>
+          <span class="video-platform">youtube</span>
+          <span class="video-date">2017-05-20</span>
+          <span class="video-full-description">Test nové generace Audi Q5 s dieselovým motorem. Testujeme luxusní výbavu, jízdní komfort a spotřebu. Luxus a efektivita v jednom.</span>
+        </div>
+      </div>
+
+      <!-- Škoda Fabia a konkurenti - největší porovnání 2017 -->
+      <div class="video-card" data-tags="škoda,fabia,porovnání,test,recenze,hatchback,2017" onclick="openModal(this)">
+        <div class="video-thumbnail">
+          <img src="https://img.youtube.com/vi/rkmLRtb1qFI/maxresdefault.jpg" alt="Škoda Fabia porovnání">
+          <div class="play-overlay">
+            <i class="fas fa-play"></i>
+          </div>
+          <div class="platform-badge youtube">YOUTUBE</div>
+        </div>
+        <div class="video-info">
+          <h3 class="video-title">Škoda Fabia a konkurenti - největší porovnání v ČR</h3>
+          <p class="video-description">Velký srovnávací test Škoda Fabia proti hlavním konkurentům. Kdo vyhraje?</p>
+          <div class="video-tags">
+            <span class="video-tag">škoda</span>
+            <span class="video-tag">fabia</span>
+            <span class="video-tag">porovnání</span>
+            <span class="video-tag">test</span>
+            <span class="video-tag">recenze</span>
+            <span class="video-tag">hatchback</span>
+            <span class="video-tag">2017</span>
+          </div>
+          <div class="video-meta">
+            <span>1. května 2017</span>
+            <span><i class="fab fa-youtube"></i></span>
+          </div>
+        </div>
+        <div class="video-data" style="display: none;">
+          <span class="video-url">https://www.youtube.com/watch?v=rkmLRtb1qFI</span>
+          <span class="video-platform">youtube</span>
+          <span class="video-date">2017-05-01</span>
+          <span class="video-full-description">Velký srovnávací test Škoda Fabia proti hlavním konkurentům v segmentu malých vozů. Testujeme praktičnost, spotřebu, cenu a kvalitu. Kdo vyhraje?</span>
+        </div>
+      </div>
+
+      <!-- Toyota C-HR 2017 -->
+      <div class="video-card" data-tags="toyota,c-hr,crossover,hybrid,test,recenze,2017" onclick="openModal(this)">
+        <div class="video-thumbnail">
+          <img src="https://img.youtube.com/vi/816GizCL3sg/maxresdefault.jpg" alt="Toyota C-HR Test">
+          <div class="play-overlay">
+            <i class="fas fa-play"></i>
+          </div>
+          <div class="platform-badge youtube">YOUTUBE</div>
+        </div>
+        <div class="video-info">
+          <h3 class="video-title">Toyota C-HR 2017</h3>
+          <p class="video-description">Test futuristického crossoveru Toyota C-HR. Odvážný design a hybridní technologie.</p>
+          <div class="video-tags">
+            <span class="video-tag">toyota</span>
+            <span class="video-tag">c-hr</span>
+            <span class="video-tag">crossover</span>
+            <span class="video-tag">hybrid</span>
+            <span class="video-tag">test</span>
+            <span class="video-tag">recenze</span>
+            <span class="video-tag">2017</span>
+          </div>
+          <div class="video-meta">
+            <span>25. dubna 2017</span>
+            <span><i class="fab fa-youtube"></i></span>
+          </div>
+        </div>
+        <div class="video-data" style="display: none;">
+          <span class="video-url">https://www.youtube.com/watch?v=816GizCL3sg</span>
+          <span class="video-platform">youtube</span>
+          <span class="video-date">2017-04-25</span>
+          <span class="video-full-description">Test futuristického crossoveru Toyota C-HR. Testujeme odvážný design, hybridní pohon a jízdní vlastnosti. Odvážný design a hybridní technologie.</span>
+        </div>
+      </div>
+
+      <!-- Peugeot 3008 2.0 HDi 2017 -->
+      <div class="video-card" data-tags="peugeot,3008,suv,test,recenze,2017" onclick="openModal(this)">
+        <div class="video-thumbnail">
+          <img src="https://img.youtube.com/vi/5w5EKAXT9R0/maxresdefault.jpg" alt="Peugeot 3008 Test">
+          <div class="play-overlay">
+            <i class="fas fa-play"></i>
+          </div>
+          <div class="platform-badge youtube">YOUTUBE</div>
+        </div>
+        <div class="video-info">
+          <h3 class="video-title">Peugeot 3008 2.0 HDi 2017</h3>
+          <p class="video-description">Test nové generace Peugeot 3008. Z MPV se stalo SUV - jak si vede?</p>
+          <div class="video-tags">
+            <span class="video-tag">peugeot</span>
+            <span class="video-tag">3008</span>
+            <span class="video-tag">suv</span>
+            <span class="video-tag">test</span>
+            <span class="video-tag">recenze</span>
+            <span class="video-tag">2017</span>
+          </div>
+          <div class="video-meta">
+            <span>1. dubna 2017</span>
+            <span><i class="fab fa-youtube"></i></span>
+          </div>
+        </div>
+        <div class="video-data" style="display: none;">
+          <span class="video-url">https://www.youtube.com/watch?v=5w5EKAXT9R0</span>
+          <span class="video-platform">youtube</span>
+          <span class="video-date">2017-04-01</span>
+          <span class="video-full-description">Test nové generace Peugeot 3008. Z MPV se stalo SUV - testujeme změny v designu, komfortu a jízdních vlastnostech. Jak si vede?</span>
+        </div>
+      </div>
+
+      <!-- Audi Q2 2.0 TDI QUATTRO 2017 -->
+      <div class="video-card" data-tags="audi,q2,tdi,quattro,crossover,luxury,test,recenze,2017" onclick="openModal(this)">
+        <div class="video-thumbnail">
+          <img src="https://img.youtube.com/vi/2PFoEbjW2m0/maxresdefault.jpg" alt="Audi Q2 Test">
+          <div class="play-overlay">
+            <i class="fas fa-play"></i>
+          </div>
+          <div class="platform-badge youtube">YOUTUBE</div>
+        </div>
+        <div class="video-info">
+          <h3 class="video-title">Audi Q2 2.0 TDI QUATTRO 2017</h3>
+          <p class="video-description">Test nejmenšího SUV od Audi. Q2 s pohonem všech kol a dieselovým motorem.</p>
+          <div class="video-tags">
+            <span class="video-tag">audi</span>
+            <span class="video-tag">q2</span>
+            <span class="video-tag">tdi</span>
+            <span class="video-tag">quattro</span>
+            <span class="video-tag">crossover</span>
+            <span class="video-tag">luxury</span>
+            <span class="video-tag">test</span>
+          </div>
+          <div class="video-meta">
+            <span>27. března 2017</span>
+            <span><i class="fab fa-youtube"></i></span>
+          </div>
+        </div>
+        <div class="video-data" style="display: none;">
+          <span class="video-url">https://youtu.be/2PFoEbjW2m0</span>
+          <span class="video-platform">youtube</span>
+          <span class="video-date">2017-03-27</span>
+          <span class="video-full-description">Test nejmenšího SUV od Audi. Q2 s pohonem všech kol a dieselovým motorem. Testujeme jízdní vlastnosti, luxus v malém balení a praktičnost.</span>
+        </div>
+      </div>
+
+      <!-- Hyundai i30 2017 -->
+      <div class="video-card" data-tags="hyundai,i30,hatchback,test,recenze,2017" onclick="openModal(this)">
+        <div class="video-thumbnail">
+          <img src="https://img.youtube.com/vi/Vz53VJGpklw/maxresdefault.jpg" alt="Hyundai i30 Test">
+          <div class="play-overlay">
+            <i class="fas fa-play"></i>
+          </div>
+          <div class="platform-badge youtube">YOUTUBE</div>
+        </div>
+        <div class="video-info">
+          <h3 class="video-title">Hyundai i30 2017</h3>
+          <p class="video-description">Test nové generace Hyundai i30. Jak si vede proti evropské konkurenci?</p>
+          <div class="video-tags">
+            <span class="video-tag">hyundai</span>
+            <span class="video-tag">i30</span>
+            <span class="video-tag">hatchback</span>
+            <span class="video-tag">test</span>
+            <span class="video-tag">recenze</span>
+            <span class="video-tag">2017</span>
+          </div>
+          <div class="video-meta">
+            <span>14. března 2017</span>
+            <span><i class="fab fa-youtube"></i></span>
+          </div>
+        </div>
+        <div class="video-data" style="display: none;">
+          <span class="video-url">https://youtu.be/Vz53VJGpklw</span>
+          <span class="video-platform">youtube</span>
+          <span class="video-date">2017-03-14</span>
+          <span class="video-full-description">Test nové generace Hyundai i30. Testujeme kvalitu, komfort a jízdní vlastnosti. Jak si vede proti evropské konkurenci?</span>
+        </div>
+      </div>
+
+<!-- VIDEA Z ROKU 2015 -->
+
+      <!-- Mitsubishi Outlander 2015 -->
+      <div class="video-card" data-tags="mitsubishi,outlander,suv,test,recenze,2015" onclick="openModal(this)">
+        <div class="video-thumbnail">
+          <img src="https://img.youtube.com/vi/BjY6JpeIbi8/maxresdefault.jpg" alt="Mitsubishi Outlander Test">
+          <div class="play-overlay">
+            <i class="fas fa-play"></i>
+          </div>
+          <div class="platform-badge youtube">YOUTUBE</div>
+        </div>
+        <div class="video-info">
+          <h3 class="video-title">Mitsubishi Outlander 2015</h3>
+          <p class="video-description">Test prostorného SUV Mitsubishi Outlander. Sedm míst pro celou rodinu.</p>
+          <div class="video-tags">
+            <span class="video-tag">mitsubishi</span>
+            <span class="video-tag">outlander</span>
+            <span class="video-tag">suv</span>
+            <span class="video-tag">test</span>
+            <span class="video-tag">recenze</span>
+            <span class="video-tag">2015</span>
+          </div>
+          <div class="video-meta">
+            <span>14. prosince 2015</span>
+            <span><i class="fab fa-youtube"></i></span>
+          </div>
+        </div>
+        <div class="video-data" style="display: none;">
+          <span class="video-url">https://youtu.be/BjY6JpeIbi8</span>
+          <span class="video-platform">youtube</span>
+          <span class="video-date">2015-12-14</span>
+          <span class="video-full-description">Test prostorného SUV Mitsubishi Outlander. Testujeme prostornost, praktičnost a jízdní vlastnosti. Sedm míst pro celou rodinu.</span>
+        </div>
+      </div>
+
+      <!-- SEAT Leon Cupra ST 2015 -->
+      <div class="video-card" data-tags="seat,leon,cupra,st,kombi,sports,test,recenze,2015" onclick="openModal(this)">
+        <div class="video-thumbnail">
+          <img src="https://img.youtube.com/vi/w4x7Sjc1-GM/maxresdefault.jpg" alt="SEAT Leon Cupra ST Test">
+          <div class="play-overlay">
+            <i class="fas fa-play"></i>
+          </div>
+          <div class="platform-badge youtube">YOUTUBE</div>
+        </div>
+        <div class="video-info">
+          <h3 class="video-title">SEAT Leon Cupra ST 2015</h3>
+          <p class="video-description">Test sportovního kombi SEAT Leon Cupra ST. Praktičnost a výkon v jednom balení.</p>
+          <div class="video-tags">
+            <span class="video-tag">seat</span>
+            <span class="video-tag">leon</span>
+            <span class="video-tag">cupra</span>
+            <span class="video-tag">st</span>
+            <span class="video-tag">kombi</span>
+            <span class="video-tag">sports</span>
+            <span class="video-tag">test</span>
+          </div>
+          <div class="video-meta">
+            <span>14. září 2015</span>
+            <span><i class="fab fa-youtube"></i></span>
+          </div>
+        </div>
+        <div class="video-data" style="display: none;">
+          <span class="video-url">https://www.youtube.com/watch?v=w4x7Sjc1-GM</span>
+          <span class="video-platform">youtube</span>
+          <span class="video-date">2015-09-14</span>
+          <span class="video-full-description">Test sportovního kombi SEAT Leon Cupra ST. Testujeme výkon, jízdní vlastnosti a praktičnost. Praktičnost a výkon v jednom balení.</span>
+        </div>
+      </div>
+
+      <!-- Vlastní reklama na Seat Leon X-Perience 2015 -->
+      <div class="video-card" data-tags="seat,leon,x-perience,reklama,crossover,test,2015" onclick="openModal(this)">
+        <div class="video-thumbnail">
+          <img src="https://img.youtube.com/vi/s3e0xn62OL4/maxresdefault.jpg" alt="Seat Leon X-Perience reklama">
+          <div class="play-overlay">
+            <i class="fas fa-play"></i>
+          </div>
+          <div class="platform-badge youtube">YOUTUBE</div>
+        </div>
+        <div class="video-info">
+          <h3 class="video-title">Vlastní reklama na Seat Leon X-Perience 2015</h3>
+          <p class="video-description">Kreativní reklama na Seat Leon X-Perience. Netradiční pohled na crossover.</p>
+          <div class="video-tags">
+            <span class="video-tag">seat</span>
+            <span class="video-tag">leon</span>
+            <span class="video-tag">x-perience</span>
+            <span class="video-tag">reklama</span>
+            <span class="video-tag">crossover</span>
+            <span class="video-tag">test</span>
+            <span class="video-tag">2015</span>
+          </div>
+          <div class="video-meta">
+            <span>8. července 2015</span>
+            <span><i class="fab fa-youtube"></i></span>
+          </div>
+        </div>
+        <div class="video-data" style="display: none;">
+          <span class="video-url">https://www.youtube.com/watch?v=s3e0xn62OL4</span>
+          <span class="video-platform">youtube</span>
+          <span class="video-date">2015-07-08</span>
+          <span class="video-full-description">Kreativní vlastní reklama na Seat Leon X-Perience. Netradiční a zábavný pohled na crossover od Seatu.</span>
+        </div>
+      </div>
+
+      <!-- Citroën DS3 a porovnání Hyundai i10 vs VW Cross UP! 2015 -->
+      <div class="video-card" data-tags="citroën,ds3,hyundai,i10,volkswagen,cross up,porovnání,test,2015" onclick="openModal(this)">
+        <div class="video-thumbnail">
+          <img src="https://img.youtube.com/vi/ZU5rGWzxNqA/maxresdefault.jpg" alt="DS3 a porovnání malých vozů">
+          <div class="play-overlay">
+            <i class="fas fa-play"></i>
+          </div>
+          <div class="platform-badge youtube">YOUTUBE</div>
+        </div>
+        <div class="video-info">
+          <h3 class="video-title">Citroën DS3 a porovnání Hyundai i10 vs VW Cross UP! 2015</h3>
+          <p class="video-description">Test Citroën DS3 a srovnání malých vozů. Které je nejlepší pro město?</p>
+          <div class="video-tags">
+            <span class="video-tag">citroën</span>
+            <span class="video-tag">ds3</span>
+            <span class="video-tag">hyundai</span>
+            <span class="video-tag">i10</span>
+            <span class="video-tag">volkswagen</span>
+            <span class="video-tag">cross up</span>
+            <span class="video-tag">porovnání</span>
+          </div>
+          <div class="video-meta">
+            <span>25. června 2015</span>
+            <span><i class="fab fa-youtube"></i></span>
+          </div>
+        </div>
+        <div class="video-data" style="display: none;">
+          <span class="video-url">https://www.youtube.com/watch?v=ZU5rGWzxNqA</span>
+          <span class="video-platform">youtube</span>
+          <span class="video-date">2015-06-25</span>
+          <span class="video-full-description">Test Citroën DS3 a srovnání malých vozů Hyundai i10 vs VW Cross UP!. Testujeme praktičnost, spotřebu a cenu. Které je nejlepší pro město?</span>
+        </div>
+      </div>
+
+      <!-- Ojetina vs nové auto. Mercedes-Benz CL vs Hyundai Genesis 2015 -->
+      <div class="video-card" data-tags="mercedes,cl,hyundai,genesis,ojetina,nové auto,porovnání,luxury,2015" onclick="openModal(this)">
+        <div class="video-thumbnail">
+          <img src="https://img.youtube.com/vi/jDwjphR0y7U/maxresdefault.jpg" alt="Mercedes CL vs Hyundai Genesis">
+          <div class="play-overlay">
+            <i class="fas fa-play"></i>
+          </div>
+          <div class="platform-badge youtube">YOUTUBE</div>
+        </div>
+        <div class="video-info">
+          <h3 class="video-title">Ojetina vs nové auto. Mercedes-Benz CL vs Hyundai Genesis 2015</h3>
+          <p class="video-description">Zajímavé porovnání ojetin vs nových aut. Co nabídne více luxusu za stejnou cenu?</p>
+          <div class="video-tags">
+            <span class="video-tag">mercedes</span>
+            <span class="video-tag">cl</span>
+            <span class="video-tag">hyundai</span>
+            <span class="video-tag">genesis</span>
+            <span class="video-tag">ojetina</span>
+            <span class="video-tag">nové auto</span>
+            <span class="video-tag">porovnání</span>
+          </div>
+          <div class="video-meta">
+            <span>14. dubna 2015</span>
+            <span><i class="fab fa-youtube"></i></span>
+          </div>
+        </div>
+        <div class="video-data" style="display: none;">
+          <span class="video-url">https://www.youtube.com/watch?v=jDwjphR0y7U</span>
+          <span class="video-platform">youtube</span>
+          <span class="video-date">2015-04-14</span>
+          <span class="video-full-description">Zajímavé porovnání ojetin vs nových aut. Mercedes-Benz CL jako ojetina vs nový Hyundai Genesis. Co nabídne více luxusu za stejnou cenu?</span>
+        </div>
+      </div>
+
+      <!-- Autosalon Ženeva 2015 -->
+      <div class="video-card" data-tags="autosalon,ženeva,novinky,test,reportáž,2015" onclick="openModal(this)">
+        <div class="video-thumbnail">
+          <img src="https://img.youtube.com/vi/-i3LfhnX1kbegrHs/maxresdefault.jpg" alt="Autosalon Ženeva 2015">
+          <div class="play-overlay">
+            <i class="fas fa-play"></i>
+          </div>
+          <div class="platform-badge youtube">YOUTUBE</div>
+        </div>
+        <div class="video-info">
+          <h3 class="video-title">Autosalon Ženeva 2015</h3>
+          <p class="video-description">Reportáže z Autosalonu Ženeva 2015. Nejnovější trendy a automobilové novinky.</p>
+          <div class="video-tags">
+            <span class="video-tag">autosalon</span>
+            <span class="video-tag">ženeva</span>
+            <span class="video-tag">novinky</span>
+            <span class="video-tag">test</span>
+            <span class="video-tag">reportáž</span>
+            <span class="video-tag">2015</span>
+          </div>
+          <div class="video-meta">
+            <span>8. března 2015</span>
+            <span><i class="fab fa-youtube"></i></span>
+          </div>
+        </div>
+        <div class="video-data" style="display: none;">
+          <span class="video-url">https://youtube.com/playlist?list=PLOVkY_GpJRo3QPw4FDCVKPNEQSpYHFHXm</span>
+          <span class="video-platform">youtube</span>
+          <span class="video-date">2015-03-08</span>
+          <span class="video-full-description">Reportáže z Autosalonu Ženeva 2015. Série videí z prestižního švýcarského autosalonu s nejnovějšími trendy a automobilovými novinkami.</span>
+        </div>
+      </div>
+
+      <!-- VIDEA Z ROKU 2014 -->
+
+      <!-- Mercedes-Benz ML 2014 -->
+      <div class="video-card" data-tags="mercedes,ml,suv,luxury,test,recenze,2014" onclick="openModal(this)">
+        <div class="video-thumbnail">
+          <img src="https://img.youtube.com/vi/t7g9Z-FjtLg/maxresdefault.jpg" alt="Mercedes ML Test">
+          <div class="play-overlay">
+            <i class="fas fa-play"></i>
+          </div>
+          <div class="platform-badge youtube">YOUTUBE</div>
+        </div>
+        <div class="video-info">
+          <h3 class="video-title">Mercedes-Benz ML 2014</h3>
+          <p class="video-description">Test luxusního SUV Mercedes-Benz ML. Německá preciznost v terénním balení.</p>
+          <div class="video-tags">
+            <span class="video-tag">mercedes</span>
+            <span class="video-tag">ml</span>
+            <span class="video-tag">suv</span>
+            <span class="video-tag">luxury</span>
+            <span class="video-tag">test</span>
+            <span class="video-tag">recenze</span>
+            <span class="video-tag">2014</span>
+          </div>
+          <div class="video-meta">
+            <span>1. listopadu 2014</span>
+            <span><i class="fab fa-youtube"></i></span>
+          </div>
+        </div>
+        <div class="video-data" style="display: none;">
+          <span class="video-url">https://www.youtube.com/watch?v=t7g9Z-FjtLg</span>
+          <span class="video-platform">youtube</span>
+          <span class="video-date">2014-11-01</span>
+          <span class="video-full-description">Test luxusního SUV Mercedes-Benz ML. Testujeme komfort, výkon a terénní schopnosti. Německá preciznost v terénním balení.</span>
+        </div>
+      </div>
+
+      <!-- Autosalon Paříž 2014 -->
+      <div class="video-card" data-tags="autosalon,paříž,novinky,test,reportáž,2014" onclick="openModal(this)">
+        <div class="video-thumbnail">
+          <img src="https://img.youtube.com/vi/qInbOk4MHRo/maxresdefault.jpg" alt="Autosalon Paříž 2014">
+          <div class="play-overlay">
+            <i class="fas fa-play"></i>
+          </div>
+          <div class="platform-badge youtube">YOUTUBE</div>
+        </div>
+        <div class="video-info">
+          <h3 class="video-title">Autosalon Paříž 2014</h3>
+          <p class="video-description">Reportáže z Autosalonu Paříž 2014. Francouzský styl a automobilové novinky.</p>
+          <div class="video-tags">
+            <span class="video-tag">autosalon</span>
+            <span class="video-tag">paříž</span>
+            <span class="video-tag">novinky</span>
+            <span class="video-tag">test</span>
+            <span class="video-tag">reportáž</span>
+            <span class="video-tag">2014</span>
+          </div>
+          <div class="video-meta">
+            <span>7. října 2014</span>
+            <span><i class="fab fa-youtube"></i></span>
+          </div>
+        </div>
+        <div class="video-data" style="display: none;">
+          <span class="video-url">https://www.youtube.com/watch?v=qInbOk4MHRo</span>
+          <span class="video-platform">youtube</span>
+          <span class="video-date">2014-10-07</span>
+          <span class="video-full-description">Reportáže z Autosalonu Paříž 2014. Přehled nejnovějších francouzských a světových automobilových novinek ve francouzském stylu.</span>
+        </div>
+      </div>
+
+      <!-- Peugeot 308 a Subaru BRZ v pořadu Autoperiskop 2014 -->
+      <div class="video-card" data-tags="peugeot,308,subaru,brz,autoperiskop,test,pořad,2014" onclick="openModal(this)">
+        <div class="video-thumbnail">
+          <img src="https://img.youtube.com/vi/kqr5q0FgDhM/maxresdefault.jpg" alt="Autoperiskop Peugeot 308 Subaru BRZ">
+          <div class="play-overlay">
+            <i class="fas fa-play"></i>
+          </div>
+          <div class="platform-badge youtube">YOUTUBE</div>
+        </div>
+        <div class="video-info">
+          <h3 class="video-title">Peugeot 308 a Subaru BRZ v pořadu Autoperiskop 2014</h3>
+          <p class="video-description">Speciální díl pořadu Autoperiskop s testy Peugeot 308 a Subaru BRZ.</p>
+          <div class="video-tags">
+            <span class="video-tag">peugeot</span>
+            <span class="video-tag">308</span>
+            <span class="video-tag">subaru</span>
+            <span class="video-tag">brz</span>
+            <span class="video-tag">autoperiskop</span>
+            <span class="video-tag">test</span>
+            <span class="video-tag">pořad</span>
+          </div>
+          <div class="video-meta">
+            <span>2. října 2014</span>
+            <span><i class="fab fa-youtube"></i></span>
+          </div>
+        </div>
+        <div class="video-data" style="display: none;">
+          <span class="video-url">https://youtu.be/kqr5q0FgDhM</span>
+          <span class="video-platform">youtube</span>
+          <span class="video-date">2014-10-02</span>
+          <span class="video-full-description">Speciální díl pořadu Autoperiskop s detailními testy Peugeot 308 a sportovního Subaru BRZ. Dva rozdílné přístupy k automobilové filozofii.</span>
+        </div>
+      </div>
+
+      <!-- Škoda Rapid 1.2 2014 -->
+      <div class="video-card" data-tags="škoda,rapid,sedan,test,recenze,2014" onclick="openModal(this)">
+        <div class="video-thumbnail">
+          <img src="https://img.youtube.com/vi/YlMDrswT7NA/maxresdefault.jpg" alt="Škoda Rapid Test 2014">
+          <div class="play-overlay">
+            <i class="fas fa-play"></i>
+          </div>
+          <div class="platform-badge youtube">YOUTUBE</div>
+        </div>
+        <div class="video-info">
+          <h3 class="video-title">Škoda Rapid 1.2 2014</h3>
+          <p class="video-description">Test kompaktního sedanu Škoda Rapid s atmosférickým motorem 1.2.</p>
+          <div class="video-tags">
+            <span class="video-tag">škoda</span>
+            <span class="video-tag">rapid</span>
+            <span class="video-tag">sedan</span>
+            <span class="video-tag">test</span>
+            <span class="video-tag">recenze</span>
+            <span class="video-tag">2014</span>
+          </div>
+          <div class="video-meta">
+            <span>14. června 2014</span>
+            <span><i class="fab fa-youtube"></i></span>
+          </div>
+        </div>
+        <div class="video-data" style="display: none;">
+          <span class="video-url">https://www.youtube.com/watch?v=YlMDrswT7NA</span>
+          <span class="video-platform">youtube</span>
+          <span class="video-date">2014-06-14</span>
+          <span class="video-full-description">Test kompaktního sedanu Škoda Rapid s atmosférickým motorem 1.2. Testujeme praktičnost, spotřebu a poměr ceny a výkonu.</span>
+        </div>
+      </div>
+
+      <!-- Opel Astra 2015 -->
+      <div class="video-card" data-tags="opel,astra,hatchback,test,recenze,2015" onclick="openModal(this)">
+        <div class="video-thumbnail">
+          <img src="https://img.youtube.com/vi/YwsEvmdQWQ4/maxresdefault.jpg" alt="Opel Astra Test">
+          <div class="play-overlay">
+            <i class="fas fa-play"></i>
+          </div>
+          <div class="platform-badge youtube">YOUTUBE</div>
+        </div>
+        <div class="video-info">
+          <h3 class="video-title">Opel Astra 2015</h3>
+          <p class="video-description">Test nové generace Opel Astra. Německá kvalita v dostupnější ceně.</p>
+          <div class="video-tags">
+            <span class="video-tag">opel</span>
+            <span class="video-tag">astra</span>
+            <span class="video-tag">hatchback</span>
+            <span class="video-tag">test</span>
+            <span class="video-tag">recenze</span>
+            <span class="video-tag">2015</span>
+          </div>
+          <div class="video-meta">
+            <span>14. prosince 2015</span>
+            <span><i class="fab fa-youtube"></i></span>
+          </div>
+        </div>
+        <div class="video-data" style="display: none;">
+          <span class="video-url">https://youtu.be/YwsEvmdQWQ4</span>
+          <span class="video-platform">youtube</span>
+          <span class="video-date">2015-12-14</span>
+          <span class="video-full-description">Test nové generace Opel Astra. Testujeme kvalitu, komfort a jízdní vlastnosti. Německá kvalita v dostupnější ceně.</span>
+        </div>
+      </div>
+
+      <!-- Audi Museum Mobile Ingolstadt 2015 -->
+      <div class="video-card" data-tags="audi,museum,ingolstadt,reportáž,historie,2015" onclick="openModal(this)">
+        <div class="video-thumbnail">
+          <img src="https://img.youtube.com/vi/40HN0WZwaxM/maxresdefault.jpg" alt="Audi Museum">
+          <div class="play-overlay">
+            <i class="fas fa-play"></i>
+          </div>
+          <div class="platform-badge youtube">YOUTUBE</div>
+        </div>
+        <div class="video-info">
+          <h3 class="video-title">Audi Museum Mobile Ingolstadt 2015</h3>
+          <p class="video-description">Reportáž z muzea Audi v Ingolstadtu. Historie čtyř kruhů od počátku.</p>
+          <div class="video-tags">
+            <span class="video-tag">audi</span>
+            <span class="video-tag">museum</span>
+            <span class="video-tag">ingolstadt</span>
+            <span class="video-tag">reportáž</span>
+            <span class="video-tag">historie</span>
+            <span class="video-tag">2015</span>
+          </div>
+          <div class="video-meta">
+            <span>28. listopadu 2015</span>
+            <span><i class="fab fa-youtube"></i></span>
+          </div>
+        </div>
+        <div class="video-data" style="display: none;">
+          <span class="video-url">https://www.youtube.com/watch?v=40HN0WZwaxM</span>
+          <span class="video-platform">youtube</span>
+          <span class="video-date">2015-11-28</span>
+          <span class="video-full-description">Reportáž z muzea Audi v Ingolstadtu. Prohlídka historie značky s čtyřmi kruhy od samého počátku až po současnost.</span>
+        </div>
+      </div>
+
+      <!-- Audi Q7 3.0 TDI V6 2015 -->
+      <div class="video-card" data-tags="audi,q7,tdi,v6,suv,luxury,test,recenze,2015" onclick="openModal(this)">
+        <div class="video-thumbnail">
+          <img src="https://img.youtube.com/vi/g63_uAw36DU/maxresdefault.jpg" alt="Audi Q7 Test">
+          <div class="play-overlay">
+            <i class="fas fa-play"></i>
+          </div>
+          <div class="platform-badge youtube">YOUTUBE</div>
+        </div>
+        <div class="video-info">
+          <h3 class="video-title">Audi Q7 3.0 TDI V6 2015</h3>
+          <p class="video-description">Test nové generace Audi Q7. Luxusní SUV s dieselovým V6 motorem.</p>
+          <div class="video-tags">
+            <span class="video-tag">audi</span>
+            <span class="video-tag">q7</span>
+            <span class="video-tag">tdi</span>
+            <span class="video-tag">v6</span>
+            <span class="video-tag">suv</span>
+            <span class="video-tag">luxury</span>
+            <span class="video-tag">test</span>
+          </div>
+          <div class="video-meta">
+            <span>21. října 2015</span>
+            <span><i class="fab fa-youtube"></i></span>
+          </div>
+        </div>
+        <div class="video-data" style="display: none;">
+          <span class="video-url">https://www.youtube.com/watch?v=g63_uAw36DU</span>
+          <span class="video-platform">youtube</span>
+          <span class="video-date">2015-10-21</span>
+          <span class="video-full-description">Test nové generace Audi Q7. Testujeme luxusní výbavu, výkon dieselového V6 motoru a jízdní vlastnosti. Luxusní SUV s dieselovým V6 motorem.</span>
+        </div>
+      </div>
+
+      <!-- Autosalon Frankfurt 2015 -->
+      <div class="video-card" data-tags="autosalon,frankfurt,novinky,test,reportáž,2015" onclick="openModal(this)">
+        <div class="video-thumbnail">
+          <img src="https://img.youtube.com/vi/mA13AYIbRxIZ7FJn/maxresdefault.jpg" alt="Autosalon Frankfurt 2015">
+          <div class="play-overlay">
+            <i class="fas fa-play"></i>
+          </div>
+          <div class="platform-badge youtube">YOUTUBE</div>
+        </div>
+        <div class="video-info">
+          <h3 class="video-title">Autosalon Frankfurt 2015</h3>
+          <p class="video-description">Reportáže z Autosalonu Frankfurt 2015. Nejnovější technologie a trendy.</p>
+          <div class="video-tags">
+            <span class="video-tag">autosalon</span>
+            <span class="video-tag">frankfurt</span>
+            <span class="video-tag">novinky</span>
+            <span class="video-tag">test</span>
+            <span class="video-tag">reportáž</span>
+            <span class="video-tag">2015</span>
+          </div>
+          <div class="video-meta">
+            <span>16. října 2015</span>
+            <span><i class="fab fa-youtube"></i></span>
+          </div>
+        </div>
+        <div class="video-data" style="display: none;">
+          <span class="video-url">https://youtube.com/playlist?list=PLOVkY_GpJRo1t4daMYiqI5rpgiMwTWuHB</span>
+          <span class="video-platform">youtube</span>
+          <span class="video-date">2015-10-16</span>
+          <span class="video-full-description">Reportáže z Autosalonu Frankfurt 2015. Série videí z nejvýznamnějšího německého autosalonu s nejnovějšími technologiemi a trendy.</span>
+        </div>
+      </div>
+
+      <!-- Audi A3 G-tron 2015 -->
+      <div class="video-card" data-tags="audi,a3,g-tron,cng,zemní plyn,test,recenze,2015" onclick="openModal(this)">
+        <div class="video-thumbnail">
+          <img src="https://img.youtube.com/vi/4BeXoJfD3M8/maxresdefault.jpg" alt="Audi A3 G-tron Test">
+          <div class="play-overlay">
+            <i class="fas fa-play"></i>
+          </div>
+          <div class="platform-badge youtube">YOUTUBE</div>
+        </div>
+        <div class="video-info">
+          <h3 class="video-title">Audi A3 G-tron 2015</h3>
+          <p class="video-description">Test Audi A3 na zemní plyn. Ekologická alternativa s luxusní výbavou.</p>
+          <div class="video-tags">
+            <span class="video-tag">audi</span>
+            <span class="video-tag">a3</span>
+            <span class="video-tag">g-tron</span>
+            <span class="video-tag">cng</span>
+            <span class="video-tag">zemní plyn</span>
+            <span class="video-tag">test</span>
+            <span class="video-tag">recenze</span>
+          </div>
+          <div class="video-meta">
+            <span>21. září 2015</span>
+            <span><i class="fab fa-youtube"></i></span>
+          </div>
+        </div>
+        <div class="video-data" style="display: none;">
+          <span class="video-url">https://www.youtube.com/watch?v=4BeXoJfD3M8</span>
+          <span class="video-platform">youtube</span>
+          <span class="video-date">2015-09-21</span>
+          <span class="video-full-description">Test Audi A3 na zemní plyn. Testujeme ekologický pohon, praktičnost a náklady na provoz. Ekologická alternativa s luxusní výbavou.</span>
+        </div>
+      </div>
+
+      <!-- Škoda Rapid 1.2 TSI 2015 -->
+      <div class="video-card" data-tags="škoda,rapid,tsi,sedan,test,recenze,2015" onclick="openModal(this)">
+        <div class="video-thumbnail">
+          <img src="https://img.youtube.com/vi/ITjnRr5r64M/maxresdefault.jpg" alt="Škoda Rapid Test">
+          <div class="play-overlay">
+            <i class="fas fa-play"></i>
+          </div>
+          <div class="platform-badge youtube">YOUTUBE</div>
+        </div>
+        <div class="video-info">
+          <h3 class="video-title">Škoda Rapid 1.2 TSI 2015</h3>
+          <p class="video-description">Test kompaktního sedanu Škoda Rapid s motorem TSI. Praktičnost za rozumnou cenu.</p>
+          <div class="video-tags">
+            <span class="video-tag">škoda</span>
+            <span class="video-tag">rapid</span>
+            <span class="video-tag">tsi</span>
+            <span class="video-tag">sedan</span>
+            <span class="video-tag">test</span>
+            <span class="video-tag">recenze</span>
+            <span class="video-tag">2015</span>
+          </div>
+          <div class="video-meta">
+            <span>20. září 2015</span>
+            <span><i class="fab fa-youtube"></i></span>
+          </div>
+        </div>
+        <div class="video-data" style="display: none;">
+          <span class="video-url">https://youtu.be/ITjnRr5r64M</span>
+          <span class="video-platform">youtube</span>
+          <span class="video-date">2015-09-20</span>
+          <span class="video-full-description">Test kompaktního sedanu Škoda Rapid s motorem TSI. Testujeme praktičnost, spotřebu a poměr ceny a výkonu. Praktičnost za rozumnou cenu.</span>
+        </div>
+      </div>
+
+      <!-- Peugeot 308 1.6 e-HDi 2015 -->
+      <div class="video-card" data-tags="peugeot,308,hdi,diesel,hatchback,test,recenze,2015" onclick="openModal(this)">
+        <div class="video-thumbnail">
+          <img src="https://img.youtube.com/vi/PngPhtxP-yQ/maxresdefault.jpg" alt="Peugeot 308 Test">
+          <div class="play-overlay">
+            <i class="fas fa-play"></i>
+          </div>
+          <div class="platform-badge youtube">YOUTUBE</div>
+        </div>
+        <div class="video-info">
+          <h3 class="video-title">Peugeot 308 1.6 e-HDi 2015</h3>
+          <p class="video-description">Test francouzského hatchbacku Peugeot 308. Elegance a úspornost v jednom.</p>
+          <div class="video-tags">
+            <span class="video-tag">peugeot</span>
+            <span class="video-tag">308</span>
+            <span class="video-tag">hdi</span>
+            <span class="video-tag">diesel</span>
+            <span class="video-tag">hatchback</span>
+            <span class="video-tag">test</span>
+            <span class="video-tag">recenze</span>
+          </div>
+          <div class="video-meta">
+            <span>19. září 2015</span>
+            <span><i class="fab fa-youtube"></i></span>
+          </div>
+        </div>
+        <div class="video-data" style="display: none;">
+          <span class="video-url">https://www.youtube.com/watch?v=PngPhtxP-yQ</span>
+          <span class="video-platform">youtube</span>
+          <span class="video-date">2015-09-19</span>
+          <span class="video-full-description">Test francouzského hatchbacku Peugeot 308. Testujeme design, komfort a úsporný dieselový motor. Elegance a úspornost v jednom.</span>
+        </div>
+      </div>
+
+      <!-- Vojtěch Štajf a Subaru BRZ 2015 -->
+      <div class="video-card" data-tags="vojtěch štajf,subaru,brz,sports car,test,rozhovor,2015" onclick="openModal(this)">
+        <div class="video-thumbnail">
+          <img src="https://img.youtube.com/vi/S7tdM-_YyKU/maxresdefault.jpg" alt="Subaru BRZ Vojtěch Štajf">
+          <div class="play-overlay">
+            <i class="fas fa-play"></i>
+          </div>
+          <div class="platform-badge youtube">YOUTUBE</div>
+        </div>
+        <div class="video-info">
+          <h3 class="video-title">Vojtěch Štajf a Subaru BRZ 2015</h3>
+          <p class="video-description">Rozhovor s Vojtěchem Štajfem o sportovním vozu Subaru BRZ. Pohled profesionála.</p>
+          <div class="video-tags">
+            <span class="video-tag">vojtěch štajf</span>
+            <span class="video-tag">subaru</span>
+            <span class="video-tag">brz</span>
+            <span class="video-tag">sports car</span>
+            <span class="video-tag">test</span>
+            <span class="video-tag">rozhovor</span>
+            <span class="video-tag">2015</span>
+          </div>
+          <div class="video-meta">
+            <span>18. září 2015</span>
+            <span><i class="fab fa-youtube"></i></span>
+          </div>
+        </div>
+        <div class="video-data" style="display: none;">
+          <span class="video-url">https://youtu.be/S7tdM-_YyKU</span>
+          <span class="video-platform">youtube</span>
+          <span class="video-date">2015-09-18</span>
+          <span class="video-full-description">Rozhovor s Vojtěchem Štajfem o sportovním vozu Subaru BRZ. Profesionální pohled na jízdní vlastnosti a charakteristiky tohoto sportovního vozů.</span>
+        </div>
+      </div>
+
+<!-- Mercedes-Benz GLA 2014 -->
+      <div class="video-card" data-tags="mercedes,gla,crossover,luxury,test,recenze,2014" onclick="openModal(this)">
+        <div class="video-thumbnail">
+          <img src="https://img.youtube.com/vi/-ZhqF9u0Qh4/maxresdefault.jpg" alt="Mercedes GLA Test">
+          <div class="play-overlay">
+            <i class="fas fa-play"></i>
+          </div>
+          <div class="platform-badge youtube">YOUTUBE</div>
+        </div>
+        <div class="video-info">
+          <h3 class="video-title">Mercedes-Benz GLA 2014</h3>
+          <p class="video-description">Test kompaktního SUV Mercedes-Benz GLA. Luxus v městském balení.</p>
+          <div class="video-tags">
+            <span class="video-tag">mercedes</span>
+            <span class="video-tag">gla</span>
+            <span class="video-tag">crossover</span>
+            <span class="video-tag">luxury</span>
+            <span class="video-tag">test</span>
+            <span class="video-tag">recenze</span>
+            <span class="video-tag">2014</span>
+          </div>
+          <div class="video-meta">
+            <span>3. června 2014</span>
+            <span><i class="fab fa-youtube"></i></span>
+          </div>
+        </div>
+        <div class="video-data" style="display: none;">
+          <span class="video-url">https://youtu.be/-ZhqF9u0Qh4</span>
+          <span class="video-platform">youtube</span>
+          <span class="video-date">2014-06-03</span>
+          <span class="video-full-description">Test kompaktního SUV Mercedes-Benz GLA. Testujeme luxusní výbavu, jízdní vlastnosti a praktičnost. Luxus v městském balení.</span>
+        </div>
+      </div>
+
+      <!-- Seat Leon 2014 -->
+      <div class="video-card" data-tags="seat,leon,hatchback,test,recenze,2014" onclick="openModal(this)">
+        <div class="video-thumbnail">
+          <img src="https://img.youtube.com/vi/Dm4bGEEWoMc/maxresdefault.jpg" alt="Seat Leon Test">
+          <div class="play-overlay">
+            <i class="fas fa-play"></i>
+          </div>
+          <div class="platform-badge youtube">YOUTUBE</div>
+        </div>
+        <div class="video-info">
+          <h3 class="video-title">Seat Leon 2014</h3>
+          <p class="video-description">Test španělského hatchbacku Seat Leon. Sportovní design a dynamické vlastnosti.</p>
+          <div class="video-tags">
+            <span class="video-tag">seat</span>
+            <span class="video-tag">leon</span>
+            <span class="video-tag">hatchback</span>
+            <span class="video-tag">test</span>
+            <span class="video-tag">recenze</span>
+            <span class="video-tag">2014</span>
+          </div>
+          <div class="video-meta">
+            <span>1. května 2014</span>
+            <span><i class="fab fa-youtube"></i></span>
+          </div>
+        </div>
+        <div class="video-data" style="display: none;">
+          <span class="video-url">https://www.youtube.com/watch?v=Dm4bGEEWoMc</span>
+          <span class="video-platform">youtube</span>
+          <span class="video-date">2014-05-01</span>
+          <span class="video-full-description">Test španělského hatchbacku Seat Leon. Testujeme sportovní design, jízdní vlastnosti a praktičnost. Sportovní design a dynamické vlastnosti.</span>
+        </div>
+      </div>
+
+      <!-- Citroën Jumper 2014 -->
+      <div class="video-card" data-tags="citroën,jumper,užitkové,dodávka,test,recenze,2014" onclick="openModal(this)">
+        <div class="video-thumbnail">
+          <img src="https://img.youtube.com/vi/_kRlZhsOxL4/maxresdefault.jpg" alt="Citroën Jumper Test">
+          <div class="play-overlay">
+            <i class="fas fa-play"></i>
+          </div>
+          <div class="platform-badge youtube">YOUTUBE</div>
+        </div>
+        <div class="video-info">
+          <h3 class="video-title">Citroën Jumper 2014</h3>
+          <p class="video-description">Test užitkového vozu Citroën Jumper. Velká dodávka pro velké úkoly.</p>
+          <div class="video-tags">
+            <span class="video-tag">citroën</span>
+            <span class="video-tag">jumper</span>
+            <span class="video-tag">užitkové</span>
+            <span class="video-tag">dodávka</span>
+            <span class="video-tag">test</span>
+            <span class="video-tag">recenze</span>
+            <span class="video-tag">2014</span>
+          </div>
+          <div class="video-meta">
+            <span>4. dubna 2014</span>
+            <span><i class="fab fa-youtube"></i></span>
+          </div>
+        </div>
+        <div class="video-data" style="display: none;">
+          <span class="video-url">https://www.youtube.com/watch?v=_kRlZhsOxL4</span>
+          <span class="video-platform">youtube</span>
+          <span class="video-date">2014-04-04</span>
+          <span class="video-full-description">Test užitkového vozu Citroën Jumper. Testujeme prostornost, praktičnost a jízdní vlastnosti. Velká dodávka pro velké úkoly.</span>
+        </div>
+      </div>
+
+      <!-- Lada Niva 2014 -->
+      <div class="video-card" data-tags="lada,niva,terénní,offroad,test,recenze,2014" onclick="openModal(this)">
+        <div class="video-thumbnail">
+          <img src="https://img.youtube.com/vi/9xSNi-i2CY8/maxresdefault.jpg" alt="Lada Niva Test">
+          <div class="play-overlay">
+            <i class="fas fa-play"></i>
+          </div>
+          <div class="platform-badge youtube">YOUTUBE</div>
+        </div>
+        <div class="video-info">
+          <h3 class="video-title">Lada Niva 2014</h3>
+          <p class="video-description">Test legendárního terénního vozu Lada Niva. Ruská klasika stále v akci.</p>
+          <div class="video-tags">
+            <span class="video-tag">lada</span>
+            <span class="video-tag">niva</span>
+            <span class="video-tag">terénní</span>
+            <span class="video-tag">offroad</span>
+            <span class="video-tag">test</span>
+            <span class="video-tag">recenze</span>
+            <span class="video-tag">2014</span>
+          </div>
+          <div class="video-meta">
+            <span>15. března 2014</span>
+            <span><i class="fab fa-youtube"></i></span>
+          </div>
+        </div>
+        <div class="video-data" style="display: none;">
+          <span class="video-url">https://www.youtube.com/watch?v=9xSNi-i2CY8</span>
+          <span class="video-platform">youtube</span>
+          <span class="video-date">2014-03-15</span>
+          <span class="video-full-description">Test legendárního terénního vozu Lada Niva. Testujeme terénní schopnosti, jednoduchost a spolehlivost. Ruská klasika stále v akci.</span>
+        </div>
+      </div>
+
+      <!-- Suzuki Swift 2014 -->
+      <div class="video-card" data-tags="suzuki,swift,hatchback,test,recenze,2014" onclick="openModal(this)">
+        <div class="video-thumbnail">
+          <img src="https://img.youtube.com/vi/zYcN5pFDe0M/maxresdefault.jpg" alt="Suzuki Swift Test">
+          <div class="play-overlay">
+            <i class="fas fa-play"></i>
+          </div>
+          <div class="platform-badge youtube">YOUTUBE</div>
+        </div>
+        <div class="video-info">
+          <h3 class="video-title">Suzuki Swift 2014</h3>
+          <p class="video-description">Test malého hatchbacku Suzuki Swift. Japonská spolehlivost v kompaktním balení.</p>
+          <div class="video-tags">
+            <span class="video-tag">suzuki</span>
+            <span class="video-tag">swift</span>
+            <span class="video-tag">hatchback</span>
+            <span class="video-tag">test</span>
+            <span class="video-tag">recenze</span>
+            <span class="video-tag">2014</span>
+          </div>
+          <div class="video-meta">
+            <span>3. února 2014</span>
+            <span><i class="fab fa-youtube"></i></span>
+          </div>
+        </div>
+        <div class="video-data" style="display: none;">
+          <span class="video-url">https://www.youtube.com/watch?v=zYcN5pFDe0M</span>
+          <span class="video-platform">youtube</span>
+          <span class="video-date">2014-02-03</span>
+          <span class="video-full-description">Test malého hatchbacku Suzuki Swift. Testujeme praktičnost, spolehlivost a jízdní vlastnosti. Japonská spolehlivost v kompaktním balení.</span>
+        </div>
+      </div>
+
+      <!-- Citroën Grand C4 Picasso 2014 -->
+      <div class="video-card" data-tags="citroën,grand c4 picasso,mpv,test,recenze,2014" onclick="openModal(this)">
+        <div class="video-thumbnail">
+          <img src="https://img.youtube.com/vi/mTXD9T_trMo/maxresdefault.jpg" alt="Citroën Grand C4 Picasso Test">
+          <div class="play-overlay">
+            <i class="fas fa-play"></i>
+          </div>
+          <div class="platform-badge youtube">YOUTUBE</div>
+        </div>
+        <div class="video-info">
+          <h3 class="video-title">Citroën Grand C4 Picasso 2014</h3>
+          <p class="video-description">Test rodinného MPV Citroën Grand C4 Picasso. Francouzský přístup k rodinným vozům.</p>
+          <div class="video-tags">
+            <span class="video-tag">citroën</span>
+            <span class="video-tag">grand c4 picasso</span>
+            <span class="video-tag">mpv</span>
+            <span class="video-tag">test</span>
+            <span class="video-tag">recenze</span>
+            <span class="video-tag">2014</span>
+          </div>
+          <div class="video-meta">
+            <span>14. ledna 2014</span>
+            <span><i class="fab fa-youtube"></i></span>
+          </div>
+        </div>
+        <div class="video-data" style="display: none;">
+          <span class="video-url">https://www.youtube.com/watch?v=mTXD9T_trMo</span>
+          <span class="video-platform">youtube</span>
+          <span class="video-date">2014-01-14</span>
+          <span class="video-full-description">Test rodinného MPV Citroën Grand C4 Picasso. Testujeme prostornost, komfort a praktičnost pro velké rodiny. Francouzský přístup k rodinným vozům.</span>
+        </div>
+      </div>
+
+      <!-- VIDEA Z ROKU 2013 -->
+
+      <!-- Citroën DS3 Cabrio 2013 -->
+      <div class="video-card" data-tags="citroën,ds3,cabrio,convertible,test,recenze,2013" onclick="openModal(this)">
+        <div class="video-thumbnail">
+          <img src="https://img.youtube.com/vi/UbDvu_VHRXw/maxresdefault.jpg" alt="Citroën DS3 Cabrio Test">
+          <div class="play-overlay">
+            <i class="fas fa-play"></i>
+          </div>
+          <div class="platform-badge youtube">YOUTUBE</div>
+        </div>
+        <div class="video-info">
+          <h3 class="video-title">Citroën DS3 Cabrio 2013</h3>
+          <p class="video-description">Test stylového kabrioletu Citroën DS3 Cabrio. Francouzská elegance s otevřenou střechou.</p>
+          <div class="video-tags">
+            <span class="video-tag">citroën</span>
+            <span class="video-tag">ds3</span>
+            <span class="video-tag">cabrio</span>
+            <span class="video-tag">convertible</span>
+            <span class="video-tag">test</span>
+            <span class="video-tag">recenze</span>
+            <span class="video-tag">2013</span>
+          </div>
+          <div class="video-meta">
+            <span>12. prosince 2013</span>
+            <span><i class="fab fa-youtube"></i></span>
+          </div>
+        </div>
+        <div class="video-data" style="display: none;">
+          <span class="video-url">https://youtu.be/UbDvu_VHRXw</span>
+          <span class="video-platform">youtube</span>
+          <span class="video-date">2013-12-12</span>
+          <span class="video-full-description">Test stylového kabrioletu Citroën DS3 Cabrio. Testujeme design, jízdní vlastnosti a praktičnost otevřené střechy. Francouzská elegance s otevřenou střechou.</span>
+        </div>
+      </div>
+
+      <!-- Volkswagen Golf Variant 2013 -->
+      <div class="video-card" data-tags="volkswagen,golf,variant,kombi,test,recenze,2013" onclick="openModal(this)">
+        <div class="video-thumbnail">
+          <img src="https://img.youtube.com/vi/XMER08w5yxo/maxresdefault.jpg" alt="VW Golf Variant Test">
+          <div class="play-overlay">
+            <i class="fas fa-play"></i>
+          </div>
+          <div class="platform-badge youtube">YOUTUBE</div>
+        </div>
+        <div class="video-info">
+          <h3 class="video-title">Volkswagen Golf Variant 2013</h3>
+          <p class="video-description">Test praktického kombi od Volkswagenu. Jak se osvědčil Golf Variant v dlouhodobém testu?</p>
+          <div class="video-tags">
+            <span class="video-tag">volkswagen</span>
+            <span class="video-tag">golf</span>
+            <span class="video-tag">variant</span>
+            <span class="video-tag">kombi</span>
+            <span class="video-tag">test</span>
+            <span class="video-tag">recenze</span>
+            <span class="video-tag">2013</span>
+          </div>
+          <div class="video-meta">
+            <span>10. října 2013</span>
+            <span><i class="fab fa-youtube"></i></span>
+          </div>
+        </div>
+        <div class="video-data" style="display: none;">
+          <span class="video-url">https://youtu.be/XMER08w5yxo</span>
+          <span class="video-platform">youtube</span>
+          <span class="video-date">2013-10-10</span>
+          <span class="video-full-description">Test praktického kombi od Volkswagenu. Testujeme prostornost, jízdní vlastnosti a celkovou praktičnost Golf Variantu. Jak se osvědčil v dlouhodobém testu?</span>
+        </div>
+      </div>
+      
+      <!-- Honda CR-V 2013 -->
+      <div class="video-card" data-tags="honda,cr-v,suv,test,recenze,2013" onclick="openModal(this)">
+        <div class="video-thumbnail">
+          <img src="https://img.youtube.com/vi/dsd-Hw44dzk/maxresdefault.jpg" alt="Honda CR-V Test">
+          <div class="play-overlay">
+            <i class="fas fa-play"></i>
+          </div>
+          <div class="platform-badge youtube">YOUTUBE</div>
+        </div>
+        <div class="video-info">
+          <h3 class="video-title">Honda CR-V 2013</h3>
+          <p class="video-description">Detailní test nové generace Honda CR-V. Jak si vede v praxi a co nabízí za svoje peníze?</p>
+          <div class="video-tags">
+            <span class="video-tag">honda</span>
+            <span class="video-tag">cr-v</span>
+            <span class="video-tag">suv</span>
+            <span class="video-tag">test</span>
+            <span class="video-tag">recenze</span>
+            <span class="video-tag">2013</span>
+          </div>
+          <div class="video-meta">
+            <span>1. října 2013</span>
+            <span><i class="fab fa-youtube"></i></span>
+          </div>
+        </div>
+        <div class="video-data" style="display: none;">
+          <span class="video-url">https://youtu.be/dsd-Hw44dzk</span>
+          <span class="video-platform">youtube</span>
+          <span class="video-date">2013-10-01</span>
+          <span class="video-full-description">Detailní test nové generace Honda CR-V. Testujeme výkon, spotřebu, komfort a praktičnost tohoto oblíbeného SUV. Jak si vede v praxi a co nabízí za svoje peníze?</span>
+        </div>
+      </div>
+
+    </div>
 
     <!-- Prázdný stav -->
     <div class="empty-state" id="emptyState" style="display: none;">
@@ -1231,7 +2869,6 @@
 
   <script>
     let allTags = new Set();
-    let currentFilter = 'all';
     let searchQuery = '';
 
     // Inicializace
@@ -1277,51 +2914,7 @@
       const cards = document.querySelectorAll('.video-card');
       
       // Sběr všech tagů z existujících videí a optimalizace zobrazení
-      allTags.clear();
-      cards.forEach(card => {
-        const tags = card.dataset.tags.split(',');
-        const tagsContainer = card.querySelector('.video-tags');
-        
-        // Počet tagů pro indikátor
-        if (tags.length > 3) {
-          const moreCount = tags.length - 3;
-          tagsContainer.setAttribute('data-more', `+${moreCount}`);
-          tagsContainer.classList.add('has-more');
-        }
-        
-        tags.forEach(tag => allTags.add(tag.trim()));
-      });
-
-      // Aktualizace filtrovacích tlačítek
-      updateFilterTags();
-      filterVideos();
-    }
-
-    function updateFilterTags() {
-      const container = document.getElementById('filterTags');
-      container.innerHTML = '<button class="tag-filter active" data-tag="all">Všechna videa</button>';
-
-      Array.from(allTags).sort().forEach(tag => {
-        const button = document.createElement('button');
-        button.className = 'tag-filter';
-        button.dataset.tag = tag;
-        button.textContent = tag;
-        button.onclick = () => setFilter(tag);
-        container.appendChild(button);
-      });
-    }
-
-    function setFilter(tag) {
-      currentFilter = tag;
-      
-      // Aktualizace aktivního tlačítka
-      document.querySelectorAll('.tag-filter').forEach(btn => {
-        btn.classList.remove('active');
-        if (btn.dataset.tag === tag) {
-          btn.classList.add('active');
-        }
-      });
-
+  
       filterVideos();
     }
 
@@ -1339,10 +2932,7 @@
                             description.includes(searchQuery) || 
                             tags.includes(searchQuery);
 
-        const matchesFilter = currentFilter === 'all' || 
-                             tags.split(',').map(t => t.trim()).includes(currentFilter);
-
-        if (matchesSearch && matchesFilter) {
+        if (matchesSearch) {
           card.style.display = 'block';
           visibleCount++;
         } else {
@@ -1392,15 +2982,18 @@
       let embedCode = '';
       if (platform === 'youtube') {
         const videoId = extractYouTubeId(url);
-        embedCode = `<iframe class="modal-video" src="https://www.youtube.com/embed/${videoId}" frameborder="0" allowfullscreen></iframe>`;
-      } else if (platform === 'tiktok') {
-        embedCode = `<div class="modal-video" style="display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.05); color: white;">
-          <div style="text-align: center;">
-            <i class="fab fa-tiktok" style="font-size: 3rem; margin-bottom: 20px;"></i>
-            <p style="margin-bottom: 20px;">TikTok video se otevře v novém okně</p>
-            <a href="${url}" target="_blank" style="background: #000; color: white; padding: 12px 24px; border-radius: 25px; text-decoration: none; font-weight: 600;">Otevřít na TikTok</a>
-          </div>
-        </div>`;
+        if (url.includes('playlist')) {
+          // Pro playlisty
+          embedCode = `<div class="modal-video" style="display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.05); color: white;">
+            <div style="text-align: center;">
+              <i class="fab fa-youtube" style="font-size: 3rem; margin-bottom: 20px; color: #FF0000;"></i>
+              <p style="margin-bottom: 20px;">Playlist se otevře v novém okně</p>
+              <a href="${url}" target="_blank" style="background: #FF0000; color: white; padding: 12px 24px; border-radius: 25px; text-decoration: none; font-weight: 600;">Otevřít na YouTube</a>
+            </div>
+          </div>`;
+        } else {
+          embedCode = `<iframe class="modal-video" src="https://www.youtube.com/embed/${videoId}" frameborder="0" allowfullscreen></iframe>`;
+        }
       }
       
       container.innerHTML = embedCode;
@@ -1410,6 +3003,10 @@
       document.getElementById('modalDescription').textContent = description;
       document.getElementById('modalPlatform').textContent = platform.toUpperCase();
       document.getElementById('modalDate').textContent = new Date(date).toLocaleDateString('cs-CZ');
+      
+      // Tagy
+      const modalTags = document.getElementById('modalTags');
+      modalTags.innerHTML = tags.map(tag => `<span class="modal-tag">${tag}</span>`).join('');
       
       // Zobrazení modalu s animací
       modal.style.display = 'flex';
@@ -1432,8 +3029,6 @@
     }
 
   </script>
-
-
 
 </body>
 </html>
