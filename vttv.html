@@ -2800,7 +2800,7 @@
         </div>
       </div>
 
-    </div>
+   </div>
 
     <!-- Prázdný stav -->
     <div class="empty-state" id="emptyState" style="display: none;">
@@ -2889,6 +2889,21 @@
           tagsContainer.setAttribute('data-more', `+${moreCount}`);
           tagsContainer.classList.add('has-more');
         }
+      });
+
+      // Fallback pro nefunkční náhledové obrázky
+      document.querySelectorAll('.video-thumbnail img').forEach(img => {
+        img.onerror = function() {
+          this.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+          this.style.display = 'flex';
+          this.style.alignItems = 'center';
+          this.style.justifyContent = 'center';
+          this.style.fontSize = '14px';
+          this.style.color = 'white';
+          this.style.fontFamily = 'inherit';
+          this.innerHTML = '<i class="fas fa-video" style="font-size: 2rem; opacity: 0.7;"></i>';
+          this.removeAttribute('alt');
+        };
       });
 
       filterVideos();
