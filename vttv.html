@@ -2834,7 +2834,6 @@
   </div>
 
   <script>
-    let allTags = new Set();
     let searchQuery = '';
 
     // Inicializace
@@ -2879,8 +2878,19 @@
     function loadVideos() {
       const cards = document.querySelectorAll('.video-card');
       
-      // Sběr všech tagů z existujících videí a optimalizace zobrazení
-  
+      // Optimalizace zobrazení tagů - indikátor "+3" pro více tagů
+      cards.forEach(card => {
+        const tags = card.dataset.tags.split(',');
+        const tagsContainer = card.querySelector('.video-tags');
+        
+        // Počet tagů pro indikátor
+        if (tags.length > 3) {
+          const moreCount = tags.length - 3;
+          tagsContainer.setAttribute('data-more', `+${moreCount}`);
+          tagsContainer.classList.add('has-more');
+        }
+      });
+
       filterVideos();
     }
 
@@ -2960,6 +2970,14 @@
         } else {
           embedCode = `<iframe class="modal-video" src="https://www.youtube.com/embed/${videoId}" frameborder="0" allowfullscreen></iframe>`;
         }
+      } else if (platform === 'tiktok') {
+        embedCode = `<div class="modal-video" style="display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.05); color: white;">
+          <div style="text-align: center;">
+            <i class="fab fa-tiktok" style="font-size: 3rem; margin-bottom: 20px;"></i>
+            <p style="margin-bottom: 20px;">TikTok video se otevře v novém okně</p>
+            <a href="${url}" target="_blank" style="background: #000; color: white; padding: 12px 24px; border-radius: 25px; text-decoration: none; font-weight: 600;">Otevřít na TikTok</a>
+          </div>
+        </div>`;
       }
       
       container.innerHTML = embedCode;
