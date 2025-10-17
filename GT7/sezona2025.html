@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HRIC-PIC-MA-MA-TAMA CHAMPIONSHIP 2025</title>
+    <title>GT7 Racing Championship 2025</title>
     <style>
         * {
             margin: 0;
@@ -235,7 +235,7 @@
 <body>
     <div class="container">
         <header>
-            <h1>🏁 HRIC-PIC-MA-MA-TAMA GT7 Championship 2025</h1>
+            <h1>🏁 HRIC-PIC-MA-MA-TAMAA GT7 Championship</h1>
             <div class="subtitle">Oficiální přehled závodů a výsledků</div>
         </header>
 
@@ -474,11 +474,33 @@
                 '<p style="color: #86868b;">Zatím žádné proběhlé závody</p>';
         }
 
+        function getYouTubeEmbedUrl(url) {
+            if (!url) return null;
+            const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+            const match = url.match(regExp);
+            return (match && match[2].length === 11) ? `https://www.youtube.com/embed/${match[2]}` : null;
+        }
+
         function renderRaceCard(race) {
             const resultsHtml = race.results ? `
                 <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #e5e5e7;">
                     <strong>Výsledky:</strong><br>
                     🥇 ${race.results.first} | 🥈 ${race.results.second} | 🥉 ${race.results.third}
+                </div>
+            ` : '';
+
+            const youtubeUrl = race.youtubeUrl ? getYouTubeEmbedUrl(race.youtubeUrl) : null;
+            const videoHtml = youtubeUrl ? `
+                <div style="margin-top: 15px;">
+                    <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 8px;">
+                        <iframe 
+                            style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"
+                            src="${youtubeUrl}" 
+                            frameborder="0" 
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                            allowfullscreen>
+                        </iframe>
+                    </div>
                 </div>
             ` : '';
 
@@ -524,6 +546,7 @@
                     </div>
                     ${race.additionalInfo ? `<div style="margin-top: 15px; color: #86868b; font-size: 0.95em;">${race.additionalInfo}</div>` : ''}
                     ${resultsHtml}
+                    ${videoHtml}
                 </div>
             `;
         }
