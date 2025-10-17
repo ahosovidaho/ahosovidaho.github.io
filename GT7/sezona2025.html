@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GT7 Racing Championship 2025</title>
+    <title>GT7 Racing Championship</title>
     <style>
         * {
             margin: 0;
@@ -235,7 +235,7 @@
 <body>
     <div class="container">
         <header>
-            <h1>🏁 HRIC-PIC-MA-MA-TAMAA GT7 Championship</h1>
+            <h1>🏁 GT7 Racing Championship</h1>
             <div class="subtitle">Oficiální přehled závodů a výsledků</div>
         </header>
 
@@ -375,6 +375,11 @@
                             <option value="Ondra">Ondra</option>
                         </select>
                     </div>
+                    <div class="form-group">
+                        <label>YouTube URL (nepovinné)</label>
+                        <input type="url" id="youtube-url" placeholder="https://www.youtube.com/watch?v=...">
+                        <small style="color: #86868b; font-size: 0.9em; display: block; margin-top: 5px;">Odkaz na video sestřih ze závodu</small>
+                    </div>
                     <button type="submit" class="btn">Vygenerovat JSON</button>
                 </form>
                 <div id="json-output-container"></div>
@@ -464,6 +469,9 @@
             const today = new Date();
             const upcoming = data.currentSeason.races.filter(r => new Date(r.date) >= today && !r.results);
             const past = data.currentSeason.races.filter(r => new Date(r.date) < today || r.results);
+            
+            // Seřaď proběhlé závody od nejnovějšího k nejstaršímu
+            past.sort((a, b) => new Date(b.date) - new Date(a.date));
 
             document.getElementById('upcoming-races').innerHTML = upcoming.length ? 
                 upcoming.map(renderRaceCard).join('') : 
@@ -637,6 +645,11 @@
                 second: document.getElementById('pos2').value,
                 third: document.getElementById('pos3').value
             };
+
+            const youtubeUrl = document.getElementById('youtube-url').value;
+            if (youtubeUrl) {
+                race.youtubeUrl = youtubeUrl;
+            }
 
             alert('Výsledky přidány! Zkopírujte JSON níže a uložte do data.json');
             document.getElementById('json-output-container').innerHTML = 
