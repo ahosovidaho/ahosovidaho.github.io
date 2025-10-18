@@ -1,0 +1,203 @@
+{
+  "currentSeason": {
+    "name": "Sezóna 2025",
+    "races": [
+      {
+        "date": "2025-07-24",
+        "circuit": "Daytona Road Circuit",
+        "cars": "American Muscle",
+        "performanceIndex": "",
+        "tuning": "Povolen",
+        "tires": "Racing Hard",
+        "laps": "10",
+        "tireWear": "x5",
+        "fuelConsumption": "x3",
+        "refuelSpeed": "Normální",
+        "additionalInfo": "",
+        "results": {
+          "first": {
+            "driver": "Viki",
+            "manufacturer": "",
+            "drivetrain": ""
+          },
+          "second": {
+            "driver": "Maty",
+            "manufacturer": "",
+            "drivetrain": ""
+          },
+          "third": {
+            "driver": "Hardy",
+            "manufacturer": "",
+            "drivetrain": ""
+          }
+        }
+      },
+      {
+        "date": "2025-08-15",
+        "circuit": "Red Bull Ring",
+        "cars": "Limonádový Joe",
+        "performanceIndex": "",
+        "tuning": "Povolen",
+        "tires": "Racing Hard",
+        "laps": "10",
+        "tireWear": "x5",
+        "fuelConsumption": "x3",
+        "refuelSpeed": "Normální",
+        "additionalInfo": "",
+        "results": {
+          "first": {
+            "driver": "Viki",
+            "manufacturer": "",
+            "drivetrain": ""
+          },
+          "second": {
+            "driver": "Hardy",
+            "manufacturer": "",
+            "drivetrain": ""
+          },
+          "third": {
+            "driver": "Maty",
+            "manufacturer": "",
+            "drivetrain": ""
+          }
+        }
+      },
+      {
+        "date": "2025-09-01",
+        "circuit": "Monza",
+        "cars": "Forza Italia",
+        "performanceIndex": "",
+        "tuning": "Povolen",
+        "tires": "Racing Hard",
+        "laps": "10",
+        "tireWear": "x5",
+        "fuelConsumption": "x3",
+        "refuelSpeed": "Normální",
+        "additionalInfo": "",
+        "results": {
+          "first": {
+            "driver": "Hardy",
+            "manufacturer": "",
+            "drivetrain": ""
+          },
+          "second": {
+            "driver": "Viki",
+            "manufacturer": "",
+            "drivetrain": ""
+          },
+          "third": {
+            "driver": "Maty",
+            "manufacturer": "",
+            "drivetrain": ""
+          }
+        }
+      },
+      {
+        "date": "2025-09-15",
+        "circuit": "Dragon Trail - přímořská trať",
+        "cars": "Dovolená v Chorvatsku",
+        "performanceIndex": "",
+        "tuning": "Povolen",
+        "tires": "Racing Hard",
+        "laps": "10",
+        "tireWear": "x5",
+        "fuelConsumption": "x3",
+        "refuelSpeed": "Normální",
+        "additionalInfo": "",
+        "results": {
+          "first": {
+            "driver": "Viki",
+            "manufacturer": "",
+            "drivetrain": ""
+          },
+          "second": {
+            "driver": "Maty",
+            "manufacturer": "",
+            "drivetrain": ""
+          },
+          "third": {
+            "driver": "Hardy",
+            "manufacturer": "",
+            "drivetrain": ""
+          }
+        }
+      },
+      {
+        "date": "2025-10-01",
+        "circuit": "Suzuka",
+        "cars": "Tokyo Drift",
+        "performanceIndex": "",
+        "tuning": "Povolen",
+        "tires": "Racing Hard",
+        "laps": "10",
+        "tireWear": "x5",
+        "fuelConsumption": "x3",
+        "refuelSpeed": "Normální",
+        "additionalInfo": "",
+        "results": {
+          "first": {
+            "driver": "Viki",
+            "manufacturer": "",
+            "drivetrain": ""
+          },
+          "second": {
+            "driver": "Maty",
+            "manufacturer": "",
+            "drivetrain": ""
+          },
+          "third": {
+            "driver": "Hardy",
+            "manufacturer": "",
+            "drivetrain": ""
+          }
+        }
+      },
+      {
+        "date": "2025-10-15",
+        "circuit": "Brands Hatch",
+        "cars": "Po stopách Jamese Bonda",
+        "performanceIndex": "",
+        "tuning": "Povolen",
+        "tires": "Racing Hard",
+        "laps": "10",
+        "tireWear": "x5",
+        "fuelConsumption": "x3",
+        "refuelSpeed": "Normální",
+        "additionalInfo": "",
+        "results": {
+          "first": {
+            "driver": "Maty",
+            "manufacturer": "",
+            "drivetrain": ""
+          },
+          "second": {
+            "driver": "Viki",
+            "manufacturer": "",
+            "drivetrain": ""
+          },
+          "third": {
+            "driver": "Hardy",
+            "manufacturer": "",
+            "drivetrain": ""
+          }
+        },
+        "youtubeUrl": "https://youtu.be/2wVeJk9QBBc"
+      },
+      {
+        "date": "2025-10-22",
+        "circuit": "LeMans 24h",
+        "cars": "Gr.1",
+        "performanceIndex": "800 PP",
+        "tuning": "Povolen",
+        "tires": "Racing (1x soft)",
+        "laps": "15",
+        "tireWear": "x4",
+        "fuelConsumption": "x3",
+        "refuelSpeed": "3",
+        "additionalInfo": "vozidla VGT zakázána."
+      }
+    ],
+    "standings": []
+  },
+  "archive": []
+}
