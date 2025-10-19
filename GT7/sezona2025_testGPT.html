@@ -1,9 +1,9 @@
 <!doctype html>
 <html lang="cs">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>GT7 Racing Championship</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>🏁 GT7 Racing Championship</title>
   <style>
     * { box-sizing: border-box; }
     body {
@@ -53,15 +53,8 @@
       flex-direction: column;
       gap: 12px;
     }
-    .form-group {
-      display: flex;
-      flex-direction: column;
-    }
-    label {
-      font-size: 13px;
-      font-weight: 500;
-      margin-bottom: 4px;
-    }
+    .form-group { display: flex; flex-direction: column; }
+    label { font-size: 13px; font-weight: 500; margin-bottom: 4px; }
     input, select, textarea {
       padding: 8px;
       border: 1px solid #ddd;
@@ -103,30 +96,28 @@
     }
     .small { font-size: 13px; color: #666; }
   </style>
-  <!-- Define showTab early so inline onclick handlers can call it without ReferenceError -->
+
+  <!-- Taby musí být dostupné globálně -->
   <script>
-    // Expose showTab globally before buttons are parsed/clicked
     window.showTab = function(tab, evt) {
-      // remove active from tabs
-      document.querySelectorAll('.tab').forEach(function(t){ t.classList.remove('active'); });
-      // hide all tab-content (elements with id ending -tab)
-      document.querySelectorAll('[id$="-tab"]').forEach(function(el){ el.classList.add('hidden'); });
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('[id$="-tab"]').forEach(el => el.classList.add('hidden'));
       if (evt && evt.target) evt.target.classList.add('active');
-      var el = document.getElementById(tab + '-tab');
-      if (el) el.classList.remove('hidden');
+      const target = document.getElementById(tab + '-tab');
+      if (target) target.classList.remove('hidden');
     };
   </script>
 </head>
 <body>
   <div class="container">
-   <header>
-  <h1>🏁 GT7 Racing Championship</h1>
-  <div class="small">Oficiální přehled závodů a výsledků — live s Firestore</div>
-  <div style="margin-top:10px;">
-    <button id="admin-login-btn" class="btn" onclick="signIn()">🔑 Přihlásit se jako admin</button>
-    <button id="logout-btn" class="btn danger" style="display:none;" onclick="signOutUser()">Odhlásit se</button>
-  </div>
-</header>
+    <header>
+      <h1>🏁 GT7 Racing Championship</h1>
+      <div class="small">Oficiální přehled závodů a výsledků — live s Firestore</div>
+      <div style="margin-top:10px;">
+        <button id="admin-login-btn" class="btn" onclick="signIn()">🔑 Přihlásit se jako admin</button>
+        <button id="logout-btn" class="btn danger" style="display:none;" onclick="signOutUser()">Odhlásit se</button>
+      </div>
+    </header>
 
     <div class="tabs">
       <button class="tab active" onclick="showTab('current', event)">Aktuální sezóna</button>
@@ -134,10 +125,12 @@
       <button class="tab" onclick="showTab('admin', event)">Admin</button>
     </div>
 
+    <!-- Aktuální sezóna -->
     <div id="current-tab">
       <div id="past-races"></div>
     </div>
 
+    <!-- Archiv -->
     <div id="archive-tab" class="hidden">
       <div class="section">
         <h2>Archiv</h2>
@@ -145,6 +138,7 @@
       </div>
     </div>
 
+    <!-- Admin sekce -->
     <div id="admin-tab" class="hidden">
       <div class="section">
         <h2>Přidat / upravit závod</h2>
@@ -193,6 +187,7 @@
           </div>
 
           <div class="grid-results">
+            <!-- 1. místo -->
             <div class="form-group">
               <label>1. místo - Jezdec</label>
               <select id="pos1" required>
@@ -200,15 +195,10 @@
                 <option>Viki</option><option>Mára</option><option>Maty</option><option>Hardy</option><option>Ondra</option>
               </select>
             </div>
-            <div class="form-group">
-              <label>1. místo - Auto</label>
-              <input id="pos1_car">
-            </div>
-            <div class="form-group">
-              <label>1. místo - Pohon</label>
-              <input id="pos1_drivetrain">
-            </div>
+            <div class="form-group"><label>Auto</label><input id="pos1_car"></div>
+            <div class="form-group"><label>Pohon</label><input id="pos1_drivetrain"></div>
 
+            <!-- 2. místo -->
             <div class="form-group">
               <label>2. místo - Jezdec</label>
               <select id="pos2" required>
@@ -216,15 +206,10 @@
                 <option>Viki</option><option>Mára</option><option>Maty</option><option>Hardy</option><option>Ondra</option>
               </select>
             </div>
-            <div class="form-group">
-              <label>2. místo - Auto</label>
-              <input id="pos2_car">
-            </div>
-            <div class="form-group">
-              <label>2. místo - Pohon</label>
-              <input id="pos2_drivetrain">
-            </div>
+            <div class="form-group"><label>Auto</label><input id="pos2_car"></div>
+            <div class="form-group"><label>Pohon</label><input id="pos2_drivetrain"></div>
 
+            <!-- 3. místo -->
             <div class="form-group">
               <label>3. místo - Jezdec</label>
               <select id="pos3" required>
@@ -232,14 +217,8 @@
                 <option>Viki</option><option>Mára</option><option>Maty</option><option>Hardy</option><option>Ondra</option>
               </select>
             </div>
-            <div class="form-group">
-              <label>3. místo - Auto</label>
-              <input id="pos3_car">
-            </div>
-            <div class="form-group">
-              <label>3. místo - Pohon</label>
-              <input id="pos3_drivetrain">
-            </div>
+            <div class="form-group"><label>Auto</label><input id="pos3_car"></div>
+            <div class="form-group"><label>Pohon</label><input id="pos3_drivetrain"></div>
           </div>
 
           <div class="form-group">
@@ -261,6 +240,7 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
     import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
     import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-analytics.js";
+    import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCkR-AyJK2vFnz0V2HTuz2b3zCaLMxbXtI",
@@ -275,7 +255,41 @@
     const app = initializeApp(firebaseConfig);
     const analytics = getAnalytics(app);
     const db = getFirestore(app);
+    const auth = getAuth(app);
+    const provider = new GoogleAuthProvider();
 
+    // Globální funkce pro přihlášení
+    window.signIn = async function() {
+      try {
+        await signInWithPopup(auth, provider);
+      } catch (err) {
+        alert('Přihlášení selhalo: ' + (err.message || err));
+      }
+    };
+
+    window.signOutUser = async function() {
+      await signOut(auth);
+    };
+
+    onAuthStateChanged(auth, (user) => {
+      const adminTab = document.querySelector('#admin-tab');
+      const loginBtn = document.querySelector('#admin-login-btn');
+      const logoutBtn = document.querySelector('#logout-btn');
+
+      if (user) {
+        console.log("✅ Přihlášen:", user.email);
+        if (adminTab) adminTab.style.display = 'block';
+        if (loginBtn) loginBtn.style.display = 'none';
+        if (logoutBtn) logoutBtn.style.display = 'inline-block';
+      } else {
+        console.log("🚪 Odhlášen");
+        if (adminTab) adminTab.style.display = 'none';
+        if (loginBtn) loginBtn.style.display = 'inline-block';
+        if (logoutBtn) logoutBtn.style.display = 'none';
+      }
+    });
+
+    // Firestore helpers
     window._firestore = db;
     window._firestoreCollection = collection;
     window._firestoreAdd = addDoc;
@@ -287,16 +301,6 @@
 
   <script>
     let data = { currentSeason: { races: [] } };
-
-    // local showTab fallback (already defined in head) - ensure exists
-    if (!window.showTab) {
-      window.showTab = function(tab, evt) {
-        document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-        document.querySelectorAll('[id$="-tab"]').forEach(t=>t.classList.add('hidden'));
-        if(evt && evt.target) evt.target.classList.add('active');
-        var el = document.getElementById(tab+'-tab'); if(el) el.classList.remove('hidden');
-      };
-    }
 
     function escapeHtml(s){ if (s===0) return '0'; if (!s) return ''; return String(s).replace(/[&<>\"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
     function formatDate(d){ if(!d) return '-'; const dt = new Date(d); return dt.toLocaleDateString('cs-CZ'); }
