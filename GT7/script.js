@@ -189,7 +189,7 @@ function renderPointsChart() {
         canvas.height = height;
         
         const colors = {
-            'Viki': '#667eea',
+            'Viki': '#FF1493',
             'Mára': '#f093fb',
             'Maty': '#4facfe',
             'Hardy': '#43e97b',
