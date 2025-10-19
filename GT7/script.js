@@ -47,7 +47,7 @@ function renderStandings() {
     
     tbody.innerHTML = standings.map(s => `
         <tr>
-            <td>${s.driver}</td>
+            <td class="driver-${s.driver.toLowerCase()}">${s.driver}</td>
             <td class="position-1">${s.first}</td>
             <td class="position-2">${s.second}</td>
             <td class="position-3">${s.third}</td>
@@ -67,10 +67,10 @@ function calculateStandings() {
     }));
 
     data.currentSeason.races.forEach(race => {
-        if (race.results) {
-            const first = typeof race.results.first === 'string' ? race.results.first : race.results.first?.driver;
-            const second = typeof race.results.second === 'string' ? race.results.second : race.results.second?.driver;
-            const third = typeof race.results.third === 'string' ? race.results.third : race.results.third?.driver;
+        if (race.results && race.results.race) {
+            const first = typeof race.results.race.first === 'string' ? race.results.race.first : race.results.race.first?.driver;
+            const second = typeof race.results.race.second === 'string' ? race.results.race.second : race.results.race.second?.driver;
+            const third = typeof race.results.race.third === 'string' ? race.results.race.third : race.results.race.third?.driver;
             
             if (first && first !== 'DNS') {
                 const result = standings.find(s => s.driver === first);
@@ -150,7 +150,7 @@ function renderCountdown() {
 }
 
 function renderPointsChart() {
-    const races = data.currentSeason.races.filter(r => r.results);
+    const races = data.currentSeason.races.filter(r => r.results && r.results.race);
     if (races.length === 0) {
         document.getElementById('points-chart').innerHTML = '<p style="color: #86868b; text-align: center; padding: 40px;">Zatím žádné dokončené závody</p>';
         return;
@@ -163,9 +163,9 @@ function renderPointsChart() {
     drivers.forEach(d => driverPoints[d] = 0);
     
     races.forEach((race, index) => {
-        const first = typeof race.results.first === 'string' ? race.results.first : race.results.first?.driver;
-        const second = typeof race.results.second === 'string' ? race.results.second : race.results.second?.driver;
-        const third = typeof race.results.third === 'string' ? race.results.third : race.results.third?.driver;
+        const first = typeof race.results.race.first === 'string' ? race.results.race.first : race.results.race.first?.driver;
+        const second = typeof race.results.race.second === 'string' ? race.results.race.second : race.results.race.second?.driver;
+        const third = typeof race.results.race.third === 'string' ? race.results.race.third : race.results.race.third?.driver;
         
         if (first && first !== 'DNS') driverPoints[first] += 8;
         if (second && second !== 'DNS') driverPoints[second] += 5;
@@ -283,30 +283,62 @@ function getYouTubeEmbedUrl(url) {
     return (match && match[2].length === 11) ? `https://www.youtube.com/embed/${match[2]}` : null;
 }
 
+function formatCarInfo(posData) {
+    if (!posData) return '';
+    const parts = [];
+    if (posData.manufacturer) parts.push(posData.manufacturer);
+    if (posData.model) parts.push(posData.model);
+    if (posData.drivetrain) parts.push(posData.drivetrain);
+    return parts.length > 0 ? ` (${parts.join(' ')})` : '';
+}
+
 function renderRaceCard(race) {
-    const resultsHtml = race.results ? (() => {
+    let resultsHtml = '';
+    
+    if (race.results) {
         const positions = ['first', 'second', 'third', 'fourth', 'fifth'];
         const medals = ['🥇', '🥈', '🥉', '4️⃣', '5️⃣'];
         
-        let html = '<div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #e5e5e7;"><strong>Výsledky:</strong><br>';
-        
-        positions.forEach((pos, index) => {
-            if (race.results[pos]) {
-                const driver = typeof race.results[pos] === 'string' ? race.results[pos] : race.results[pos]?.driver;
-                
-                if (driver && driver !== 'DNS') {
-                    const car = race.results[pos]?.manufacturer || race.results[pos]?.drivetrain ? 
-                        ` (${[race.results[pos]?.manufacturer, race.results[pos]?.drivetrain].filter(Boolean).join(' ')})` : '';
-                    html += `${medals[index]} ${driver}${car}<br>`;
-                } else if (driver === 'DNS') {
-                    html += `${medals[index]} DNS<br>`;
+        // Kvalifikace
+        if (race.results.qualifying) {
+            resultsHtml += '<div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #e5e5e7;"><strong>📋 Kvalifikace:</strong><br>';
+            
+            positions.forEach((pos, index) => {
+                if (race.results.qualifying[pos]) {
+                    const driver = typeof race.results.qualifying[pos] === 'string' ? race.results.qualifying[pos] : race.results.qualifying[pos]?.driver;
+                    
+                    if (driver && driver !== 'DNS') {
+                        const car = formatCarInfo(race.results.qualifying[pos]);
+                        resultsHtml += `${medals[index]} ${driver}${car}<br>`;
+                    } else if (driver === 'DNS') {
+                        resultsHtml += `${medals[index]} DNS<br>`;
+                    }
                 }
-            }
-        });
+            });
+            
+            resultsHtml += '</div>';
+        }
         
-        html += '</div>';
-        return html;
-    })() : '';
+        // Závod
+        if (race.results.race) {
+            resultsHtml += '<div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #e5e5e7;"><strong>🏁 Závod:</strong><br>';
+            
+            positions.forEach((pos, index) => {
+                if (race.results.race[pos]) {
+                    const driver = typeof race.results.race[pos] === 'string' ? race.results.race[pos] : race.results.race[pos]?.driver;
+                    
+                    if (driver && driver !== 'DNS') {
+                        const car = formatCarInfo(race.results.race[pos]);
+                        resultsHtml += `${medals[index]} ${driver}${car}<br>`;
+                    } else if (driver === 'DNS') {
+                        resultsHtml += `${medals[index]} DNS<br>`;
+                    }
+                }
+            });
+            
+            resultsHtml += '</div>';
+        }
+    }
 
     const youtubeUrl = race.youtubeUrl ? getYouTubeEmbedUrl(race.youtubeUrl) : null;
     const videoHtml = youtubeUrl ? `
@@ -405,10 +437,19 @@ function applyFilters() {
         past = past.filter(r => {
             if (!r.results) return false;
             const positions = ['first', 'second', 'third', 'fourth', 'fifth'];
-            return positions.some(pos => {
-                const manu = r.results[pos]?.manufacturer || '';
-                return manu.toLowerCase().includes(manufacturer);
-            });
+            
+            const checkInSection = (section) => {
+                return positions.some(pos => {
+                    const manu = section[pos]?.manufacturer || '';
+                    const model = section[pos]?.model || '';
+                    return manu.toLowerCase().includes(manufacturer) || model.toLowerCase().includes(manufacturer);
+                });
+            };
+            
+            let match = false;
+            if (r.results.qualifying) match = match || checkInSection(r.results.qualifying);
+            if (r.results.race) match = match || checkInSection(r.results.race);
+            return match;
         });
     }
     
@@ -416,10 +457,18 @@ function applyFilters() {
         past = past.filter(r => {
             if (!r.results) return false;
             const positions = ['first', 'second', 'third', 'fourth', 'fifth'];
-            return positions.some(pos => {
-                const dt = r.results[pos]?.drivetrain || '';
-                return dt.toLowerCase().includes(drivetrain);
-            });
+            
+            const checkInSection = (section) => {
+                return positions.some(pos => {
+                    const dt = section[pos]?.drivetrain || '';
+                    return dt.toLowerCase().includes(drivetrain);
+                });
+            };
+            
+            let match = false;
+            if (r.results.qualifying) match = match || checkInSection(r.results.qualifying);
+            if (r.results.race) match = match || checkInSection(r.results.race);
+            return match;
         });
     }
     
@@ -524,38 +573,88 @@ document.getElementById('results-form').addEventListener('submit', (e) => {
     const raceIndex = document.getElementById('select-race').value;
     const race = data.currentSeason.races.filter(r => !r.results)[raceIndex];
     
+    // Kvalifikace
     race.results = {
-        first: {
-            driver: document.getElementById('pos1-driver').value,
-            manufacturer: document.getElementById('pos1-manufacturer').value,
-            drivetrain: document.getElementById('pos1-drivetrain').value
+        qualifying: {
+            first: {
+                driver: document.getElementById('qual-pos1-driver').value,
+                manufacturer: document.getElementById('qual-pos1-manufacturer').value,
+                model: document.getElementById('qual-pos1-model').value,
+                drivetrain: document.getElementById('qual-pos1-drivetrain').value
+            },
+            second: {
+                driver: document.getElementById('qual-pos2-driver').value,
+                manufacturer: document.getElementById('qual-pos2-manufacturer').value,
+                model: document.getElementById('qual-pos2-model').value,
+                drivetrain: document.getElementById('qual-pos2-drivetrain').value
+            },
+            third: {
+                driver: document.getElementById('qual-pos3-driver').value,
+                manufacturer: document.getElementById('qual-pos3-manufacturer').value,
+                model: document.getElementById('qual-pos3-model').value,
+                drivetrain: document.getElementById('qual-pos3-drivetrain').value
+            }
         },
-        second: {
-            driver: document.getElementById('pos2-driver').value,
-            manufacturer: document.getElementById('pos2-manufacturer').value,
-            drivetrain: document.getElementById('pos2-drivetrain').value
-        },
-        third: {
-            driver: document.getElementById('pos3-driver').value,
-            manufacturer: document.getElementById('pos3-manufacturer').value,
-            drivetrain: document.getElementById('pos3-drivetrain').value
+        race: {
+            first: {
+                driver: document.getElementById('pos1-driver').value,
+                manufacturer: document.getElementById('pos1-manufacturer').value,
+                model: document.getElementById('pos1-model').value,
+                drivetrain: document.getElementById('pos1-drivetrain').value
+            },
+            second: {
+                driver: document.getElementById('pos2-driver').value,
+                manufacturer: document.getElementById('pos2-manufacturer').value,
+                model: document.getElementById('pos2-model').value,
+                drivetrain: document.getElementById('pos2-drivetrain').value
+            },
+            third: {
+                driver: document.getElementById('pos3-driver').value,
+                manufacturer: document.getElementById('pos3-manufacturer').value,
+                model: document.getElementById('pos3-model').value,
+                drivetrain: document.getElementById('pos3-drivetrain').value
+            }
         }
     };
     
+    // 4. a 5. místo pro kvalifikaci
+    const qualPos4Driver = document.getElementById('qual-pos4-driver').value;
+    if (qualPos4Driver) {
+        race.results.qualifying.fourth = {
+            driver: qualPos4Driver,
+            manufacturer: document.getElementById('qual-pos4-manufacturer').value,
+            model: document.getElementById('qual-pos4-model').value,
+            drivetrain: document.getElementById('qual-pos4-drivetrain').value
+        };
+    }
+    
+    const qualPos5Driver = document.getElementById('qual-pos5-driver').value;
+    if (qualPos5Driver) {
+        race.results.qualifying.fifth = {
+            driver: qualPos5Driver,
+            manufacturer: document.getElementById('qual-pos5-manufacturer').value,
+            model: document.getElementById('qual-pos5-model').value,
+            drivetrain: document.getElementById('qual-pos5-drivetrain').value
+        };
+    }
+    
+    // 4. a 5. místo pro závod
     const pos4Driver = document.getElementById('pos4-driver').value;
     if (pos4Driver) {
-        race.results.fourth = {
+        race.results.race.fourth = {
             driver: pos4Driver,
             manufacturer: document.getElementById('pos4-manufacturer').value,
+            model: document.getElementById('pos4-model').value,
             drivetrain: document.getElementById('pos4-drivetrain').value
         };
     }
     
     const pos5Driver = document.getElementById('pos5-driver').value;
     if (pos5Driver) {
-        race.results.fifth = {
+        race.results.race.fifth = {
             driver: pos5Driver,
             manufacturer: document.getElementById('pos5-manufacturer').value,
+            model: document.getElementById('pos5-model').value,
             drivetrain: document.getElementById('pos5-drivetrain').value
         };
     }
