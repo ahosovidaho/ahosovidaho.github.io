@@ -119,10 +119,14 @@
 </head>
 <body>
   <div class="container">
-    <header>
-      <h1>🏁 GT7 Racing Championship</h1>
-      <div class="small">Oficiální přehled závodů a výsledků — live s Firestore</div>
-    </header>
+   <header>
+  <h1>🏁 GT7 Racing Championship</h1>
+  <div class="small">Oficiální přehled závodů a výsledků — live s Firestore</div>
+  <div style="margin-top:10px;">
+    <button id="admin-login-btn" class="btn" onclick="signIn()">🔑 Přihlásit se jako admin</button>
+    <button id="logout-btn" class="btn danger" style="display:none;" onclick="signOutUser()">Odhlásit se</button>
+  </div>
+</header>
 
     <div class="tabs">
       <button class="tab active" onclick="showTab('current', event)">Aktuální sezóna</button>
