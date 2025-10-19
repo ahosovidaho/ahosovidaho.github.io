@@ -15,20 +15,25 @@
         "refuelSpeed": "Normální",
         "additionalInfo": "",
         "results": {
-          "first": {
-            "driver": "Viki",
-            "manufacturer": "",
-            "drivetrain": ""
-          },
-          "second": {
-            "driver": "Maty",
-            "manufacturer": "",
-            "drivetrain": ""
-          },
-          "third": {
-            "driver": "Hardy",
-            "manufacturer": "",
-            "drivetrain": ""
+          "race": {
+            "first": {
+              "driver": "Viki",
+              "manufacturer": "",
+              "model": "",
+              "drivetrain": ""
+            },
+            "second": {
+              "driver": "Maty",
+              "manufacturer": "",
+              "model": "",
+              "drivetrain": ""
+            },
+            "third": {
+              "driver": "Hardy",
+              "manufacturer": "",
+              "model": "",
+              "drivetrain": ""
+            }
           }
         }
       },
@@ -45,20 +50,25 @@
         "refuelSpeed": "Normální",
         "additionalInfo": "",
         "results": {
-          "first": {
-            "driver": "Viki",
-            "manufacturer": "",
-            "drivetrain": ""
-          },
-          "second": {
-            "driver": "Hardy",
-            "manufacturer": "",
-            "drivetrain": ""
-          },
-          "third": {
-            "driver": "Maty",
-            "manufacturer": "",
-            "drivetrain": ""
+          "race": {
+            "first": {
+              "driver": "Viki",
+              "manufacturer": "",
+              "model": "",
+              "drivetrain": ""
+            },
+            "second": {
+              "driver": "Hardy",
+              "manufacturer": "",
+              "model": "",
+              "drivetrain": ""
+            },
+            "third": {
+              "driver": "Maty",
+              "manufacturer": "",
+              "model": "",
+              "drivetrain": ""
+            }
           }
         }
       },
@@ -75,20 +85,25 @@
         "refuelSpeed": "Normální",
         "additionalInfo": "",
         "results": {
-          "first": {
-            "driver": "Hardy",
-            "manufacturer": "",
-            "drivetrain": ""
-          },
-          "second": {
-            "driver": "Viki",
-            "manufacturer": "",
-            "drivetrain": ""
-          },
-          "third": {
-            "driver": "Maty",
-            "manufacturer": "",
-            "drivetrain": ""
+          "race": {
+            "first": {
+              "driver": "Hardy",
+              "manufacturer": "",
+              "model": "",
+              "drivetrain": ""
+            },
+            "second": {
+              "driver": "Viki",
+              "manufacturer": "",
+              "model": "",
+              "drivetrain": ""
+            },
+            "third": {
+              "driver": "Maty",
+              "manufacturer": "",
+              "model": "",
+              "drivetrain": ""
+            }
           }
         }
       },
@@ -105,20 +120,25 @@
         "refuelSpeed": "Normální",
         "additionalInfo": "",
         "results": {
-          "first": {
-            "driver": "Viki",
-            "manufacturer": "",
-            "drivetrain": ""
-          },
-          "second": {
-            "driver": "Maty",
-            "manufacturer": "",
-            "drivetrain": ""
-          },
-          "third": {
-            "driver": "Hardy",
-            "manufacturer": "",
-            "drivetrain": ""
+          "race": {
+            "first": {
+              "driver": "Viki",
+              "manufacturer": "",
+              "model": "",
+              "drivetrain": ""
+            },
+            "second": {
+              "driver": "Maty",
+              "manufacturer": "",
+              "model": "",
+              "drivetrain": ""
+            },
+            "third": {
+              "driver": "Hardy",
+              "manufacturer": "",
+              "model": "",
+              "drivetrain": ""
+            }
           }
         }
       },
@@ -135,20 +155,25 @@
         "refuelSpeed": "Normální",
         "additionalInfo": "",
         "results": {
-          "first": {
-            "driver": "Viki",
-            "manufacturer": "",
-            "drivetrain": ""
-          },
-          "second": {
-            "driver": "Maty",
-            "manufacturer": "",
-            "drivetrain": ""
-          },
-          "third": {
-            "driver": "Hardy",
-            "manufacturer": "",
-            "drivetrain": ""
+          "race": {
+            "first": {
+              "driver": "Viki",
+              "manufacturer": "",
+              "model": "",
+              "drivetrain": ""
+            },
+            "second": {
+              "driver": "Maty",
+              "manufacturer": "",
+              "model": "",
+              "drivetrain": ""
+            },
+            "third": {
+              "driver": "Hardy",
+              "manufacturer": "",
+              "model": "",
+              "drivetrain": ""
+            }
           }
         }
       },
@@ -165,20 +190,25 @@
         "refuelSpeed": "Normální",
         "additionalInfo": "",
         "results": {
-          "first": {
-            "driver": "Maty",
-            "manufacturer": "",
-            "drivetrain": ""
-          },
-          "second": {
-            "driver": "Viki",
-            "manufacturer": "",
-            "drivetrain": ""
-          },
-          "third": {
-            "driver": "Hardy",
-            "manufacturer": "",
-            "drivetrain": ""
+          "race": {
+            "first": {
+              "driver": "Maty",
+              "manufacturer": "",
+              "model": "",
+              "drivetrain": ""
+            },
+            "second": {
+              "driver": "Viki",
+              "manufacturer": "",
+              "model": "",
+              "drivetrain": ""
+            },
+            "third": {
+              "driver": "Hardy",
+              "manufacturer": "",
+              "model": "",
+              "drivetrain": ""
+            }
           }
         },
         "youtubeUrl": "https://youtu.be/2wVeJk9QBBc"
