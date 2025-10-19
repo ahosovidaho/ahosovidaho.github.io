@@ -72,20 +72,28 @@ function calculateStandings() {
             const second = typeof race.results.second === 'string' ? race.results.second : race.results.second?.driver;
             const third = typeof race.results.third === 'string' ? race.results.third : race.results.third?.driver;
             
-            const result = standings.find(s => s.driver === first);
-            if (result) {
-                result.first++;
-                result.points += 8;
+            if (first && first !== 'DNS') {
+                const result = standings.find(s => s.driver === first);
+                if (result) {
+                    result.first++;
+                    result.points += 8;
+                }
             }
-            const result2 = standings.find(s => s.driver === second);
-            if (result2) {
-                result2.second++;
-                result2.points += 5;
+            
+            if (second && second !== 'DNS') {
+                const result2 = standings.find(s => s.driver === second);
+                if (result2) {
+                    result2.second++;
+                    result2.points += 5;
+                }
             }
-            const result3 = standings.find(s => s.driver === third);
-            if (result3) {
-                result3.third++;
-                result3.points += 3;
+            
+            if (third && third !== 'DNS') {
+                const result3 = standings.find(s => s.driver === third);
+                if (result3) {
+                    result3.third++;
+                    result3.points += 3;
+                }
             }
         }
     });
@@ -159,9 +167,9 @@ function renderPointsChart() {
         const second = typeof race.results.second === 'string' ? race.results.second : race.results.second?.driver;
         const third = typeof race.results.third === 'string' ? race.results.third : race.results.third?.driver;
         
-        if (first) driverPoints[first] += 8;
-        if (second) driverPoints[second] += 5;
-        if (third) driverPoints[third] += 3;
+        if (first && first !== 'DNS') driverPoints[first] += 8;
+        if (second && second !== 'DNS') driverPoints[second] += 5;
+        if (third && third !== 'DNS') driverPoints[third] += 3;
         
         const dataPoint = {
             name: race.circuit.substring(0, 15),
@@ -189,7 +197,7 @@ function renderPointsChart() {
         canvas.height = height;
         
         const colors = {
-            'Viki': '#FF1493',
+            'Viki': '#667eea',
             'Mára': '#f093fb',
             'Maty': '#4facfe',
             'Hardy': '#43e97b',
@@ -277,25 +285,27 @@ function getYouTubeEmbedUrl(url) {
 
 function renderRaceCard(race) {
     const resultsHtml = race.results ? (() => {
-        const first = typeof race.results.first === 'string' ? race.results.first : race.results.first?.driver;
-        const second = typeof race.results.second === 'string' ? race.results.second : race.results.second?.driver;
-        const third = typeof race.results.third === 'string' ? race.results.third : race.results.third?.driver;
+        const positions = ['first', 'second', 'third', 'fourth', 'fifth'];
+        const medals = ['🥇', '🥈', '🥉', '4️⃣', '5️⃣'];
         
-        const firstCar = race.results.first?.manufacturer || race.results.first?.drivetrain ? 
-            ` (${[race.results.first?.manufacturer, race.results.first?.drivetrain].filter(Boolean).join(' ')})` : '';
-        const secondCar = race.results.second?.manufacturer || race.results.second?.drivetrain ? 
-            ` (${[race.results.second?.manufacturer, race.results.second?.drivetrain].filter(Boolean).join(' ')})` : '';
-        const thirdCar = race.results.third?.manufacturer || race.results.third?.drivetrain ? 
-            ` (${[race.results.third?.manufacturer, race.results.third?.drivetrain].filter(Boolean).join(' ')})` : '';
+        let html = '<div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #e5e5e7;"><strong>Výsledky:</strong><br>';
         
-        return `
-            <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #e5e5e7;">
-                <strong>Výsledky:</strong><br>
-                🥇 ${first}${firstCar}<br>
-                🥈 ${second}${secondCar}<br>
-                🥉 ${third}${thirdCar}
-            </div>
-        `;
+        positions.forEach((pos, index) => {
+            if (race.results[pos]) {
+                const driver = typeof race.results[pos] === 'string' ? race.results[pos] : race.results[pos]?.driver;
+                
+                if (driver && driver !== 'DNS') {
+                    const car = race.results[pos]?.manufacturer || race.results[pos]?.drivetrain ? 
+                        ` (${[race.results[pos]?.manufacturer, race.results[pos]?.drivetrain].filter(Boolean).join(' ')})` : '';
+                    html += `${medals[index]} ${driver}${car}<br>`;
+                } else if (driver === 'DNS') {
+                    html += `${medals[index]} DNS<br>`;
+                }
+            }
+        });
+        
+        html += '</div>';
+        return html;
     })() : '';
 
     const youtubeUrl = race.youtubeUrl ? getYouTubeEmbedUrl(race.youtubeUrl) : null;
@@ -394,24 +404,22 @@ function applyFilters() {
     if (manufacturer) {
         past = past.filter(r => {
             if (!r.results) return false;
-            const first = r.results.first?.manufacturer || '';
-            const second = r.results.second?.manufacturer || '';
-            const third = r.results.third?.manufacturer || '';
-            return first.toLowerCase().includes(manufacturer) || 
-                   second.toLowerCase().includes(manufacturer) || 
-                   third.toLowerCase().includes(manufacturer);
+            const positions = ['first', 'second', 'third', 'fourth', 'fifth'];
+            return positions.some(pos => {
+                const manu = r.results[pos]?.manufacturer || '';
+                return manu.toLowerCase().includes(manufacturer);
+            });
         });
     }
     
     if (drivetrain) {
         past = past.filter(r => {
             if (!r.results) return false;
-            const first = r.results.first?.drivetrain || '';
-            const second = r.results.second?.drivetrain || '';
-            const third = r.results.third?.drivetrain || '';
-            return first.toLowerCase().includes(drivetrain) || 
-                   second.toLowerCase().includes(drivetrain) || 
-                   third.toLowerCase().includes(drivetrain);
+            const positions = ['first', 'second', 'third', 'fourth', 'fifth'];
+            return positions.some(pos => {
+                const dt = r.results[pos]?.drivetrain || '';
+                return dt.toLowerCase().includes(drivetrain);
+            });
         });
     }
     
@@ -533,6 +541,24 @@ document.getElementById('results-form').addEventListener('submit', (e) => {
             drivetrain: document.getElementById('pos3-drivetrain').value
         }
     };
+    
+    const pos4Driver = document.getElementById('pos4-driver').value;
+    if (pos4Driver) {
+        race.results.fourth = {
+            driver: pos4Driver,
+            manufacturer: document.getElementById('pos4-manufacturer').value,
+            drivetrain: document.getElementById('pos4-drivetrain').value
+        };
+    }
+    
+    const pos5Driver = document.getElementById('pos5-driver').value;
+    if (pos5Driver) {
+        race.results.fifth = {
+            driver: pos5Driver,
+            manufacturer: document.getElementById('pos5-manufacturer').value,
+            drivetrain: document.getElementById('pos5-drivetrain').value
+        };
+    }
 
     const youtubeUrl = document.getElementById('youtube-url').value;
     if (youtubeUrl) {
