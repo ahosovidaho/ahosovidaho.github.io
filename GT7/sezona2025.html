@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GT7 Racing Championship</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🏁 GT7 Racing Championship</h1>
+            <div class="subtitle">Oficiální přehled závodů a výsledků</div>
+        </header>
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('current')">Aktuální sezóna</button>
+            <button class="tab" onclick="showTab('archive')">Archiv</button>
+            <button class="tab" onclick="showTab('admin')">Admin</button>
+        </div>
+        <div id="current-tab">
+            <div id="countdown-container"></div>
+            <div class="section animate-in">
+                <h2>Průběžné pořadí</h2>
+                <table class="standings-table">
+                    <thead>
+                        <tr>
+                            <th>Jezdec</th>
+                            <th>🥇 1. místa</th>
+                            <th>🥈 2. místa</th>
+                            <th>🥉 3. místa</th>
+                            <th>Body</th>
+                        </tr>
+                    </thead>
+                    <tbody id="standings-body"></tbody>
+                </table>
+            </div>
+            <div class="chart-container animate-in">
+                <h2>Vývoj bodů v sezóně</h2>
+                <div id="points-chart"></div>
+            </div>
+            <div class="section">
+                <h2>Nadcházející závody</h2>
+                <div id="upcoming-races"></div>
+            </div>
+            <div class="section">
+                <h2>Proběhlé závody</h2>
+                <div class="filter-bar">
+                    <input type="text" id="filter-manufacturer" class="filter-input" placeholder="🔍 Výrobce (např. Toyota, BMW...)">
+                    <input type="text" id="filter-drivetrain" class="filter-input" placeholder="🔍 Pohon (MR, FR, RR, 4WD, AWD...)">
+                    <input type="text" id="filter-circuit" class="filter-input" placeholder="🔍 Okruh (např. Spa, Monza...)">
+                    <button class="btn" onclick="clearFilters()">Vymazat filtry</button>
+                </div>
+                <div id="past-races"></div>
+            </div>
+        </div>
+        <div id="archive-tab" class="hidden">
+            <div class="section">
+                <h2>Archiv minulých sezón</h2>
+                <div id="archive-content"></div>
+            </div>
+        </div>
+        <div id="admin-tab" class="hidden">
+            <div class="section">
+                <h2>Přidat nový závod</h2>
+                <form id="race-form">
+                    <div class="form-group">
+                        <label>Datum</label>
+                        <input type="date" id="race-date" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Název okruhu</label>
+                        <input type="text" id="circuit-name" placeholder="Např. Spa-Francorchamps" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Povolená vozidla</label>
+                        <input type="text" id="allowed-cars" placeholder="Např. Gr.3" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Index výkonu</label>
+                        <input type="text" id="performance-index" placeholder="Např. 700 PP">
+                    </div>
+                    <div class="form-group">
+                        <label>Tuning</label>
+                        <select id="tuning">
+                            <option value="Povolen">Povolen</option>
+                            <option value="Zakázán">Zakázán</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Pneumatiky</label>
+                        <input type="text" id="tires" placeholder="Např. Racing Hard">
+                    </div>
+                    <div class="form-group">
+                        <label>Počet kol</label>
+                        <input type="number" id="laps" placeholder="10">
+                    </div>
+                    <div class="form-group">
+                        <label>Rychlost opotřebení pneumatik</label>
+                        <input type="text" id="tire-wear" placeholder="Např. x5">
+                    </div>
+                    <div class="form-group">
+                        <label>Rychlost spotřeby paliva</label>
+                        <input type="text" id="fuel-consumption" placeholder="Např. x3">
+                    </div>
+                    <div class="form-group">
+                        <label>Rychlost doplňování paliva v boxech</label>
+                        <input type="text" id="refuel-speed" placeholder="Např. Normální">
+                    </div>
+                    <div class="form-group">
+                        <label>Doplňující informace</label>
+                        <textarea id="additional-info" rows="3" placeholder="Jakékoliv další poznámky..."></textarea>
+                    </div>
+                    <button type="submit" class="btn">Přidat závod</button>
+                </form>
+            </div>
+            <div class="section">
+                <h2>Zadat výsledky závodu</h2>
+                <form id="results-form">
+                    <div class="form-group">
+                        <label>Vyberte závod</label>
+                        <select id="select-race" required></select>
+                    </div>
+                    <h3 style="margin: 20px 0 10px 0;">1. místo</h3>
+                    <div class="form-group">
+                        <label>Jezdec</label>
+                        <select id="pos1-driver" required>
+                            <option value="">Vyberte jezdce</option>
+                            <option value="Viki">Viki</option>
+                            <option value="Mára">Mára</option>
+                            <option value="Maty">Maty</option>
+                            <option value="Hardy">Hardy</option>
+                            <option value="Ondra">Ondra</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Výrobce</label>
+                        <input type="text" id="pos1-manufacturer" placeholder="Např. Toyota, Porsche...">
+                    </div>
+                    <div class="form-group">
+                        <label>Typ pohonu</label>
+                        <input type="text" id="pos1-drivetrain" placeholder="MR, FR, RR, 4WD...">
+                    </div>
+                    <h3 style="margin: 20px 0 10px 0;">2. místo</h3>
+                    <div class="form-group">
+                        <label>Jezdec</label>
+                        <select id="pos2-driver" required>
+                            <option value="">Vyberte jezdce</option>
+                            <option value="Viki">Viki</option>
+                            <option value="Mára">Mára</option>
+                            <option value="Maty">Maty</option>
+                            <option value="Hardy">Hardy</option>
+                            <option value="Ondra">Ondra</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Výrobce</label>
+                        <input type="text" id="pos2-manufacturer" placeholder="Např. Toyota, Porsche...">
+                    </div>
+                    <div class="form-group">
+                        <label>Typ pohonu</label>
+                        <input type="text" id="pos2-drivetrain" placeholder="MR, FR, RR, 4WD...">
+                    </div>
+                    <h3 style="margin: 20px 0 10px 0;">3. místo</h3>
+                    <div class="form-group">
+                        <label>Jezdec</label>
+                        <select id="pos3-driver" required>
+                            <option value="">Vyberte jezdce</option>
+                            <option value="Viki">Viki</option>
+                            <option value="Mára">Mára</option>
+                            <option value="Maty">Maty</option>
+                            <option value="Hardy">Hardy</option>
+                            <option value="Ondra">Ondra</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Výrobce</label>
+                        <input type="text" id="pos3-manufacturer" placeholder="Např. Toyota, Porsche...">
+                    </div>
+                    <div class="form-group">
+                        <label>Typ pohonu</label>
+                        <input type="text" id="pos3-drivetrain" placeholder="MR, FR, RR, 4WD...">
+                    </div>
+                    <div class="form-group">
+                        <label>YouTube URL (nepovinné)</label>
+                        <input type="url" id="youtube-url" placeholder="https://www.youtube.com/watch?v=...">
+                        <small style="color: #86868b; font-size: 0.9em; display: block; margin-top: 5px;">Odkaz na video sestřih ze závodu</small>
+                    </div>
+                    <button type="submit" class="btn">Vygenerovat JSON</button>
+                </form>
+                <div id="json-output-container"></div>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
