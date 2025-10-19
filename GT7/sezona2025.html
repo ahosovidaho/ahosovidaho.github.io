@@ -113,82 +113,133 @@
                     <button type="submit" class="btn">Přidat závod</button>
                 </form>
             </div>
-            <div class="section">
-                <h2>Zadat výsledky závodu</h2>
-                <form id="results-form">
-                    <div class="form-group">
-                        <label>Vyberte závod</label>
-                        <select id="select-race" required></select>
-                    </div>
-                    <h3 style="margin: 20px 0 10px 0;">1. místo</h3>
-                    <div class="form-group">
-                        <label>Jezdec</label>
-                        <select id="pos1-driver" required>
-                            <option value="">Vyberte jezdce</option>
-                            <option value="Viki">Viki</option>
-                            <option value="Mára">Mára</option>
-                            <option value="Maty">Maty</option>
-                            <option value="Hardy">Hardy</option>
-                            <option value="Ondra">Ondra</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Výrobce</label>
-                        <input type="text" id="pos1-manufacturer" placeholder="Např. Toyota, Porsche...">
-                    </div>
-                    <div class="form-group">
-                        <label>Typ pohonu</label>
-                        <input type="text" id="pos1-drivetrain" placeholder="MR, FR, RR, 4WD...">
-                    </div>
-                    <h3 style="margin: 20px 0 10px 0;">2. místo</h3>
-                    <div class="form-group">
-                        <label>Jezdec</label>
-                        <select id="pos2-driver" required>
-                            <option value="">Vyberte jezdce</option>
-                            <option value="Viki">Viki</option>
-                            <option value="Mára">Mára</option>
-                            <option value="Maty">Maty</option>
-                            <option value="Hardy">Hardy</option>
-                            <option value="Ondra">Ondra</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Výrobce</label>
-                        <input type="text" id="pos2-manufacturer" placeholder="Např. Toyota, Porsche...">
-                    </div>
-                    <div class="form-group">
-                        <label>Typ pohonu</label>
-                        <input type="text" id="pos2-drivetrain" placeholder="MR, FR, RR, 4WD...">
-                    </div>
-                    <h3 style="margin: 20px 0 10px 0;">3. místo</h3>
-                    <div class="form-group">
-                        <label>Jezdec</label>
-                        <select id="pos3-driver" required>
-                            <option value="">Vyberte jezdce</option>
-                            <option value="Viki">Viki</option>
-                            <option value="Mára">Mára</option>
-                            <option value="Maty">Maty</option>
-                            <option value="Hardy">Hardy</option>
-                            <option value="Ondra">Ondra</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Výrobce</label>
-                        <input type="text" id="pos3-manufacturer" placeholder="Např. Toyota, Porsche...">
-                    </div>
-                    <div class="form-group">
-                        <label>Typ pohonu</label>
-                        <input type="text" id="pos3-drivetrain" placeholder="MR, FR, RR, 4WD...">
-                    </div>
-                    <div class="form-group">
-                        <label>YouTube URL (nepovinné)</label>
-                        <input type="url" id="youtube-url" placeholder="https://www.youtube.com/watch?v=...">
-                        <small style="color: #86868b; font-size: 0.9em; display: block; margin-top: 5px;">Odkaz na video sestřih ze závodu</small>
-                    </div>
-                    <button type="submit" class="btn">Vygenerovat JSON</button>
-                </form>
-                <div id="json-output-container"></div>
-            </div>
+          <div class="section">
+    <h2>Zadat výsledky závodu</h2>
+    <form id="results-form">
+        <div class="form-group">
+            <label>Vyberte závod</label>
+            <select id="select-race" required></select>
+        </div>
+        
+        <h3 style="margin: 20px 0 10px 0;">1. místo</h3>
+        <div class="form-group">
+            <label>Jezdec</label>
+            <select id="pos1-driver" required>
+                <option value="">Vyberte jezdce</option>
+                <option value="Viki">Viki</option>
+                <option value="Mára">Mára</option>
+                <option value="Maty">Maty</option>
+                <option value="Hardy">Hardy</option>
+                <option value="Ondra">Ondra</option>
+                <option value="DNS">DNS (nezúčastnil se)</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Výrobce</label>
+            <input type="text" id="pos1-manufacturer" placeholder="Např. Toyota, Porsche...">
+        </div>
+        <div class="form-group">
+            <label>Typ pohonu</label>
+            <input type="text" id="pos1-drivetrain" placeholder="MR, FR, RR, 4WD...">
+        </div>
+        
+        <h3 style="margin: 20px 0 10px 0;">2. místo</h3>
+        <div class="form-group">
+            <label>Jezdec</label>
+            <select id="pos2-driver" required>
+                <option value="">Vyberte jezdce</option>
+                <option value="Viki">Viki</option>
+                <option value="Mára">Mára</option>
+                <option value="Maty">Maty</option>
+                <option value="Hardy">Hardy</option>
+                <option value="Ondra">Ondra</option>
+                <option value="DNS">DNS (nezúčastnil se)</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Výrobce</label>
+            <input type="text" id="pos2-manufacturer" placeholder="Např. Toyota, Porsche...">
+        </div>
+        <div class="form-group">
+            <label>Typ pohonu</label>
+            <input type="text" id="pos2-drivetrain" placeholder="MR, FR, RR, 4WD...">
+        </div>
+        
+        <h3 style="margin: 20px 0 10px 0;">3. místo</h3>
+        <div class="form-group">
+            <label>Jezdec</label>
+            <select id="pos3-driver" required>
+                <option value="">Vyberte jezdce</option>
+                <option value="Viki">Viki</option>
+                <option value="Mára">Mára</option>
+                <option value="Maty">Maty</option>
+                <option value="Hardy">Hardy</option>
+                <option value="Ondra">Ondra</option>
+                <option value="DNS">DNS (nezúčastnil se)</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Výrobce</label>
+            <input type="text" id="pos3-manufacturer" placeholder="Např. Toyota, Porsche...">
+        </div>
+        <div class="form-group">
+            <label>Typ pohonu</label>
+            <input type="text" id="pos3-drivetrain" placeholder="MR, FR, RR, 4WD...">
+        </div>
+        
+        <h3 style="margin: 20px 0 10px 0;">4. místo</h3>
+        <div class="form-group">
+            <label>Jezdec</label>
+            <select id="pos4-driver">
+                <option value="">Vyberte jezdce</option>
+                <option value="Viki">Viki</option>
+                <option value="Mára">Mára</option>
+                <option value="Maty">Maty</option>
+                <option value="Hardy">Hardy</option>
+                <option value="Ondra">Ondra</option>
+                <option value="DNS">DNS (nezúčastnil se)</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Výrobce</label>
+            <input type="text" id="pos4-manufacturer" placeholder="Např. Toyota, Porsche...">
+        </div>
+        <div class="form-group">
+            <label>Typ pohonu</label>
+            <input type="text" id="pos4-drivetrain" placeholder="MR, FR, RR, 4WD...">
+        </div>
+        
+        <h3 style="margin: 20px 0 10px 0;">5. místo</h3>
+        <div class="form-group">
+            <label>Jezdec</label>
+            <select id="pos5-driver">
+                <option value="">Vyberte jezdce</option>
+                <option value="Viki">Viki</option>
+                <option value="Mára">Mára</option>
+                <option value="Maty">Maty</option>
+                <option value="Hardy">Hardy</option>
+                <option value="Ondra">Ondra</option>
+                <option value="DNS">DNS (nezúčastnil se)</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Výrobce</label>
+            <input type="text" id="pos5-manufacturer" placeholder="Např. Toyota, Porsche...">
+        </div>
+        <div class="form-group">
+            <label>Typ pohonu</label>
+            <input type="text" id="pos5-drivetrain" placeholder="MR, FR, RR, 4WD...">
+        </div>
+        
+        <div class="form-group">
+            <label>YouTube URL (nepovinné)</label>
+            <input type="url" id="youtube-url" placeholder="https://www.youtube.com/watch?v=...">
+            <small style="color: #86868b; font-size: 0.9em; display: block; margin-top: 5px;">Odkaz na video sestřih ze závodu</small>
+        </div>
+        <button type="submit" class="btn">Vygenerovat JSON</button>
+    </form>
+    <div id="json-output-container"></div>
+</div>
         </div>
     </div>
     <script src="script.js"></script>
