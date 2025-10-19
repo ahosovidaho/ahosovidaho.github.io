@@ -5,25 +5,117 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>GT7 Racing Championship</title>
   <style>
-    /* Základní styly (zkráceno) */
-    body{font-family:Inter,system-ui,Segoe UI,Roboto,Arial;margin:0;background:#f5f5f7;color:#111}
-    .container{max-width:1100px;margin:40px auto;padding:20px}
-    header{background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;padding:24px;border-radius:12px;margin-bottom:20px}
-    h1{margin:0;font-size:28px}
-    .tabs{display:flex;gap:10px;margin:16px 0}
-    .tab{padding:8px 14px;border-radius:8px;border:1px solid #e5e7eb;background:#fff;cursor:pointer}
-    .tab.active{background:#667eea;color:#fff;border-color:#667eea}
-    .section{background:#fff;padding:18px;border-radius:10px;margin-bottom:18px}
-    .btn{background:#667eea;color:#fff;border:none;padding:8px 12px;border-radius:8px;cursor:pointer}
-    .btn.danger{background:#e55353}
-    .form-group{margin-bottom:10px}
-    label{display:block;font-size:13px;margin-bottom:6px}
-    input,select,textarea{width:100%;padding:8px;border:1px solid #ddd;border-radius:8px}
-    .race-card{border-left:4px solid #667eea;padding:12px;margin-bottom:10px;background:#fafafa;border-radius:8px}
-    .admin-list{display:flex;flex-direction:column;gap:8px}
-    .admin-row{display:flex;justify-content:space-between;align-items:center;padding:8px;border-radius:8px;background:#fff;border:1px solid #eee}
-    .small{font-size:13px;color:#666}
+    * { box-sizing: border-box; }
+    body {
+      font-family: Inter, system-ui, Segoe UI, Roboto, Arial;
+      margin: 0;
+      background: #f5f5f7;
+      color: #111;
+    }
+    .container {
+      max-width: 1100px;
+      margin: 40px auto;
+      padding: 20px;
+    }
+    header {
+      background: linear-gradient(135deg,#667eea,#764ba2);
+      color: #fff;
+      padding: 24px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+    }
+    h1 { margin: 0; font-size: 28px; }
+    .tabs {
+      display: flex;
+      gap: 10px;
+      margin: 16px 0;
+    }
+    .tab {
+      padding: 8px 14px;
+      border-radius: 8px;
+      border: 1px solid #e5e7eb;
+      background: #fff;
+      cursor: pointer;
+    }
+    .tab.active {
+      background: #667eea;
+      color: #fff;
+      border-color: #667eea;
+    }
+    .section {
+      background: #fff;
+      padding: 18px;
+      border-radius: 10px;
+      margin-bottom: 18px;
+    }
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+    }
+    label {
+      font-size: 13px;
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+    input, select, textarea {
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+    .grid-results {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 10px;
+    }
+    .btn {
+      background: #667eea;
+      color: white;
+      padding: 8px 12px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .btn.danger { background: #e55353; }
+    .btn:hover { opacity: 0.9; }
+    .hidden { display: none; }
+    .admin-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px;
+      background: #fafafa;
+      border-radius: 6px;
+      border: 1px solid #eee;
+    }
+    .admin-list { display: flex; flex-direction: column; gap: 8px; }
+    .race-card {
+      border-left: 4px solid #667eea;
+      padding: 12px;
+      margin-bottom: 10px;
+      background: #fafafa;
+      border-radius: 8px;
+    }
+    .small { font-size: 13px; color: #666; }
   </style>
+  <!-- Define showTab early so inline onclick handlers can call it without ReferenceError -->
+  <script>
+    // Expose showTab globally before buttons are parsed/clicked
+    window.showTab = function(tab, evt) {
+      // remove active from tabs
+      document.querySelectorAll('.tab').forEach(function(t){ t.classList.remove('active'); });
+      // hide all tab-content (elements with id ending -tab)
+      document.querySelectorAll('[id$="-tab"]').forEach(function(el){ el.classList.add('hidden'); });
+      if (evt && evt.target) evt.target.classList.add('active');
+      var el = document.getElementById(tab + '-tab');
+      if (el) el.classList.remove('hidden');
+    };
+  </script>
 </head>
 <body>
   <div class="container">
@@ -39,11 +131,7 @@
     </div>
 
     <div id="current-tab">
-      <div id="countdown-container"></div>
-      <div class="section">
-        <h2>Proběhlé závody</h2>
-        <div id="past-races"></div>
-      </div>
+      <div id="past-races"></div>
     </div>
 
     <div id="archive-tab" class="hidden">
@@ -87,9 +175,7 @@
             <button type="button" onclick="resetRaceForm()" class="btn" style="background:#999">Zrušit</button>
           </div>
         </form>
-
         <hr style="margin:12px 0">
-
         <h3>Seznam závodů (admin)</h3>
         <div id="admin-race-list" class="admin-list"></div>
       </div>
@@ -102,53 +188,53 @@
             <select id="select-race" required></select>
           </div>
 
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-            <div>
+          <div class="grid-results">
+            <div class="form-group">
               <label>1. místo - Jezdec</label>
               <select id="pos1" required>
                 <option value="">Vyberte jezdce</option>
                 <option>Viki</option><option>Mára</option><option>Maty</option><option>Hardy</option><option>Ondra</option>
               </select>
             </div>
-            <div>
+            <div class="form-group">
               <label>1. místo - Auto</label>
-              <input id="pos1_car" placeholder="Značka / model">
+              <input id="pos1_car">
             </div>
-            <div>
+            <div class="form-group">
               <label>1. místo - Pohon</label>
-              <input id="pos1_drivetrain" placeholder="FR / MR / RR / 4WD">
+              <input id="pos1_drivetrain">
             </div>
 
-            <div>
+            <div class="form-group">
               <label>2. místo - Jezdec</label>
               <select id="pos2" required>
                 <option value="">Vyberte jezdce</option>
                 <option>Viki</option><option>Mára</option><option>Maty</option><option>Hardy</option><option>Ondra</option>
               </select>
             </div>
-            <div>
+            <div class="form-group">
               <label>2. místo - Auto</label>
-              <input id="pos2_car" placeholder="Značka / model">
+              <input id="pos2_car">
             </div>
-            <div>
+            <div class="form-group">
               <label>2. místo - Pohon</label>
-              <input id="pos2_drivetrain" placeholder="FR / MR / RR / 4WD">
+              <input id="pos2_drivetrain">
             </div>
 
-            <div>
+            <div class="form-group">
               <label>3. místo - Jezdec</label>
               <select id="pos3" required>
                 <option value="">Vyberte jezdce</option>
                 <option>Viki</option><option>Mára</option><option>Maty</option><option>Hardy</option><option>Ondra</option>
               </select>
             </div>
-            <div>
+            <div class="form-group">
               <label>3. místo - Auto</label>
-              <input id="pos3_car" placeholder="Značka / model">
+              <input id="pos3_car">
             </div>
-            <div>
+            <div class="form-group">
               <label>3. místo - Pohon</label>
-              <input id="pos3_drivetrain" placeholder="FR / MR / RR / 4WD">
+              <input id="pos3_drivetrain">
             </div>
           </div>
 
@@ -166,7 +252,7 @@
     </div>
   </div>
 
-  <!-- Firebase SDK + konfigurace -->
+  <!-- Firebase SDK -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
     import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
@@ -196,102 +282,132 @@
   </script>
 
   <script>
-    // --- Lokální model ---
-    let data = { currentSeason: { races: [] }, archive: [] };
+    let data = { currentSeason: { races: [] } };
 
-    // --- Utility ---
-    function showTab(tab, evt){ document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active')); document.querySelectorAll('[id$="-tab"]').forEach(t=>t.classList.add('hidden')); if (evt && evt.target) evt.target.classList.add('active'); const el = document.getElementById(tab+'-tab'); if (el) el.classList.remove('hidden'); }
-
-    function formatDate(d){ if(!d) return '-'; const dt = new Date(d); return dt.toLocaleDateString('cs-CZ'); }
+    // local showTab fallback (already defined in head) - ensure exists
+    if (!window.showTab) {
+      window.showTab = function(tab, evt) {
+        document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+        document.querySelectorAll('[id$="-tab"]').forEach(t=>t.classList.add('hidden'));
+        if(evt && evt.target) evt.target.classList.add('active');
+        var el = document.getElementById(tab+'-tab'); if(el) el.classList.remove('hidden');
+      };
+    }
 
     function escapeHtml(s){ if (s===0) return '0'; if (!s) return ''; return String(s).replace(/[&<>\"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+    function formatDate(d){ if(!d) return '-'; const dt = new Date(d); return dt.toLocaleDateString('cs-CZ'); }
 
-    // --- Načítání dat a reaktivní update ---
     function loadData(){
-      const racesCol = window._firestoreCollection(window._firestore, 'races');
-      window._firestoreOnSnapshot(racesCol, snapshot => {
-        const races = [];
-        snapshot.forEach(doc => races.push({ id: doc.id, ...doc.data() }));
-        // uspořádáme podle data
-        races.sort((a,b)=> new Date(a.date) - new Date(b.date));
-        data.currentSeason.races = races;
-        renderAll();
-      });
+      try {
+        const racesCol = window._firestoreCollection(window._firestore,'races');
+        window._firestoreOnSnapshot(racesCol,snapshot=>{
+          const races=[];
+          snapshot.forEach(doc=>races.push({id:doc.id,...doc.data()}));
+          races.sort((a,b)=>new Date(a.date)-new Date(b.date));
+          data.currentSeason.races=races;
+          renderAll();
+        });
+      } catch (err) {
+        console.error('Firestore not initialized', err);
+      }
     }
 
-    // --- Render funkce ---
-    function renderAll(){ renderPastRaces(); renderAdminRaceList(); renderRaceSelect(); renderStandings(); }
+    function renderAll(){ renderPastRaces(); renderAdminRaceList(); renderRaceSelect(); }
 
-    function renderStandings(){ /* jednoduché počítání pro ukázku */
-      const tbody = document.getElementById('standings-body'); if(!tbody) return;
-      const drivers = ['Viki','Mára','Maty','Hardy','Ondra'];
-      const standings = drivers.map(d=>({driver:d,first:0,second:0,third:0,points:0}));
-      data.currentSeason.races.forEach(r=>{ if(!r.results) return; const f = r.results.first?.driver || r.results.first; const s = r.results.second?.driver || r.results.second; const t = r.results.third?.driver || r.results.third; const a = standings.find(x=>x.driver===f); if(a){a.first++;a.points+=8} const b = standings.find(x=>x.driver===s); if(b){b.second++;b.points+=5} const c = standings.find(x=>x.driver===t); if(c){c.third++;c.points+=3} });
-      tbody.innerHTML = standings.sort((a,b)=>b.points-a.points).map(s=>`<tr><td>${escapeHtml(s.driver)}</td><td>${s.first}</td><td>${s.second}</td><td>${s.third}</td><td><strong>${s.points}</strong></td></tr>`).join('');
+    function renderPastRaces(){
+      const c=document.getElementById('past-races');
+      if(!c) return;
+      if(!data.currentSeason.races.length){ c.innerHTML='<p class="small">Žádné závody</p>'; return; }
+      c.innerHTML=data.currentSeason.races.map(r=>{
+        const res = r.results ?
+          `<div class="small" style="margin-top:8px"><strong>Výsledky:</strong><br>🥇 ${escapeHtml(r.results.first?.driver||'')} (${escapeHtml(r.results.first?.car||'')}) - ${escapeHtml(r.results.first?.drivetrain||'')}<br>🥈 ${escapeHtml(r.results.second?.driver||'')} (${escapeHtml(r.results.second?.car||'')}) - ${escapeHtml(r.results.second?.drivetrain||'')}<br>🥉 ${escapeHtml(r.results.third?.driver||'')} (${escapeHtml(r.results.third?.car||'')}) - ${escapeHtml(r.results.third?.drivetrain||'')}</div>` : '';
+        return `<div class="race-card"><div><strong>${escapeHtml(r.circuit)}</strong><div class="small">${formatDate(r.date)}</div></div>${res}</div>`;
+      }).join('');
     }
 
-    function renderPastRaces(){ const container = document.getElementById('past-races'); if(!container) return; if(!data.currentSeason.races.length) { container.innerHTML = '<p class="small">Žádné závody</p>'; return; }
-      container.innerHTML = data.currentSeason.races.map(r=>{
-        const res = r.results ? (`<div style="margin-top:8px"><strong>Výsledky:</strong><br>🥇 ${escapeHtml(r.results.first?.driver||r.results.first||'')} ${r.results.first?.car?'<span class="small">('+escapeHtml(r.results.first.car)+')</span>':''}<br>🥈 ${escapeHtml(r.results.second?.driver||r.results.second||'')} ${r.results.second?.car?'<span class="small">('+escapeHtml(r.results.second.car)+')</span>':''}<br>🥉 ${escapeHtml(r.results.third?.driver||r.results.third||'')} ${r.results.third?.car?'<span class="small">('+escapeHtml(r.results.third.car)+')</span>':''}</div>`) : '';
-        return `<div class="race-card"><div style="display:flex;justify-content:space-between"><div><strong>${escapeHtml(r.circuit||'Neznámý')}</strong><div class="small">${formatDate(r.date)}</div></div><div><span class="small">${escapeHtml(r.manufacturer||'')}</span></div></div><div style="margin-top:8px" class="small">${escapeHtml(r.additionalInfo||'')}</div>${res}</div>`;
-      }).join(''); }
+    function renderAdminRaceList(){
+      const l=document.getElementById('admin-race-list');
+      if(!l) return;
+      l.innerHTML=data.currentSeason.races.map(r=>`
+        <div class="admin-row">
+          <div><strong>${escapeHtml(r.circuit)}</strong><div class="small">${formatDate(r.date)}</div></div>
+          <div style="display:flex;gap:8px">
+            <button class="btn" onclick="editRace('${r.id}')">✏️ Uprav</button>
+            <button class="btn danger" onclick="deleteRace('${r.id}')">🗑️ Smaž</button>
+          </div>
+        </div>`).join('');
+    }
 
-    function renderAdminRaceList(){ const list = document.getElementById('admin-race-list'); if(!list) return; list.innerHTML = data.currentSeason.races.map(r=>{
-        return `<div class="admin-row"><div><strong>${escapeHtml(r.circuit)}</strong> <div class="small">${formatDate(r.date)}</div></div><div style="display:flex;gap:8px"><button class="btn" onclick="editRace('${r.id}')">✏️ Uprav</button><button class="btn danger" onclick="deleteRace('${r.id}')">🗑️ Smaž</button></div></div>`;
-      }).join(''); }
+    function renderRaceSelect(){
+      const s=document.getElementById('select-race');
+      if(!s) return;
+      s.innerHTML='<option value="">Vyberte závod</option>'+data.currentSeason.races.map(r=>`<option value="${r.id}">${escapeHtml(r.circuit)} - ${formatDate(r.date)}</option>`).join('');
+    }
 
-    function renderRaceSelect(){ const sel = document.getElementById('select-race'); if(!sel) return; sel.innerHTML = '<option value="">Vyberte závod</option>' + data.currentSeason.races.map(r=>`<option value="${r.id}">${escapeHtml(r.circuit)} - ${formatDate(r.date)}</option>`).join(''); }
+    async function addRaceToFirestore(race){ await window._firestoreAdd(window._firestoreCollection(window._firestore,'races'),race); }
+    async function updateRaceInFirestore(id,payload){ const ref=window._firestoreDoc(window._firestore,'races',id); await window._firestoreUpdate(ref,payload); }
+    async function deleteRaceFromFirestore(id){ const ref=window._firestoreDoc(window._firestore,'races',id); await window._firestoreDelete(ref); }
 
-    // --- Admin actions: add / edit / delete ---
-    async function addRaceToFirestore(race){ await window._firestoreAdd(window._firestoreCollection(window._firestore,'races'), race); }
-    async function updateRaceInFirestore(id, payload){ const ref = window._firestoreDoc(window._firestore,'races',id); await window._firestoreUpdate(ref, payload); }
-    async function deleteRaceFromFirestore(id){ const ref = window._firestoreDoc(window._firestore,'races',id); await window._firestoreDelete(ref); }
+    function editRace(id){
+      const r=data.currentSeason.races.find(x=>x.id===id);
+      if(!r) return;
+      document.getElementById('edit-id').value=id;
+      document.getElementById('race-date').value=r.date||'';
+      document.getElementById('circuit-name').value=r.circuit||'';
+      document.getElementById('allowed-cars').value=r.cars||'';
+      document.getElementById('manufacturer').value=r.manufacturer||'';
+      document.getElementById('drivetrain').value=r.drivetrain||'';
+      document.getElementById('additional-info').value=r.additionalInfo||'';
+      window.scrollTo({top:0,behavior:'smooth'});
+    }
 
-    // edit form
-    function editRace(id){ const race = data.currentSeason.races.find(r=>r.id===id); if(!race) return; document.getElementById('edit-id').value = id; document.getElementById('race-date').value = race.date || ''; document.getElementById('circuit-name').value = race.circuit || ''; document.getElementById('allowed-cars').value = race.cars || ''; document.getElementById('manufacturer').value = race.manufacturer || ''; document.getElementById('drivetrain').value = race.drivetrain || ''; document.getElementById('additional-info').value = race.additionalInfo || ''; window.scrollTo({top:0,behavior:'smooth'}); }
     function resetRaceForm(){ document.getElementById('edit-id').value=''; document.getElementById('race-form').reset(); }
+    async function deleteRace(id){ if(confirm('Opravdu smazat tento závod?')) await deleteRaceFromFirestore(id); }
 
-    async function deleteRace(id){ if(!confirm('Opravdu smazat tento závod?')) return; try{ await deleteRaceFromFirestore(id); }catch(e){ alert('Chyba při mazání: '+e.message); } }
-
-    // results
     function resetResultsForm(){ document.getElementById('results-form').reset(); }
+    async function saveResultsToFirestore(raceId,results,youtubeUrl){
+      const raceRef=window._firestoreDoc(window._firestore,'races',raceId);
+      await window._firestoreUpdate(raceRef,{results:results,youtubeUrl:youtubeUrl||null});
+    }
 
-    async function saveResultsToFirestore(raceId, results, youtubeUrl){ const raceRef = window._firestoreDoc(window._firestore,'races',raceId); await window._firestoreUpdate(raceRef,{ results: results, youtubeUrl: youtubeUrl || null }); }
-
-    // --- Eventy formulářů ---
-    document.addEventListener('DOMContentLoaded', ()=>{
+    document.addEventListener('DOMContentLoaded',()=>{
       loadData();
 
-      const raceForm = document.getElementById('race-form');
-      raceForm.addEventListener('submit', async (e)=>{
+      document.getElementById('race-form').addEventListener('submit',async e=>{
         e.preventDefault();
-        const editId = document.getElementById('edit-id').value;
-        const payload = {
-          date: document.getElementById('race-date').value,
-          circuit: document.getElementById('circuit-name').value,
-          cars: document.getElementById('allowed-cars').value,
-          manufacturer: document.getElementById('manufacturer').value,
-          drivetrain: document.getElementById('drivetrain').value,
-          additionalInfo: document.getElementById('additional-info').value
+        const editId=document.getElementById('edit-id').value;
+        const payload={
+          date:document.getElementById('race-date').value,
+          circuit:document.getElementById('circuit-name').value,
+          cars:document.getElementById('allowed-cars').value,
+          manufacturer:document.getElementById('manufacturer').value,
+          drivetrain:document.getElementById('drivetrain').value,
+          additionalInfo:document.getElementById('additional-info').value
         };
         try{
-          if(editId){ await updateRaceInFirestore(editId,payload); }
-          else{ await addRaceToFirestore(payload); }
+          if(editId){
+            await updateRaceInFirestore(editId,payload);
+          } else {
+            await addRaceToFirestore(payload);
+          }
           resetRaceForm();
-        }catch(err){ alert('Chyba při ukládání závodu: '+err.message); }
+        } catch(err){ alert('Chyba při ukládání závodu: '+(err.message||err)); }
       });
 
-      const resultsForm = document.getElementById('results-form');
-      resultsForm.addEventListener('submit', async (e)=>{
+      document.getElementById('results-form').addEventListener('submit',async e=>{
         e.preventDefault();
-        const raceId = document.getElementById('select-race').value; if(!raceId){ alert('Vyberte závod'); return; }
+        const raceId = document.getElementById('select-race').value;
+        if(!raceId){ alert('Vyberte závod'); return; }
         const results = {
           first: { driver: document.getElementById('pos1').value, car: document.getElementById('pos1_car').value, drivetrain: document.getElementById('pos1_drivetrain').value },
           second: { driver: document.getElementById('pos2').value, car: document.getElementById('pos2_car').value, drivetrain: document.getElementById('pos2_drivetrain').value },
           third: { driver: document.getElementById('pos3').value, car: document.getElementById('pos3_car').value, drivetrain: document.getElementById('pos3_drivetrain').value }
         };
         const youtubeUrl = document.getElementById('youtube-url').value;
-        try{ await saveResultsToFirestore(raceId, results, youtubeUrl); resetResultsForm(); }catch(err){ alert('Chyba při ukládání výsledků: '+err.message); }
+        try{
+          await saveResultsToFirestore(raceId, results, youtubeUrl);
+          resetResultsForm();
+        } catch(err){ alert('Chyba při ukládání výsledků: '+(err.message||err)); }
       });
     });
   </script>
