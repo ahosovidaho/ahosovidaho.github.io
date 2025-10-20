@@ -21,10 +21,24 @@ const pointsForPosition = { 1: 10, 2: 8, 3: 6, 4: 4, 5: 2 };
 const maxPositions = 5;
 
 function showTab(tab, evt) {
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  document.querySelectorAll('[id$="-tab"]').forEach(t=>t.classList.add('hidden'));
-  evt.target.classList.add('active');
-  document.getElementById(tab+'-tab').classList.remove('hidden');
+  // zruší aktivní třídu ze všech tlačítek
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+
+  // přidá aktivní třídu na aktuální tlačítko
+  if (evt && evt.target) {
+    evt.target.classList.add('active');
+  } else {
+    // fallback - najde tlačítko podle atributu onclick
+    const btn = document.querySelector(`.tab[onclick*="${tab}"]`);
+    if (btn) btn.classList.add('active');
+  }
+
+  // schová všechny záložky
+  document.querySelectorAll('[id$="-tab"]').forEach(t => t.classList.add('hidden'));
+
+  // zobrazí vybranou záložku
+  const activeTab = document.getElementById(tab + '-tab');
+  if (activeTab) activeTab.classList.remove('hidden');
 }
 
 function escapeHtml(s){ if(!s) return ''; return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
