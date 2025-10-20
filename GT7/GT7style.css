@@ -1,0 +1,131 @@
+* { box-sizing: border-box; }
+body {
+  font-family: Inter, system-ui, Segoe UI, Roboto, Arial;
+  margin: 0;
+  background: #f5f5f7;
+  color: #111;
+}
+.container {
+  max-width: 1100px;
+  margin: 40px auto;
+  padding: 20px;
+}
+header {
+  background: linear-gradient(135deg,#667eea,#764ba2);
+  color: #fff;
+  padding: 24px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+}
+h1 { margin: 0; font-size: 28px; }
+.tabs { display: flex; gap: 10px; margin: 16px 0; }
+.tab {
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  cursor: pointer;
+}
+.tab.active {
+  background: #667eea;
+  color: #fff;
+  border-color: #667eea;
+}
+.section {
+  background: #fff;
+  padding: 18px;
+  border-radius: 10px;
+  margin-bottom: 18px;
+}
+.small { font-size: 13px; color: #666; }
+
+.leaderboard-controls {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+.leaderboard-controls input[type="text"],
+.leaderboard-controls input[type="number"] {
+  padding: 5px;
+  font-size: 14px;
+}
+.leaderboard-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+.leaderboard-table th, .leaderboard-table td {
+  padding: 6px 8px;
+  text-align: center;
+  border-bottom: 1px solid #eee;
+}
+.leaderboard-table th {
+  background: #667eea;
+  color: #fff;
+}
+.leaderboard-table tr:nth-child(even) {
+  background: #f7f7f7;
+}
+.leaderboard-table a {
+  color: #667eea;
+  text-decoration: none;
+}
+.leaderboard-table a:hover {
+  text-decoration: underline;
+}
+
+.fun-item {
+  background: #fafafa;
+  padding: 10px;
+  margin-bottom: 8px;
+  border-radius: 8px;
+  border-left: 4px solid #667eea;
+}
+
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+.modal.hidden { display: none; }
+.modal-content {
+  background: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  max-width: 600px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+}
+.close-btn {
+  background: transparent;
+  border: none;
+  font-size: 20px;
+  position: absolute;
+  right: 20px;
+  top: 20px;
+  cursor: pointer;
+}
+.driver-history-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+.driver-history-table th, .driver-history-table td {
+  padding: 6px 8px;
+  border-bottom: 1px solid #eee;
+  text-align: center;
+}
+.driver-history-table th {
+  background: #667eea;
+  color: #fff;
+}
