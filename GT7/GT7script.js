@@ -1,47 +1,66 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-import { getFirestore, collection, addDoc, doc, updateDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
-import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-import Chart from "https://cdn.jsdelivr.net/npm/chart.js";
+// =========================
+// 🧑‍💻 Přihlášení admina
+// =========================
 
-const firebaseConfig = {
-  apiKey: "AIzaSyCkR-AyJK2vFnz0V2HTuz2b3zCaLMxbXtI",
-  authDomain: "test-gt7.firebaseapp.com",
-  projectId: "test-gt7",
-  storageBucket: "test-gt7.firebasestorage.app",
-  messagingSenderId: "928154989107",
-  appId: "1:928154989107:web:20a34d0009fa75bd1ee946",
-  measurementId: "G-1SG8DW1KQ9"
-};
+async function signIn() {
+  console.log("[Auth] Pokus o přihlášení...");
+  try {
+    const result = await signInWithPopup(auth, provider);
+    console.log("[Auth] Přihlášený uživatel:", result.user.email);
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const auth = getAuth(app);
-const provider = new GoogleAuthProvider();
+    if (result.user.email !== ADMIN_EMAIL) {
+      alert("⚠️ Tento účet nemá administrátorská práva.");
+      await signOut(auth);
+    }
+  } catch (e) {
+    console.error("[Auth] Chyba přihlášení:", e);
+    if (e.code === "auth/unauthorized-domain") {
+      alert("❌ Doména není povolená v Firebase Auth.\n\nPřidej doménu webu do sekce Authentication → Settings → Authorized domains.");
+    } else if (e.code === "auth/popup-blocked") {
+      alert("⚠️ Prohlížeč zablokoval vyskakovací okno. Povolení pop-upů může problém vyřešit.");
+    } else {
+      alert("Přihlášení selhalo: " + (e.message || e));
+    }
+  }
+}
 
-const ADMIN_EMAIL = "viktor.tamayo@gmail.com";
-const pointsForPosition = {1:10,2:8,3:6,4:4,5:2};
-const maxPositions = 5;
+async function signOutUser() {
+  console.log("[Auth] Odhlášení...");
+  await signOut(auth);
+}
 
-let allRaces = [];
-window._allRaces = allRaces;
-
-function escapeHtml(s){ if(s===0) return '0'; if(!s) return ''; return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
-function formatDate(d){ if(!d) return '-'; const dt = new Date(d); return dt.toLocaleDateString('cs-CZ'); }
-
-const btnSignIn = document.getElementById('btn-signin');
-const btnSignOut = document.getElementById('btn-signout');
-const userEmailSpan = document.getElementById('user-email');
-const adminForms = document.getElementById('admin-forms');
-const notAdmin = document.getElementById('not-admin');
-
-btnSignIn.addEventListener('click', ()=> signIn());
-btnSignOut.addEventListener('click', ()=> signOutUser());
-
-async function signIn(){ try{ await signInWithPopup(auth, provider); }catch(e){ alert('Přihlášení selhalo: '+(e.message||e)); } }
-async function signOutUser(){ await signOut(auth); }
-
+// ✅ Funkce vystavené pro HTML tlačítka
 window.signIn = signIn;
 window.signOutUser = signOutUser;
+
+// =========================
+// 🪪 Reakce na změnu stavu přihlášení
+// =========================
+onAuthStateChanged(auth, user => {
+  console.log("[Auth] Změna stavu:", user ? user.email : "nepřihlášen");
+  if (user && user.email === ADMIN_EMAIL) {
+    userEmailSpan.textContent = user.email;
+    btnSignIn.classList.add('hidden');
+    btnSignOut.classList.remove('hidden');
+    adminForms.classList.remove('hidden');
+    notAdmin.classList.add('hidden');
+  } else if (user) {
+    userEmailSpan.textContent = user.email;
+    btnSignIn.classList.add('hidden');
+    btnSignOut.classList.remove('hidden');
+    adminForms.classList.add('hidden');
+    notAdmin.classList.remove('hidden');
+  } else {
+    userEmailSpan.textContent = '';
+    btnSignIn.classList.remove('hidden');
+    btnSignOut.classList.add('hidden');
+    adminForms.classList.add('hidden');
+    notAdmin.classList.remove('hidden');
+  }
+});
+
+// 📡 Pomocné ladění — umožní spustit přihlášení z konzole
+window.debugSignIn = signIn;
 
 onAuthStateChanged(auth, user=>{
   if(user && user.email===ADMIN_EMAIL){ userEmailSpan.textContent = user.email; btnSignIn.classList.add('hidden'); btnSignOut.classList.remove('hidden'); adminForms.classList.remove('hidden'); notAdmin.classList.add('hidden'); }
