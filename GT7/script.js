@@ -39,6 +39,7 @@ function renderAll() {
     renderRaceSelect();
     renderCountdown();
     renderPointsChart();
+    renderInterestingStats();
 }
 
 function renderStandings() {
@@ -671,5 +672,217 @@ document.getElementById('results-form').addEventListener('submit', (e) => {
     e.target.reset();
     renderAll();
 });
+
+function renderInterestingStats() {
+    const races = data.currentSeason.races.filter(r => r.results && r.results.race);
+    if (races.length === 0) {
+        document.getElementById('interesting-stats').innerHTML = '<p style="color: #86868b;">Zatím žádné statistiky</p>';
+        return;
+    }
+
+    const drivers = ['Viki', 'Mára', 'Maty', 'Hardy', 'Ondra'];
+    const stats = [];
+
+    // 1. Nejdelší série výher
+    let currentStreak = { driver: null, count: 0 };
+    let maxStreak = { driver: null, count: 0 };
+    
+    races.forEach(race => {
+        const winner = typeof race.results.race.first === 'string' ? race.results.race.first : race.results.race.first?.driver;
+        if (winner && winner !== 'DNS') {
+            if (winner === currentStreak.driver) {
+                currentStreak.count++;
+            } else {
+                currentStreak = { driver: winner, count: 1 };
+            }
+            if (currentStreak.count > maxStreak.count) {
+                maxStreak = { ...currentStreak };
+            }
+        }
+    });
+
+    if (maxStreak.driver) {
+        stats.push({
+            icon: '🔥',
+            label: 'Nejdelší série výher',
+            value: `${maxStreak.count}x`,
+            detail: `${maxStreak.driver} - ${maxStreak.count} ${maxStreak.count === 1 ? 'výhra' : maxStreak.count < 5 ? 'výhry' : 'výher'} v řadě`
+        });
+    }
+
+    // 2. Pole positions
+    const polePositions = {};
+    drivers.forEach(d => polePositions[d] = 0);
+    
+    races.forEach(race => {
+        if (race.results.qualifying && race.results.qualifying.first) {
+            const pole = typeof race.results.qualifying.first === 'string' ? race.results.qualifying.first : race.results.qualifying.first?.driver;
+            if (pole && pole !== 'DNS' && polePositions[pole] !== undefined) {
+                polePositions[pole]++;
+            }
+        }
+    });
+
+    const topPole = Object.entries(polePositions).filter(([_, count]) => count > 0).sort((a, b) => b[1] - a[1])[0];
+    if (topPole) {
+        stats.push({
+            icon: '🏁',
+            label: 'Nejčastější pole position',
+            value: `${topPole[1]}x`,
+            detail: `${topPole[0]} - ${topPole[1]} ${topPole[1] === 1 ? 'pole position' : 'pole positions'}`
+        });
+    }
+
+    // 3. Největší comeback
+    let biggestComeback = { driver: null, from: 0, to: 0, gain: 0 };
+    
+    races.forEach(race => {
+        if (race.results.qualifying && race.results.race) {
+            const qualPositions = ['first', 'second', 'third', 'fourth', 'fifth'];
+            const racePositions = ['first', 'second', 'third', 'fourth', 'fifth'];
+            
+            qualPositions.forEach((qualPos, qualIndex) => {
+                const driver = race.results.qualifying[qualPos]?.driver;
+                if (driver && driver !== 'DNS') {
+                    const raceIndex = racePositions.findIndex(racePos => {
+                        const raceDriver = race.results.race[racePos]?.driver;
+                        return raceDriver === driver;
+                    });
+                    
+                    if (raceIndex !== -1 && raceIndex < qualIndex) {
+                        const gain = qualIndex - raceIndex;
+                        if (gain > biggestComeback.gain) {
+                            biggestComeback = {
+                                driver: driver,
+                                from: qualIndex + 1,
+                                to: raceIndex + 1,
+                                gain: gain
+                            };
+                        }
+                    }
+                }
+            });
+        }
+    });
+
+    if (biggestComeback.driver) {
+        stats.push({
+            icon: '📈',
+            label: 'Největší comeback',
+            value: `+${biggestComeback.gain}`,
+            detail: `${biggestComeback.driver} - z ${biggestComeback.from}. na ${biggestComeback.to}. místo`
+        });
+    }
+
+    // 4. Top performer (nejlepší průměrné umístění)
+    const avgPositions = {};
+    const raceCounts = {};
+    
+    drivers.forEach(d => {
+        avgPositions[d] = 0;
+        raceCounts[d] = 0;
+    });
+
+    races.forEach(race => {
+        const positions = ['first', 'second', 'third', 'fourth', 'fifth'];
+        positions.forEach((pos, index) => {
+            const driver = race.results.race[pos]?.driver;
+            if (driver && driver !== 'DNS' && avgPositions[driver] !== undefined) {
+                avgPositions[driver] += (index + 1);
+                raceCounts[driver]++;
+            }
+        });
+    });
+
+    const avgResults = Object.keys(avgPositions)
+        .filter(d => raceCounts[d] > 0)
+        .map(d => ({
+            driver: d,
+            avg: (avgPositions[d] / raceCounts[d]).toFixed(2)
+        }))
+        .sort((a, b) => a.avg - b.avg);
+
+    if (avgResults.length > 0) {
+        const topPerformer = avgResults[0];
+        stats.push({
+            icon: '🏆',
+            label: 'Nejlepší průměr',
+            value: `${topPerformer.avg}`,
+            detail: `${topPerformer.driver} - průměrné umístění`
+        });
+    }
+
+    // 5. Nejčastější souboj na podiu
+    const podiumPairs = {};
+    
+    races.forEach(race => {
+        const podium = [];
+        ['first', 'second', 'third'].forEach(pos => {
+            const driver = race.results.race[pos]?.driver;
+            if (driver && driver !== 'DNS') {
+                podium.push(driver);
+            }
+        });
+
+        for (let i = 0; i < podium.length; i++) {
+            for (let j = i + 1; j < podium.length; j++) {
+                const pair = [podium[i], podium[j]].sort().join(' vs ');
+                podiumPairs[pair] = (podiumPairs[pair] || 0) + 1;
+            }
+        }
+    });
+
+    const topPair = Object.entries(podiumPairs).sort((a, b) => b[1] - a[1])[0];
+    if (topPair && topPair[1] > 1) {
+        stats.push({
+            icon: '🎯',
+            label: 'Nejčastější souboj na podiu',
+            value: `${topPair[1]}x`,
+            detail: topPair[0]
+        });
+    }
+
+    // 6. Počet DNS
+    const dnsCount = {};
+    drivers.forEach(d => dnsCount[d] = 0);
+    
+    races.forEach(race => {
+        const positions = ['first', 'second', 'third', 'fourth', 'fifth'];
+        positions.forEach(pos => {
+            if (race.results.race[pos]?.driver === 'DNS') {
+                // Zjistit, kdo to byl z kvalifikace
+                if (race.results.qualifying && race.results.qualifying[pos]) {
+                    const driver = race.results.qualifying[pos]?.driver;
+                    if (driver && driver !== 'DNS' && dnsCount[driver] !== undefined) {
+                        dnsCount[driver]++;
+                    }
+                }
+            }
+        });
+    });
+
+    const maxDns = Math.max(...Object.values(dnsCount));
+    if (maxDns > 0) {
+        const dnsDriver = Object.entries(dnsCount).find(([_, count]) => count === maxDns);
+        stats.push({
+            icon: '😢',
+            label: 'Nejvíc DNS',
+            value: `${maxDns}x`,
+            detail: `${dnsDriver[0]}`
+        });
+    }
+
+    // Vykreslení
+    const container = document.getElementById('interesting-stats');
+    container.innerHTML = stats.map(stat => `
+        <div class="stat-card">
+            <div class="stat-icon">${stat.icon}</div>
+            <div class="stat-label">${stat.label}</div>
+            <div class="stat-value">${stat.value}</div>
+            <div class="stat-detail">${stat.detail}</div>
+        </div>
+    `).join('');
+}
+
 
 loadData();
