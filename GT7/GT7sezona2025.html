@@ -5,35 +5,27 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>GT7 Racing Championship 2025</title>
   <link rel="stylesheet" href="GT7style.css">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
   <script>
-    // Robust global showTab - works even if called without event (Safari, mobile) and when main script is module-scoped.
+    // Robust global showTab - works even without event
     window.showTab = function(tab, evt) {
-      // remove active class from all tabs
       document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
 
-      // try to set active on the clicked element; if event missing, find a matching button
       if (evt && evt.target) {
         evt.target.classList.add('active');
       } else {
-        // fallback: find a .tab button whose onclick mentions the tab name
         const btn = Array.from(document.querySelectorAll('.tab')).find(b => {
           const oc = b.getAttribute('onclick') || '';
-          return oc.indexOf("'" + tab + "'") >= 0 || oc.indexOf('"' + tab + '"') >= 0 || oc.indexOf(tab) >= 0;
+          return oc.includes("'" + tab + "'") || oc.includes('"' + tab + '"') || oc.includes(tab);
         });
         if (btn) btn.classList.add('active');
       }
 
-      // hide all tab panels (elements with id ending in -tab)
       document.querySelectorAll('[id$="-tab"]').forEach(el => el.classList.add('hidden'));
 
-      // show requested tab panel
       const panel = document.getElementById(tab + '-tab');
       if (panel) panel.classList.remove('hidden');
     };
   </script>
-
 </head>
 <body>
   <div class="container">
@@ -51,56 +43,30 @@
 
     <div id="current-tab">
       <div class="section">
-        <h2>Průběžné pořadí</h2>
-        <div class="leaderboard-controls">
-          <input type="text" id="search-driver" placeholder="🔍 Hledat jezdce">
-          <label>Min. starty: <input type="number" id="min-starts" value="0" min="0"></label>
-        </div>
-        <div id="leaderboard-container"></div>
-        <canvas id="points-chart" style="margin-top:20px; max-height:400px;"></canvas>
-      </div>
-
-      <div class="section">
-        <h2>Statistiky</h2>
-        <div id="stats-container"></div>
-      </div>
-
-      <div class="section">
-        <h2>Výsledky závodů</h2>
-        <div id="past-races"></div>
+        <h2>🏎️ Aktuální sezóna</h2>
+        <p>Test — aktuální sezóna zobrazuje obsah správně ✅</p>
       </div>
     </div>
 
     <div id="archive-tab" class="hidden">
       <div class="section">
         <h2>Archiv sezón</h2>
-        <div id="archive-content"></div>
+        <p>Test — archiv zobrazen správně ✅</p>
       </div>
     </div>
 
     <div id="hall-tab" class="hidden">
       <div class="section">
         <h2>Hall of Fame 🏆</h2>
-        <div id="hall-of-fame"></div>
-      </div>
-      <div class="section">
-        <h2>Fun facts 🤓</h2>
-        <div id="fun-facts"></div>
+        <p>Test — Hall of Fame funguje ✅</p>
       </div>
     </div>
 
     <div id="admin-tab" class="hidden">
-      <div id="admin-panel"></div>
-    </div>
-  </div>
-
-  <div id="driver-modal" class="modal hidden">
-    <div class="modal-content">
-      <button class="close-btn" onclick="closeDriverModal()">✕</button>
-      <h2 id="driver-name"></h2>
-      <div id="driver-summary"></div>
-      <canvas id="driver-points-chart" style="max-height:300px;margin:15px 0;"></canvas>
-      <div id="driver-race-history"></div>
+      <div class="section">
+        <h2>Admin panel</h2>
+        <p>Test — Admin panel funguje ✅</p>
+      </div>
     </div>
   </div>
 
