@@ -40,6 +40,9 @@ btnSignOut.addEventListener('click', ()=> signOutUser());
 async function signIn(){ try{ await signInWithPopup(auth, provider); }catch(e){ alert('Přihlášení selhalo: '+(e.message||e)); } }
 async function signOutUser(){ await signOut(auth); }
 
+window.signIn = signIn;
+window.signOutUser = signOutUser;
+
 onAuthStateChanged(auth, user=>{
   if(user && user.email===ADMIN_EMAIL){ userEmailSpan.textContent = user.email; btnSignIn.classList.add('hidden'); btnSignOut.classList.remove('hidden'); adminForms.classList.remove('hidden'); notAdmin.classList.add('hidden'); }
   else if(user){ userEmailSpan.textContent = user.email; btnSignIn.classList.add('hidden'); btnSignOut.classList.remove('hidden'); adminForms.classList.add('hidden'); notAdmin.classList.remove('hidden'); }
