@@ -5,13 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>GT7 Racing Championship 2025</title>
   <link rel="stylesheet" href="GT7style.css" />
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
+    // Jednoduché přepínání tabů
     window.showTab = function(tab, evt) {
       document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
       if (evt && evt.target) evt.target.classList.add('active');
       else {
-        const btn = Array.from(document.querySelectorAll('.tab')).find(b=>{ const oc = b.getAttribute('onclick')||''; return oc.includes("'" + tab + "'") || oc.includes('"' + tab + '"') || oc.includes(tab); });
+        const btn = Array.from(document.querySelectorAll('.tab')).find(b=>{
+          const oc = b.getAttribute('onclick')||'';
+          return oc.includes("'" + tab + "'") || oc.includes('"' + tab + '"') || oc.includes(tab);
+        });
         if (btn) btn.classList.add('active');
       }
       document.querySelectorAll('[id$="-tab"]').forEach(el=>el.classList.add('hidden'));
@@ -76,6 +79,8 @@
 
   </div>
 
+  <!-- ✅ Chart.js přes UMD -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
   <script type="module" src="GT7script.js"></script>
 </body>
 </html>
