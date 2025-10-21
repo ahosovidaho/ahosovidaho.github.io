@@ -145,6 +145,11 @@ function renderPastRaces(races, year){
   const container = document.getElementById('past-races');
   const list = races.filter(r=> new Date(r.date).getFullYear()===year);
   if(!list.length){ container.innerHTML = '<p class="small">Žádné závody v aktuální sezóně</p>'; return; }
+
+// Seřadíme od nejnovějšího po nejstarší
+  list.sort((a, b) => new Date(b.date) - new Date(a.date));
+  
+  
   container.innerHTML = list.map(r=>{ 
     let resultsHtml='';
     if(r.results){
