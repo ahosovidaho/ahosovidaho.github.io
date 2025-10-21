@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>GT7 Racing Championship 2025</title>
+  <link rel="stylesheet" href="./GT7style.css" />
+  <script>
+    // showTab early so inline onclick handlers can call it
+    window.showTab = function(tab, evt){
+      document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+      if(evt && evt.target) evt.target.classList.add('active');
+      document.querySelectorAll('.tab-content').forEach(el=>el.classList.add('hidden'));
+      const el = document.getElementById(tab);
+      if(el) el.classList.remove('hidden');
+    };
+  </script>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🏁 GT7 Racing Championship 2025</h1>
+      <div class="small">Přehled závodů, výsledků a statistik</div>
+      <div class="auth-controls">
+        <button id="btn-signin" class="btn" onclick="signIn()">Přihlásit se (admin)</button>
+        <button id="btn-signout" class="btn secondary hidden" onclick="signOutUser()">Odhlásit se</button>
+        <span id="user-email" class="small"></span>
+      </div>
+    </header>
+
+    <div class="tabs">
+      <button class="tab active" onclick="showTab('current', event)">Aktuální sezóna</button>
+      <button class="tab" onclick="showTab('archive', event)">Archiv</button>
+      <button class="tab" onclick="showTab('hall', event)">Hall of Fame</button>
+      <button class="tab" onclick="showTab('admin', event)">Admin</button>
+    </div>
+
+    <main>
+      <section id="current" class="tab-content">
+        <div id="upcoming-container"></div>
+
+        <div class="section">
+          <h2>Průběžné pořadí</h2>
+          <div class="leaderboard-controls">
+            <input id="search-driver" placeholder="🔍 Hledat jezdce">
+            <label>Min. starty: <input id="min-starts" type="number" min="0" value="0"></label>
+            <label>Sezóna: <select id="season-select"></select></label>
+          </div>
+          <div id="leaderboard-container"></div>
+          <canvas id="points-chart" style="margin-top:20px; max-height:400px;"></canvas>
+        </div>
+
+        <div class="section">
+          <h2>Statistiky</h2>
+          <div id="stats-container"></div>
+        </div>
+
+        <div class="section">
+          <h2>Výsledky závodů</h2>
+          <div id="past-races"></div>
+        </div>
+      </section>
+
+      <section id="archive" class="tab-content hidden">
+        <div class="section">
+          <h2>Archiv sezón</h2>
+          <div id="archive-content"></div>
+        </div>
+      </section>
+
+      <section id="hall" class="tab-content hidden">
+        <div class="section">
+          <h2>Hall of Fame 🏆</h2>
+          <div id="hall-of-fame"></div>
+          <canvas id="hall-bar-chart" style="max-height:300px;margin-top:12px;"></canvas>
+        </div>
+        <div class="section">
+          <h2>Fun facts 🤓</h2>
+          <div id="fun-facts"></div>
+        </div>
+      </section>
+
+      <section id="admin" class="tab-content hidden">
+        <div class="section">
+          <h2>Admin</h2>
+          <div id="admin-forms" class="hidden">
+            <h3>Přidat / upravit závod</h3>
+            <form id="race-form">
+              <input type="hidden" id="edit-id" />
+              <div class="form-row">
+                <label>Datum: <input type="datetime-local" id="race-date" required></label>
+                <label>Okruh: <input id="circuit-name" required></label>
+              </div>
+              <div class="form-row">
+                <label>Povolená auta: <input id="allowed-cars" placeholder="např. Gr.3"></label>
+                <label>PP limit: <input type="number" id="pp-limit" placeholder="730"></label>
+              </div>
+              <div class="form-row">
+                <label>BoP povolena: <select id="bop-enabled"><option value="true">Ano</option><option value="false" selected>Ne</option></select></label>
+                <label>Tuning povolen: <select id="tuning-allowed"><option value="true">Ano</option><option value="false" selected>Ne</option></select></label>
+              </div>
+              <div class="form-row">
+                <label>Kategorie pneumatik: <select id="tire-category"><option value="Komfortní">Komfortní</option><option value="Sportovní">Sportovní</option><option value="Závodní">Závodní</option></select></label>
+                <label>Povinná směs: <select id="mandatory-compound"><option value="Bez povinné">Bez povinné</option><option value="Měkká">Měkká</option><option value="Střední">Střední</option><option value="Tvrdá">Tvrdá</option></select></label>
+              </div>
+              <div class="form-row">
+                <label>Počet kol: <input type="number" id="laps" value="10"></label>
+                <label>Spotřeba paliva (x): <input type="number" id="fuel-consumption" value="1"></label>
+              </div>
+              <div class="form-row">
+                <label>Opotřebení pneumatik (x): <input type="number" id="tire-wear" value="1"></label>
+                <label>Rychlost tankování (l/s): <input type="number" id="refuel-speed" value="5"></label>
+              </div>
+              <div style="margin-top:8px">
+                <button class="btn" type="submit">Uložit závod</button>
+                <button type="button" class="btn secondary" onclick="resetRaceForm()">Reset</button>
+              </div>
+            </form>
+
+            <hr>
+
+            <h3>Zadat výsledky (1.–5. místo + DNS)</h3>
+            <form id="results-form">
+              <label>Vyber závod: <select id="select-race"></select></label>
+              <div id="positions-container" class="grid-results"></div>
+              <div style="margin-top:8px">
+                <label>YouTube URL: <input type="url" id="youtube-url" placeholder="https://www.youtube.com/watch?v=..."></label>
+                <button class="btn" type="submit">Uložit výsledky</button>
+                <button type="button" class="btn secondary" onclick="resetResultsForm()">Reset</button>
+              </div>
+            </form>
+
+            <hr>
+            <h3>Seznam závodů (admin)</h3>
+            <div id="admin-race-list" class="admin-list"></div>
+          </div>
+          <div id="not-admin" class="small">Přihlaste se jako admin (Google) pro úpravy.</div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- driver modal -->
+  <div id="driver-modal" class="modal hidden">
+    <div class="modal-content">
+      <button class="close-btn" onclick="closeDriverModal()">✕</button>
+      <h2 id="driver-name"></h2>
+      <div id="driver-summary"></div>
+      <canvas id="driver-points-chart" style="max-height:300px;margin:10px 0;"></canvas>
+      <div id="driver-race-history"></div>
+    </div>
+  </div>
+
+  <!-- Chart.js UMD (global Chart) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+
+  <!-- App script (module) -->
+  <script type="module" src="./GT7script.js"></script>
+</body>
+</html>
