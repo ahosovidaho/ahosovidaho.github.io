@@ -95,6 +95,68 @@
                 <label>Povolená auta: <input id="allowed-cars" placeholder="např. Gr.3"></label>
                 <label>PP limit: <input type="number" id="pp-limit" placeholder="730"></label>
               </div>
+              
+              <div class="form-group">
+  <label>Maximální PP</label>
+  <input type="number" id="pp-limit" placeholder="např. 730">
+</div>
+
+<div class="form-group">
+  <label>Rovnováha výkonu (BoP)</label>
+  <select id="bop-enabled">
+    <option value="true">Zapnuto</option>
+    <option value="false">Vypnuto</option>
+  </select>
+</div>
+
+<div class="form-group">
+  <label>Povolený tuning</label>
+  <select id="tuning-allowed">
+    <option value="false">Zakázán</option>
+    <option value="true">Povolen</option>
+  </select>
+</div>
+
+<div class="form-group">
+  <label>Kategorie pneumatik</label>
+  <select id="tire-category">
+    <option value="Komfortní">Komfortní</option>
+    <option value="Sportovní">Sportovní</option>
+    <option value="Závodní">Závodní</option>
+  </select>
+</div>
+
+<div class="form-group">
+  <label>Povinná směs</label>
+  <select id="mandatory-compound">
+    <option value="Bez povinné směsi">Bez povinné směsi</option>
+    <option value="Měkká">Měkká</option>
+    <option value="Střední">Střední</option>
+    <option value="Tvrdá">Tvrdá</option>
+  </select>
+</div>
+
+<div class="form-group">
+  <label>Počet kol</label>
+  <input type="number" id="laps" placeholder="např. 15">
+</div>
+
+<div class="form-group">
+  <label>Spotřeba paliva (násobek)</label>
+  <input type="number" id="fuel-consumption" placeholder="např. 3">
+</div>
+
+<div class="form-group">
+  <label>Opotřebení pneumatik (násobek)</label>
+  <input type="number" id="tire-wear" placeholder="např. 5">
+</div>
+
+<div class="form-group">
+  <label>Rychlost tankování (l/s)</label>
+  <input type="number" id="refuel-speed" placeholder="např. 6">
+</div>
+              
+              
               <div class="form-row">
                 <label>BoP povolena: <select id="bop-enabled"><option value="true">Ano</option><option value="false" selected>Ne</option></select></label>
                 <label>Tuning povolen: <select id="tuning-allowed"><option value="true">Ano</option><option value="false" selected>Ne</option></select></label>
