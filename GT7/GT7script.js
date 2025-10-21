@@ -25,19 +25,4 @@ window.showTab = function(tabName) {
   document.getElementById(tabName).classList.add('active');
 };
 
-function renderPastRaces(races) {
-  const container = document.getElementById('past-races');
-  container.innerHTML = races.map(race => {
-    const resultsHtml = race.results
-      ? `<div class="small"><strong>Výsledky:</strong><br>
-        🥇 ${race.results.pos1?.driver || '-'}<br>
-        🥈 ${race.results.pos2?.driver || '-'}<br>
-        🥉 ${race.results.pos3?.driver || '-'}
-        </div>`
-      : '<div class="small">Žádné výsledky</div>';
-    const videoHtml = race.youtubeUrl
-      ? `<iframe class="youtube-preview" src="${race.youtubeUrl.replace('watch?v=', 'embed/').replace('youtu.be/', 'youtube.com/embed/')}" allowfullscreen></iframe>`
-      : '<div class="small">🎥 Video zatím není k dispozici.</div>';
-    return `<div class="section"><strong>${race.circuit}</strong><br>${resultsHtml}${videoHtml}</div>`;
-  }).join('');
-}
+console.log("✅ GT7script.js načteno správně.");
