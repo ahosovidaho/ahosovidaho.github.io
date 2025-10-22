@@ -1,33 +1,106 @@
 <!DOCTYPE html>
 <html lang="cs">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>!HRIC-PIC-MA-MA-TAMA! GT7 Sezóna 2025</title>
-  <link rel="stylesheet" href="GT7style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>HRIC-PIC-MA-MA-TAMA GT7 Sezóna 2025</title>
+  <link rel="stylesheet" href="GT7style.css" />
   <script type="module" src="GT7script.js" defer></script>
 </head>
 <body>
   <header>
-    <h1>GT7 Sezóna 2025</h1>
-    <div id="user-info">
-      Přihlášený uživatel: <span id="user-name">Nepřihlášen</span>
+    <h1>HRIC-PIC-MA-MA-TAMA GT7 Sezóna 2025</h1>
+
+    <div id="auth-bar">
+      <button id="btn-signin">Přihlásit (Google)</button>
+      <button id="btn-signout" class="hidden">Odhlásit</button>
+      <span id="user-email" style="margin-left:1rem;">&nbsp;</span>
+    </div>
+
+    <div id="admin-forms" class="hidden" style="margin-top:0.5rem;">
+      <!-- zobrazeno pouze adminům -->
+      <small>Admin režim</small>
+    </div>
+    <div id="not-admin" style="margin-top:0.5rem;">
+      <small>Neregistrovaný uživatel</small>
     </div>
   </header>
 
   <main>
-    <section id="chart-section">
-      <canvas id="resultsChart" width="400" height="200"></canvas>
+    <section id="racesSection" class="visible">
+      <h2>Přehled závodů</h2>
+      <div id="upcoming-container"></div>
+      <div id="raceList" class="card-grid"></div>
     </section>
 
-    <section id="results">
-      <h2>Výsledky závodů</h2>
-      <div id="race-list"></div>
+    <section id="standingsSection">
+      <h2>Průběžné pořadí</h2>
+      <div id="leaderboard-container"></div>
+      <canvas id="points-chart" style="width:100%; height:250px;"></canvas>
+    </section>
+
+    <section id="pastSection">
+      <h2>Proběhlé závody</h2>
+      <div id="past-races"></div>
+    </section>
+
+    <section id="h2hSection">
+      <h2>Head to Head</h2>
+      <div>
+        <input id="h2h-a" placeholder="Jezdec A" />
+        <input id="h2h-b" placeholder="Jezdec B" />
+        <select id="h2h-season"><option value="all">All-time</option></select>
+        <button id="h2h-run">Porovnat</button>
+      </div>
+      <div id="h2h-result"></div>
+    </section>
+
+    <section id="adminSection" class="admin">
+      <h2>Admin – správa závodů</h2>
+
+      <form id="race-form">
+        <input type="hidden" id="edit-id" />
+        <label>Okruh <input id="circuit-name" /></label>
+        <label>Datum <input type="datetime-local" id="race-date" /></label>
+        <label>Povolená auta <input id="allowed-cars" /></label>
+        <button type="submit">Uložit závod</button>
+        <button type="button" onclick="resetRaceForm()">Reset</button>
+      </form>
+
+      <h3>Ukládání výsledků</h3>
+      <form id="results-form">
+        <label>Vyber závod
+          <select id="select-race"></select>
+        </label>
+        <div id="positions-container"></div>
+        <button type="submit">Uložit výsledky</button>
+        <button type="button" onclick="resetResultsForm()">Reset</button>
+      </form>
+
+      <div id="admin-race-list" class="admin-races"></div>
+    </section>
+
+    <section id="profileSection">
+      <h2>Můj profil</h2>
+      <div id="profile-view">
+        <div id="profile-name"></div>
+        <div id="profile-email"></div>
+        <div id="profile-team"></div>
+        <div id="profile-bio"></div>
+      </div>
+
+      <form id="profile-form">
+        <label>Nick <input id="profile-nick" /></label>
+        <label>Tým <input id="profile-team-input" /></label>
+        <label>Bio <textarea id="profile-bio-input"></textarea></label>
+        <label>Preferovaný styl <input id="profile-preferred" /></label>
+        <button type="submit">Uložit profil</button>
+      </form>
     </section>
   </main>
 
   <footer>
-    <p>© 2025 HRIC-PIC-MA-MA-TAMA Racing League</p>
+    <p>© 2025 VIKI for HRIC-PIC-MA-MA-TAMA GT7 Championship</p>
   </footer>
 </body>
 </html>
