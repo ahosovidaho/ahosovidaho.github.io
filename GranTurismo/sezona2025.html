@@ -164,7 +164,7 @@ function naplnPoradi(){
 }
 
 // --- Graf body ---
-import Chart from 'https://cdn.jsdelivr.net/npm/chart.js';
+import { Chart } from 'https://cdn.jsdelivr.net/npm/chart.js';
 function vykresliGraf(){
   const ctx=document.getElementById('grafBody').getContext('2d');
   const labels = zavody.map(z=>z.nazev);
