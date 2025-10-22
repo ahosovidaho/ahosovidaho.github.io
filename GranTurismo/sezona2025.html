@@ -16,8 +16,6 @@
   th, td { border:1px solid #444; padding:8px; text-align:center; }
   th { background:#222; }
   canvas { max-width:100%; height:auto; }
-  input, select { padding:5px; margin:5px; }
-  button { padding:5px 10px; margin:5px; cursor:pointer; }
 </style>
 <!-- Firebase SDKs -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -84,27 +82,7 @@
 <section id="admin">
   <h2>Admin</h2>
   <button id="loginBtn">Přihlásit se přes Google</button>
-  <div id="adminBanner">
-    <h3>Zadání nového závodu</h3>
-    <form id="raceForm">
-      Datum a čas: <input type="datetime-local" id="raceDate"><br>
-      Název závodu: <input type="text" id="raceName"><br>
-      Trať: <input type="text" id="raceTrack"><br>
-      Kategorie: 
-      <select id="raceCategory">
-        <option>Gr.1</option>
-        <option>Gr.2</option>
-        <option>Gr.3</option>
-        <option>open</option>
-      </select><br>
-      Povolená vozidla: <input type="text" id="raceVehicles"><br>
-      Tuning: <select id="raceTuning"><option>ANO</option><option>NE</option></select><br>
-      Povinný pitstop: <select id="racePitstop"><option>ANO</option><option>NE</option></select><br>
-      Pneumatiky: <select id="raceTyres"><option>Slick</option><option>Rain</option></select><br>
-      Doplňující info: <input type="text" id="raceInfo"><br>
-      <button type="submit">Uložit nový závod</button>
-    </form>
-  </div>
+  <div id="adminBanner">Zadávání závodů</div>
 </section>
 
 <script>
@@ -140,26 +118,21 @@
     }).catch(console.error);
   });
 
+  // --- DATA ---
   const drivers = ["Viki","Mára","Maty","Hardy","Ondra"];
+  const resultsData = [
+    {date:"01:03:25 20:00", race:"American Muscle", track:"Daytona road circuit", order:["Viki","Maty","Hardy","DNS","DNS"]},
+    {date:"05:03:25 20:00", race:"Limonádový Joe", track:"Red Bull Ring", order:["Viki","Hardy","Maty","DNS","DNS"]},
+    {date:"10:03:25 20:00", race:"Forza Italia", track:"Monza", order:["Hardy","Viki","Maty","DNS","DNS"]},
+    {date:"15:03:25 20:00", race:"Dovolená v Chorvatsku", track:"Dragon Trail - přímořská trať", order:["Viki","Maty","Hardy","DNS","DNS"]},
+    {date:"20:03:25 20:00", race:"Tokyo Drift", track:"Suzuka", order:["Viki","Maty","Hardy","DNS","DNS"]},
+    {date:"25:03:25 20:00", race:"Po stopách Jamese Bonda", track:"Brands Hatch", order:["Maty","Viki","Hardy","DNS","DNS"]},
+    {date:"30:03:25 20:00", race:"24h Le Mans", track:"Le Mans", order:["Viki","Hardy","Maty","DNS","DNS"]}
+  ];
   const pointsMap = [10,8,6,4,2]; //1.-5.místo
 
-  let resultsData = [];
-
-  // --- LOAD AND RENDER ---
-  function renderAll(){
-    // Tabulka výsledků
-    const tbodyResults = document.querySelector('#results tbody');
-    tbodyResults.innerHTML="";
-    resultsData.slice().reverse().forEach(r=>{
-      const tr = document.createElement('tr');
-      tr.innerHTML = `<td>${r.date}</td><td>${r.race} / ${r.track}</td>` +
-        r.order.map(d=>`<td>${d}</td>`).join('');
-      tbodyResults.appendChild(tr);
-    });
-
-    // Pořadí
-    const tbodyStandings = document.querySelector('#standings tbody');
-    tbodyStandings.innerHTML="";
+  // --- VYPOČET POŘADÍ ---
+  function calculateStandings(){
     const standings = {};
     drivers.forEach(d=>standings[d]={points:0,podium:0,dns:0});
     resultsData.forEach(r=>{
@@ -169,58 +142,55 @@
         if(i<3) standings[d].podium++;
       });
     });
-    Object.entries(standings).sort((a,b)=>b[1].points - a[1].points)
-      .forEach(([name,data])=>{
-        const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${name}</td><td>${data.points}</td><td>${data.podium}</td><td>${data.dns}</td>`;
-        tbodyStandings.appendChild(tr);
-      });
-
-    // Graf
-    const ctx = document.getElementById('pointsChart').getContext('2d');
-    const datasets = drivers.map(d=>{
-      let sum=0;
-      const data = resultsData.map(r=>{
-        const idx = r.order.indexOf(d);
-        if(idx==-1 || r.order[idx]==="DNS") return sum;
-        sum += pointsMap[idx]||0;
-        return sum;
-      });
-      return {label:d,data, borderColor:getRandomColor(), fill:false, tension:0.1};
-    });
-    if(window.pointsChart) window.pointsChart.destroy();
-    window.pointsChart = new Chart(ctx,{type:'line', data:{labels:resultsData.map(r=>r.race), datasets}, options:{responsive:true, plugins:{legend:{labels:{color:'#fff'}}}, scales:{x:{ticks:{color:'#fff'}},y:{ticks:{color:'#fff'}}}}});
+    return Object.entries(standings).sort((a,b)=>b[1].points - a[1].points);
   }
 
-  function getRandomColor(){ const letters="0123456789ABCDEF"; return "#"+Array.from({length:6}).map(()=>letters[Math.floor(Math.random()*16)]).join(''); }
-
-  // --- FETCH FROM FIRESTORE ---
-  db.collection("races").orderBy("date").onSnapshot(snapshot=>{
-    resultsData = snapshot.docs.map(doc=>({id:doc.id, ...doc.data()}));
-    renderAll();
+  // --- VYPSÁNÍ TABULKY ---
+  const tbodyResults = document.querySelector('#results tbody');
+  resultsData.slice().reverse().forEach(r=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${r.date}</td><td>${r.race} / ${r.track}</td>` +
+      r.order.map(d=>`<td>${d}</td>`).join('');
+    tbodyResults.appendChild(tr);
   });
 
-  // --- ADMIN FORM ---
-  document.getElementById('raceForm').addEventListener('submit', e=>{
-    e.preventDefault();
-    const race = {
-      date: document.getElementById('raceDate').value,
-      race: document.getElementById('raceName').value,
-      track: document.getElementById('raceTrack').value,
-      category: document.getElementById('raceCategory').value,
-      vehicles: document.getElementById('raceVehicles').value,
-      tuning: document.getElementById('raceTuning').value,
-      pitstop: document.getElementById('racePitstop').value,
-      tyres: document.getElementById('raceTyres').value,
-      info: document.getElementById('raceInfo').value,
-      order: ["DNS","DNS","DNS","DNS","DNS"] // default, později doplnit výsledky
-    };
-    db.collection("races").add(race).then(()=>{
-      alert("Závod uložen!");
-      document.getElementById('raceForm').reset();
-    }).catch(console.error);
-  });
+  const tbodyStandings = document.querySelector('#standings tbody');
+  function renderStandings(){
+    tbodyStandings.innerHTML="";
+    calculateStandings().forEach(([name,data])=>{
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${name}</td><td>${data.points}</td><td>${data.podium}</td><td>${data.dns}</td>`;
+      tbodyStandings.appendChild(tr);
+    });
+  }
+  renderStandings();
+
+  // --- GRAF BODŮ ---
+  const ctx = document.getElementById('pointsChart').getContext('2d');
+
+  function renderChart(){
+    if (window.pointsChart && typeof window.pointsChart.destroy === 'function'){
+      window.pointsChart.destroy();
+    }
+    const datasets = drivers.map(d=>{
+      return {
+        label:d,
+        data: resultsData.map(r=>{
+          const idx = r.order.indexOf(d);
+          return idx===-1 ? 0 : pointsMap[idx] || 0;
+        }),
+        borderColor: '#' + Math.floor(Math.random()*16777215).toString(16),
+        fill:false
+      };
+    });
+    window.pointsChart = new Chart(ctx,{
+      type:'line',
+      data:{labels: resultsData.map(r=>r.race), datasets},
+      options:{responsive:true, plugins:{legend:{position:'bottom'}}}
+    });
+  }
+  renderChart();
+
 </script>
-
 </body>
 </html>
