@@ -4,17 +4,17 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Hric-Pic-Ma-Ma-Tama Championship 2025</title>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
-body { background:#111; color:#fff; font-family:-apple-system, BlinkMacSystemFont, sans-serif; margin:0; padding:0;}
-header { text-align:center; padding:20px; color:#0af; }
-nav { display:flex; justify-content:center; background:#222; }
-nav button { background:#222; color:#fff; border:none; padding:10px 20px; cursor:pointer; font-size:16px; }
-nav button:hover { background:#333; }
-section { padding:20px; }
-table { width:100%; border-collapse: collapse; margin-top:20px; }
-th, td { border:1px solid #444; padding:8px; text-align:center; }
-th { background:#333; }
+  body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background:#111; color:#eee; margin:0; padding:0; }
+  header { background:#1a1a1a; padding:1rem; text-align:center; }
+  nav { display:flex; justify-content:center; background:#222; }
+  nav button { margin:0.5rem; padding:0.5rem 1rem; background:#333; border:none; color:#eee; cursor:pointer; }
+  nav button:hover { background:#444; }
+  section { padding:1rem; display:none; }
+  table { width:100%; border-collapse:collapse; margin-bottom:1rem; }
+  th, td { border:1px solid #444; padding:0.5rem; text-align:center; }
+  th { background:#222; }
+  .chart-container { width:100%; max-width:800px; margin:1rem auto; }
 </style>
 </head>
 <body>
@@ -24,152 +24,229 @@ th { background:#333; }
 </header>
 
 <nav>
-<button onclick="showTab('aktualni')">Aktuální sezóna</button>
-<button onclick="showTab('statistiky')">Statistiky</button>
-<button onclick="showTab('archiv')">Archiv sezón</button>
-<button onclick="showTab('profil')">Profil závodníka</button>
-<button onclick="showTab('admin')">Admin</button>
+  <button onclick="showTab('aktualni')">Aktuální sezóna</button>
+  <button onclick="showTab('statistiky')">Statistiky</button>
+  <button onclick="showTab('archiv')">Archiv sezón</button>
+  <button onclick="showTab('profil')">Profil závodníka</button>
+  <button onclick="showTab('admin')">Admin</button>
 </nav>
 
-<section id="aktualni"></section>
-<section id="statistiky" style="display:none;">Statistiky a H2H zde...</section>
-<section id="archiv" style="display:none;">Archiv sezón zde...</section>
-<section id="profil" style="display:none;">Profil závodníka zde...</section>
-<section id="admin" style="display:none;">Admin panel zde...</section>
+<!-- Aktuální sezóna -->
+<section id="aktualni">
+<h2>Aktuální sezóna</h2>
+
+<h3>Tabulka výsledků</h3>
+<table id="tabulkaVysledky">
+  <thead>
+    <tr>
+      <th>Datum</th>
+      <th>Závod a trať</th>
+      <th>1. místo</th>
+      <th>2. místo</th>
+      <th>3. místo</th>
+      <th>4. místo</th>
+      <th>5. místo</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<h3>Celkové pořadí</h3>
+<table id="tabulkaPoradi">
+  <thead>
+    <tr>
+      <th>Závodník</th>
+      <th>Body</th>
+      <th>Pódiová umístění</th>
+      <th>DNS</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<div class="chart-container">
+  <canvas id="grafBody"></canvas>
+</div>
+</section>
+
+<!-- Statistiky -->
+<section id="statistiky">
+<h2>Statistiky sezóny 2025</h2>
+
+<div id="serieVitezstvi"></div>
+<div id="seriePosledni"></div>
+<div id="maxDNS"></div>
+
+<h3>Porovnání H2H</h3>
+<label for="h2h1">Závodník 1:</label>
+<select id="h2h1"></select>
+<label for="h2h2">Závodník 2:</label>
+<select id="h2h2"></select>
+<button id="porovnatH2H">Porovnat</button>
+<div id="vysledekH2H"></div>
+</section>
+
+<!-- Archiv sezón -->
+<section id="archiv">
+<h2>Archiv sezón</h2>
+<label for="vyberRok">Vyber sezónu:</label>
+<select id="vyberRok"></select>
+<div id="archivObsah"></div>
+</section>
+
+<!-- Profil závodníka -->
+<section id="profil">
+<h2>Profil závodníka</h2>
+<p>Funkce pro nahrání fotky, oblíbené auto a trať připravujeme.</p>
+</section>
+
+<!-- Admin -->
+<section id="admin">
+<h2>Admin</h2>
+<p>Přihlášení přes Google účet + zadávání výsledků připraveno.</p>
+</section>
 
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
-import { getFirestore } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
+// Globální showTab
+window.showTab = function(tab){
+  ['aktualni','statistiky','archiv','profil','admin'].forEach(t=>{
+    document.getElementById(t).style.display = (t===tab)?'block':'none';
+  });
+}
+showTab('aktualni');
 
-const firebaseConfig = {
-apiKey: "AIzaSyCkR-AyJK2vFnz0V2HTuz2b3zCaLMxbXtI",
-authDomain: "test-gt7.firebaseapp.com",
-projectId: "test-gt7",
-storageBucket: "test-gt7.firebasestorage.app",
-messagingSenderId: "928154989107",
-appId: "1:928154989107:web:20a34d0009fa75bd1ee946",
-measurementId: "G-1SG8DW1KQ9"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-// Závodníci
-const zavodnici = ["Viki","Mára","Maty","Hardy","Ondra"];
-const bodyRozdeleni = [10,8,6,4,2]; // 1.–5. místo, DNS=0
-
-// Závody s výsledky podle potvrzené tabulky
+// --- Data ---
+const zavodnici = ['Viki','Mára','Maty','Hárdy','Ondra'];
+const bodyRozdeleni = [10,8,6,4,2]; // 1.-5. místo
 const zavody = [
-{ datum:"2025-03-01T15:00", nazev:"American Muscle", trat:"Daytona road circuit", vysledky:["Viki","Maty","Hardy","DNS","DNS"] },
-{ datum:"2025-03-15T15:00", nazev:"Limonádový Joe", trat:"Red Bull Ring", vysledky:["Viki","Hardy","Maty","DNS","DNS"] },
-{ datum:"2025-04-01T15:00", nazev:"Forza Italia", trat:"Monza", vysledky:["Hardy","Viki","Maty","DNS","DNS"] },
-{ datum:"2025-04-15T15:00", nazev:"Dovolená v Chorvatsku", trat:"Dragon Trail - přímořská trať", vysledky:["Viki","Maty","Hardy","DNS","DNS"] },
-{ datum:"2025-05-01T15:00", nazev:"Tokyo Drift", trat:"Suzuka", vysledky:["Viki","Maty","Hardy","DNS","DNS"] },
-{ datum:"2025-05-15T15:00", nazev:"Po stopách Jamese Bonda", trat:"Brands Hatch", vysledky:["Maty","Viki","Hardy","DNS","DNS"] },
-{ datum:"2025-06-01T15:00", nazev:"24h Le Mans", trat:"Le Mans", vysledky:["Viki","Hardy","Maty (PEN)","DNS","DNS"] }
+  {datum:'01.05.2025', nazev:'American Muscle', trat:'Daytona road circuit', vysledky:['Viki','Maty','Hardy','DNS','DNS']},
+  {datum:'08.05.2025', nazev:'Limonádový Joe', trat:'Red Bull Ring', vysledky:['Viki','Hardy','Maty','DNS','DNS']},
+  {datum:'15.05.2025', nazev:'Forza Italia', trat:'Monza', vysledky:['Hardy','Viki','Maty','DNS','DNS']},
+  {datum:'22.05.2025', nazev:'Dovolená v Chorvatsku', trat:'Dragon Trail', vysledky:['Viki','Maty','Hardy','DNS','DNS']},
+  {datum:'29.05.2025', nazev:'Tokyo Drift', trat:'Suzuka', vysledky:['Viki','Maty','Hardy','DNS','DNS']},
+  {datum:'05.06.2025', nazev:'Po stopách Jamese Bonda', trat:'Brands Hatch', vysledky:['Maty','Viki','Hardy','DNS','DNS']},
+  {datum:'12.06.2025', nazev:'24h Le Mans', trat:'Le Mans', vysledky:['Viki','Hardy','Maty','DNS','DNS']}
 ];
 
-// Přepínání záložek
-function showTab(tab){
-['aktualni','statistiky','archiv','profil','admin'].forEach(t=>{
-document.getElementById(t).style.display = (t===tab)?'block':'none';
-});
+// --- Naplnění tabulky výsledků ---
+function naplnVysledky(){
+  const tbody = document.querySelector('#tabulkaVysledky tbody');
+  tbody.innerHTML = '';
+  zavody.forEach(zav=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${zav.datum}</td>
+                    <td>${zav.nazev} / ${zav.trat}</td>
+                    ${zav.vysledky.map(v=>`<td>${v}</td>`).join('')}`;
+    tbody.appendChild(tr);
+  });
 }
 
-// Vypočet bodů a tabulka
-async function nactiAktualni(){
-const sekce = document.getElementById('aktualni');
-sekce.innerHTML = "<h2>Výsledky závodů 2025</h2>";
-
-let body = {}, podia = {}, dns = {};
-zavodnici.forEach(z=>{body[z]=0; podia[z]=0; dns[z]=0;});
-
-// Dataset pro graf
-let labels=[], datasets={};
-zavodnici.forEach(z=>datasets[z]=[]);
-
-// Tabulka výsledků
-let html='<table><tr><th>Datum</th><th>Závod</th><th>Trať</th>';
-for(let i=1;i<=5;i++){ html+=`<th>${i}. místo</th>`; }
-html+='</tr>';
-
-// Pro každý závod
-zavody.forEach(z=>{
-  labels.push(z.nazev);
-  html+='<tr><td>'+new Date(z.datum).toLocaleDateString()+'</td><td>'+z.nazev+'</td><td>'+z.trat+'</td>';
-  
-  z.vysledky.forEach((v,i)=>{
-    let zavodnik = v;
-    let b = 0;
-    if(v==="DNS") { 
-      zavodnik = zavodnici[i]; 
-      dns[zavodnik]++; 
-      b=0; 
-    } else if(v.includes("(PEN)")) { 
-      zavodnik = v.replace(" (PEN)",""); 
-      b=6; 
-      body[zavodnik]+=b; 
-      podia[zavodnik]+=1; 
-    } else { 
-      b = bodyRozdeleni[i]; 
-      body[v]+=b; 
-      podia[v]+=(i<3)?1:0; 
-    }
-    html+=`<td>${v}</td>`;
+// --- Celkové pořadí ---
+function naplnPoradi(){
+  const body = {}, podium={}, dns = {};
+  zavodnici.forEach(z=>{ body[z]=0; podium[z]=0; dns[z]=0; });
+  zavody.forEach(zav=>{
+    zav.vysledky.forEach((v,i)=>{
+      if(v==='DNS'){ dns[zavodnici[i]]++; } 
+      else { body[v]+=bodyRozdeleni[i]; if(i<3) podium[v]++; }
+    });
   });
-  html+='</tr>';
-});
+  const poradi = zavodnici.map(z=>({zavodnik:z, body:body[z], podium:podium[z], dns:dns[z]}));
+  poradi.sort((a,b)=>b.body-a.body);
 
-// Celkové pořadí – seřazeno podle bodů sestupně
-html+='<h3>Celkové pořadí</h3>';
-html+='<table><tr><th>Závodník</th><th>Body</th><th>Pódiová umístění</th><th>DNS</th></tr>';
-const serazeni = [...zavodnici].sort((a,b)=>body[b]-body[a]);
-serazeni.forEach(z=>{
-  html+=`<tr><td>${z}</td><td>${body[z]}</td><td>${podia[z]}</td><td>${dns[z]}</td></tr>`;
-});
-html+='</table>';
-
-// Naplnění datasetu pro graf kumulativních bodů
-zavodnici.forEach(z=>datasets[z]=[]); // reset
-zavodnici.forEach(z=>{body[z]=0;}); // reset
-
-zavody.forEach(z=>{
-  z.vysledky.forEach((v,i)=>{
-    let zavodnik = v;
-    let b = 0;
-    if(v==="DNS") { 
-      zavodnik = zavodnici[i]; b=0; 
-    } else if(v.includes("(PEN)")) { 
-      zavodnik = v.replace(" (PEN)",""); 
-      b=6; 
-    } else { 
-      b = bodyRozdeleni[i]; 
-    }
-    if(!v.includes("DNS")) body[zavodnik]+=b;
+  const tbody = document.querySelector('#tabulkaPoradi tbody');
+  tbody.innerHTML = '';
+  poradi.forEach(p=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${p.zavodnik}</td><td>${p.body}</td><td>${p.podium}</td><td>${p.dns}</td>`;
+    tbody.appendChild(tr);
   });
-  zavodnici.forEach(z=>datasets[z].push(body[z]));
-});
-
-sekce.innerHTML += html + '<canvas id="grafBody" height="200"></canvas>';
-
-// Graf
-const ctx = document.getElementById('grafBody').getContext('2d');
-new Chart(ctx,{
-  type:'line',
-  data:{
-    labels:labels,
-    datasets: zavodnici.map(z=>({
-      label:z,
-      data:datasets[z],
-      borderColor:z==="Viki"?"#0af":z==="Mára"?"#f00":z==="Maty"?"#ff0":z==="Hardy"?"#0f0":"#f0f",
-      fill:false
-    }))
-  },
-  options:{responsive:true, plugins:{legend:{labels:{color:"#fff"}}}, scales:{y:{beginAtZero:true, ticks:{color:"#fff"}}, x:{ticks:{color:"#fff"}}}}
-});
 }
 
-nactiAktualni();
+// --- Graf body ---
+import Chart from 'https://cdn.jsdelivr.net/npm/chart.js';
+function vykresliGraf(){
+  const ctx=document.getElementById('grafBody').getContext('2d');
+  const labels = zavody.map(z=>z.nazev);
+  const dataSets = zavodnici.map((z,i)=>({
+    label:z,
+    data:zavody.map(zav=>{ 
+      let idx=zav.vysledky.findIndex(v=>v===z); 
+      return (idx===-1 || zav.vysledky[idx]==='DNS') ? 0 : bodyRozdeleni[idx];
+    }),
+    borderColor:`hsl(${i*70},70%,50%)`,
+    fill:false
+  }));
+  new Chart(ctx,{type:'line',data:{labels:labels,datasets:dataSets},options:{responsive:true,plugins:{legend:{position:'bottom'}}}});
+}
+
+// --- Statistiky ---
+function vypocetStatistik(){
+  let serieVitezstvi={}, seriePosledni={}, dnsCount={}, bodySum={};
+  zavodnici.forEach(z=>{ serieVitezstvi[z]=0; seriePosledni[z]=0; dnsCount[z]=0; bodySum[z]=0; });
+
+  zavodnici.forEach(z=>{
+    let maxV=0, curV=0, maxP=0, curP=0;
+    zavody.forEach(zav=>{
+      let idx = zav.vysledky.findIndex(v=>v===z);
+      if(idx===-1 || zav.vysledky[idx]==='DNS'){ dnsCount[z]++; curV=0; curP=0; } 
+      else {
+        bodySum[z]+=bodyRozdeleni[idx];
+        if(idx===0){ curV++; maxV=Math.max(maxV,curV); } else curV=0;
+        let startCount = zav.vysledky.filter(v=>v!=='DNS').length;
+        if(idx===startCount-1){ curP++; maxP=Math.max(maxP,curP); } else curP=0;
+      }
+    });
+    serieVitezstvi[z]=maxV;
+    seriePosledni[z]=maxP;
+  });
+
+  document.getElementById('serieVitezstvi').innerHTML='<h3>Nejdelší série vítězství</h3><ul>'+
+    zavodnici.map(z=>`<li>${z}: ${serieVitezstvi[z]}</li>`).join('')+'</ul>';
+  document.getElementById('seriePosledni').innerHTML='<h3>Nejdelší série posledního místa (bez DNS)</h3><ul>'+
+    zavodnici.map(z=>`<li>${z}: ${seriePosledni[z]}</li>`).join('')+'</ul>';
+  document.getElementById('maxDNS').innerHTML='<h3>Největší počet DNS</h3><ul>'+
+    zavodnici.map(z=>`<li>${z}: ${dnsCount[z]}</li>`).join('')+'</ul>';
+
+  const sel1=document.getElementById('h2h1'), sel2=document.getElementById('h2h2');
+  zavodnici.forEach(z=>{ sel1.innerHTML+=`<option value="${z}">${z}</option>`; sel2.innerHTML+=`<option value="${z}">${z}</option>`; });
+
+  document.getElementById('porovnatH2H').onclick=()=>{
+    const z1=sel1.value,z2=sel2.value;
+    if(z1===z2){ document.getElementById('vysledekH2H').innerText="Vyberte dva různé závodníky"; return; }
+    let z1Vyh=0,z2Vyh=0;
+    zavody.forEach(zav=>{
+      let idx1=zav.vysledky.findIndex(v=>v===z1);
+      let idx2=zav.vysledky.findIndex(v=>v===z2);
+      if(idx1!==-1 && idx2!==-1){ if(idx1<idx2) z1Vyh++; else if(idx2<idx1) z2Vyh++; }
+    });
+    document.getElementById('vysledekH2H').innerHTML=`${z1} vyhrál ${z1Vyh}x, ${z2} vyhrál ${z2Vyh}x`;
+  };
+}
+
+// --- Archiv sezón ---
+const sezony = {2025:zavody};
+function naplnArchiv(){
+  const selRok=document.getElementById('vyberRok');
+  Object.keys(sezony).forEach(r=>{ selRok.innerHTML+=`<option value="${r}">${r}</option>`; });
+  const obsah=document.getElementById('archivObsah');
+  function vykresliRok(rok){
+    const data=sezony[rok];
+    let html='<table><thead><tr><th>Datum</th><th>Závod</th><th>Trať</th><th>1.</th><th>2.</th><th>3.</th><th>4.</th><th>5.</th></tr></thead><tbody>';
+    data.forEach(z=>{ html+=`<tr><td>${z.datum}</td><td>${z.nazev}</td><td>${z.trat}</td>${z.vysledky.map(v=>`<td>${v}</td>`).join('')}</tr>`; });
+    html+='</tbody></table>'; obsah.innerHTML=html;
+  }
+  selRok.onchange=()=>vykresliRok(selRok.value);
+  selRok.value=Object.keys(sezony)[0]; selRok.onchange();
+}
+
+// --- Inicializace ---
+naplnVysledky();
+naplnPoradi();
+vykresliGraf();
+vypocetStatistik();
+naplnArchiv();
 </script>
+
 </body>
 </html>
