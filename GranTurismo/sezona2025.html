@@ -276,7 +276,7 @@ btnAdmin.addEventListener('click', ()=>{
   const provider = new firebase.auth.GoogleAuthProvider();
   auth.signInWithPopup(provider).then(result=>{
     const user = result.user;
-    if(user.email==="tvoje.email@domena.cz"){
+    if(user.email==="viktor.tamayo@gmail.com"){
       document.getElementById('adminForm').style.display='block';
       alert("Přihlášení admina úspěšné");
     } else {
