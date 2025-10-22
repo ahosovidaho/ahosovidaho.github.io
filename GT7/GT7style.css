@@ -1,38 +1,141 @@
-body {
-  font-family: Arial, sans-serif;
-  margin: 0;
-  padding: 0;
-  background: #121212;
-  color: #fff;
+/* =============================
+   GT7 Šampionát – fix9 (finální)
+   Responzivní styl a vylepšení UI
+   ============================= */
+
+:root{
+  --bg:#0e0e0e;
+  --panel:#1b1b1b;
+  --muted:#888;
+  --accent:#0066ff;
+  --success:#00c176;
+  --danger:#ff5c5c;
+  --card:#191919;
 }
 
-header {
-  background: #e63946;
-  padding: 1em;
-  text-align: center;
+*{box-sizing:border-box}
+body{
+  font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  margin:0;
+  background:var(--bg);
+  color:#f5f5f5;
+  -webkit-font-smoothing:antialiased;
 }
 
-#user-info {
-  font-size: 0.9em;
-  margin-top: 0.5em;
+header{
+  background:linear-gradient(90deg,#111,#1a1a1a);
+  padding:18px 12px;
+  text-align:center;
+  border-bottom:1px solid #222;
+}
+header h1{margin:0;font-size:1.6rem}
+header p{margin:6px 0 0;color:var(--muted);font-size:0.95rem}
+
+/* Tabs / Nav */
+.tabs{
+  display:flex;
+  gap:8px;
+  justify-content:center;
+  padding:10px;
+  background:var(--panel);
+  border-bottom:1px solid #222;
+}
+.tab{
+  background:#222;
+  color:#eee;
+  border:none;
+  padding:8px 12px;
+  border-radius:6px;
+  cursor:pointer;
+  font-weight:600;
+}
+.tab.active{background:var(--accent);color:#fff}
+
+/* Sections */
+.section, .race-card, #admin form{
+  background:var(--card);
+  padding:12px;
+  border-radius:10px;
+  margin:14px auto;
+  max-width:980px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.4);
 }
 
-#chart-section {
-  padding: 2em;
-  text-align: center;
+/* Upcoming */
+.upcoming-section, .next-race{
+  max-width:980px;
+  margin:12px auto;
+  padding:14px;
+  border-radius:10px;
+  background:linear-gradient(135deg,#151515,#0f1720);
+  border:1px solid #222;
+}
+.next-race h3{margin:0 0 6px 0}
+#countdown{font-size:1.25rem;color:var(--success);margin-top:8px}
+
+/* Tables */
+.leaderboard-table, .driver-history-table{
+  width:100%;
+  border-collapse:collapse;
+}
+.leaderboard-table th, .leaderboard-table td, .driver-history-table th, .driver-history-table td{
+  padding:10px 8px;
+  border-bottom:1px solid #232323;
+  font-size:0.95rem;
+}
+.leaderboard-table thead th{background:#171717;font-size:0.9rem;color:#ccc}
+.leaderboard-table tr:hover{background:#161616}
+
+/* Buttons & Forms */
+button, .btn{
+  background:var(--accent);
+  color:#fff;
+  border:none;
+  padding:8px 12px;
+  border-radius:8px;
+  cursor:pointer;
+}
+button.secondary{background:#444}
+.btn.danger{background:var(--danger)}
+input, select, textarea{
+  width:100%;
+  padding:8px;
+  background:#0f0f0f;
+  border:1px solid #2b2b2b;
+  color:#fff;
+  border-radius:6px;
+  font-size:0.95rem;
 }
 
-#race-list {
-  padding: 1em;
-}
+/* Avatar & profile */
+.avatar{width:84px;height:84px;border-radius:50%;object-fit:cover;border:2px solid #222}
 
-.race {
-  background: #1d1d1d;
-  margin-bottom: 0.5em;
-  padding: 0.5em 1em;
-  border-radius: 4px;
-}
+/* Youtube preview */
+.youtube-preview{width:100%;max-width:900px;border-radius:8px;border:1px solid #222;margin-top:8px;aspect-ratio:16/9;}
 
-.error {
-  color: #ffb703;
+/* Head2Head */
+.head2head-form{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.head2head-form select{width:220px}
+.head2head-form button{min-width:140px}
+
+/* Admin list */
+.admin-actions{display:flex;gap:6px;margin-top:8px}
+.admin-actions button{background:#333;padding:6px 10px;border-radius:6px}
+
+/* Small text */
+.small{font-size:0.9rem;color:var(--muted)}
+
+/* Hidden helper */
+.hidden{display:none}
+
+/* Responsive */
+@media (max-width:900px){
+  .head2head-form select{width:100%}
+  .head2head-form{flex-direction:column;align-items:stretch}
+  .tabs{flex-wrap:wrap}
+}
+@media (max-width:480px){
+  header h1{font-size:1.2rem}
+  .avatar{width:64px;height:64px}
+  #countdown{font-size:1rem}
 }
