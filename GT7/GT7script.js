@@ -9,7 +9,7 @@ import {
 import {
   getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-import Chart from "https://cdn.jsdelivr.net/npm/chart.js/auto";
+import Chart from "https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.esm.js";
 
 /* =========================
    KONFIGURACE FIREBASE
