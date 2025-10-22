@@ -1,0 +1,12 @@
+# Nastavení správných MIME typů pro JavaScript moduly
+<IfModule mod_mime.c>
+    AddType application/javascript .js
+    AddType application/javascript .mjs
+</IfModule>
+
+# Povolit CORS pro moduly (pokud používáš CDN)
+<IfModule mod_headers.c>
+    <FilesMatch "\.(js|mjs)$">
+        Header set Access-Control-Allow-Origin "*"
+    </FilesMatch>
+</IfModule>
