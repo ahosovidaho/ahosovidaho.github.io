@@ -11,7 +11,7 @@ import {
 import { 
   getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged 
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-import Chart from "https://esm.sh/chart.js@4.4.0";
+import Chart from "https://cdn.skypack.dev/chart.js@4.4.0";
 
 // Firebase konfigurace
 const firebaseConfig = {
