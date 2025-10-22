@@ -15,7 +15,6 @@ section { padding:20px; }
 table { width:100%; border-collapse: collapse; margin-top:20px; }
 th, td { border:1px solid #444; padding:8px; text-align:center; }
 th { background:#333; }
-.winner { color:#0f0; font-weight:bold; }
 </style>
 </head>
 <body>
@@ -103,7 +102,8 @@ zavodnici.forEach(z=>datasets[z]=[]);
 
 // Tabulka výsledků
 let html='<table><tr><th>Datum</th><th>Závod</th><th>Trať</th>';
-zavodnici.forEach(z=>html+=`<th>${z}</th>`); html+='</tr>';
+for(let i=1;i<=5;i++){ html+=`<th>${i}. místo</th>`; }
+html+='</tr>';
 
 docs.forEach((d,index)=>{
   const z = d.data();
@@ -111,17 +111,18 @@ docs.forEach((d,index)=>{
   html+='<tr><td>'+new Date(z.datum).toLocaleDateString()+'</td><td>'+z.nazev+'</td><td>'+z.trat+'</td>';
   z.vysledky.forEach((v,i)=>{
     let b=0;
-    if(v==="DNS") { dns[zavodnici[i]]++; b=0; }
-    else if(v.includes("(PEN)")) { b=6; body[zavodnici[i]]+=6; podia[zavodnici[i]]+=1; }
+    const zavodnik = zavodnici[i];
+    if(v==="DNS") { dns[zavodnik]++; b=0; }
+    else if(v.includes("(PEN)")) { b=6; body[zavodnik]+=6; podia[zavodnik]+=1; }
     else { b=bodyRozdeleni[i]; body[v]+=b; podia[v]+=1; }
-    datasets[zavodnici[i]].push(body[zavodnici[i]]);
+    datasets[zavodnik].push(body[zavodnik]);
     html+=`<td>${v}</td>`;
   });
   html+='</tr>';
 });
 html+='</table>';
 
-// Celkové body
+// Celkové body a pódiová umístění
 html+='<h3>Celkové pořadí</h3>';
 html+='<table><tr><th>Závodník</th><th>Body</th><th>Pódiová umístění</th><th>DNS</th></tr>';
 zavodnici.forEach(z=>{
