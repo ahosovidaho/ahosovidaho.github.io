@@ -120,7 +120,10 @@ html+='</table>';
 // Celkové body a pódiová umístění
 html+='<h3>Celkové pořadí</h3>';
 html+='<table><tr><th>Závodník</th><th>Body</th><th>Pódiová umístění</th><th>DNS</th></tr>';
-zavodnici.forEach(z=>{
+// Seřadit podle bodů sestupně
+const serazeni = [...zavodnici].sort((a,b)=>body[b]-body[a]);
+
+serazeni.forEach(z=>{
   html+=`<tr><td>${z}</td><td>${body[z]}</td><td>${podia[z]}</td><td>${dns[z]}</td></tr>`;
 });
 html+='</table>';
