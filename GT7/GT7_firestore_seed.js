@@ -1,6 +1,6 @@
 /* GT7_firestore_seed.js
-   Open this file in browser while logged into your Firebase project (and allowed origin).
-   It will push sample races to 'races' collection.
+   Spusť v prohlížeči (přihlášený do Firebase projektu) pro nahrání testovacích dat.
+   Upraveno pro Variant A: results jsou pole, každý race má season.
 */
 (async function(){
   const { initializeApp } = await import('https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js');
@@ -19,13 +19,83 @@
   const db = getFirestore(app);
 
   const races = [
-    { date: "2025-07-10", circuit: "Red Bull Ring", results: { pos1:{driver:"Viki"}, pos2:{driver:"Hardy"}, pos3:{driver:"Maty"} } },
-    { date: "2025-07-25", circuit: "Daytona - road circuit", results: { pos1:{driver:"Viki"}, pos2:{driver:"Maty"}, pos3:{driver:"Hardy"} } },
-    { date: "2025-08-01", circuit: "Monza", results: { pos1:{driver:"Hardy"}, pos2:{driver:"Viki"}, pos3:{driver:"Maty"} } },
-    { date: "2025-08-11", circuit: "Dragon Trail", results: { pos1:{driver:"Viki"}, pos2:{driver:"Maty"}, pos3:{driver:"Hardy"} } },
-    { date: "2025-08-18", circuit: "Suzuka", results: { pos1:{driver:"Viki"}, pos2:{driver:"Maty"}, pos3:{driver:"Hardy"} } },
-    { date: "2025-10-15", circuit: "Brands Hatch", results: { pos1:{driver:"Maty"}, pos2:{driver:"Viki"}, pos3:{driver:"Hardy"} } },
-    { date: "2025-10-20", circuit: "LeMans", results: { pos1:{driver:"Viki"}, pos2:{driver:"Hardy"}, pos3:{driver:"Maty"} } }
+    {
+      date: "2025-07-10T20:00:00",
+      circuit: "Red Bull Ring",
+      season: 2025,
+      allowedCars: "Gr.4, Gr.3",
+      results: [
+        { pos: 1, driver: "Viki", time: "18:12.345", pts: 10 },
+        { pos: 2, driver: "Hardy", time: "18:22.100", pts: 8 },
+        { pos: 3, driver: "Maty", time: "18:30.500", pts: 6 }
+      ]
+    },
+    {
+      date: "2025-07-25T19:30:00",
+      circuit: "Daytona - road circuit",
+      season: 2025,
+      allowedCars: "Gr.4",
+      results: [
+        { pos: 1, driver: "Viki", time: "21:10.234", pts: 10 },
+        { pos: 2, driver: "Maty", time: "21:18.001", pts: 8 },
+        { pos: 3, driver: "Hardy", time: "21:30.444", pts: 6 }
+      ]
+    },
+    {
+      date: "2025-08-01T20:00:00",
+      circuit: "Monza",
+      season: 2025,
+      allowedCars: "Gr.3",
+      results: [
+        { pos: 1, driver: "Hardy", time: "14:02.001", pts: 10 },
+        { pos: 2, driver: "Viki", time: "14:05.120", pts: 8 },
+        { pos: 3, driver: "Maty", time: "14:10.010", pts: 6 }
+      ]
+    },
+    {
+      date: "2025-08-11T20:00:00",
+      circuit: "Dragon Trail",
+      season: 2025,
+      allowedCars: "Gr.4",
+      results: [
+        { pos: 1, driver: "Viki", time: "17:40.000", pts: 10 },
+        { pos: 2, driver: "Maty", time: "17:47.500", pts: 8 },
+        { pos: 3, driver: "Hardy", time: "17:55.333", pts: 6 }
+      ]
+    },
+    {
+      date: "2025-08-18T20:00:00",
+      circuit: "Suzuka",
+      season: 2025,
+      allowedCars: "Gr.3",
+      results: [
+        { pos: 1, driver: "Viki", time: "22:02.123", pts: 10 },
+        { pos: 2, driver: "Maty", time: "22:10.456", pts: 8 },
+        { pos: 3, driver: "Hardy", time: "22:20.789", pts: 6 }
+      ]
+    },
+    {
+      date: "2025-10-15T19:00:00",
+      circuit: "Brands Hatch",
+      season: 2025,
+      allowedCars: "Gr.4",
+      results: [
+        { pos: 1, driver: "Maty", time: "16:55.555", pts: 10 },
+        { pos: 2, driver: "Viki", time: "17:01.010", pts: 8 },
+        { pos: 3, driver: "Hardy", time: "17:10.111", pts: 6 }
+      ]
+    },
+    {
+      date: "2025-10-20T19:30:00",
+      circuit: "LeMans",
+      season: 2025,
+      allowedCars: "Gr.3, endurance",
+      results: [
+        { pos: 1, driver: "Viki", time: "120:00.000", pts: 10 },
+        { pos: 2, driver: "Hardy", time: "121:05.222", pts: 8 },
+        { pos: 3, driver: "Maty", time: "122:10.333", pts: 6 }
+      ]
+    }
   ];
 
   for(const r of races){
