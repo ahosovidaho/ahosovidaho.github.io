@@ -16,8 +16,6 @@
   th, td { border:1px solid #444; padding:8px; text-align:center; }
   th { background:#222; }
   canvas { max-width:100%; height:auto; }
-  input, select { margin:5px 0; padding:5px; width:100%; background:#222; color:#fff; border:1px solid #444; }
-  button.saveBtn { margin-top:10px; padding:10px 15px; cursor:pointer; background:#610000; border:none; color:#fff; }
 </style>
 <!-- Firebase SDKs -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -84,27 +82,7 @@
 <section id="admin">
   <h2>Admin</h2>
   <button id="loginBtn">Přihlásit se přes Google</button>
-  <div id="adminBanner">
-    <h3>Zadání nového závodu</h3>
-    <input type="datetime-local" id="raceDate" placeholder="Datum a čas">
-    <input type="text" id="raceName" placeholder="Název závodu">
-    <input type="text" id="raceTrack" placeholder="Trať">
-    <select id="raceCategory">
-      <option value="Gr.1">Gr.1</option>
-      <option value="Gr.2">Gr.2</option>
-      <option value="Gr.3">Gr.3</option>
-      <option value="Gr.4">Gr.4</option>
-      <option value="Gr.B">Gr.B</option>
-      <option value="VGT">VGT</option>
-      <option value="open">open</option>
-    </select>
-    <input type="text" id="raceCars" placeholder="Povolená vozidla">
-    <select id="raceTuning"><option>ANO</option><option>NE</option></select>
-    <select id="racePit"><option>ANO</option><option>NE</option></select>
-    <select id="raceTyres"><option>Komfortní</option><option>Sportovní</option><option>Závodní</option><option>Na sníh</option><option>Na šotolinu</option></select>
-    <input type="text" id="raceInfo" placeholder="Doplňující info">
-    <button class="saveBtn" id="saveRace">Uložit nový závod</button>
-  </div>
+  <div id="adminBanner">Zadávání závodů</div>
 </section>
 
 <script>
@@ -143,7 +121,17 @@
   // --- DATA ---
   const drivers = ["Viki","Mára","Maty","Hardy","Ondra"];
   const pointsMap = [10,8,6,4,2]; //1.-5.místo
-  let resultsData = []; // Načteno z Firestore
+
+  let resultsData = []; // zde se načte z Firestore
+
+  function loadRaces(){
+    db.collection("races").orderBy("date").get().then(snapshot=>{
+      resultsData = snapshot.docs.map(d=>d.data());
+      renderResults();
+      renderStandings();
+      renderChart();
+    }).catch(console.error);
+  }
 
   function calculateStandings(){
     const standings = {};
@@ -158,16 +146,6 @@
     return Object.entries(standings).sort((a,b)=>b[1].points - a[1].points);
   }
 
-  function renderStandings(){
-    const tbodyStandings = document.querySelector('#standings tbody');
-    tbodyStandings.innerHTML="";
-    calculateStandings().forEach(([name,data])=>{
-      const tr = document.createElement('tr');
-      tr.innerHTML = `<td>${name}</td><td>${data.points}</td><td>${data.podium}</td><td>${data.dns}</td>`;
-      tbodyStandings.appendChild(tr);
-    });
-  }
-
   function renderResults(){
     const tbodyResults = document.querySelector('#results tbody');
     tbodyResults.innerHTML="";
@@ -176,6 +154,16 @@
       tr.innerHTML = `<td>${r.date}</td><td>${r.race} / ${r.track}</td>` +
         r.order.map(d=>`<td>${d}</td>`).join('');
       tbodyResults.appendChild(tr);
+    });
+  }
+
+  function renderStandings(){
+    const tbodyStandings = document.querySelector('#standings tbody');
+    tbodyStandings.innerHTML="";
+    calculateStandings().forEach(([name,data])=>{
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${name}</td><td>${data.points}</td><td>${data.podium}</td><td>${data.dns}</td>`;
+      tbodyStandings.appendChild(tr);
     });
   }
 
@@ -189,48 +177,24 @@
         sum += pointsMap[idx]||0;
         return sum;
       });
-      return {label:d,data, borderColor: getRandomColor(), fill:false, tension:0.1};
+      return {label:d,data, borderColor:getRandomColor(), fill:false, tension:0.1};
     });
-    if(window.pointsChartInstance) window.pointsChartInstance.destroy();
-    window.pointsChartInstance = new Chart(ctx,{type:'line', data:{labels:resultsData.map(r=>r.race), datasets}, options:{responsive:true, plugins:{legend:{labels:{color:'#fff'}}}, scales:{x:{ticks:{color:'#fff'}},y:{ticks:{color:'#fff'}}}}});
+    new Chart(ctx,{
+      type:'line',
+      data:{labels:resultsData.map(r=>r.race), datasets},
+      options:{
+        responsive:true,
+        plugins:{legend:{labels:{color:'#fff'}}},
+        scales:{x:{ticks:{color:'#fff'}}, y:{ticks:{color:'#fff'}}}
+      }
+    });
   }
 
   function getRandomColor(){ const letters="0123456789ABCDEF"; return "#"+Array.from({length:6}).map(()=>letters[Math.floor(Math.random()*16)]).join(''); }
 
-  // --- LOAD FROM FIRESTORE ---
-  db.collection("races").orderBy("date").onSnapshot(snapshot=>{
-    resultsData = snapshot.docs.map(doc=>{
-      return {...doc.data(), id:doc.id};
-    });
-    renderResults();
-    renderStandings();
-    renderChart();
-  });
+  // --- INITIAL LOAD ---
+  loadRaces();
 
-  // --- SAVE NEW RACE ---
-  document.getElementById('saveRace').addEventListener('click',()=>{
-    const newRace = {
-      date: document.getElementById('raceDate').value,
-      race: document.getElementById('raceName').value,
-      track: document.getElementById('raceTrack').value,
-      category: document.getElementById('raceCategory').value,
-      cars: document.getElementById('raceCars').value,
-      tuning: document.getElementById('raceTuning').value,
-      pit: document.getElementById('racePit').value,
-      tyres: document.getElementById('raceTyres').value,
-      info: document.getElementById('raceInfo').value,
-      order: ["DNS","DNS","DNS","DNS","DNS"],
-      youtube: ""
-    };
-    db.collection("races").add(newRace).then(()=>{
-      alert("Závod uložen");
-      document.getElementById('raceDate').value="";
-      document.getElementById('raceName').value="";
-      document.getElementById('raceTrack').value="";
-      document.getElementById('raceCars').value="";
-      document.getElementById('raceInfo').value="";
-    });
-  });
 </script>
 
 </body>
