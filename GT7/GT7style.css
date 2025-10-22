@@ -1,172 +1,38 @@
-/* GT7style.css – minimalistický a funkční vzhled */
-:root {
-  --bg: #111;
-  --text: #eee;
-  --accent: #d93025;
-  --card-bg: #1c1c1c;
-  --border: #333;
-  --muted: #999;
-  font-family: "Inter", system-ui, sans-serif;
-}
-
 body {
-  background: var(--bg);
-  color: var(--text);
+  font-family: Arial, sans-serif;
   margin: 0;
   padding: 0;
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
+  background: #121212;
+  color: #fff;
 }
 
 header {
-  background: #000;
-  border-bottom: 1px solid var(--border);
-  padding: 1rem 2rem;
+  background: #e63946;
+  padding: 1em;
   text-align: center;
 }
 
-header h1 {
-  margin: 0;
-  font-size: 1.5rem;
-  letter-spacing: 1px;
+#user-info {
+  font-size: 0.9em;
+  margin-top: 0.5em;
 }
 
-nav {
-  margin-top: 0.5rem;
-}
-
-nav button {
-  background: none;
-  border: none;
-  color: var(--text);
-  margin: 0 0.5rem;
-  font-size: 1rem;
-  cursor: pointer;
-  padding: 0.3rem 0.6rem;
-  border-bottom: 2px solid transparent;
-  transition: all 0.2s;
-}
-
-nav button:hover {
-  color: var(--accent);
-}
-
-nav button.active {
-  border-bottom-color: var(--accent);
-  color: var(--accent);
-}
-
-main {
-  flex: 1;
-  padding: 1.5rem;
-  max-width: 1000px;
-  margin: 0 auto;
-}
-
-section {
-  display: none;
-}
-
-section.visible {
-  display: block;
-}
-
-.card-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1rem;
-}
-
-.card {
-  background: var(--card-bg);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 1rem;
-  transition: transform 0.2s;
-}
-
-.card:hover {
-  transform: translateY(-4px);
-}
-
-.card h3 {
-  margin: 0 0 0.3rem;
-}
-
-.card small {
-  color: var(--muted);
-}
-
-.card .results {
-  margin-top: 0.5rem;
-}
-
-.card .result {
-  font-size: 0.9rem;
-  padding: 2px 0;
-  display: flex;
-  justify-content: space-between;
-}
-
-.card .result:first-child {
-  color: var(--accent);
-  font-weight: 600;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 1rem;
-}
-
-th, td {
-  padding: 0.6rem;
-  text-align: left;
-  border-bottom: 1px solid var(--border);
-}
-
-th {
-  color: var(--accent);
-}
-
-.admin {
-  margin-top: 2rem;
-  border-top: 1px solid var(--border);
-  padding-top: 1rem;
-}
-
-.admin-form {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-
-.admin-form input {
-  background: #222;
-  border: 1px solid var(--border);
-  color: var(--text);
-  padding: 0.4rem 0.6rem;
-  border-radius: 5px;
-}
-
-.admin-form button {
-  background: var(--accent);
-  border: none;
-  color: #fff;
-  padding: 0.5rem 1rem;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-.admin-races {
-  margin-top: 1rem;
-}
-
-footer {
+#chart-section {
+  padding: 2em;
   text-align: center;
-  padding: 1rem;
-  border-top: 1px solid var(--border);
-  color: var(--muted);
-  font-size: 0.85rem;
-} 
+}
+
+#race-list {
+  padding: 1em;
+}
+
+.race {
+  background: #1d1d1d;
+  margin-bottom: 0.5em;
+  padding: 0.5em 1em;
+  border-radius: 4px;
+}
+
+.error {
+  color: #ffb703;
+}
