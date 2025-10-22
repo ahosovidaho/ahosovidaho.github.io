@@ -101,33 +101,8 @@
     <p>© 2025 VIKI for HRIC-PIC-MA-MA-TAMA GT7 Championship</p>
   </footer>
 
-  <!-- === Chart.js ESM import + registrace (musi být před GT7script.js) === -->
-  <script type="module">
-    import {
-      Chart,
-      BarController,
-      BarElement,
-      CategoryScale,
-      LinearScale,
-      Title,
-      Tooltip,
-      Legend
-    } from "https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.esm.js";
-
-    // Registrace nutných komponent (bar controller atd.)
-    Chart.register(
-      BarController,
-      BarElement,
-      CategoryScale,
-      LinearScale,
-      Title,
-      Tooltip,
-      Legend
-    );
-
-    // vystav Chart do window, aby ho GT7script.js mohl použít jako globální
-    window.Chart = Chart;
-  </script>
+   <!-- === Chart.js (opravena verze, UMD) === -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 
   <!-- Hlavní modul (tvůj opravený skript) -->
   <script type="module" src="GT7script.js"></script>
