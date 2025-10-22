@@ -4,319 +4,150 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Hric-Pic-Ma-Ma-Tama Championship 2025</title>
-<style>
-body {margin:0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background:#111; color:#fff;}
-header {padding:20px; text-align:center; background:#222;}
-nav {display:flex; justify-content:center; background:#111; border-bottom:1px solid #333;}
-nav button {background:none; border:none; color:#fff; padding:15px 20px; cursor:pointer;}
-nav button.active {border-bottom:3px solid #f00;}
-.tab {display:none; padding:20px;}
-table {width:100%; border-collapse:collapse; margin-top:10px;}
-table, th, td {border:1px solid #333;}
-th, td {padding:8px; text-align:center;}
-input, select, button {padding:5px; margin:3px 0;}
-#grafBody {width:100%; height:300px;}
-</style>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+body { background:#111; color:#fff; font-family:-apple-system, BlinkMacSystemFont, sans-serif; margin:0; padding:0;}
+header { text-align:center; padding:20px; color:#0af; }
+nav { display:flex; justify-content:center; background:#222; }
+nav button { background:#222; color:#fff; border:none; padding:10px 20px; cursor:pointer; font-size:16px; }
+nav button:hover { background:#333; }
+section { padding:20px; }
+table { width:100%; border-collapse: collapse; margin-top:20px; }
+th, td { border:1px solid #444; padding:8px; text-align:center; }
+th { background:#333; }
+.winner { color:#0f0; font-weight:bold; }
+</style>
 </head>
 <body>
+
 <header>
-  <h1>Hric-Pic-Ma-Ma-Tama Championship 2025</h1>
+<h1>Hric-Pic-Ma-Ma-Tama Championship 2025</h1>
 </header>
+
 <nav>
-  <button class="tablink active" data-tab="aktualni">Aktuální sezóna</button>
-  <button class="tablink" data-tab="statistiky">Statistiky</button>
-  <button class="tablink" data-tab="archiv">Archiv sezón</button>
-  <button class="tablink" data-tab="profil">Profil závodníka</button>
-  <button class="tablink" data-tab="admin">Admin</button>
+<button onclick="showTab('aktualni')">Aktuální sezóna</button>
+<button onclick="showTab('statistiky')">Statistiky</button>
+<button onclick="showTab('archiv')">Archiv sezón</button>
+<button onclick="showTab('profil')">Profil závodníka</button>
+<button onclick="showTab('admin')">Admin</button>
 </nav>
 
-<div id="aktualni" class="tab" style="display:block;">
-  <h2>Aktuální sezóna</h2>
-  <div id="nadvazujiciZavod"></div>
-  <canvas id="grafBody"></canvas>
-  <h3>Tabulka bodů</h3>
-  <table id="tabulkaBody">
-    <thead><tr><th>Jezdec</th><th>Body</th><th>Pódia</th><th>DNS</th></tr></thead>
-    <tbody></tbody>
-  </table>
-  <h3>Výsledky závodů</h3>
-  <div id="vysledkyZavodu"></div>
-</div>
+<section id="aktualni"></section>
+<section id="statistiky" style="display:none;">Statistiky a H2H zde...</section>
+<section id="archiv" style="display:none;">Archiv sezón zde...</section>
+<section id="profil" style="display:none;">Profil závodníka zde...</section>
+<section id="admin" style="display:none;">Admin panel zde...</section>
 
-<div id="statistiky" class="tab">
-  <h2>Statistiky</h2>
-  <div>
-    <h3>H2H porovnání</h3>
-    <select id="h2hJ1"></select> vs <select id="h2hJ2"></select>
-    <button id="porovnatH2H">Porovnat</button>
-    <div id="vysledekH2H"></div>
-  </div>
-</div>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
+import { getFirestore, collection, doc, setDoc, getDocs } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
 
-<div id="archiv" class="tab">
-  <h2>Archiv sezón</h2>
-  <p>Zde bude souhrn všech sezón (zatím placeholder)</p>
-</div>
-
-<div id="profil" class="tab">
-  <h2>Profil závodníka</h2>
-  <button id="prihlasit">Přihlásit přes Google</button>
-  <div id="uzivatelInfo" style="display:none;">
-    <p>Jméno: <span id="profilJmeno"></span></p>
-    <img id="profilFoto" width="80" alt="Profilová fotka">
-    <p>Oblíbené auto: <input type="text" id="oblAuto"></p>
-    <p>Oblíbená trať: <input type="text" id="oblTrat"></p>
-    <button id="ulozitProfil">Uložit</button>
-    <h3>Statistiky</h3>
-    <p>Body: <span id="statBody"></span></p>
-    <p>Pódia: <span id="statPodi"></span></p>
-    <p>DNS: <span id="statDNS"></span></p>
-    <p>Výhry %: <span id="statVyhry"></span></p>
-  </div>
-</div>
-
-<div id="admin" class="tab">
-  <h2>Admin sekce</h2>
-  <button id="prihlasitAdmin">Přihlásit přes Google (Admin)</button>
-  <div id="adminForm" style="display:none; margin-top:10px;">
-    <h3>Přidat / upravit závod</h3>
-    <form id="formZavod">
-      <p>Datum závodu: <input type="datetime-local" id="datumZavodu" required></p>
-      <p>Název závodu: <input type="text" id="nazevZavodu" required></p>
-      <p>Trať: <input type="text" id="tratZavodu" required></p>
-      <p>Povolená vozidla: <input type="text" id="vozidlaZavodu"></p>
-      <p>Kategorie: 
-        <select id="kategorieZavodu">
-          <option>Gr.1</option><option>Gr.2</option><option>Gr.3</option>
-          <option>Gr.4</option><option>Gr.B</option><option>VGT</option>
-        </select>
-      </p>
-      <p>Tuning: <select id="tuningZavodu"><option>ANO</option><option>NE</option></select></p>
-      <p>Rovnováha výkonu: <select id="balancZavodu"><option>ANO</option><option>NE</option></select></p>
-      <p>Povolené pneumatiky: 
-        <select id="pneumatikyZavodu">
-          <option>Komfortní</option><option>Sportovní</option><option>Závodní</option>
-          <option>Na sníh</option><option>Na šotolinu</option>
-        </select>
-      </p>
-      <p>Povinná směs: <select id="smesZavodu"><option>Tvrdá</option><option>Střední</option><option>Měkká</option></select></p>
-      <p>Opotřebení pneumatik: <input type="text" id="opotrebeni"></p>
-      <p>Spotřeba paliva: <input type="text" id="spotreba"></p>
-      <p>Rychlost doplňování paliva: <input type="text" id="doplneni"></p>
-      <p>Povinný pit-stop: <select id="pitstop"><option>ANO</option><option>NE</option></select></p>
-      <p>Doplňující info: <input type="text" id="infoZavodu"></p>
-      <h4>Výsledky závodníků</h4>
-      <p>Viki: <input type="text" id="vikiRes" placeholder="1.,2.,3.,DNS"></p>
-      <p>Mára: <input type="text" id="maraRes" placeholder="DNS"></p>
-      <p>Maty: <input type="text" id="matyRes" placeholder="1.,2.,3.,DNS"></p>
-      <p>Hardy: <input type="text" id="hardyRes" placeholder="1.,2.,3.,DNS"></p>
-      <p>Ondra: <input type="text" id="ondraRes" placeholder="DNS"></p>
-      <button type="submit">Uložit závod</button>
-    </form>
-  </div>
-</div>
-
-<script>
-// --- Firebase ---
 const firebaseConfig = {
-  apiKey: "AIzaSyCkR-AyJK2vFnz0V2HTuz2b3zCaLMxbXtI",
-  authDomain: "test-gt7.firebaseapp.com",
-  projectId: "test-gt7",
-  storageBucket: "test-gt7.firebasestorage.app",
-  messagingSenderId: "928154989107",
-  appId: "1:928154989107:web:20a34d0009fa75bd1ee946",
-  measurementId: "G-1SG8DW1KQ9"
+apiKey: "AIzaSyCkR-AyJK2vFnz0V2HTuz2b3zCaLMxbXtI",
+authDomain: "test-gt7.firebaseapp.com",
+projectId: "test-gt7",
+storageBucket: "test-gt7.firebasestorage.app",
+messagingSenderId: "928154989107",
+appId: "1:928154989107:web:20a34d0009fa75bd1ee946",
+measurementId: "G-1SG8DW1KQ9"
 };
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
-const auth = firebase.auth();
 
-// --- Záložky ---
-const tablinks = document.querySelectorAll(".tablink");
-tablinks.forEach(btn=>{
-  btn.addEventListener('click', ()=>{
-    tablinks.forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active');
-    document.querySelectorAll(".tab").forEach(t=>t.style.display='none');
-    document.getElementById(btn.dataset.tab).style.display='block';
-  });
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// Závodníci
+const zavodnici = ["Viki","Mára","Maty","Hardy","Ondra"];
+const bodyRozdeleni = [10,8,6,4,2]; // 1.-5., DNS=0
+
+// Pevné závody
+const zavody = [
+{ datum:"2025-03-01T15:00", nazev:"American Muscle", trat:"Daytona road circuit", vysledky:["Viki","DNS","Maty","Hardy","DNS"] },
+{ datum:"2025-03-15T15:00", nazev:"Limonádový Joe", trat:"Red Bull Ring", vysledky:["Viki","Hardy","Maty","DNS","DNS"] },
+{ datum:"2025-04-01T15:00", nazev:"Forza Italia", trat:"Monza", vysledky:["Hardy","Viki","Maty","DNS","DNS"] },
+{ datum:"2025-04-15T15:00", nazev:"Dovolená v Chorvatsku", trat:"Dragon Trail - přímořská trať", vysledky:["Viki","DNS","Maty","Hardy","DNS"] },
+{ datum:"2025-05-01T15:00", nazev:"Tokyo Drift", trat:"Suzuka", vysledky:["Viki","DNS","Maty","Hardy","DNS"] },
+{ datum:"2025-05-15T15:00", nazev:"Po stopách Jamese Bonda", trat:"Brands Hatch", vysledky:["Maty","Viki","Hardy","DNS","DNS"] },
+{ datum:"2025-06-01T15:00", nazev:"24h Le Mans", trat:"Le Mans", vysledky:["Viki","Hardy","Maty (PEN)","DNS","DNS"] }
+];
+
+// Přidání do Firestore
+zavody.forEach((z,index)=>{
+  const docRef = doc(db,"zavody","zavod"+(index+1));
+  setDoc(docRef,z).then(()=>console.log("Závod přidán:",z.nazev))
+                  .catch(err=>console.error("Chyba:",err));
 });
 
-// --- Proměnné ---
-const jezdcí = ["Viki","Mára","Maty","Hardy","Ondra"];
-let zavody = [];
-let tabulka={};
-
-// --- Načtení závodů z Firestore ---
-db.collection('zavody').orderBy('datum').onSnapshot(snapshot=>{
-  zavody = [];
-  snapshot.forEach(doc=>{
-    zavody.push({...doc.data(), id:doc.id});
-  });
-  prepocitejTabulku();
-  vykresliGraf();
-  zobrazVysledky();
+// Přepínání záložek
+function showTab(tab){
+['aktualni','statistiky','archiv','profil','admin'].forEach(t=>{
+document.getElementById(t).style.display = (t===tab)?'block':'none';
 });
-
-// --- Přepočet bodů ---
-function prepocitejTabulku(){
-  tabulka={};
-  jezdcí.forEach(j=>tabulka[j]={body:0, podi:0, dns:0});
-  zavody.forEach(z=>{
-    z.vysledky.forEach((res,i)=>{
-      let bod=0;
-      if(res==="1") bod=10;
-      else if(res==="2") bod=8;
-      else if(res==="3") bod=6;
-      else if(res==="4") bod=4;
-      else if(res==="5") bod=2;
-      else if(res==="DNS") tabulka[jezdcí[i]].dns++;
-      tabulka[jezdcí[i]].body += bod;
-      if(["1","2","3"].includes(res)) tabulka[jezdcí[i]].podi++;
-    });
-  });
-  // Aktualizace tabulky HTML
-  const tbody=document.querySelector("#tabulkaBody tbody");
-  tbody.innerHTML="";
-  jezdcí.forEach(j=>{
-    const tr=document.createElement("tr");
-    tr.innerHTML=`<td>${j}</td><td>${tabulka[j].body}</td><td>${tabulka[j].podi}</td><td>${tabulka[j].dns}</td>`;
-    tbody.appendChild(tr);
-  });
 }
 
-// --- Graf ---
-let chartBody;
-function vykresliGraf(){
-  const ctx=document.getElementById('grafBody').getContext('2d');
-  const labels = zavody.map(z=>z.nazev);
-  const data = jezdcí.map(j=>zavody.map(z=>{
-    const idx = jezdcí.indexOf(j);
-    let res = z.vysledky[idx];
-    if(res==="1") return 10;
-    else if(res==="2") return 8;
-    else if(res==="3") return 6;
-    else if(res==="4") return 4;
-    else if(res==="5") return 2;
-    else return 0;
-  }).reduce((a,b,i)=>i===0?b:a+b,0));
-  if(chartBody) chartBody.destroy();
-  chartBody = new Chart(ctx,{type:'line',data:{labels, datasets: jezdcí.map((j,i)=>({
-    label:j, data:zavody.map(z=>{
-      const idx=jezdcí.indexOf(j); 
-      let res=z.vysledky[idx];
-      if(res==="1") return 10;
-      else if(res==="2") return 8;
-      else if(res==="3") return 6;
-      else if(res==="4") return 4;
-      else if(res==="5") return 2;
-      else return 0;
-    }).map((v,k)=>k>0 ? v+0 : v), // kumulativní body
-    borderColor: ["#f00","#00f","#0f0","#ff0","#0ff"][i],
-    fill:false
-  }))}, options:{responsive:true, scales:{y:{beginAtZero:true}}}});
+// Vypočet bodů a tabulka
+async function nactiAktualni(){
+const sekce = document.getElementById('aktualni');
+sekce.innerHTML = "<h2>Výsledky závodů 2025</h2>";
+const col = collection(db,"zavody");
+const data = await getDocs(col);
+const docs = data.docs.sort((a,b)=> new Date(a.data().datum)-new Date(b.data().datum));
+
+let body = {};
+let podia = {};
+let dns = {};
+zavodnici.forEach(z=>{body[z]=0; podia[z]=0; dns[z]=0;});
+
+// Graf
+let labels=[], datasets={};
+zavodnici.forEach(z=>datasets[z]=[]);
+
+// Tabulka výsledků
+let html='<table><tr><th>Datum</th><th>Závod</th><th>Trať</th>';
+zavodnici.forEach(z=>html+=`<th>${z}</th>`); html+='</tr>';
+
+docs.forEach((d,index)=>{
+  const z = d.data();
+  labels.push(z.nazev);
+  html+='<tr><td>'+new Date(z.datum).toLocaleDateString()+'</td><td>'+z.nazev+'</td><td>'+z.trat+'</td>';
+  z.vysledky.forEach((v,i)=>{
+    let b=0;
+    if(v==="DNS") { dns[zavodnici[i]]++; b=0; }
+    else if(v.includes("(PEN)")) { b=6; body[zavodnici[i]]+=6; podia[zavodnici[i]]+=1; }
+    else { b=bodyRozdeleni[i]; body[v]+=b; podia[v]+=1; }
+    datasets[zavodnici[i]].push(body[zavodnici[i]]);
+    html+=`<td>${v}</td>`;
+  });
+  html+='</tr>';
+});
+html+='</table>';
+
+// Celkové body
+html+='<h3>Celkové pořadí</h3>';
+html+='<table><tr><th>Závodník</th><th>Body</th><th>Pódiová umístění</th><th>DNS</th></tr>';
+zavodnici.forEach(z=>{
+  html+=`<tr><td>${z}</td><td>${body[z]}</td><td>${podia[z]}</td><td>${dns[z]}</td></tr>`;
+});
+html+='</table>';
+
+// Graf
+sekce.innerHTML += html + '<canvas id="grafBody" height="200"></canvas>';
+const ctx = document.getElementById('grafBody').getContext('2d');
+new Chart(ctx,{
+  type:'line',
+  data:{
+    labels:labels,
+    datasets: zavodnici.map(z=>({
+      label:z,
+      data:datasets[z],
+      borderColor:z==="Viki"?"#0af":z==="Mára"?"#f00":z==="Maty"?"#ff0":z==="Hardy"?"#0f0":"#f0f",
+      fill:false
+    }))
+  },
+  options:{responsive:true, plugins:{legend:{labels:{color:"#fff"}}}, scales:{y:{beginAtZero:true, ticks:{color:"#fff"}}, x:{ticks:{color:"#fff"}}}}
+});
 }
 
-// --- Výsledky závodů ---
-function zobrazVysledky(){
-  const div = document.getElementById('vysledkyZavodu');
-  div.innerHTML="";
-  [...zavody].reverse().forEach(z=>{
-    const d = document.createElement("div");
-    d.innerHTML=`<strong>${z.nazev} (${z.trat}):</strong> ${z.vysledky.join(", ")}`;
-    div.appendChild(d);
-  });
-}
-
-// --- H2H ---
-const h2hJ1=document.getElementById('h2hJ1');
-const h2hJ2=document.getElementById('h2hJ2');
-jezdcí.forEach(j=>{
-  const o1=document.createElement("option"); o1.value=j;o1.text=j; h2hJ1.add(o1);
-  const o2=document.createElement("option"); o2.value=j;o2.text=j; h2hJ2.add(o2);
-});
-document.getElementById('porovnatH2H').addEventListener('click', ()=>{
-  const j1=h2hJ1.value; const j2=h2hJ2.value;
-  if(j1===j2){ alert("Vyber dva různé jezdce"); return; }
-  let v1=0,v2=0,poz1=0,poz2=0,pocet=0;
-  zavody.forEach(z=>{
-    const i1=jezdcí.indexOf(j1); const i2=jezdcí.indexOf(j2);
-    const res1=z.vysledky[i1]; const res2=z.vysledky[i2];
-    if(res1!=="DNS" && res2!=="DNS"){pocet++; if(parseInt(res1)<parseInt(res2)) v1++; else if(parseInt(res2)<parseInt(res1)) v2++; poz1+=parseInt(res1); poz2+=parseInt(res2);}
-  });
-  const prum1=(poz1/pocet).toFixed(2), prum2=(poz2/pocet).toFixed(2);
-  document.getElementById('vysledekH2H').innerHTML=`<p>${j1} vítězství: ${v1}</p><p>${j2} vítězství: ${v2}</p><p>Prům. pozice: ${j1}: ${prum1}, ${j2}: ${prum2}</p><p>Rozdíl bodů: ${tabulka[j1].body-tabulka[j2].body}</p>`;
-});
-
-// --- Profil závodníka ---
-document.getElementById('prihlasit').addEventListener('click', ()=>{
-  const provider = new firebase.auth.GoogleAuthProvider();
-  auth.signInWithPopup(provider).then(res=>{
-    const user=res.user;
-    document.getElementById('profilJmeno').textContent=user.displayName;
-    document.getElementById('profilFoto').src=user.photoURL;
-    document.getElementById('uzivatelInfo').style.display='block';
-    if(tabulka[user.displayName]){
-      document.getElementById('statBody').textContent=tabulka[user.displayName].body;
-      document.getElementById('statPodi').textContent=tabulka[user.displayName].podi;
-      document.getElementById('statDNS').textContent=tabulka[user.displayName].dns;
-      const pocetZ=zavody.length-tabulka[user.displayName].dns;
-      document.getElementById('statVyhry').textContent=((tabulka[user.displayName].podi/pocetZ)*100).toFixed(1)+"%";
-    }
-  });
-});
-
-// --- Admin přihlášení ---
-const btnAdmin = document.getElementById('prihlasitAdmin');
-btnAdmin.addEventListener('click', ()=>{
-  const provider = new firebase.auth.GoogleAuthProvider();
-  auth.signInWithPopup(provider).then(result=>{
-    const user = result.user;
-    if(user.email==="viktor.tamayo@gmail.com"){
-      document.getElementById('adminForm').style.display='block';
-      alert("Přihlášení admina úspěšné");
-    } else {
-      alert("Nemáte oprávnění admina");
-      auth.signOut();
-    }
-  });
-});
-
-// --- Uložení závodu ---
-document.getElementById('formZavod').addEventListener('submit', (e)=>{
-  e.preventDefault();
-  const novyZavod = {
-    datum: document.getElementById('datumZavodu').value,
-    nazev: document.getElementById('nazevZavodu').value,
-    trat: document.getElementById('tratZavodu').value,
-    vozidla: document.getElementById('vozidlaZavodu').value,
-    kategorie: document.getElementById('kategorieZavodu').value,
-    tuning: document.getElementById('tuningZavodu').value,
-    balanc: document.getElementById('balancZavodu').value,
-    pneumatiky: document.getElementById('pneumatikyZavodu').value,
-    smes: document.getElementById('smesZavodu').value,
-    opotrebeni: document.getElementById('opotrebeni').value,
-    spotreba: document.getElementById('spotreba').value,
-    doplneni: document.getElementById('doplneni').value,
-    pitstop: document.getElementById('pitstop').value,
-    info: document.getElementById('infoZavodu').value,
-    vysledky:[
-      document.getElementById('vikiRes').value || "DNS",
-      document.getElementById('maraRes').value || "DNS",
-      document.getElementById('matyRes').value || "DNS",
-      document.getElementById('hardyRes').value || "DNS",
-      document.getElementById('ondraRes').value || "DNS"
-    ]
-  };
-  db.collection('zavody').add(novyZavod).then(()=>{
-    alert("Závod uložen! Tabulka a graf se aktualizují automaticky.");
-    document.getElementById('formZavod').reset();
-  });
-});
+nactiAktualni();
 </script>
 </body>
 </html>
