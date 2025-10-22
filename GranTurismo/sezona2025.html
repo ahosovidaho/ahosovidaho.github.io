@@ -56,25 +56,18 @@ const db = getFirestore(app);
 
 // Závodníci
 const zavodnici = ["Viki","Mára","Maty","Hardy","Ondra"];
-const bodyRozdeleni = [10,8,6,4,2]; // 1.-5., DNS=0
+const bodyRozdeleni = [10,8,6,4,2]; // 1.–5. místo, DNS=0
 
-// Pevné závody
+// Závody s výsledky podle potvrzené tabulky
 const zavody = [
-{ datum:"2025-03-01T15:00", nazev:"American Muscle", trat:"Daytona road circuit", vysledky:["Viki","DNS","Maty","Hardy","DNS"] },
+{ datum:"2025-03-01T15:00", nazev:"American Muscle", trat:"Daytona road circuit", vysledky:["Viki","Maty","Hardy","DNS","DNS"] },
 { datum:"2025-03-15T15:00", nazev:"Limonádový Joe", trat:"Red Bull Ring", vysledky:["Viki","Hardy","Maty","DNS","DNS"] },
 { datum:"2025-04-01T15:00", nazev:"Forza Italia", trat:"Monza", vysledky:["Hardy","Viki","Maty","DNS","DNS"] },
-{ datum:"2025-04-15T15:00", nazev:"Dovolená v Chorvatsku", trat:"Dragon Trail - přímořská trať", vysledky:["Viki","DNS","Maty","Hardy","DNS"] },
-{ datum:"2025-05-01T15:00", nazev:"Tokyo Drift", trat:"Suzuka", vysledky:["Viki","DNS","Maty","Hardy","DNS"] },
+{ datum:"2025-04-15T15:00", nazev:"Dovolená v Chorvatsku", trat:"Dragon Trail - přímořská trať", vysledky:["Viki","Maty","Hardy","DNS","DNS"] },
+{ datum:"2025-05-01T15:00", nazev:"Tokyo Drift", trat:"Suzuka", vysledky:["Viki","Maty","Hardy","DNS","DNS"] },
 { datum:"2025-05-15T15:00", nazev:"Po stopách Jamese Bonda", trat:"Brands Hatch", vysledky:["Maty","Viki","Hardy","DNS","DNS"] },
 { datum:"2025-06-01T15:00", nazev:"24h Le Mans", trat:"Le Mans", vysledky:["Viki","Hardy","Maty (PEN)","DNS","DNS"] }
 ];
-
-// Přidání do Firestore
-zavody.forEach((z,index)=>{
-  const docRef = doc(db,"zavody","zavod"+(index+1));
-  setDoc(docRef,z).then(()=>console.log("Závod přidán:",z.nazev))
-                  .catch(err=>console.error("Chyba:",err));
-});
 
 // Přepínání záložek
 function showTab(tab){
@@ -87,13 +80,8 @@ document.getElementById(t).style.display = (t===tab)?'block':'none';
 async function nactiAktualni(){
 const sekce = document.getElementById('aktualni');
 sekce.innerHTML = "<h2>Výsledky závodů 2025</h2>";
-const col = collection(db,"zavody");
-const data = await getDocs(col);
-const docs = data.docs.sort((a,b)=> new Date(a.data().datum)-new Date(b.data().datum));
 
-let body = {};
-let podia = {};
-let dns = {};
+let body = {}, podia = {}, dns = {};
 zavodnici.forEach(z=>{body[z]=0; podia[z]=0; dns[z]=0;});
 
 // Graf
@@ -105,17 +93,24 @@ let html='<table><tr><th>Datum</th><th>Závod</th><th>Trať</th>';
 for(let i=1;i<=5;i++){ html+=`<th>${i}. místo</th>`; }
 html+='</tr>';
 
-docs.forEach((d,index)=>{
-  const z = d.data();
+zavody.forEach((z,index)=>{
   labels.push(z.nazev);
   html+='<tr><td>'+new Date(z.datum).toLocaleDateString()+'</td><td>'+z.nazev+'</td><td>'+z.trat+'</td>';
   z.vysledky.forEach((v,i)=>{
     let b=0;
-    const zavodnik = zavodnici[i];
-    if(v==="DNS") { dns[zavodnik]++; b=0; }
-    else if(v.includes("(PEN)")) { b=6; body[zavodnik]+=6; podia[zavodnik]+=1; }
-    else { b=bodyRozdeleni[i]; body[v]+=b; podia[v]+=1; }
-    datasets[zavodnik].push(body[zavodnik]);
+    let zavodnik = v;
+    if(v==="DNS") { 
+      zavodnik = zavodnici[i]; 
+      dns[zavodnik]++; 
+      b=0; 
+    } else if(v.includes("(PEN)")) { 
+      zavodnik = v.replace(" (PEN)",""); 
+      b=6; body[zavodnik]+=6; podia[zavodnik]+=1; 
+    } else { 
+      body[v]+=bodyRozdeleni[i]; 
+      podia[v]+=(i<3)?1:0; 
+    }
+    datasets[zavodnici[i]].push(body[zavodnici[i]]);
     html+=`<td>${v}</td>`;
   });
   html+='</tr>';
