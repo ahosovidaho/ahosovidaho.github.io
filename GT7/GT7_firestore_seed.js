@@ -1,6 +1,6 @@
 /* GT7_firestore_seed.js
    Spusť v prohlížeči (přihlášený do Firebase projektu) pro nahrání testovacích dat.
-   Varianta A – každý závod má results jako pole.
+   Varianta A – každý závod má results jako pole..
 */
 (async function(){
   const { initializeApp } = await import('https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js');
