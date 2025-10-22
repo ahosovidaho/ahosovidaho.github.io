@@ -1,34 +1,30 @@
 <!DOCTYPE html>
 <html lang="cs">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>HRIC-PIC-MA-MA-TAMA GT7 Sezóna 2025</title>
-  <link rel="stylesheet" href="GT7style.css" />
-  <script type="module" src="GT7script.js" defer></script>
+  <link rel="stylesheet" href="GT7style.css">
 </head>
 <body>
   <header>
     <h1>HRIC-PIC-MA-MA-TAMA GT7 Sezóna 2025</h1>
 
-    <div id="auth-bar">
+    <div id="auth-bar" style="margin-top:8px;">
       <button id="btn-signin">Přihlásit (Google)</button>
       <button id="btn-signout" class="hidden">Odhlásit</button>
-      <span id="user-email" style="margin-left:1rem;">&nbsp;</span>
+      <span id="user-email" style="margin-left:12px;">&nbsp;</span>
     </div>
 
-    <div id="admin-forms" class="hidden" style="margin-top:0.5rem;">
-      <!-- zobrazeno pouze adminům -->
+    <div id="admin-forms" class="hidden" style="margin-top:6px;">
       <small>Admin režim</small>
     </div>
-    <div id="not-admin" style="margin-top:0.5rem;">
-      <small>Neregistrovaný uživatel</small>
-    </div>
+    <div id="not-admin" style="margin-top:6px;"><small>Neregistrovaný uživatel</small></div>
   </header>
 
   <main>
     <section id="racesSection" class="visible">
-      <h2>Přehled závodů</h2>
+      <h2>Nadcházející / poslední závody</h2>
       <div id="upcoming-container"></div>
       <div id="raceList" class="card-grid"></div>
     </section>
@@ -36,7 +32,10 @@
     <section id="standingsSection">
       <h2>Průběžné pořadí</h2>
       <div id="leaderboard-container"></div>
-      <canvas id="points-chart" style="width:100%; height:250px;"></canvas>
+      <!-- Canvas pro body (zachován pro kompatibilitu se skriptem) -->
+      <div style="height:300px;">
+        <canvas id="points-chart" style="width:100%;height:100%;"></canvas>
+      </div>
     </section>
 
     <section id="pastSection">
@@ -47,8 +46,8 @@
     <section id="h2hSection">
       <h2>Head to Head</h2>
       <div>
-        <input id="h2h-a" placeholder="Jezdec A" />
-        <input id="h2h-b" placeholder="Jezdec B" />
+        <input id="h2h-a" placeholder="Jezdec A">
+        <input id="h2h-b" placeholder="Jezdec B">
         <select id="h2h-season"><option value="all">All-time</option></select>
         <button id="h2h-run">Porovnat</button>
       </div>
@@ -57,12 +56,11 @@
 
     <section id="adminSection" class="admin">
       <h2>Admin – správa závodů</h2>
-
       <form id="race-form">
-        <input type="hidden" id="edit-id" />
-        <label>Okruh <input id="circuit-name" /></label>
-        <label>Datum <input type="datetime-local" id="race-date" /></label>
-        <label>Povolená auta <input id="allowed-cars" /></label>
+        <input type="hidden" id="edit-id">
+        <label>Okruh <input id="circuit-name"></label>
+        <label>Datum <input type="datetime-local" id="race-date"></label>
+        <label>Povolená auta <input id="allowed-cars"></label>
         <button type="submit">Uložit závod</button>
         <button type="button" onclick="resetRaceForm()">Reset</button>
       </form>
@@ -90,10 +88,10 @@
       </div>
 
       <form id="profile-form">
-        <label>Nick <input id="profile-nick" /></label>
-        <label>Tým <input id="profile-team-input" /></label>
+        <label>Nick <input id="profile-nick"></label>
+        <label>Tým <input id="profile-team-input"></label>
         <label>Bio <textarea id="profile-bio-input"></textarea></label>
-        <label>Preferovaný styl <input id="profile-preferred" /></label>
+        <label>Preferovaný styl <input id="profile-preferred"></label>
         <button type="submit">Uložit profil</button>
       </form>
     </section>
@@ -102,5 +100,36 @@
   <footer>
     <p>© 2025 VIKI for HRIC-PIC-MA-MA-TAMA GT7 Championship</p>
   </footer>
+
+  <!-- === Chart.js ESM import + registrace (musi být před GT7script.js) === -->
+  <script type="module">
+    import {
+      Chart,
+      BarController,
+      BarElement,
+      CategoryScale,
+      LinearScale,
+      Title,
+      Tooltip,
+      Legend
+    } from "https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.esm.js";
+
+    // Registrace nutných komponent (bar controller atd.)
+    Chart.register(
+      BarController,
+      BarElement,
+      CategoryScale,
+      LinearScale,
+      Title,
+      Tooltip,
+      Legend
+    );
+
+    // vystav Chart do window, aby ho GT7script.js mohl použít jako globální
+    window.Chart = Chart;
+  </script>
+
+  <!-- Hlavní modul (tvůj opravený skript) -->
+  <script type="module" src="GT7script.js"></script>
 </body>
 </html>
