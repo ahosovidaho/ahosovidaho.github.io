@@ -1,6 +1,6 @@
 /* GT7_firestore_seed.js
    Spusť v prohlížeči (přihlášený do Firebase projektu) pro nahrání testovacích dat.
-   Upraveno pro Variant A: results jsou pole, každý race má season.
+   Varianta A – každý závod má results jako pole.
 */
 (async function(){
   const { initializeApp } = await import('https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js');
@@ -87,9 +87,9 @@
     },
     {
       date: "2025-10-20T19:30:00",
-      circuit: "LeMans",
+      circuit: "Le Mans 24h",
       season: 2025,
-      allowedCars: "Gr.3, endurance",
+      allowedCars: "Gr.1 (ne VGT)",
       results: [
         { pos: 1, driver: "Viki", time: "120:00.000", pts: 10 },
         { pos: 2, driver: "Hardy", time: "121:05.222", pts: 8 },
@@ -98,8 +98,8 @@
     }
   ];
 
-  for(const r of races){
-    await addDoc(collection(db,'races'), r);
+  for (const race of races) {
+    await addDoc(collection(db, "races"), race);
   }
-  alert('✅ Testovací data nahrána do Firestore (collection "races")');
+  alert("✅ Testovací data byla úspěšně nahrána do Firestore (kolekce 'races').");
 })();
