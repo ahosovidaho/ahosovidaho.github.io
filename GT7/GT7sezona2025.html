@@ -1,110 +1,113 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="cs">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>HRIC-PIC-MA-MA-TAMA GT7 Sezóna 2025</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GT7 Sezóna 2025</title>
   <link rel="stylesheet" href="GT7style.css">
 </head>
 <body>
   <header>
-    <h1>HRIC-PIC-MA-MA-TAMA GT7 Sezóna 2025</h1>
-
-    <div id="auth-bar" style="margin-top:8px;">
-      <button id="btn-signin">Přihlásit (Google)</button>
-      <button id="btn-signout" class="hidden">Odhlásit</button>
-      <span id="user-email" style="margin-left:12px;">&nbsp;</span>
-    </div>
-
-    <div id="admin-forms" class="hidden" style="margin-top:6px;">
-      <small>Admin režim</small>
-    </div>
-    <div id="not-admin" style="margin-top:6px;"><small>Neregistrovaný uživatel</small></div>
+    <h1>🏁 GT7 Sezóna 2025</h1>
+    <p>Oficiální přehled závodů, výsledků a statistik</p>
   </header>
 
-  <main>
-    <section id="racesSection" class="visible">
-      <h2>Nadcházející / poslední závody</h2>
-      <div id="upcoming-container"></div>
-      <div id="raceList" class="card-grid"></div>
-    </section>
+  <nav class="tabs">
+    <button onclick="showTab('home')" class="tab active">Domů</button>
+    <button onclick="showTab('archive')" class="tab">Archiv</button>
+    <button onclick="showTab('hall')" class="tab">Hall of Fame</button>
+    <button onclick="showTab('head2head')" class="tab">Head 2 Head</button>
+    <button onclick="showTab('profile')" class="tab">Profil</button>
+    <button onclick="showTab('admin')" class="tab">Admin</button>
+  </nav>
 
-    <section id="standingsSection">
-      <h2>Průběžné pořadí</h2>
-      <div id="leaderboard-container"></div>
-      <!-- Canvas pro body (zachován pro kompatibilitu se skriptem) -->
-      <div style="height:300px;">
-        <canvas id="points-chart" style="width:100%;height:100%;"></canvas>
-      </div>
-    </section>
+  <!-- Nadcházející závod -->
+  <section id="upcoming" class="section">
+    <h2>🏎️ Nadcházející závod</h2>
+    <div id="next-race-container" class="next-race"></div>
+  </section>
 
-    <section id="pastSection">
-      <h2>Proběhlé závody</h2>
-      <div id="past-races"></div>
-    </section>
-
-    <section id="h2hSection">
-      <h2>Head to Head</h2>
-      <div>
-        <input id="h2h-a" placeholder="Jezdec A">
-        <input id="h2h-b" placeholder="Jezdec B">
-        <select id="h2h-season"><option value="all">All-time</option></select>
-        <button id="h2h-run">Porovnat</button>
-      </div>
-      <div id="h2h-result"></div>
-    </section>
-
-    <section id="adminSection" class="admin">
-      <h2>Admin – správa závodů</h2>
-      <form id="race-form">
-        <input type="hidden" id="edit-id">
-        <label>Okruh <input id="circuit-name"></label>
-        <label>Datum <input type="datetime-local" id="race-date"></label>
-        <label>Povolená auta <input id="allowed-cars"></label>
-        <button type="submit">Uložit závod</button>
-        <button type="button" onclick="resetRaceForm()">Reset</button>
-      </form>
-
-      <h3>Ukládání výsledků</h3>
-      <form id="results-form">
-        <label>Vyber závod
-          <select id="select-race"></select>
-        </label>
-        <div id="positions-container"></div>
-        <button type="submit">Uložit výsledky</button>
-        <button type="button" onclick="resetResultsForm()">Reset</button>
-      </form>
-
-      <div id="admin-race-list" class="admin-races"></div>
-    </section>
-
-    <section id="profileSection">
-      <h2>Můj profil</h2>
-      <div id="profile-view">
-        <div id="profile-name"></div>
-        <div id="profile-email"></div>
-        <div id="profile-team"></div>
-        <div id="profile-bio"></div>
-      </div>
-
-      <form id="profile-form">
-        <label>Nick <input id="profile-nick"></label>
-        <label>Tým <input id="profile-team-input"></label>
-        <label>Bio <textarea id="profile-bio-input"></textarea></label>
-        <label>Preferovaný styl <input id="profile-preferred"></label>
-        <button type="submit">Uložit profil</button>
-      </form>
-    </section>
+  <!-- Hlavní přehled -->
+  <main id="home" class="tab-content active">
+    <canvas id="points-chart"></canvas>
+    <div id="stats-container"></div>
+    <div id="past-races" class="races"></div>
   </main>
 
-  <footer>
-    <p>© 2025 VIKI for HRIC-PIC-MA-MA-TAMA GT7 Championship</p>
-  </footer>
+  <!-- Archiv -->
+  <section id="archive" class="tab-content hidden">
+    <h2>📚 Archiv závodů</h2>
+    <div id="archive-content"></div>
+  </section>
 
-   <!-- === Chart.js (opravena verze, UMD) === -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <!-- Hall of Fame -->
+  <section id="hall" class="tab-content hidden">
+    <h2>🏆 Hall of Fame</h2>
+    <div id="hall-of-fame"></div>
+    <canvas id="hall-bar-chart"></canvas>
+    <div id="fun-facts"></div>
+  </section>
 
-  <!-- Hlavní modul (tvůj opravený skript) -->
-  <script type="module" src="GT7script.js"></script>
+  <!-- Head to Head -->
+  <section id="head2head" class="tab-content hidden">
+    <h2>⚔️ Head-to-Head</h2>
+    <div class="head2head-form">
+      <label for="head2head-driver1">Jezdec 1:</label>
+      <select id="head2head-driver1"></select>
+      <label for="head2head-driver2">Jezdec 2:</label>
+      <select id="head2head-driver2"></select>
+      <button onclick="compareDrivers()">Porovnat</button>
+    </div>
+    <div id="head2head-result"></div>
+  </section>
+
+  <!-- Profil -->
+  <section id="profile" class="tab-content hidden">
+    <h2>👤 Můj profil</h2>
+    <div id="profile-section">
+      <img src="https://www.gravatar.com/avatar?d=mp&s=100" alt="Avatar" class="avatar">
+      <div id="profile-name">Nepřihlášený uživatel</div>
+      <div id="profile-team"></div>
+    </div>
+    <div id="profile-edit" class="hidden">
+      <h3>Upravit profil</h3>
+      <input type="text" id="edit-name" placeholder="Závodní přezdívka">
+      <input type="text" id="edit-team" placeholder="Tým">
+      <button onclick="saveProfile()">Uložit profil</button>
+    </div>
+    <div id="profile-note">
+      <p>Pro úpravu profilu se přihlas.</p>
+    </div>
+  </section>
+
+  <!-- Admin -->
+  <section id="admin" class="tab-content hidden">
+    <h2>🛠️ Admin sekce</h2>
+    <div id="admin-forms" class="hidden">
+      <form id="race-form">
+        <h3>Přidat / upravit závod</h3>
+        <input type="hidden" id="edit-id">
+        <label>Datum <input type="datetime-local" id="race-date" required></label>
+        <label>Okruh <input type="text" id="circuit-name" required></label>
+        <label>Povolená auta <input type="text" id="allowed-cars"></label>
+        <label>PP limit <input type="number" id="pp-limit"></label>
+        <label>BoP <select id="bop"><option>Vypnuto</option><option>Zapnuto</option></select></label>
+        <label>Tuning <select id="tuning"><option>Povolen</option><option>Zakázán</option></select></label>
+        <label>Kategorie pneumatik <select id="tire-cat"><option>Komfortní</option><option>Sportovní</option><option>Závodní</option></select></label>
+        <label>Povinná směs <select id="tire-comp"><option>Bez povinné směsi</option><option>Měkká</option><option>Střední</option><option>Tvrdá</option></select></label>
+        <label>Počet kol <input type="number" id="laps"></label>
+        <label>Spotřeba paliva (x) <input type="number" id="fuel" min="1" max="10" step="1"></label>
+        <label>Opotřebení pneumatik (x) <input type="number" id="wear" min="1" max="10" step="1"></label>
+        <label>Rychlost tankování (l/s) <input type="number" id="refuel" min="1" max="10"></label>
+        <button type="submit" class="btn">Uložit závod</button>
+      </form>
+    </div>
+    <button id="btn-signin">Přihlásit se (admin)</button>
+    <button id="btn-signout" class="hidden">Odhlásit se</button>
+    <p id="user-email"></p>
+    <div id="not-admin">Pouze pro administrátora.</div>
+  </section>
+
+  <script type="module" src="./GT7script.js"></script>
 </body>
 </html>
