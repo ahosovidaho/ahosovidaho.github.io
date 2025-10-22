@@ -133,6 +133,10 @@
   </div>
 
   <!-- JS modul -->
-<script type="module" src="GT7script.js"></script>
+<script>
+  import('./GT7script.js')
+    .then(() => console.log('✅ Modul načten'))
+    .catch(err => console.error('❌ Chyba při načítání:', err));
+</script>
 </body>
 </html>
