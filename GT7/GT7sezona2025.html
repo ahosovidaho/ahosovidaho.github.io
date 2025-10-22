@@ -9,61 +9,25 @@
 </head>
 <body>
   <header>
-    <h1>HRIC-PIC-MA-MA-TAMA GT7 Sezóna 2025</h1>
-    <nav>
-      <button id="showRacesBtn" class="active">Závody</button>
-      <button id="showStandingsBtn">Pořadí</button>
-      <button id="showH2HBtn">H2H</button>
-    </nav>
+    <h1>GT7 Sezóna 2025</h1>
+    <div id="user-info">
+      Přihlášený uživatel: <span id="user-name">Nepřihlášen</span>
+    </div>
   </header>
 
   <main>
-    <section id="racesSection" class="visible">
-      <h2>Přehled závodů</h2>
-      <div id="raceList" class="card-grid"></div>
+    <section id="chart-section">
+      <canvas id="resultsChart" width="400" height="200"></canvas>
     </section>
 
-    <section id="standingsSection">
-      <h2>Průběžné pořadí</h2>
-      <table id="standingsTable">
-        <thead>
-          <tr>
-            <th>Pořadí</th>
-            <th>Jezdec</th>
-            <th>Body</th>
-            <th>Vítězství</th>
-            <th>Účasti</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </section>
-
-    <section id="h2hSection">
-      <h2>Head to Head</h2>
-      <div id="h2hSeasonSelect"></div>
-      <table id="h2hTable">
-        <thead></thead>
-        <tbody></tbody>
-      </table>
-    </section>
-
-    <section id="adminSection" class="admin">
-      <h2>Admin – správa závodů</h2>
-      <div class="admin-form">
-        <input type="text" id="circuitInput" placeholder="Okruh">
-        <input type="datetime-local" id="dateInput">
-        <input type="text" id="allowedCarsInput" placeholder="Povolená auta">
-        <input type="number" id="seasonInput" placeholder="Sezóna" value="2025">
-        <button id="addRaceBtn">Přidat závod</button>
-      </div>
-
-      <div id="adminRaceList" class="admin-races"></div>
+    <section id="results">
+      <h2>Výsledky závodů</h2>
+      <div id="race-list"></div>
     </section>
   </main>
 
   <footer>
-    <p>© 2025 VIKI for HRIC-PIC-MA-MA-TAMA GT7 Championship</p>
+    <p>© 2025 HRIC-PIC-MA-MA-TAMA Racing League</p>
   </footer>
 </body>
 </html>
