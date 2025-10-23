@@ -16,9 +16,6 @@
   th, td { border:1px solid #444; padding:8px; text-align:center; }
   th { background:#222; }
   canvas { max-width:100%; height:auto; }
-  form label { display:block; margin-top:10px; font-weight:bold; }
-  form input, form select, form textarea { width:100%; padding:6px; margin-top:4px; background:#1e1e1e; color:#fff; border:1px solid #444; border-radius:4px; }
-  form button { margin-top:15px; padding:10px 20px; background:#610000; color:#fff; border:none; cursor:pointer; border-radius:4px; }
 </style>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -42,7 +39,7 @@
 
 <section id="aktualni" class="active">
   <h2>Nejbližší závod</h2>
-  <div id="nextRaceBanner">Zde bude upoutávka na nadcházející závod</div>
+  <div id="nextRaceBanner">Zatím žádný naplánovaný závod</div>
 
   <h2>Vývoj bodů</h2>
   <canvas id="pointsChart"></canvas>
@@ -81,157 +78,126 @@
 <section id="admin">
   <h2>Admin – Přidat / Upravit závod</h2>
   <button id="loginBtn">Přihlásit se přes Google</button>
-
-  <form id="raceForm">
-    <label for="raceName">Název závodu:</label>
-    <input type="text" id="raceName" required>
-
-    <label for="raceTrack">Trať:</label>
-    <input type="text" id="raceTrack" required>
-
-    <label for="raceDate">Datum a čas:</label>
-    <input type="datetime-local" id="raceDate">
-
-    <label for="allowedVehicles">Povolená vozidla:</label>
-    <input type="text" id="allowedVehicles">
-
-    <label for="allowedCategory">Povolená kategorie:</label>
-    <select id="allowedCategory">
-      <option value="">--vyber--</option>
-      <option>Gr.1</option>
-      <option>Gr.2</option>
-      <option>Gr.3</option>
-      <option>Gr.4</option>
-      <option>Gr.B</option>
-      <option>VGT</option>
-      <option>Open</option>
-    </select>
-
-    <label for="tuning">Tuning:</label>
-    <select id="tuning">
-      <option value="">--vyber--</option>
-      <option>ANO</option>
-      <option>NE</option>
-    </select>
-
-    <label for="bo">Rovnováha výkonu:</label>
-    <select id="bo">
-      <option value="">--vyber--</option>
-      <option>ANO</option>
-      <option>NE</option>
-    </select>
-
-    <label for="allowedTyres">Povolené pneumatiky:</label>
-    <select id="allowedTyres">
-      <option value="">--vyber--</option>
-      <option>Komfortní</option>
-      <option>Sportovní</option>
-      <option>Závodní</option>
-      <option>Na sníh</option>
-      <option>Na šotolinu</option>
-    </select>
-
-    <label for="mandatoryTyre">Povinná směs:</label>
-    <select id="mandatoryTyre">
-      <option value="">--vyber--</option>
-      <option>Tvrdá</option>
-      <option>Střední</option>
-      <option>Měkká</option>
-    </select>
-
-    <label for="tyreWear">Opotřebení pneumatik:</label>
-    <input type="text" id="tyreWear">
-
-    <label for="fuelConsumption">Spotřeba paliva:</label>
-    <input type="text" id="fuelConsumption">
-
-    <label for="fuelRefill">Rychlost doplňování paliva:</label>
-    <input type="text" id="fuelRefill">
-
-    <label for="mandatoryPitstop">Povinný pit-stop:</label>
-    <select id="mandatoryPitstop">
-      <option value="">--vyber--</option>
-      <option>ANO</option>
-      <option>NE</option>
-    </select>
-
-    <label for="extraInfo">Doplňující info:</label>
-    <textarea id="extraInfo" rows="3"></textarea>
-
-    <button type="submit">Uložit závod</button>
-  </form>
 </section>
 
 <script>
-  const tabs = document.querySelectorAll('.tablink');
-  tabs.forEach(btn=>{
-    btn.addEventListener('click',()=> {
-      document.querySelectorAll('section').forEach(sec=>sec.classList.remove('active'));
-      document.querySelector('#'+btn.dataset.tab).classList.add('active');
-      tabs.forEach(b=>b.classList.remove('active'));
-      btn.classList.add('active');
-    });
+const tabs = document.querySelectorAll('.tablink');
+tabs.forEach(btn=>{
+  btn.addEventListener('click',()=> {
+    document.querySelectorAll('section').forEach(sec=>sec.classList.remove('active'));
+    document.querySelector('#'+btn.dataset.tab).classList.add('active');
+    tabs.forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
   });
+});
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyCkR-AyJK2vFnz0V2HTuz2b3zCaLMxbXtI",
-    authDomain: "test-gt7.firebaseapp.com",
-    projectId: "test-gt7",
-    storageBucket: "test-gt7.firebasestorage.app",
-    messagingSenderId: "928154989107",
-    appId: "1:928154989107:web:20a34d0009fa75bd1ee946",
-    measurementId: "G-1SG8DW1KQ9"
-  };
-  firebase.initializeApp(firebaseConfig);
-  const auth = firebase.auth();
-  const db = firebase.firestore();
+const firebaseConfig = {
+  apiKey: "AIzaSyCkR-AyJK2vFnz0V2HTuz2b3zCaLMxbXtI",
+  authDomain: "test-gt7.firebaseapp.com",
+  projectId: "test-gt7",
+  storageBucket: "test-gt7.firebasestorage.app",
+  messagingSenderId: "928154989107",
+  appId: "1:928154989107:web:20a34d0009fa75bd1ee946",
+  measurementId: "G-1SG8DW1KQ9"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
 
-  document.getElementById('loginBtn').addEventListener('click', ()=>{
-    const provider = new firebase.auth.GoogleAuthProvider();
-    auth.signInWithPopup(provider).then(result=>{
-      alert('Přihlášeno: '+result.user.displayName);
-    }).catch(console.error);
-  });
+document.getElementById('loginBtn').addEventListener('click', ()=>{
+  const provider = new firebase.auth.GoogleAuthProvider();
+  auth.signInWithPopup(provider).then(result=>{
+    alert('Přihlášeno: '+result.user.displayName);
+  }).catch(console.error);
+});
 
-  // --- Přidání / editace závodů ---
-  const raceForm = document.getElementById('raceForm');
-  raceForm.addEventListener('submit', async (e)=>{
-    e.preventDefault();
-    const data = {
-      name: document.getElementById('raceName').value,
-      track: document.getElementById('raceTrack').value,
-      date: document.getElementById('raceDate').value || null,
-      allowedVehicles: document.getElementById('allowedVehicles').value,
-      allowedCategory: document.getElementById('allowedCategory').value,
-      tuning: document.getElementById('tuning').value,
-      bo: document.getElementById('bo').value,
-      allowedTyres: document.getElementById('allowedTyres').value,
-      mandatoryTyre: document.getElementById('mandatoryTyre').value,
-      tyreWear: document.getElementById('tyreWear').value,
-      fuelConsumption: document.getElementById('fuelConsumption').value,
-      fuelRefill: document.getElementById('fuelRefill').value,
-      mandatoryPitstop: document.getElementById('mandatoryPitstop').value,
-      extraInfo: document.getElementById('extraInfo').value
-    };
-    await db.collection('plannedRaces').add(data);
-    raceForm.reset();
-    alert('Závod uložen.');
-    loadPlannedRaces();
-  });
+// --- Načtení dokončených závodů ---
+const drivers = ["Viki","Mára","Maty","Hardy","Ondra"];
+const pointsMap = [10,8,6,4,2];
 
-  async function loadPlannedRaces(){
-    const tbody = document.querySelector('#planned tbody');
-    tbody.innerHTML = '';
-    const snapshot = await db.collection('plannedRaces').orderBy('date','asc').get();
-    snapshot.forEach(doc=>{
-      const r = doc.data();
-      const tr = document.createElement('tr');
-      tr.innerHTML = `<td>${r.date||''}</td><td>${r.name} / ${r.track}</td><td>${r.allowedVehicles||''}</td>
-        <td>${r.allowedCategory||''}</td><td>${r.tuning||''}</td><td>${r.bo||''}</td><td>${r.allowedTyres||''}</td>`;
-      tbody.appendChild(tr);
-    });
-  }
+async function loadRaces() {
+  const completedSnapshot = await db.collection('completedRaces').orderBy('date','asc').get();
+  const completedRaces = completedSnapshot.docs.map(d=>d.data());
+  renderResults(completedRaces);
+  renderStandings(completedRaces);
+  renderPointsChart(completedRaces);
   loadPlannedRaces();
+}
+
+function renderResults(races){
+  const tbody = document.querySelector('#results tbody');
+  tbody.innerHTML='';
+  races.slice().reverse().forEach(r=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${r.date}</td><td>${r.name} / ${r.track}</td>` +
+      drivers.map(d=>{
+        const idx = r.order.indexOf(d);
+        return `<td>${idx>=0?r.order[idx]:"DNS"}</td>`;
+      }).join('');
+    tbody.appendChild(tr);
+  });
+}
+
+function calculateStandings(races){
+  const standings = {};
+  drivers.forEach(d=>standings[d]={points:0,podium:0,dns:0});
+  races.forEach(r=>{
+    r.order.forEach((d,i)=>{
+      if(d==="DNS"){ standings[drivers[i]].dns++; return; }
+      standings[d].points += pointsMap[i]||0;
+      if(i<3) standings[d].podium++;
+    });
+  });
+  return Object.entries(standings).sort((a,b)=>b[1].points - a[1].points);
+}
+
+function renderStandings(races){
+  const tbody = document.querySelector('#standings tbody');
+  tbody.innerHTML='';
+  calculateStandings(races).forEach(([name,data])=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML=`<td>${name}</td><td>${data.points}</td><td>${data.podium}</td><td>${data.dns}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+function renderPointsChart(races){
+  const ctx = document.getElementById('pointsChart').getContext('2d');
+  const datasets = drivers.map(d=>{
+    let sum=0;
+    const data = races.map(r=>{
+      const idx = r.order.indexOf(d);
+      if(idx==-1 || r.order[idx]==="DNS") return sum;
+      sum += pointsMap[idx]||0;
+      return sum;
+    });
+    return {label:d,data,borderColor:getRandomColor(),fill:false,tension:0.1};
+  });
+  new Chart(ctx,{type:'line',data:{labels:races.map(r=>r.name),datasets},options:{responsive:true,plugins:{legend:{labels:{color:'#fff'}}},scales:{x:{ticks:{color:'#fff'}},y:{ticks:{color:'#fff'}}}}});
+}
+
+function getRandomColor(){ const letters="0123456789ABCDEF"; return "#"+Array.from({length:6}).map(()=>letters[Math.floor(Math.random()*16)]).join(''); }
+
+// --- Naplánované závody ---
+async function loadPlannedRaces(){
+  const tbody = document.querySelector('#planned tbody');
+  tbody.innerHTML='';
+  const snapshot = await db.collection('plannedRaces').orderBy('date','asc').get();
+  let nextRace=null;
+  snapshot.forEach(doc=>{
+    const r = doc.data();
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${r.date||''}</td><td>${r.name} / ${r.track}</td><td>${r.allowedVehicles||''}</td><td>${r.allowedCategory||''}</td><td>${r.tuning||''}</td><td>${r.bo||''}</td><td>${r.allowedTyres||''}</td>`;
+    tbody.appendChild(tr);
+    if(!nextRace && r.date && new Date(r.date) > new Date()) nextRace=r;
+  });
+  const banner = document.getElementById('nextRaceBanner');
+  if(nextRace){
+    banner.innerHTML = `<strong>${nextRace.name}</strong> na trati ${nextRace.track} – ${nextRace.date}`;
+  }
+}
+
+loadRaces();
 </script>
 
 </body>
