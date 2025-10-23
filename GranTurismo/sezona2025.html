@@ -16,6 +16,9 @@
   th, td { border:1px solid #444; padding:8px; text-align:center; }
   th { background:#222; }
   canvas { max-width:100%; height:auto; }
+  #addRace { margin-top:20px; padding:10px; background:#1e1e1e; border:1px solid #444; }
+  #addRace input { margin:5px 0; padding:5px; width:calc(100% - 12px); }
+  #addRace button { padding:5px 10px; margin-top:5px; cursor:pointer; }
 </style>
 <!-- Firebase SDKs -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -83,6 +86,14 @@
   <h2>Admin</h2>
   <button id="loginBtn">Přihlásit se přes Google</button>
   <div id="adminBanner">Zadávání závodů</div>
+
+  <div id="addRace">
+    <h3>Přidat nový závod</h3>
+    <input type="datetime-local" id="newRaceDate" placeholder="Datum a čas">
+    <input type="text" id="newRaceName" placeholder="Název závodu">
+    <input type="text" id="newRaceTrack" placeholder="Trať">
+    <button id="addRaceBtn">Přidat závod</button>
+  </div>
 </section>
 
 <script>
@@ -121,46 +132,44 @@
   // --- DATA ---
   const drivers = ["Viki","Mára","Maty","Hardy","Ondra"];
   const resultsData = [
-    {datum:"2025-03-01T15:00", nazev:"American Muscle", trat:"Daytona road circuit", vysledky:["Viki","Maty","Hardy","DNS","DNS"]},
-    {datum:"2025-03-15T15:00", nazev:"Limonádový Joe", trat:"Red Bull Ring", vysledky:["Viki","Hardy","Maty","DNS","DNS"]},
-    {datum:"2025-04-01T15:00", nazev:"Forza Italia", trat:"Monza", vysledky:["Hardy","Viki","Maty","DNS","DNS"]},
-    {datum:"2025-04-15T15:00", nazev:"Dovolená v Chorvatsku", trat:"Dragon Trail - přímořská trať", vysledky:["Viki","Maty","Hardy","DNS","DNS"]},
-    {datum:"2025-05-01T15:00", nazev:"Tokyo Drift", trat:"Suzuka", vysledky:["Viki","Maty","Hardy","DNS","DNS"]},
-    {datum:"2025-05-15T15:00", nazev:"Po stopách Jamese Bonda", trat:"Brands Hatch", vysledky:["Maty","Viki","Hardy","DNS","DNS"]},
-    {datum:"2025-06-01T15:00", nazev:"24h Le Mans", trat:"Le Mans", vysledky:["Viki","Hardy","Maty (PEN)","DNS","DNS"]}
+    {datum: "2025-03-01T15:00", nazev:"American Muscle", trat:"Daytona road circuit", vysledky:["Viki","Maty","Hardy","DNS","DNS"]},
+    {datum: "2025-03-15T15:00", nazev:"Limonádový Joe", trat:"Red Bull Ring", vysledky:["Viki","Hardy","Maty","DNS","DNS"]},
+    {datum: "2025-04-01T15:00", nazev:"Forza Italia", trat:"Monza", vysledky:["Hardy","Viki","Maty","DNS","DNS"]},
+    {datum: "2025-04-15T15:00", nazev:"Dovolená v Chorvatsku", trat:"Dragon Trail - přímořská trať", vysledky:["Viki","Maty","Hardy","DNS","DNS"]},
+    {datum: "2025-05-01T15:00", nazev:"Tokyo Drift", trat:"Suzuka", vysledky:["Viki","Maty","Hardy","DNS","DNS"]},
+    {datum: "2025-05-15T15:00", nazev:"Po stopách Jamese Bonda", trat:"Brands Hatch", vysledky:["Maty","Viki","Hardy","DNS","DNS"]},
+    {datum: "2025-06-01T15:00", nazev:"24h Le Mans", trat:"Le Mans", vysledky:["Viki","Hardy","Maty (PEN)","DNS","DNS"]}
   ];
   const pointsMap = [10,8,6,4,2]; //1.-5.místo
 
-  // --- VYPOČET POŘADÍ S AUTOMATICKÝM DNS ---
+  // --- VYPOČET POŘADÍ ---
   function calculateStandings(){
     const standings = {};
     drivers.forEach(d=>standings[d]={points:0,podium:0,dns:0});
-
     resultsData.forEach(r=>{
-      drivers.forEach(driver=>{
-        const pos = r.vysledky.findIndex(d=>d.replace(/\s*\(PEN\)/,'') === driver);
-        if(pos === -1 || r.vysledky[pos] === "DNS"){
-          standings[driver].dns++;
-        } else {
-          standings[driver].points += pointsMap[pos] || 0;
-          if(pos < 3) standings[driver].podium++;
-        }
+      r.vysledky.forEach((d,i)=>{
+        const cleanName = d.replace(/\s*\(PEN\)/,'');
+        if(d==="DNS"){ standings[drivers[i]].dns++; return;}
+        standings[cleanName].points += pointsMap[i] || 0;
+        if(i<3) standings[cleanName].podium++;
       });
     });
-
     return Object.entries(standings).sort((a,b)=>b[1].points - a[1].points);
   }
 
-  // --- VYPSÁNÍ TABULKY VÝSLEDKŮ ---
+  // --- VYPSÁNÍ TABULKY ---
   const tbodyResults = document.querySelector('#results tbody');
-  resultsData.slice().reverse().forEach(r=>{
-    const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${r.datum}</td><td>${r.nazev} / ${r.trat}</td>` +
-      r.vysledky.map(d=>`<td>${d}</td>`).join('');
-    tbodyResults.appendChild(tr);
-  });
+  function renderResults(){
+    tbodyResults.innerHTML="";
+    resultsData.slice().reverse().forEach(r=>{
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${r.datum}</td><td>${r.nazev} / ${r.trat}</td>` +
+        r.vysledky.map(d=>`<td>${d}</td>`).join('');
+      tbodyResults.appendChild(tr);
+    });
+  }
+  renderResults();
 
-  // --- VYPSÁNÍ POŘADÍ ---
   const tbodyStandings = document.querySelector('#standings tbody');
   function renderStandings(){
     tbodyStandings.innerHTML="";
@@ -186,7 +195,44 @@
   });
   const pointsChart = new Chart(ctx,{type:'line', data:{labels:resultsData.map(r=>r.nazev), datasets}, options:{responsive:true, plugins:{legend:{labels:{color:'#fff'}}}, scales:{x:{ticks:{color:'#fff'}},y:{ticks:{color:'#fff'}}}}});
 
+  function updateChart(){
+    drivers.forEach((d,i)=>{
+      let sum=0;
+      pointsChart.data.datasets[i].data = resultsData.map(r=>{
+        const idx = r.vysledky.findIndex(x=>x.replace(/\s*\(PEN\)/,'')===d);
+        if(idx==-1 || r.vysledky[idx]==="DNS") return sum;
+        sum += pointsMap[idx]||0;
+        return sum;
+      });
+    });
+    pointsChart.data.labels = resultsData.map(r=>r.nazev);
+    pointsChart.update();
+  }
+
   function getRandomColor(){ const letters="0123456789ABCDEF"; return "#"+Array.from({length:6}).map(()=>letters[Math.floor(Math.random()*16)]).join(''); }
+
+  // --- PŘIDÁNÍ NOVÉHO ZÁVODU ---
+  document.getElementById('addRaceBtn').addEventListener('click', ()=>{
+    const date = document.getElementById('newRaceDate').value;
+    const name = document.getElementById('newRaceName').value.trim();
+    const track = document.getElementById('newRaceTrack').value.trim();
+    if(!date || !name || !track){ alert("Vyplňte všechny údaje."); return; }
+
+    const newRace = {datum: date, nazev: name, trat: track, vysledky: drivers.map(()=> "DNS")};
+    resultsData.push(newRace);
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${newRace.datum}</td><td>${newRace.nazev} / ${newRace.trat}</td>` +
+                   newRace.vysledky.map(d=>`<td>${d}</td>`).join('');
+    tbodyResults.prepend(tr);
+
+    renderStandings();
+    updateChart();
+
+    document.getElementById('newRaceDate').value = "";
+    document.getElementById('newRaceName').value = "";
+    document.getElementById('newRaceTrack').value = "";
+  });
 </script>
 
 </body>
