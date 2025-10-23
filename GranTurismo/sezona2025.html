@@ -49,6 +49,24 @@
   #nextRaceInfo .race-title{font-size:16px;font-weight:700}
   #nextRaceInfo .countdown{display:inline-block;font-weight:800;color:var(--accent2);font-size:18px;margin-top:4px}
   @media(max-width:800px){ .row{flex-direction:column} .youtube-thumb{width:80px} th,td{font-size:13px} header h1{font-size:18px} }
+
+/* === HERO: menší výška + kompaktnější vnitřní odsazení === */
+:root{
+  /* původně bylo cca 40–50vh; teď kompaktnější */
+  --hero-h: clamp(160px, 22vh, 280px);
+}
+#hero{
+  min-height: var(--hero-h);
+  background-position: center 20%; /* ať je vidět zajímavá část key-artu i při menší výšce */
+}
+#hero .hero-inner{
+  padding: clamp(14px, 2vh, 20px) 0 18px;
+}
+/* volitelné – nepatrně větší nadpis, ať se čte snáz v menším headeru */
+#hero h1{
+  font-size: clamp(20px, 2.1vw, 30px);
+}
+
 </style>
 
 <!-- Firebase compat -->
