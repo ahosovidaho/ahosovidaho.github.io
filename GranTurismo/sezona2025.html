@@ -31,6 +31,8 @@
   .admin-only{display:none}
   .toolbar {display:flex;gap:8px;align-items:center;flex-wrap:wrap}
   .toolbar a, .toolbar button {text-decoration:none}
+  .legend-chip{display:inline-flex;align-items:center;gap:6px;margin-right:10px}
+  .chip{display:inline-block;width:10px;height:10px;border-radius:2px}
   @media(max-width:800px){ .row{flex-direction:column} .youtube-thumb{width:80px} th,td{font-size:13px} header h1{font-size:18px} }
 </style>
 
@@ -67,6 +69,7 @@
 
     <div class="card">
       <strong>Vývoj bodů</strong>
+      <div id="driverLegend" class="small" style="margin-top:6px"></div>
       <canvas id="pointsChart" style="max-height:360px"></canvas>
     </div>
 
@@ -118,7 +121,26 @@
       </div>
       <div id="h2hSummary" class="small" style="margin-top:12px"></div>
       <canvas id="h2hChart" style="max-height:300px;margin-top:10px"></canvas>
-      <div class="small" id="h2hNote" style="margin-top:8px;color:#9aa0a6"></div>
+
+      <div class="card" style="margin-top:12px">
+        <strong>Společné závody (H2H)</strong>
+        <table id="h2hTable">
+          <thead>
+            <tr>
+              <th>Datum</th><th>Závod / Trať</th>
+              <th id="h2hColA">A</th><th id="h2hColB">B</th>
+              <th>Body A</th><th>Body B</th><th>Výsledek</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+        <div class="small" id="h2hNote" style="margin-top:8px;color:#9aa0a6"></div>
+      </div>
+
+      <div class="card" style="margin-top:12px">
+        <strong>Minigraf: body v čase (H2H)</strong>
+        <canvas id="h2hMiniChart" style="max-height:220px;margin-top:10px"></canvas>
+      </div>
     </div>
 
     <div class="card">
@@ -320,16 +342,17 @@ const db = firebase.firestore();
 
 /* === State / Constants === */
 const drivers = ["Viki","Mára","Maty","Hardy","Ondra"];
+const driverColors = { "Viki":"#ff058a","Maty":"#d0e0e3","Hardy":"#ffd700","Mára":"#ffff66","Ondra":"#7d85c0" };
 const pointsMap = [10,8,6,4,2]; // 1..5
 let racesCache = [];
 let pointsChart = null;
 let h2hChart = null;
+let h2hMiniChart = null;
 
 /* === Helpers === */
 const $ = s=>document.querySelector(s);
 const $$ = s=>Array.from(document.querySelectorAll(s));
 function escapeHtml(s){ if(s==null) return ''; return String(s).replace(/[&<>"']/g, ch=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;', "'":'&#39;' }[ch])); }
-function randomColor(){ return '#'+Math.floor(Math.random()*16777215).toString(16).padStart(6,'0'); }
 function normName(raw){ return (!raw)?raw:String(raw).replace(/\s*\(.*\)\s*$/,'').trim(); }
 function ytId(url){ if(!url) return null; try{const u=new URL(url); if(u.hostname.includes('youtu.be')) return u.pathname.slice(1); if(u.searchParams.get('v')) return u.searchParams.get('v'); const seg=u.pathname.split('/').filter(Boolean).pop(); return seg&&seg.length>=10?seg:null;}catch(e){ return url.length===11?url:null; }}
 function getResultsArray(r){ if(Array.isArray(r.vysledky)) return r.vysledky; if(Array.isArray(r.results)) return r.results; return []; }
@@ -385,6 +408,7 @@ function renderAll(){
   renderStandingsAndChart();
   populateEditSelect();
   populateH2HDropdowns();
+  renderDriverLegend();
 }
 
 /* === Next race banner === */
@@ -483,7 +507,7 @@ function renderStandingsAndChart(){
       tbody.appendChild(tr);
     });
 
-  // graf – kumulativně
+  // graf – kumulativně, pevné barvy
   const labels = completed.map(r=> r.nazev||r.name|| (r.trat||r.track||'Závod'));
   const datasets = drivers.map(d=>{
     let cum=0;
@@ -494,11 +518,22 @@ function renderStandingsAndChart(){
       cum += (pointsMap[idx]||0);
       return cum;
     });
-    return {label:d,data, borderColor:randomColor(), fill:false, tension:0.2};
+    return {label:d,data, borderColor:driverColors[d]||'#ccc', backgroundColor:driverColors[d]||'#ccc', fill:false, tension:0.2};
   });
   const ctx=$('#pointsChart').getContext('2d');
   if(pointsChart && typeof pointsChart.destroy==='function') pointsChart.destroy();
   pointsChart = new Chart(ctx,{ type:'line', data:{labels,datasets}, options:{ responsive:true, plugins:{legend:{labels:{color:'#fff'}}}, scales:{x:{ticks:{color:'#fff'}}, y:{ticks:{color:'#fff'}, beginAtZero:true}} }});
+}
+
+/* === Driver legend (pevné barvy) === */
+function renderDriverLegend(){
+  const el = $('#driverLegend'); el.innerHTML='';
+  drivers.forEach(d=>{
+    const span=document.createElement('span');
+    span.className='legend-chip';
+    span.innerHTML=`<span class="chip" style="background:${driverColors[d]||'#ccc'}"></span>${escapeHtml(d)}`;
+    el.appendChild(span);
+  });
 }
 
 /* === Admin: Přidat nový závod === */
@@ -634,16 +669,13 @@ function populateH2HDropdowns(){
   const set=(sel)=>{ sel.innerHTML=''; drivers.forEach(d=>{ const o=document.createElement('option'); o.value=d; o.textContent=d; sel.appendChild(o); }); };
   set(a); set(b); if(drivers.length>1){ b.value=drivers[1]; }
 }
-function finishRank(name){
-  if(name==='DNS' || name==null) return 999; // DNS horší než jakákoli pozice
-  return name; // původně string se jménem – ranking řešíme dle indexu v poli
-}
 function h2hCompute(A,B){
-  const completed = racesCache.filter(hasResults);
+  const completed = racesCache.filter(hasResults)
+    .sort((a,b)=> new Date(a.datum||a.date||0) - new Date(b.datum||b.date||0));
+  const rows=[]; // per race detail
   let races=0, winsA=0, winsB=0, draws=0, dnsA=0, dnsB=0;
   let ptsA=0, ptsB=0;
   let avgPosA=0, avgPosB=0, posCount=0;
-  const perRacePoints = [];
 
   completed.forEach(r=>{
     const res = getResultsArray(r);
@@ -658,32 +690,52 @@ function h2hCompute(A,B){
 
     races++;
 
-    // body
-    if(!aIsDNS) ptsA += pointsMap[idxA]||0;
-    if(!bIsDNS) ptsB += pointsMap[idxB]||0;
-    perRacePoints.push({a: aIsDNS?0:(pointsMap[idxA]||0), b: bIsDNS?0:(pointsMap[idxB]||0)});
+    const pA = aIsDNS ? 'DNS' : (idxA+1);
+    const pB = bIsDNS ? 'DNS' : (idxB+1);
+    const ptsRa = aIsDNS?0:(pointsMap[idxA]||0);
+    const ptsRb = bIsDNS?0:(pointsMap[idxB]||0);
 
-    // průměrné umístění
+    // body total
+    ptsA += ptsRa; ptsB += ptsRb;
+
+    // průměrné umístění a výsledek
+    let resultTxt='';
     if(!aIsDNS && !bIsDNS){
       avgPosA += (idxA+1);
       avgPosB += (idxB+1);
       posCount++;
-      if(idxA < idxB) winsA++; else if(idxB < idxA) winsB++; else draws++;
-    }else if(!aIsDNS && bIsDNS){
-      winsA++;
-    }else if(aIsDNS && !bIsDNS){
-      winsB++;
-    }
+      if(idxA < idxB){ winsA++; resultTxt = `${A} porazil ${B}`; }
+      else if(idxB < idxA){ winsB++; resultTxt = `${B} porazil ${A}`; }
+      else { draws++; resultTxt = 'Remíza'; }
+    }else if(!aIsDNS && bIsDNS){ winsA++; resultTxt = `${A} vyhrál (B DNS)`; }
+    else if(aIsDNS && !bIsDNS){ winsB++; resultTxt = `${B} vyhrál (A DNS)`; }
+
+    rows.push({
+      date: r.datum||r.date ? new Date(r.datum||r.date).toLocaleString() : '',
+      label: `${r.nazev||r.name||''} / ${r.trat||r.track||''}`,
+      posA: pA, posB: pB, ptsA: ptsRa, ptsB: ptsRb, result: resultTxt
+    });
   });
 
   const avgA = posCount? (avgPosA/posCount).toFixed(2) : '—';
   const avgB = posCount? (avgPosB/posCount).toFixed(2) : '—';
 
-  return {races, winsA, winsB, draws, dnsA, dnsB, ptsA, ptsB, avgA, avgB, perRacePoints};
+  return {races, winsA, winsB, draws, dnsA, dnsB, ptsA, ptsB, avgA, avgB, rows};
 }
+
 function renderH2H(){
   const A=$('#h2hA').value, B=$('#h2hB').value;
-  if(!A||!B||A===B){ $('#h2hSummary').innerHTML='Vyber dva různé jezdce.'; if(h2hChart){h2hChart.destroy();} return; }
+  const colA=$('#h2hColA'), colB=$('#h2hColB');
+  if(colA) colA.textContent = A || 'A';
+  if(colB) colB.textContent = B || 'B';
+
+  if(!A||!B||A===B){
+    $('#h2hSummary').innerHTML='Vyber dva různé jezdce.';
+    if(h2hChart){h2hChart.destroy();}
+    if(h2hMiniChart){h2hMiniChart.destroy();}
+    $('#h2hTable tbody').innerHTML='';
+    return;
+  }
   const r = h2hCompute(A,B);
   $('#h2hSummary').innerHTML = `
     <div><strong>${A} vs ${B}</strong></div>
@@ -693,30 +745,55 @@ function renderH2H(){
     <div>Body celkem: ${A}: ${r.ptsA} &nbsp;|&nbsp; ${B}: ${r.ptsB}</div>
     <div>DNS: ${A}: ${r.dnsA} &nbsp;|&nbsp; ${B}: ${r.dnsB}</div>
   `;
-  // jednoduchý graf – průměr bodů na závod
+
+  // H2H main chart – průměr bodů na závod
   const avgPtsA = r.races? r.ptsA/r.races : 0;
   const avgPtsB = r.races? r.ptsB/r.races : 0;
   const ctx=$('#h2hChart').getContext('2d');
   if(h2hChart && typeof h2hChart.destroy==='function') h2hChart.destroy();
   h2hChart = new Chart(ctx,{
     type:'bar',
-    data:{ labels:[A,B], datasets:[{label:'Body / závod', data:[avgPtsA,avgPtsB]}] },
+    data:{ labels:[A,B], datasets:[{label:'Body / závod', data:[avgPtsA,avgPtsB], backgroundColor:[driverColors[A]||'#ccc', driverColors[B]||'#ccc']}] },
     options:{ responsive:true, plugins:{legend:{labels:{color:'#fff'}}}, scales:{x:{ticks:{color:'#fff'}}, y:{ticks:{color:'#fff'}, beginAtZero:true}} }
   });
 
+  // H2H detail table
+  const tbody=$('#h2hTable tbody'); tbody.innerHTML='';
+  r.rows.forEach(row=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML = `<td>${row.date}</td><td>${escapeHtml(row.label)}</td><td>${row.posA}</td><td>${row.posB}</td><td>${row.ptsA}</td><td>${row.ptsB}</td><td>${escapeHtml(row.result)}</td>`;
+    tbody.appendChild(tr);
+  });
   $('#h2hNote').textContent = 'Pozn.: H2H ignoruje závody, kde oba jezdci mají DNS. Pokud jeden DNS a druhý dojede, bere se to jako výhra finišujícího jezdce.';
+
+  // Minigraf – body v čase (jen společné závody, chronologicky)
+  const miniCtx=$('#h2hMiniChart').getContext('2d');
+  const labels = r.rows.map((row,i)=>`${i+1}.`);
+  const dataA = r.rows.map(row=>row.ptsA);
+  const dataB = r.rows.map(row=>row.ptsB);
+  if(h2hMiniChart && typeof h2hMiniChart.destroy==='function') h2hMiniChart.destroy();
+  h2hMiniChart = new Chart(miniCtx,{
+    type:'line',
+    data:{ labels, datasets:[
+      {label:A, data:dataA, borderColor:driverColors[A]||'#ccc', backgroundColor:driverColors[A]||'#ccc', fill:false, tension:0.2},
+      {label:B, data:dataB, borderColor:driverColors[B]||'#888', backgroundColor:driverColors[B]||'#888', fill:false, tension:0.2}
+    ]},
+    options:{ responsive:true, plugins:{legend:{labels:{color:'#fff'}}}, scales:{x:{ticks:{color:'#fff'}}, y:{ticks:{color:'#fff'}, beginAtZero:true}} }
+  });
 }
 $('#btnH2H').addEventListener('click', renderH2H);
 
 /* === .ICS generování (naplánované závody) === */
+function pad2(n){ return String(n).padStart(2,'0'); }
 function toICSDate(dt){
-  // očekává ISO string nebo cokoliv co new Date() zvládne
   const d = new Date(dt);
-  const pad=(n)=>String(n).padStart(2,'0');
-  return d.getUTCFullYear()+pad(d.getUTCMonth()+1)+pad(d.getUTCDate())+'T'+pad(d.getUTCHours())+pad(d.getUTCMinutes())+'00Z';
+  return d.getUTCFullYear()+pad2(d.getUTCMonth()+1)+pad2(d.getUTCDate())+'T'+pad2(d.getUTCHours())+pad2(d.getUTCMinutes())+'00Z';
+}
+function plusMinutes(dt, mins){
+  const d = new Date(dt);
+  return new Date(d.getTime() + mins*60000);
 }
 function buildICS(){
-  const now=new Date();
   const planned = racesCache.filter(r=>!hasResults(r) && r.datum).sort((a,b)=>new Date(a.datum)-new Date(b.datum));
   const lines=[
     'BEGIN:VCALENDAR',
@@ -726,7 +803,10 @@ function buildICS(){
     'METHOD:PUBLISH'
   ];
   planned.forEach(r=>{
-    const start = toICSDate(r.datum||r.date);
+    const startDate = new Date(r.datum||r.date);
+    const endDate = plusMinutes(startDate, 120); // + 2 hodiny
+    const start = toICSDate(startDate);
+    const end = toICSDate(endDate);
     const uid = (r.id||Math.random().toString(36).slice(2))+'@tamayo.cz';
     const title = (r.nazev||r.name||'Závod');
     const location = (r.trat||r.track||'');
@@ -740,8 +820,7 @@ function buildICS(){
     lines.push('UID:'+uid);
     lines.push('DTSTAMP:'+toICSDate(new Date().toISOString()));
     lines.push('DTSTART:'+start);
-    // bez konce (all-day-ish start), nebo můžeme dát +90min:
-    // lines.push('DTEND:'+toICSDate(new Date(new Date(r.datum).getTime()+90*60000)));
+    lines.push('DTEND:'+end);
     lines.push('SUMMARY:'+title);
     lines.push('LOCATION:'+location.replace(/,/g,'\\,'));
     lines.push('DESCRIPTION:'+desc);
