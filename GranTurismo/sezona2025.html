@@ -1,160 +1,660 @@
 <!DOCTYPE html>
 <html lang="cs">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>GT7 Sezona 2025</title>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Hric-Pic-Ma-Ma-Tama Championship 2025</title>
 <style>
-body { font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; background:#121212; color:#fff; margin:0; padding:0;}
-header {padding:20px; text-align:center; background:linear-gradient(90deg,#0d1b36,#610000);}
-nav {display:flex; justify-content:center; background:#1e1e1e;}
-nav button {background:none;border:none;color:#fff;padding:15px 20px;cursor:pointer;font-size:16px;}
-nav button.active{border-bottom:3px solid #ff0000;}
-section{padding:20px; display:none;}
-section.active{display:block;}
-table{width:100%;border-collapse:collapse;margin-top:20px;}
-th,td{border:1px solid #444;padding:8px;text-align:center;}
-th{background:#222;}
-canvas{max-width:100%; height:auto;}
-input,select{margin:5px 0;padding:5px;width:100%;color:#000;}
-button{padding:8px 12px;margin-top:5px;cursor:pointer;}
-#banner{padding:10px;margin-bottom:20px;background:#1e1e1e;text-align:center;}
-.youtube-preview{max-width:200px;}
+  /* Jednoduchý, tmavý, responzivní styl */
+  :root { --bg:#121212; --card:#1b1b1b; --muted:#888; --accent:#0d6efd; --accent2:#c62828; }
+  html,body{height:100%;margin:0;background:var(--bg);color:#fff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+  header{padding:20px;text-align:center;background:linear-gradient(90deg,#0d1b36,#610000)}
+  header h1{margin:0;font-size:20px}
+  nav{display:flex;gap:6px;justify-content:center;background:#141414;padding:6px;flex-wrap:wrap}
+  nav button{background:none;border:none;color:#fff;padding:10px 14px;cursor:pointer;font-size:15px}
+  nav button.active{border-bottom:3px solid var(--accent2)}
+  .container{max-width:1100px;margin:18px auto;padding:0 12px}
+  section{display:none}
+  section.active{display:block}
+  .card{background:var(--card);border:1px solid #2a2a2a;border-radius:8px;padding:12px;margin-bottom:16px}
+  table{width:100%;border-collapse:collapse;font-size:14px}
+  th,td{border:1px solid #2a2a2a;padding:8px;text-align:center;vertical-align:middle}
+  th{background:#151515}
+  .small{font-size:13px;color:var(--muted)}
+  form label{display:block;font-size:13px;margin-top:8px}
+  input,select,textarea{width:100%;padding:8px;border-radius:6px;border:1px solid #333;background:#111;color:#fff;box-sizing:border-box}
+  textarea{min-height:70px}
+  .row{display:flex;gap:12px}
+  .col{flex:1}
+  .formBtn{background:var(--accent2);color:#fff;border:none;padding:10px 12px;border-radius:6px;cursor:pointer}
+  .btn-ghost{background:transparent;border:1px solid #444;color:#fff;padding:6px 8px;border-radius:6px;cursor:pointer}
+  .clickable-row:hover{background:#222;cursor:pointer}
+  .youtube-thumb{width:120px}
+  @media(max-width:800px){ .row{flex-direction:column} .youtube-thumb{width:80px} th,td{font-size:13px} header h1{font-size:18px} }
 </style>
+
+<!-- Firebase compat (works with older style simple usage) -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+<!-- Chart.js UMD -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
+<header>
+  <h1>Hric-Pic-Ma-Ma-Tama Championship 2025</h1>
+</header>
 
-<header><h1>GT7 Championship 2025</h1></header>
+<div class="container">
+  <nav>
+    <button class="tablink active" data-tab="home">Aktuální sezóna</button>
+    <button class="tablink" data-tab="stats">Statistiky</button>
+    <button class="tablink" data-tab="archive">Archiv sezón</button>
+    <button class="tablink" data-tab="profile">Profil závodníka</button>
+    <button class="tablink" data-tab="admin">Admin</button>
+  </nav>
 
-<nav>
-<button class="tablink active" data-tab="aktualni">Aktuální sezóna</button>
-<button class="tablink" data-tab="statistiky">Statistiky</button>
-<button class="tablink" data-tab="archiv">Archiv</button>
-<button class="tablink" data-tab="profil">Profil</button>
-<button class="tablink" data-tab="admin">Admin</button>
-</nav>
+  <!-- HOME / AKTUÁLNÍ -->
+  <section id="home" class="active">
+    <div class="card" id="nextRaceCard">
+      <strong>Nejbližší závod:</strong>
+      <div id="nextRaceInfo" class="small">Načítám...</div>
+    </div>
 
-<section id="aktualni" class="active">
-<h2>Nejbližší závod</h2>
-<div id="banner">Zatím není žádný nadcházející závod</div>
+    <div class="card">
+      <strong>Vývoj bodů</strong>
+      <canvas id="pointsChart" style="max-height:340px"></canvas>
+    </div>
 
-<h2>Vývoj bodů</h2>
-<canvas id="pointsChart"></canvas>
+    <div class="card">
+      <strong>Pořadí závodníků</strong>
+      <table id="standings">
+        <thead><tr><th>Závodník</th><th>Body</th><th>Pódiová umístění</th><th>DNS</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
 
-<h2>Pořadí závodníků</h2>
-<table id="standings">
-<thead><tr><th>Závodník</th><th>Body</th><th>Pódiová umístění</th><th>DNS</th></tr></thead>
-<tbody></tbody>
-</table>
+    <div class="card">
+      <strong>Výsledky závodů</strong>
+      <table id="resultsTable">
+        <thead>
+          <tr><th>Datum</th><th>Závod / Trať</th><th>1.</th><th>2.</th><th>3.</th><th>4.</th><th>5.</th><th>Video</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
 
-<h2>Výsledky závodů</h2>
-<table id="results">
-<thead><tr>
-<th>Datum</th><th>Závod a trať</th><th>1. místo</th><th>2. místo</th><th>3. místo</th><th>4. místo</th><th>5. místo</th><th>Video</th>
-</tr></thead>
-<tbody></tbody>
-</table>
+    <div class="card">
+      <strong>Naplánované závody</strong>
+      <table id="plannedTable">
+        <thead>
+          <tr>
+            <th>Datum</th><th>Závod / Trať</th><th>Kategorie</th><th>Vozidla</th><th>Info</th><th>Akce</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
 
-<h2>Naplánované závody</h2>
-<table id="planned">
-<thead><tr>
-<th>Datum</th><th>Závod a trať</th><th>Povolená vozidla</th><th>Kategorie</th><th>Tuning</th><th>Rovnováha výkonu</th><th>Pneumatiky</th><th>Povinná směs</th>
-</tr></thead>
-<tbody></tbody>
-</table>
-</section>
+  <!-- STATS -->
+  <section id="stats">
+    <div class="card">
+      <strong>Statistiky</strong>
+      <div id="statsArea" class="small">Nezobrazeno — brzy doplním H2H, série výher a další.</div>
+    </div>
+  </section>
 
-<section id="statistiky"><h2>Statistiky</h2></section>
-<section id="archiv"><h2>Archiv sezón</h2></section>
-<section id="profil"><h2>Profil závodníka</h2></section>
+  <!-- ARCHIVE -->
+  <section id="archive">
+    <div class="card"><strong>Archiv sezón</strong><div id="archiveArea" class="small">Zatím prázdné.</div></div>
+  </section>
 
-<section id="admin">
-<h2>Admin</h2>
-<button id="loginBtn">Přihlásit se přes Google</button>
+  <!-- PROFILE -->
+  <section id="profile">
+    <div class="card"><strong>Profil závodníka</strong>
+      <div class="small">Funkce pro nahrání fotky a vyplnění oblíbených vozů se doplní později.</div>
+    </div>
+  </section>
 
-<h3>Přidat / Editovat závod</h3>
-<form id="raceForm">
-<label>Název závodu</label><input type="text" id="raceName" required>
-<label>Datum a čas</label><input type="datetime-local" id="raceDate">
-<label>Trať</label><input type="text" id="raceTrack" required>
-<label>Povolená vozidla</label><input type="text" id="raceVehicles">
-<label>Kategorie</label>
-<select id="raceCategory"><option>Gr.1</option><option>Gr.2</option><option>Gr.3</option><option>Gr.4</option><option>Gr.B</option><option>VGT</option><option>Open</option></select>
-<label>Tuning</label><select id="raceTuning"><option>ANO</option><option>NE</option></select>
-<label>Rovnováha výkonu</label><select id="raceBoP"><option>ANO</option><option>NE</option></select>
-<label>Povolené pneumatiky</label><select id="raceTyres"><option>Komfortní</option><option>Sportovní</option><option>Závodní</option><option>Na sníh</option><option>Na šotolinu</option></select>
-<label>Povinná směs</label><select id="raceCompulsoryTyre"><option>Tvrdá</option><option>Střední</option><option>Měkká</option></select>
-<label>Opotřebení pneumatik</label><input type="text" id="raceTyreWear">
-<label>Spotřeba paliva</label><input type="text" id="raceFuel">
-<label>Rychlost doplňování paliva</label><input type="text" id="raceFuelRate">
-<label>Povinný pit-stop</label><select id="racePitStop"><option>ANO</option><option>NE</option></select>
-<label>Doplňující info</label><input type="text" id="raceInfo">
-<label>Youtube odkaz</label><input type="text" id="raceVideo">
-<button type="submit">Uložit závod</button>
-</form>
-</section>
+  <!-- ADMIN -->
+  <section id="admin">
+    <div class="card">
+      <div class="row">
+        <div class="col">
+          <strong>Admin</strong>
+          <div style="margin-top:8px">
+            <button id="loginBtn" class="formBtn">Přihlásit se přes Google</button>
+            <button id="logoutBtn" class="btn-ghost" style="margin-left:8px;display:none">Odhlásit</button>
+            <div id="adminUser" class="small" style="margin-top:8px"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <strong>Přidat / upravit naplánovaný závod</strong>
+      <form id="raceForm">
+        <input type="hidden" id="raceDocId" />
+        <div class="row">
+          <div class="col">
+            <label>Název</label><input id="name" required />
+          </div>
+          <div class="col">
+            <label>Datum a čas</label><input id="date" type="datetime-local" />
+          </div>
+        </div>
+
+        <label>Trať</label><input id="track" />
+
+        <div class="row">
+          <div class="col">
+            <label>Povolená vozidla</label><input id="vehicles" />
+          </div>
+          <div class="col">
+            <label>Kategorie</label>
+            <select id="category"><option>Gr.1</option><option>Gr.2</option><option>Gr.3</option><option>Gr.4</option><option>Gr.B</option><option>VGT</option><option>Open</option></select>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col">
+            <label>Tuning</label><select id="tuning"><option>ANO</option><option>NE</option></select>
+          </div>
+          <div class="col">
+            <label>BoP</label><select id="bop"><option>ANO</option><option>NE</option></select>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col"><label>Pneumatiky</label>
+            <select id="tyres"><option>Komfortní</option><option>Sportovní</option><option>Závodní</option><option>Na sníh</option><option>Na šotolinu</option></select>
+          </div>
+          <div class="col"><label>Směs</label>
+            <select id="compound"><option>Tvrdá</option><option>Střední</option><option>Měkká</option></select>
+          </div>
+        </div>
+
+        <label>Opotřebení pneumatik / Spotřeba / Rychlost doplňování</label>
+        <div class="row">
+          <div class="col"><input id="tyreWear" placeholder="Opotřebení"/></div>
+          <div class="col"><input id="fuel" placeholder="Spotřeba"/></div>
+          <div class="col"><input id="refuel" placeholder="Rychlost doplňování"/></div>
+        </div>
+
+        <label>Povinný pit-stop</label>
+        <select id="pitstop"><option>ANO</option><option>NE</option></select>
+
+        <label>Doplňující info</label><textarea id="info"></textarea>
+
+        <label>Youtube odkaz (volitelně)</label><input id="youtube" placeholder="https://www.youtube.com/watch?v=..." />
+
+        <div style="margin-top:8px"><button class="formBtn" id="saveRaceBtn">Uložit</button>
+        <button class="btn-ghost" id="clearFormBtn" type="button" style="margin-left:8px">Vyčistit</button></div>
+      </form>
+    </div>
+
+    <div class="card">
+      <strong>Správa výsledků (přidat výsledky po závodě)</strong>
+      <div class="small">Vyber závod z naplánovaných (kliknutím na "Upravit výsledky") a zadej pořadí / DNS.</div>
+      <div id="resultEditor" style="margin-top:12px;display:none">
+        <select id="selectRaceForResults" style="margin-bottom:8px"></select>
+        <div id="resultsInputs" style="margin-bottom:8px"></div>
+        <div style="display:flex;gap:8px">
+          <button id="saveResultsBtn" class="formBtn">Uložit výsledky (přesunout do výsledků)</button>
+          <button id="cancelResultsBtn" class="btn-ghost" type="button">Zrušit</button>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+</div>
 
 <script>
-// --- TAB SWITCH ---
-document.querySelectorAll('.tablink').forEach(btn=>{
-btn.addEventListener('click',()=>{
-document.querySelectorAll('section').forEach(sec=>sec.classList.remove('active'));
-document.querySelector('#'+btn.dataset.tab).classList.add('active');
-document.querySelectorAll('.tablink').forEach(b=>b.classList.remove('active'));
-btn.classList.add('active');
-});
-});
-
-// --- FIREBASE ---
-const firebaseConfig = { apiKey:"AIzaSyCkR-AyJK2vFnz0V2HTuz2b3zCaLMxbXtI", authDomain:"test-gt7.firebaseapp.com", projectId:"test-gt7", storageBucket:"test-gt7.firebasestorage.app", messagingSenderId:"928154989107", appId:"1:928154989107:web:20a34d0009fa75bd1ee946", measurementId:"G-1SG8DW1KQ9" };
+/* ---------------------------
+  Konfigurace Firebase (váš config)
+-----------------------------*/
+const firebaseConfig = {
+  apiKey: "AIzaSyCkR-AyJK2vFnz0V2HTuz2b3zCaLMxbXtI",
+  authDomain: "test-gt7.firebaseapp.com",
+  projectId: "test-gt7",
+  storageBucket: "test-gt7.appspot.com",
+  messagingSenderId: "928154989107",
+  appId: "1:928154989107:web:20a34d0009fa75bd1ee946",
+  measurementId: "G-1SG8DW1KQ9"
+};
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-// --- LOGIN ---
-document.getElementById('loginBtn').addEventListener('click',()=>{
-const provider = new firebase.auth.GoogleAuthProvider();
-auth.signInWithPopup(provider).then(result=>alert('Přihlášeno: '+result.user.displayName)).catch(console.error);
+/* ---------------------------
+  Stav a konstanty
+-----------------------------*/
+const drivers = ["Viki","Mára","Maty","Hardy","Ondra"];
+const pointsMap = [10,8,6,4,2]; // 1..5
+let racesCache = []; // pole objektů načtených z Firestore (aktuální snapshot)
+let pointsChart = null;
+
+/* ---------------------------
+  UI Helpery
+-----------------------------*/
+function qs(sel){ return document.querySelector(sel) }
+function qsa(sel){ return Array.from(document.querySelectorAll(sel)) }
+function getYouTubeId(url){
+  if(!url) return null;
+  try{
+    const u = new URL(url);
+    if(u.hostname.includes('youtu.be')) return u.pathname.slice(1);
+    if(u.searchParams && u.searchParams.get('v')) return u.searchParams.get('v');
+    // fallback: last part after /
+    const parts = u.pathname.split('/');
+    return parts.pop() || null;
+  }catch(e){
+    // maybe raw id
+    if(url.length===11) return url;
+    return null;
+  }
+}
+
+/* ---------------------------
+  Přepínání záložek
+-----------------------------*/
+qsa('.tablink').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    qsa('section').forEach(s=>s.classList.remove('active'));
+    const tab = btn.dataset.tab;
+    qs('#'+tab).classList.add('active');
+    qsa('.tablink').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+  });
 });
 
-// --- DATA ---
-let drivers = ["Viki","Mára","Maty","Hardy","Ondra"];
-let resultsData = [
-  {date:"2025-10-01", name:"Tokyo Drift", track:"Suzuka", order:["Viki","Maty","Hardy","DNS","DNS"], video:""},
-  {date:"2025-10-05", name:"24h Le Mans", track:"Le Mans", order:["Viki","Hardy","Maty (PEN)","DNS","DNS"], video:""}
-];
-let plannedRaces = [];
-let editingIndex = null;
+/* ---------------------------
+  Auth (Google sign-in)
+-----------------------------*/
+const loginBtn = qs('#loginBtn');
+const logoutBtn = qs('#logoutBtn');
+const adminUser = qs('#adminUser');
 
-// --- RENDER ---
-function renderPlanned(){const tbody=document.querySelector('#planned tbody');tbody.innerHTML="";plannedRaces.forEach((r,i)=>{const tr=document.createElement('tr');tr.innerHTML=`<td>${r.date||''}</td><td>${r.name} / ${r.track}</td><td>${r.vehicles||''}</td><td>${r.category||''}</td><td>${r.tuning||''}</td><td>${r.bop||''}</td><td>${r.tyres||''}</td><td>${r.compulsoryTyre||''}</td>`;tr.addEventListener('click',()=>{editingIndex=i;["raceName","raceDate","raceTrack","raceVehicles","raceCategory","raceTuning","raceBoP","raceTyres","raceCompulsoryTyre","raceTyreWear","raceFuel","raceFuelRate","racePitStop","raceInfo","raceVideo"].forEach(id=>document.getElementById(id).value=r[id.replace("race","").charAt(0).toLowerCase()+id.replace("race","").slice(1)]||r[id]||'');});tbody.appendChild(tr);});renderBanner();renderResults();renderStandings();renderChart();}
-function renderBanner(){const banner=document.getElementById('banner');const futureRaces=plannedRaces.filter(r=>r.date && new Date(r.date)>new Date());if(futureRaces.length>0){const next=futureRaces.sort((a,b)=>new Date(a.date)-new Date(b.date))[0];let diff=new Date(next.date)-new Date();let d=Math.floor(diff/1000/60/60/24);let h=Math.floor(diff/1000/60/60)%24;let m=Math.floor(diff/1000/60)%60;banner.innerHTML=`<strong>${next.name}</strong> / ${next.track} - za ${d}d ${h}h ${m}m`;}else if(plannedRaces.length>0){const next=plannedRaces[0];banner.innerHTML=`<strong>${next.name}</strong> / ${next.track} - datum dosud nenastaveno`;}else{banner.innerText="Zatím není žádný nadcházející závod";}}
+loginBtn.addEventListener('click', async ()=>{
+  const provider = new firebase.auth.GoogleAuthProvider();
+  try{
+    const result = await auth.signInWithPopup(provider);
+    adminUser.textContent = `Přihlášen: ${result.user.displayName}`;
+    loginBtn.style.display='none';
+    logoutBtn.style.display='';
+  }catch(err){ console.error(err); alert('Chyba při přihlášení: '+err.message) }
+});
+logoutBtn.addEventListener('click', async ()=>{
+  await auth.signOut();
+});
 
-const pointsMap=[10,8,6,4,2];
-function calculateStandings(){const standings={};drivers.forEach(d=>standings[d]={points:0,podium:0,dns:0});resultsData.forEach(r=>{r.order.forEach((d,i)=>{if(d==="DNS"){standings[drivers[i]]?.dns++;return;}standings[d]?.points+=pointsMap[i]||0;if(i<3)standings[d]?.podium++;});});return Object.entries(standings).sort((a,b)=>b[1].points-a[1].points);}
-function renderStandings(){const tbody=document.querySelector('#standings tbody');tbody.innerHTML="";calculateStandings().forEach(([name,data])=>{const tr=document.createElement('tr');tr.innerHTML=`<td>${name}</td><td>${data.points}</td><td>${data.podium}</td><td>${data.dns}</td>`;tbody.appendChild(tr);});}
+/* update UI on auth state */
+auth.onAuthStateChanged(user=>{
+  if(user){ adminUser.textContent = `Přihlášen: ${user.displayName}`; loginBtn.style.display='none'; logoutBtn.style.display=''; }
+  else { adminUser.textContent=''; loginBtn.style.display=''; logoutBtn.style.display='none'; }
+});
 
-function renderResults(){const tbody=document.querySelector('#results tbody');tbody.innerHTML="";resultsData.slice().reverse().forEach(r=>{const tr=document.createElement('tr');tr.innerHTML=`<td>${r.date}</td><td>${r.name} / ${r.track}</td>`+r.order.map(d=>`<td>${d}</td>`).join('')+`<td>${r.video ? `<a href="${r.video}" target="_blank"><img class="youtube-preview" src="https://img.youtube.com/vi/${r.video.split("v=")[1]}/0.jpg"></a>` : ''}</td>`;tbody.appendChild(tr);});}
+/* ---------------------------
+  Načítání dat z Firestore (realtime)
+-----------------------------*/
+function startRealtimeLoad(){
+  db.collection('races').orderBy('date').onSnapshot(snapshot=>{
+    const list = [];
+    snapshot.forEach(doc=>{
+      list.push({ id: doc.id, ...doc.data() });
+    });
+    // uložíme a vykreslíme
+    racesCache = list;
+    renderAll();
+  }, err=>{
+    console.error('Firestore snapshot error', err);
+    // při chybě zkusíme jednorázové načtení
+    db.collection('races').orderBy('date').get().then(sn=>{
+      const list=[];
+      sn.forEach(d=>list.push({id:d.id,...d.data()}));
+      racesCache = list; renderAll();
+    }).catch(e=>console.error(e));
+  });
+}
 
-function renderChart(){const ctx=document.getElementById('pointsChart').getContext('2d');const datasets=drivers.map(d=>{let sum=0;const data=resultsData.map(r=>{const idx=r.order.indexOf(d);if(idx==-1 || r.order[idx]==="DNS")return sum;sum+=pointsMap[idx]||0;return sum;});return {label:d,data,borderColor:getRandomColor(),fill:false,tension:0.1};});if(window.pointsChart)window.pointsChart.destroy();window.pointsChart=new Chart(ctx,{type:'line',data:{labels:resultsData.map(r=>r.name)},options:{responsive:true,plugins:{legend:{labels:{color:'#fff'}}},scales:{x:{ticks:{color:'#fff'}},y:{ticks:{color:'#fff'}}}}});}
-function getRandomColor(){const letters="0123456789ABCDEF";return "#"+Array.from({length:6}).map(()=>letters[Math.floor(Math.random()*16)]).join('');}
+/* ---------------------------
+  Render funkce
+-----------------------------*/
+function renderAll(){
+  renderNextRace();
+  renderResultsTable();
+  renderPlannedTable();
+  renderStandingsAndChart();
+  populateResultsEditorSelect();
+}
 
-// --- FORM SUBMIT ---
-document.getElementById('raceForm').addEventListener('submit',e=>{e.preventDefault();
-const race={name:document.getElementById('raceName').value,date:document.getElementById('raceDate').value,track:document.getElementById('raceTrack').value,vehicles:document.getElementById('raceVehicles').value,category:document.getElementById('raceCategory').value,tuning:document.getElementById('raceTuning').value,bop:document.getElementById('raceBoP').value,tyres:document.getElementById('raceTyres').value,compulsoryTyre:document.getElementById('raceCompulsoryTyre').value,tyreWear:document.getElementById('raceTyreWear').value,fuel:document.getElementById('raceFuel').value,fuelRate:document.getElementById('raceFuelRate').value,pitStop:document.getElementById('racePitStop').value,info:document.getElementById('raceInfo').value,video:document.getElementById('raceVideo').value,order:[]};
-if(editingIndex!==null){plannedRaces[editingIndex]=race; editingIndex=null;}else plannedRaces.push(race);
-document.getElementById('raceForm').reset();renderPlanned();});
+/* Nejbližší závod s odpočtem */
+function renderNextRace(){
+  const now = new Date();
+  const future = racesCache.filter(r=>r.date && new Date(r.date) > now);
+  const banner = qs('#nextRaceInfo');
+  if(future.length===0){ banner.textContent = 'Žádný nadcházející závod.'; return; }
+  future.sort((a,b)=>new Date(a.date)-new Date(b.date));
+  const next = future[0];
+  // odpočet (jednoduchý)
+  const dt = new Date(next.date) - new Date();
+  if(dt<=0){ banner.textContent = `${next.name} — začíná právě teď (${next.track})`; return; }
+  const days = Math.floor(dt/1000/60/60/24);
+  const hours = Math.floor(dt/1000/60/60)%24;
+  const mins = Math.floor(dt/1000/60)%60;
+  banner.innerHTML = `<strong>${next.name}</strong> — ${next.track} <div class="small">Do startu: ${days}d ${hours}h ${mins}m</div>`;
+}
 
-// INITIAL RENDER
-renderPlanned();
-renderResults();
-renderStandings();
-renderChart();
+/* Výsledky (dokončené závody) */
+function renderResultsTable(){
+  const tbody = qs('#resultsTable tbody');
+  tbody.innerHTML = '';
+  // completed races: mají pole results (non-empty)
+  const completed = racesCache.filter(r=>Array.isArray(r.results) && r.results.length>0)
+    .sort((a,b)=> new Date(b.date||0) - new Date(a.date||0)); // newest first
+  completed.forEach(r=>{
+    const tr = document.createElement('tr');
+    const dt = r.date ? (new Date(r.date)).toLocaleString() : '';
+    const nameTrack = `${escapeHtml(r.name||'')} / ${escapeHtml(r.track||'')}`;
+    const cells = [dt, nameTrack];
+    for(let i=0;i<5;i++){
+      cells.push( escapeHtml(r.results[i] || 'DNS') );
+    }
+    // video thumb
+    let videoCell = '';
+    if(r.youtube){
+      const id = getYouTubeId(r.youtube);
+      if(id) videoCell = `<a href="${escapeHtml(r.youtube)}" target="_blank"><img class="youtube-thumb" src="https://img.youtube.com/vi/${id}/hqdefault.jpg" alt="video"></a>`;
+      else videoCell = `<a href="${escapeHtml(r.youtube)}" target="_blank">Link</a>`;
+    }
+    const html = `<td>${cells[0]}</td><td>${cells[1]}</td><td>${cells[2]}</td><td>${cells[3]}</td><td>${cells[4]}</td><td>${cells[5]}</td><td>${cells[6]}</td><td>${videoCell}</td>`;
+    tr.innerHTML = html;
+    tbody.appendChild(tr);
+  });
+}
+
+/* Naplánované — bez výsledků */
+function renderPlannedTable(){
+  const tbody = qs('#plannedTable tbody');
+  tbody.innerHTML = '';
+  const planned = racesCache.filter(r=>!Array.isArray(r.results) || r.results.length===0)
+    .sort((a,b)=> (new Date(a.date||0)) - (new Date(b.date||0)));
+  planned.forEach(r=>{
+    const tr = document.createElement('tr');
+    tr.classList.add('clickable-row');
+    const dt = r.date ? (new Date(r.date)).toLocaleString() : '';
+    const nameTrack = `${escapeHtml(r.name||'')} / ${escapeHtml(r.track||'')}`;
+    const info = escapeHtml(r.info || '');
+    const vehicles = escapeHtml(r.vehicles || '');
+    const category = escapeHtml(r.category || '');
+    tr.innerHTML = `<td>${dt}</td><td>${nameTrack}</td><td>${category}</td><td>${vehicles}</td><td>${info}</td>
+      <td>
+        <button class="btn-ghost" data-id="${r.id}" onclick="handleEditRace(event,'${r.id}')">Upravit</button>
+        <button class="btn-ghost" data-id="${r.id}" onclick="handleEditResults(event,'${r.id}')">Upravit výsledky</button>
+        <button class="btn-ghost" data-id="${r.id}" onclick="deleteRace('${r.id}')">Smazat</button>
+      </td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+/* Pořadí a graf (jen dokončené závody) */
+function renderStandingsAndChart(){
+  // compute standings
+  const completed = racesCache.filter(r=>Array.isArray(r.results) && r.results.length>0)
+    .sort((a,b)=> new Date(a.date||0) - new Date(b.date||0)); // chronological
+  const standings = {};
+  drivers.forEach(d=>standings[d] = {points:0,podiums:0,dns:0});
+  completed.forEach(r=>{
+    // each completed race: iterate results entries; missing drivers count as DNS
+    for(let pos=0; pos<5; pos++){
+      const occupant = r.results[pos];
+      if(!occupant || occupant === 'DNS'){
+        // tiny detail: DNS counts per driver not per position — we should add to the driver who is missing
+        continue;
+      }
+      if(!standings[occupant]) standings[occupant] = {points:0,podiums:0,dns:0}; // safety
+      standings[occupant].points += (pointsMap[pos] || 0);
+      if(pos<3) standings[occupant].podiums++;
+    }
+    // DNS: each known driver not present in r.results -> +1 DNS
+    drivers.forEach(d=>{
+      if(!r.results.includes(d)) standings[d].dns++;
+    });
+  });
+
+  // render table, sorted by points desc
+  const tbody = qs('#standings tbody'); tbody.innerHTML='';
+  Object.keys(standings).sort((a,b)=>standings[b].points - standings[a].points)
+    .forEach(name=>{
+      const s = standings[name];
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${escapeHtml(name)}</td><td>${s.points}</td><td>${s.podiums}</td><td>${s.dns}</td>`;
+      tbody.appendChild(tr);
+    });
+
+  // Chart: cumulative points over completed races (chronological)
+  const labels = completed.map(r=>r.name || (r.track||'Závod'));
+  const datasets = drivers.map(driver=>{
+    let cum = 0;
+    const data = completed.map(r=>{
+      const idx = r.results.indexOf(driver);
+      if(idx === -1 || r.results[idx] === 'DNS') return (cum = cum); // unchanged
+      cum += (pointsMap[idx] || 0);
+      return cum;
+    });
+    return {
+      label: driver,
+      data,
+      borderColor: randomColor(),
+      fill:false,
+      tension:0.2
+    };
+  });
+
+  const ctx = qs('#pointsChart').getContext('2d');
+  if(pointsChart && typeof pointsChart.destroy === 'function') pointsChart.destroy();
+  pointsChart = new Chart(ctx, {
+    type:'line',
+    data:{ labels, datasets },
+    options: {
+      responsive:true,
+      plugins:{ legend:{ labels:{ color:'#fff' } } },
+      scales:{
+        x:{ ticks:{ color:'#fff' } },
+        y:{ ticks:{ color:'#fff' }, beginAtZero:true }
+      }
+    }
+  });
+}
+
+/* populate select of races in result editor */
+function populateResultsEditorSelect(){
+  const sel = qs('#selectRaceForResults');
+  if(!sel) return;
+  sel.innerHTML = '';
+  const planned = racesCache.filter(r=>!Array.isArray(r.results) || r.results.length===0)
+    .sort((a,b)=> new Date(a.date||0) - new Date(b.date||0));
+  const placeholder = document.createElement('option'); placeholder.value=''; placeholder.textContent='-- vyber závod --'; sel.appendChild(placeholder);
+  planned.forEach(r=>{ const opt=document.createElement('option'); opt.value=r.id; opt.textContent = `${r.name} — ${ r.date ? new Date(r.date).toLocaleString() : 'datum nenastaveno'}`; sel.appendChild(opt); });
+}
+
+/* ---------------------------
+  Actions: edit, delete, results editor
+-----------------------------*/
+window.handleEditRace = function(evt, id){
+  evt.stopPropagation();
+  // load into form
+  db.collection('races').doc(id).get().then(doc=>{
+    if(!doc.exists) return alert('Závod nenalezen');
+    const r = doc.data();
+    qs('#raceDocId').value = id;
+    qs('#name').value = r.name || '';
+    qs('#date').value = r.date || '';
+    qs('#track').value = r.track || '';
+    qs('#vehicles').value = r.vehicles || '';
+    qs('#category').value = r.category || 'Gr.1';
+    qs('#tuning').value = r.tuning || 'NE';
+    qs('#bop').value = r.bop || 'NE';
+    qs('#tyres').value = r.tyres || 'Komfortní';
+    qs('#compound').value = r.compound || 'Tvrdá';
+    qs('#tyreWear').value = r.wear || '';
+    qs('#fuel').value = r.fuel || '';
+    qs('#refuel').value = r.refuel || '';
+    qs('#pitstop').value = r.pitstop || 'NE';
+    qs('#info').value = r.info || '';
+    qs('#youtube').value = r.youtube || '';
+    // switch to admin tab for user convenience
+    qsa('.tablink').forEach(b=>b.classList.remove('active'));
+    qs('[data-tab="admin"]').classList.add('active');
+    qsa('section').forEach(s=>s.classList.remove('active'));
+    qs('#admin').classList.add('active');
+  }).catch(e=>{console.error(e); alert('Chyba při načítání závodu')});
+};
+
+window.deleteRace = function(id){
+  if(!confirm('Smazat závod? Tato akce nelze vrátit.')) return;
+  db.collection('races').doc(id).delete().then(()=>{ /* firestore snapshot auto-refresh */ }).catch(e=>{console.error(e); alert('Chyba při mazání')});
+};
+
+/* Edit results (open result editor with race preselected) */
+window.handleEditResults = function(evt, id){
+  evt.stopPropagation();
+  const editor = qs('#resultEditor');
+  editor.style.display = '';
+  const sel = qs('#selectRaceForResults');
+  populateResultsEditorSelect();
+  sel.value = id;
+  onSelectRaceForResultsChange();
+  // switch to admin tab
+  qsa('.tablink').forEach(b=>b.classList.remove('active'));
+  qs('[data-tab="admin"]').classList.add('active');
+  qsa('section').forEach(s=>s.classList.remove('active'));
+  qs('#admin').classList.add('active');
+};
+
+/* when user picks a race in editor, show 5 dropdowns and youtube */
+function onSelectRaceForResultsChange(){
+  const sel = qs('#selectRaceForResults');
+  const id = sel.value;
+  const area = qs('#resultsInputs');
+  area.innerHTML = '';
+  if(!id) return;
+  const race = racesCache.find(r=>r.id===id);
+  if(!race) return alert('Závod nenalezen');
+  // show 5 selects (1..5) choosing from drivers + DNS
+  for(let pos=1; pos<=5; pos++){
+    const div = document.createElement('div');
+    div.style.marginBottom='6px';
+    const label = document.createElement('label');
+    label.textContent = `${pos}. místo`;
+    const selDriver = document.createElement('select');
+    selDriver.style.width='100%';
+    const options = [...drivers,'DNS'];
+    options.forEach(opt=>{ const o=document.createElement('option'); o.value=o.textContent=opt; selDriver.appendChild(o);});
+    // preselect if race.results exists
+    if(Array.isArray(race.results) && race.results[pos-1]) selDriver.value = race.results[pos-1];
+    div.appendChild(label); div.appendChild(selDriver);
+    area.appendChild(div);
+  }
+  // youtube input
+  const ydiv = document.createElement('div');
+  ydiv.style.marginTop='8px';
+  const ylab = document.createElement('label'); ylab.textContent='Youtube odkaz (volitelně)';
+  const yinput = document.createElement('input'); yinput.type='url';
+  yinput.value = race.youtube || '';
+  yinput.style.width='100%';
+  ydiv.appendChild(ylab); ydiv.appendChild(yinput);
+  area.appendChild(ydiv);
+  // store raceId on save button dataset
+  qs('#saveResultsBtn').dataset.raceId = id;
+}
+
+/* attach change handler for selectRaceForResults (dynamic created) */
+document.addEventListener('change', function(e){
+  if(e.target && e.target.id === 'selectRaceForResults') onSelectRaceForResultsChange();
+});
+
+/* save results */
+qs('#saveResultsBtn').addEventListener('click', async ()=>{
+  const sel = qs('#selectRaceForResults');
+  const raceId = sel.value || qs('#saveResultsBtn').dataset.raceId;
+  if(!raceId) return alert('Vyber závod.');
+  const inputs = qs('#resultsInputs').querySelectorAll('select');
+  const results = Array.from(inputs).map(s=>s.value || 'DNS');
+  const youtubeInput = qs('#resultsInputs').querySelector('input[type="url"]');
+  const youtube = youtubeInput ? youtubeInput.value.trim() : '';
+  // sanity: ensure results length 5
+  while(results.length<5) results.push('DNS');
+  // update document: set results array and youtube
+  try{
+    await db.collection('races').doc(raceId).update({ results, youtube });
+    // hide editor
+    qs('#resultEditor').style.display='none';
+    qs('#selectRaceForResults').value='';
+    qs('#resultsInputs').innerHTML='';
+    alert('Výsledky uloženy.');
+  }catch(e){ console.error(e); alert('Chyba při ukládání výsledků.') }
+});
+
+/* cancel results edit */
+qs('#cancelResultsBtn').addEventListener('click', ()=>{ qs('#resultEditor').style.display='none'; qs('#resultsInputs').innerHTML=''; });
+
+/* clear/create race form handlers */
+qs('#clearFormBtn').addEventListener('click', ()=>{
+  qs('#raceForm').reset(); qs('#raceDocId').value='';
+});
+
+qs('#saveRaceBtn').addEventListener('click', async (e)=>{
+  e.preventDefault();
+  // authentication optional but recommended: allow only signed admin to write (Firestore rules should enforce it). We won't block in UI.
+  const id = qs('#raceDocId').value || db.collection('races').doc().id;
+  const payload = {
+    name: qs('#name').value.trim(),
+    date: qs('#date').value || null,
+    track: qs('#track').value.trim(),
+    vehicles: qs('#vehicles').value.trim(),
+    category: qs('#category').value,
+    tuning: qs('#tuning').value,
+    bop: qs('#bop').value,
+    tyres: qs('#tyres').value,
+    compound: qs('#compound').value,
+    wear: qs('#tyreWear') ? qs('#tyreWear').value : qs('#tyreWear')?.value || qs('#tyreWear')?.value || qs('#tyreWear'),
+    fuel: qs('#fuel').value,
+    refuel: qs('#refuel').value,
+    pitstop: qs('#pitstop').value,
+    info: qs('#info').value.trim(),
+    youtube: qs('#youtube').value.trim()
+  };
+  try{
+    await db.collection('races').doc(id).set(payload, { merge:true });
+    qs('#raceForm').reset(); qs('#raceDocId').value='';
+    alert('Závod uložen.');
+  }catch(err){
+    console.error(err); alert('Chyba při ukládání závodu: '+err.message);
+  }
+});
+
+/* ---------------------------
+  Utility: escape html, random color
+-----------------------------*/
+function escapeHtml(s){
+  if(s==null) return '';
+  return String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+}
+function randomColor(){
+  return '#'+Math.floor(Math.random()*16777215).toString(16).padStart(6,'0');
+}
+
+/* ---------------------------
+  Init realtime load
+-----------------------------*/
+startRealtimeLoad();
+
+/* update countdown every minute for nicer user experience */
+setInterval(renderNextRace, 60*1000);
 </script>
-
 </body>
 </html>
