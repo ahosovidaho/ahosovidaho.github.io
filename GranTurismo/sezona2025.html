@@ -16,14 +16,11 @@
   th, td { border:1px solid #444; padding:8px; text-align:center; }
   th { background:#222; }
   canvas { max-width:100%; height:auto; }
-  input { margin:5px; padding:5px; }
-  button { margin:5px; padding:5px 10px; cursor:pointer; }
+  input, select, button { margin:5px 0; padding:5px; font-size:14px; }
 </style>
-<!-- Firebase SDKs -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-<!-- Chart.js UMD -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
@@ -34,16 +31,10 @@
 
 <nav>
   <button class="tablink active" data-tab="aktualni">Aktuální sezóna</button>
-  <button class="tablink" data-tab="statistiky">Statistiky</button>
-  <button class="tablink" data-tab="archiv">Archiv sezón</button>
-  <button class="tablink" data-tab="profil">Profil závodníka</button>
   <button class="tablink" data-tab="admin">Admin</button>
 </nav>
 
 <section id="aktualni" class="active">
-  <h2>Nejbližší závod</h2>
-  <div id="banner">Zde bude upoutávka na nadcházející závod</div>
-
   <h2>Vývoj bodů</h2>
   <canvas id="pointsChart"></canvas>
 
@@ -66,28 +57,13 @@
   </table>
 </section>
 
-<section id="statistiky">
-  <h2>Statistiky</h2>
-  <div id="statsBanner">Statistiky a H2H porovnání</div>
-</section>
-
-<section id="archiv">
-  <h2>Archiv sezón</h2>
-  <div id="archiveBanner">Sezónní výsledky</div>
-</section>
-
-<section id="profil">
-  <h2>Profil závodníka</h2>
-  <div id="profileBanner">Informace a oblíbené auta závodníků</div>
-</section>
-
 <section id="admin">
-  <h2>Admin</h2>
+  <h2>Admin - Přidání závodu</h2>
   <button id="loginBtn">Přihlásit se přes Google</button>
-  <div id="adminBanner">
-    <label>Datum: <input type="datetime-local" id="raceDate"></label>
-    <label>Název: <input type="text" id="raceName"></label>
-    <label>Trať: <input type="text" id="raceTrack"></label>
+  <div>
+    <label>Datum: <input type="datetime-local" id="raceDate"></label><br>
+    <label>Název závodu: <input type="text" id="raceName"></label><br>
+    <label>Trať: <input type="text" id="raceTrack"></label><br>
     <button id="addRaceBtn">Přidat závod</button>
   </div>
 </section>
@@ -109,7 +85,7 @@
     apiKey: "AIzaSyCkR-AyJK2vFnz0V2HTuz2b3zCaLMxbXtI",
     authDomain: "test-gt7.firebaseapp.com",
     projectId: "test-gt7",
-    storageBucket: "test-gt7.firebasestorage.app",
+    storageBucket: "test-gt7.app",
     messagingSenderId: "928154989107",
     appId: "1:928154989107:web:20a34d0009fa75bd1ee946",
     measurementId: "G-1SG8DW1KQ9"
@@ -125,153 +101,86 @@
     }).catch(console.error);
   });
 
-  // --- DRIVERS & COLORS ---
   const drivers = ["Viki","Mára","Maty","Hardy","Ondra"];
-  const driverColors = {
-    "Viki":"#FF0000","Mára":"#00FF00","Maty":"#0000FF","Hardy":"#FFAA00","Ondra":"#AA00FF"
-  };
+  const pointsMap = [10,8,6,4,2];
 
-  // --- DATA (will be loaded from Firestore) ---
   let resultsData = [];
 
-  // --- HELPERS ---
-  function normalizeName(name){
-    if(!name) return name;
-    if(name === "DNS") return "DNS";
-    // remove parenthesis note like " (PEN)"
-    return name.replace(/\s*\(.*\)\s*$/,'').trim();
-  }
-
-  // --- LOAD RACES FROM FIRESTORE (real-time) ---
-  function loadRaces(){
-    db.collection("zavody").orderBy("datum","asc").onSnapshot(snapshot=>{
-      resultsData = snapshot.docs.map(doc=>({id:doc.id,...doc.data()}));
-      // ensure sorting by date (in case)
-      resultsData.sort((a,b)=> new Date(a.datum) - new Date(b.datum));
-      refreshAll();
-    }, err=>{
-      console.error('Firestore snapshot error:', err);
-    });
-  }
-
-  // --- STANDINGS CALC ---
-  const pointsMap = [10,8,6,4,2];
-  const tbodyResults = document.querySelector('#results tbody');
-  const tbodyStandings = document.querySelector('#standings tbody');
-
   function calculateStandings(){
-    // initialize
     const standings = {};
     drivers.forEach(d=>standings[d]={points:0,podium:0,dns:0});
-
     resultsData.forEach(r=>{
-      if(!r.vysledky) {
-        // race not run yet
-        return;
-      }
-      // build normalized order array (strip (PEN) etc.)
-      const normOrder = r.vysledky.map(x=>normalizeName(x));
-
-      // add points / podiums based on normalized index
-      drivers.forEach(driver=>{
-        const idx = normOrder.indexOf(driver);
-        if(idx === -1){
-          // driver not present in order -> DNS
-          standings[driver].dns++;
-        } else {
-          // present -> add points and podium if top3
-          standings[driver].points += pointsMap[idx] || 0;
-          if(idx < 3) standings[driver].podium++;
+      drivers.forEach((d,i)=>{
+        const idx = r.order.indexOf(d);
+        if(idx===-1 || r.order[idx]==="DNS"){
+          standings[d].dns++;
+          return;
         }
+        standings[d].points += pointsMap[idx]||0;
+        if(idx<3) standings[d].podium++;
       });
     });
-
-    // convert to entries sorted by points desc
     return Object.entries(standings).sort((a,b)=>b[1].points - a[1].points);
   }
 
-  // --- RENDER RESULTS TABLE ---
-  function renderResults(){
+  const tbodyResults = document.querySelector('#results tbody');
+  const tbodyStandings = document.querySelector('#standings tbody');
+  let pointsChart;
+
+  function renderAll(){
+    // výsledky
     tbodyResults.innerHTML="";
-    // newest on top
     resultsData.slice().reverse().forEach(r=>{
       const tr = document.createElement('tr');
-      const dateStr = new Date(r.datum).toLocaleDateString('cs-CZ',{day:'2-digit',month:'2-digit',year:'numeric'});
-      // if vysledky undefined -> show "Závod neproběhl"
-      let orderCells;
-      if(!r.vysledky) {
-        orderCells = "<td colspan='5'>Závod neproběhl</td>";
-      } else {
-        // show exactly what's stored (including "Maty (PEN)")
-        orderCells = r.vysledky.map(d=>`<td>${d}</td>`).join('');
-      }
-      tr.innerHTML = `<td>${dateStr}</td><td>${r.nazev} / ${r.trat}</td>${orderCells}`;
+      tr.innerHTML = `<td>${r.date}</td><td>${r.name} / ${r.track}</td>` +
+        drivers.map(d=>`<td>${r.order[d]||"DNS"}</td>`).join('');
       tbodyResults.appendChild(tr);
     });
-  }
 
-  // --- RENDER STANDINGS ---
-  function renderStandings(){
+    // pořadí
     tbodyStandings.innerHTML="";
     calculateStandings().forEach(([name,data])=>{
       const tr = document.createElement('tr');
       tr.innerHTML = `<td>${name}</td><td>${data.points}</td><td>${data.podium}</td><td>${data.dns}</td>`;
       tbodyStandings.appendChild(tr);
     });
-  }
 
-  // --- CHART: cumulative points per driver ---
-  const ctx = document.getElementById('pointsChart').getContext('2d');
-  let pointsChart;
-  function renderChart(){
-    // for each driver compute cumulative series (in chronological order)
-    const datasets = drivers.map(driver=>{
-      let sum = 0;
+    // graf
+    if(pointsChart) pointsChart.destroy();
+    const ctx = document.getElementById('pointsChart').getContext('2d');
+    const datasets = drivers.map(d=>{
+      let sum=0;
       const data = resultsData.map(r=>{
-        if(!r.vysledky) return sum;
-        const normOrder = r.vysledky.map(x=>normalizeName(x));
-        const idx = normOrder.indexOf(driver);
-        if(idx === -1) return sum; // DNS or not present
-        sum += pointsMap[idx] || 0;
+        const idx = r.order.indexOf(d);
+        if(idx===-1 || r.order[idx]==="DNS") return sum;
+        sum += pointsMap[idx]||0;
         return sum;
       });
-      return {label: driver, data, borderColor: driverColors[driver], fill:false, tension:0.1};
+      return {label:d,data,borderColor:getRandomColor(),fill:false,tension:0.1};
     });
-
-    const labels = resultsData.map(r=>r.nazev);
-
-    if(pointsChart && typeof pointsChart.destroy === 'function') pointsChart.destroy();
     pointsChart = new Chart(ctx,{
       type:'line',
-      data:{labels,datasets},
-      options:{
-        responsive:true,
-        plugins:{legend:{labels:{color:'#fff'}}},
-        scales:{x:{ticks:{color:'#fff'}},y:{ticks:{color:'#fff'}}}
-      }
+      data:{labels:resultsData.map(r=>r.name), datasets},
+      options:{responsive:true, plugins:{legend:{labels:{color:'#fff'}}}, scales:{x:{ticks:{color:'#fff'}},y:{ticks:{color:'#fff'}}}}
     });
   }
 
-  function refreshAll(){ renderResults(); renderStandings(); renderChart(); }
+  function getRandomColor(){ const letters="0123456789ABCDEF"; return "#"+Array.from({length:6}).map(()=>letters[Math.floor(Math.random()*16)]).join(''); }
 
-  // --- ADD RACE (admin) ---
-  document.getElementById('addRaceBtn').addEventListener('click',()=>{
-    const datum = document.getElementById('raceDate').value;
-    const nazev = document.getElementById('raceName').value.trim();
-    const trat = document.getElementById('raceTrack').value.trim();
-    if(!datum || !nazev || !trat){ alert('Vyplň všechny údaje!'); return; }
-    // create race doc with no results yet
-    db.collection('zavody').add({datum, nazev, trat})
-      .then(()=>{ alert('Závod uložen do Firestore. Pořadí doplníš později.'); })
-      .catch(err=>{ console.error(err); alert('Chyba při ukládání.'); });
+  // --- ADD NEW RACE ---
+  document.getElementById('addRaceBtn').addEventListener('click', ()=>{
+    const date = document.getElementById('raceDate').value;
+    const name = document.getElementById('raceName').value;
+    const track = document.getElementById('raceTrack').value;
+    if(!date || !name || !track){ alert("Vyplňte všechna pole"); return; }
+    // nové závody, zatím bez pořadí, všechny DNS
+    const order = {};
+    drivers.forEach(d=>order[d]="DNS");
+    resultsData.push({date,name,track,order});
+    renderAll();
   });
 
-  // --- Start ---
-  loadRaces();
-
-  // For convenience during dev: if you want to insert initial sample races only if collection empty,
-  // you can use a admin-only script once. Not added here to avoid accidental duplication.
+  renderAll();
 </script>
-
 </body>
 </html>
