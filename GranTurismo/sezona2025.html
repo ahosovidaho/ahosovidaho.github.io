@@ -16,11 +16,13 @@
   th, td { border:1px solid #444; padding:8px; text-align:center; }
   th { background:#222; }
   canvas { max-width:100%; height:auto; }
-  input, select, button { margin:5px 0; padding:5px; font-size:14px; }
 </style>
+
+<!-- Firebase SDKs -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<!-- Chart.js UMD -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
@@ -31,10 +33,16 @@
 
 <nav>
   <button class="tablink active" data-tab="aktualni">Aktuální sezóna</button>
+  <button class="tablink" data-tab="statistiky">Statistiky</button>
+  <button class="tablink" data-tab="archiv">Archiv sezón</button>
+  <button class="tablink" data-tab="profil">Profil závodníka</button>
   <button class="tablink" data-tab="admin">Admin</button>
 </nav>
 
 <section id="aktualni" class="active">
+  <h2>Nejbližší závod</h2>
+  <div id="banner">Zde bude upoutávka na nadcházející závod</div>
+
   <h2>Vývoj bodů</h2>
   <canvas id="pointsChart"></canvas>
 
@@ -57,15 +65,25 @@
   </table>
 </section>
 
+<section id="statistiky">
+  <h2>Statistiky</h2>
+  <div id="statsBanner">Statistiky a H2H porovnání</div>
+</section>
+
+<section id="archiv">
+  <h2>Archiv sezón</h2>
+  <div id="archiveBanner">Sezónní výsledky</div>
+</section>
+
+<section id="profil">
+  <h2>Profil závodníka</h2>
+  <div id="profileBanner">Informace a oblíbené auta závodníků</div>
+</section>
+
 <section id="admin">
-  <h2>Admin - Přidání závodu</h2>
+  <h2>Admin</h2>
   <button id="loginBtn">Přihlásit se přes Google</button>
-  <div>
-    <label>Datum: <input type="datetime-local" id="raceDate"></label><br>
-    <label>Název závodu: <input type="text" id="raceName"></label><br>
-    <label>Trať: <input type="text" id="raceTrack"></label><br>
-    <button id="addRaceBtn">Přidat závod</button>
-  </div>
+  <div id="adminBanner">Zadávání závodů</div>
 </section>
 
 <script>
@@ -101,86 +119,87 @@
     }).catch(console.error);
   });
 
+  // --- DATA ---
   const drivers = ["Viki","Mára","Maty","Hardy","Ondra"];
-  const pointsMap = [10,8,6,4,2];
+  const resultsData = [
+    {datum:"2025-03-01T15:00", nazev:"American Muscle", trat:"Daytona road circuit", vysledky:["Viki","Maty","Hardy","DNS","DNS"]},
+    {datum:"2025-03-15T15:00", nazev:"Limonádový Joe", trat:"Red Bull Ring", vysledky:["Viki","Hardy","Maty","DNS","DNS"]},
+    {datum:"2025-04-01T15:00", nazev:"Forza Italia", trat:"Monza", vysledky:["Hardy","Viki","Maty","DNS","DNS"]},
+    {datum:"2025-04-15T15:00", nazev:"Dovolená v Chorvatsku", trat:"Dragon Trail - přímořská trať", vysledky:["Viki","Maty","Hardy","DNS","DNS"]},
+    {datum:"2025-05-01T15:00", nazev:"Tokyo Drift", trat:"Suzuka", vysledky:["Viki","Maty","Hardy","DNS","DNS"]},
+    {datum:"2025-05-15T15:00", nazev:"Po stopách Jamese Bonda", trat:"Brands Hatch", vysledky:["Maty","Viki","Hardy","DNS","DNS"]},
+    {datum:"2025-06-01T15:00", nazev:"24h Le Mans", trat:"Le Mans", vysledky:["Viki","Hardy","Maty (PEN)","DNS","DNS"]}
+  ];
+  const pointsMap = [10,8,6,4,2]; //1.-5.místo
 
-  let resultsData = [];
-
+  // --- VYPOČET POŘADÍ ---
   function calculateStandings(){
     const standings = {};
     drivers.forEach(d=>standings[d]={points:0,podium:0,dns:0});
     resultsData.forEach(r=>{
-      drivers.forEach((d,i)=>{
-        const idx = r.order.indexOf(d);
-        if(idx===-1 || r.order[idx]==="DNS"){
-          standings[d].dns++;
+      r.vysledky.forEach((d,i)=>{
+        if(d==="DNS"){ 
+          const driverName = drivers[i];
+          standings[driverName].dns++;
           return;
         }
-        standings[d].points += pointsMap[idx]||0;
-        if(idx<3) standings[d].podium++;
+        // penalizace "Maty (PEN)" se počítá jako Maty
+        const name = d.replace(/\s*\(PEN\)/,'');
+        standings[name].points += pointsMap[i] || 0;
+        if(i<3) standings[name].podium++;
       });
     });
     return Object.entries(standings).sort((a,b)=>b[1].points - a[1].points);
   }
 
+  // --- VYPSÁNÍ TABULKY VÝSLEDKŮ ---
   const tbodyResults = document.querySelector('#results tbody');
+  resultsData.slice().reverse().forEach(r=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${r.datum}</td><td>${r.nazev} / ${r.trat}</td>` +
+      r.vysledky.map(d=>`<td>${d}</td>`).join('');
+    tbodyResults.appendChild(tr);
+  });
+
+  // --- VYPSÁNÍ TABULKY STANDING ---
   const tbodyStandings = document.querySelector('#standings tbody');
-  let pointsChart;
-
-  function renderAll(){
-    // výsledky
-    tbodyResults.innerHTML="";
-    resultsData.slice().reverse().forEach(r=>{
-      const tr = document.createElement('tr');
-      tr.innerHTML = `<td>${r.date}</td><td>${r.name} / ${r.track}</td>` +
-        drivers.map(d=>`<td>${r.order[d]||"DNS"}</td>`).join('');
-      tbodyResults.appendChild(tr);
-    });
-
-    // pořadí
+  function renderStandings(){
     tbodyStandings.innerHTML="";
     calculateStandings().forEach(([name,data])=>{
       const tr = document.createElement('tr');
       tr.innerHTML = `<td>${name}</td><td>${data.points}</td><td>${data.podium}</td><td>${data.dns}</td>`;
       tbodyStandings.appendChild(tr);
     });
-
-    // graf
-    if(pointsChart) pointsChart.destroy();
-    const ctx = document.getElementById('pointsChart').getContext('2d');
-    const datasets = drivers.map(d=>{
-      let sum=0;
-      const data = resultsData.map(r=>{
-        const idx = r.order.indexOf(d);
-        if(idx===-1 || r.order[idx]==="DNS") return sum;
-        sum += pointsMap[idx]||0;
-        return sum;
-      });
-      return {label:d,data,borderColor:getRandomColor(),fill:false,tension:0.1};
-    });
-    pointsChart = new Chart(ctx,{
-      type:'line',
-      data:{labels:resultsData.map(r=>r.name), datasets},
-      options:{responsive:true, plugins:{legend:{labels:{color:'#fff'}}}, scales:{x:{ticks:{color:'#fff'}},y:{ticks:{color:'#fff'}}}}
-    });
   }
+  renderStandings();
 
-  function getRandomColor(){ const letters="0123456789ABCDEF"; return "#"+Array.from({length:6}).map(()=>letters[Math.floor(Math.random()*16)]).join(''); }
-
-  // --- ADD NEW RACE ---
-  document.getElementById('addRaceBtn').addEventListener('click', ()=>{
-    const date = document.getElementById('raceDate').value;
-    const name = document.getElementById('raceName').value;
-    const track = document.getElementById('raceTrack').value;
-    if(!date || !name || !track){ alert("Vyplňte všechna pole"); return; }
-    // nové závody, zatím bez pořadí, všechny DNS
-    const order = {};
-    drivers.forEach(d=>order[d]="DNS");
-    resultsData.push({date,name,track,order});
-    renderAll();
+  // --- GRAF BODŮ ---
+  const ctx = document.getElementById('pointsChart').getContext('2d');
+  const datasets = drivers.map(d=>{
+    let sum=0;
+    const data = resultsData.map(r=>{
+      const idx = r.vysledky.indexOf(d);
+      if(idx==-1 || r.vysledky[idx]==="DNS") return sum;
+      sum += pointsMap[idx]||0;
+      return sum;
+    });
+    return {label:d,data, borderColor: getRandomColor(), fill:false, tension:0.1};
+  });
+  const pointsChart = new Chart(ctx,{
+    type:'line',
+    data:{labels:resultsData.map(r=>r.nazev), datasets},
+    options:{
+      responsive:true,
+      plugins:{legend:{labels:{color:'#fff'}}},
+      scales:{x:{ticks:{color:'#fff'}},y:{ticks:{color:'#fff'}}}
+    }
   });
 
-  renderAll();
+  function getRandomColor(){ 
+    const letters="0123456789ABCDEF"; 
+    return "#"+Array.from({length:6}).map(()=>letters[Math.floor(Math.random()*16)]).join(''); 
+  }
 </script>
+
 </body>
 </html>
