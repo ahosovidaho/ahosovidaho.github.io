@@ -13,8 +13,9 @@
   section { padding:20px; display:none; }
   section.active { display:block; }
   table { width:100%; border-collapse: collapse; margin-top:20px;}
-  th, td { border:1px solid #444; padding:8px; text-align:center; }
+  th, td { border:1px solid #444; padding:8px; text-align:center; cursor: default; }
   th { background:#222; }
+  tbody tr:hover { background:#333; cursor:pointer; }
   canvas { max-width:100%; height:auto; }
   .form-group { margin-bottom:10px; display:flex; flex-direction:column; }
   label { margin-bottom:2px; }
@@ -117,6 +118,7 @@
     <div class="form-group"><label>Rychlost doplňování paliva</label><input type="text" id="raceRefuelSpeed"></div>
     <div class="form-group"><label>Povinný pit-stop</label><select id="racePit"><option>ANO</option><option>NE</option></select></div>
     <div class="form-group"><label>Doplňující info</label><textarea id="raceInfo"></textarea></div>
+    <input type="hidden" id="editingIndex">
     <button type="submit" class="submit">Uložit závod</button>
   </form>
 </section>
@@ -155,7 +157,7 @@
 
   // --- DATA ---
   const drivers = ["Viki","Mára","Maty","Hardy","Ondra"];
-  const pointsMap = [10,8,6,4,2]; // body 1.-5.místo
+  const pointsMap = [10,8,6,4,2];
 
   let resultsData = [
     {date:"2025-03-01T15:00", race:"American Muscle", track:"Daytona road circuit", order:["Viki","DNS","Maty","Hardy","DNS"]},
@@ -167,7 +169,7 @@
     {date:"2025-06-01T15:00", race:"24h Le Mans", track:"Le Mans", order:["Viki","Hardy","Maty","DNS","DNS"]}
   ];
 
-  let plannedRaces = []; // naplánované závody
+  let plannedRaces = [];
 
   // --- FUNKCE ---
   function calculateStandings(){
@@ -206,10 +208,27 @@
   function renderPlanned(){
     const tbody = document.querySelector('#planned tbody');
     tbody.innerHTML="";
-    plannedRaces.forEach(r=>{
+    plannedRaces.forEach((r,index)=>{
       const tr = document.createElement('tr');
       tr.innerHTML = `<td>${r.date||""}</td><td>${r.race} / ${r.track}</td><td>${r.cars||""}</td><td>${r.category||""}</td><td>${r.tuning||""}</td>
       <td>${r.balance||""}</td><td>${r.tyres||""}</td><td>${r.tyreMix||""}</td><td>${r.tyreWear||""}</td><td>${r.fuel||""}</td><td>${r.refuel||""}</td><td>${r.pit||""}</td><td>${r.info||""}</td>`;
+      tr.addEventListener('click',()=>{
+        document.getElementById('editingIndex').value=index;
+        document.getElementById('raceDate').value=r.date;
+        document.getElementById('raceName').value=r.race;
+        document.getElementById('raceTrack').value=r.track;
+        document.getElementById('raceCars').value=r.cars;
+        document.getElementById('raceCategory').value=r.category;
+        document.getElementById('raceTuning').value=r.tuning;
+        document.getElementById('raceBalance').value=r.balance;
+        document.getElementById('raceTyres').value=r.tyres;
+        document.getElementById('raceTyreMix').value=r.tyreMix;
+        document.getElementById('raceTyreWear').value=r.tyreWear;
+        document.getElementById('raceFuel').value=r.fuel;
+        document.getElementById('raceRefuelSpeed').value=r.refuel;
+        document.getElementById('racePit').value=r.pit;
+        document.getElementById('raceInfo').value=r.info;
+      });
       tbody.appendChild(tr);
     });
   }
@@ -250,9 +269,9 @@
     }
   }
 
-  // --- FORMULÁŘ ---
   document.getElementById('raceForm').addEventListener('submit',e=>{
     e.preventDefault();
+    const idx = document.getElementById('editingIndex').value;
     const newRace = {
       date: document.getElementById('raceDate').value,
       race: document.getElementById('raceName').value,
@@ -269,7 +288,9 @@
       pit: document.getElementById('racePit').value,
       info: document.getElementById('raceInfo').value
     };
-    plannedRaces.push(newRace);
+    if(idx==="") plannedRaces.push(newRace);
+    else plannedRaces[idx]=newRace;
+    document.getElementById('editingIndex').value="";
     renderPlanned();
     updateUpcomingBanner();
     e.target.reset();
@@ -282,5 +303,6 @@
   renderChart();
   updateUpcomingBanner();
 </script>
+
 </body>
 </html>
