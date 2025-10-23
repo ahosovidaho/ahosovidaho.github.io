@@ -17,7 +17,6 @@
   th { background:#222; }
   canvas { max-width:100%; height:auto; }
 </style>
-
 <!-- Firebase SDKs -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
@@ -132,23 +131,23 @@
   ];
   const pointsMap = [10,8,6,4,2]; //1.-5.místo
 
-  // --- VYPOČET POŘADÍ ---
+  // --- VYPOČET POŘADÍ S AUTOMATICKÝM DNS ---
   function calculateStandings(){
     const standings = {};
     drivers.forEach(d=>standings[d]={points:0,podium:0,dns:0});
+
     resultsData.forEach(r=>{
-      r.vysledky.forEach((d,i)=>{
-        if(d==="DNS"){ 
-          const driverName = drivers[i];
-          standings[driverName].dns++;
-          return;
+      drivers.forEach(driver=>{
+        const pos = r.vysledky.findIndex(d=>d.replace(/\s*\(PEN\)/,'') === driver);
+        if(pos === -1 || r.vysledky[pos] === "DNS"){
+          standings[driver].dns++;
+        } else {
+          standings[driver].points += pointsMap[pos] || 0;
+          if(pos < 3) standings[driver].podium++;
         }
-        // penalizace "Maty (PEN)" se počítá jako Maty
-        const name = d.replace(/\s*\(PEN\)/,'');
-        standings[name].points += pointsMap[i] || 0;
-        if(i<3) standings[name].podium++;
       });
     });
+
     return Object.entries(standings).sort((a,b)=>b[1].points - a[1].points);
   }
 
@@ -161,7 +160,7 @@
     tbodyResults.appendChild(tr);
   });
 
-  // --- VYPSÁNÍ TABULKY STANDING ---
+  // --- VYPSÁNÍ POŘADÍ ---
   const tbodyStandings = document.querySelector('#standings tbody');
   function renderStandings(){
     tbodyStandings.innerHTML="";
@@ -178,27 +177,16 @@
   const datasets = drivers.map(d=>{
     let sum=0;
     const data = resultsData.map(r=>{
-      const idx = r.vysledky.indexOf(d);
+      const idx = r.vysledky.findIndex(x=>x.replace(/\s*\(PEN\)/,'')===d);
       if(idx==-1 || r.vysledky[idx]==="DNS") return sum;
       sum += pointsMap[idx]||0;
       return sum;
     });
     return {label:d,data, borderColor: getRandomColor(), fill:false, tension:0.1};
   });
-  const pointsChart = new Chart(ctx,{
-    type:'line',
-    data:{labels:resultsData.map(r=>r.nazev), datasets},
-    options:{
-      responsive:true,
-      plugins:{legend:{labels:{color:'#fff'}}},
-      scales:{x:{ticks:{color:'#fff'}},y:{ticks:{color:'#fff'}}}
-    }
-  });
+  const pointsChart = new Chart(ctx,{type:'line', data:{labels:resultsData.map(r=>r.nazev), datasets}, options:{responsive:true, plugins:{legend:{labels:{color:'#fff'}}}, scales:{x:{ticks:{color:'#fff'}},y:{ticks:{color:'#fff'}}}}});
 
-  function getRandomColor(){ 
-    const letters="0123456789ABCDEF"; 
-    return "#"+Array.from({length:6}).map(()=>letters[Math.floor(Math.random()*16)]).join(''); 
-  }
+  function getRandomColor(){ const letters="0123456789ABCDEF"; return "#"+Array.from({length:6}).map(()=>letters[Math.floor(Math.random()*16)]).join(''); }
 </script>
 
 </body>
