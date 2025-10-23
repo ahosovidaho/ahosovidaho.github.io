@@ -30,9 +30,11 @@
   .youtube-thumb{width:120px;height:auto;border-radius:6px}
   .admin-only{display:none}
   .toolbar {display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-  .toolbar a, .toolbar button {text-decoration:none}
   .legend-chip{display:inline-flex;align-items:center;gap:6px;margin-right:10px}
   .chip{display:inline-block;width:10px;height:10px;border-radius:2px}
+  .name-chip{display:inline-block;padding:2px 6px;border-radius:10px;border:1px solid #2a2a2a;margin-right:6px;line-height:1}
+  .pill{display:inline-block;border:1px solid #2a2a2a;border-radius:999px;padding:2px 8px}
+  .muted{color:#9aa0a6}
   @media(max-width:800px){ .row{flex-direction:column} .youtube-thumb{width:80px} th,td{font-size:13px} header h1{font-size:18px} }
 </style>
 
@@ -41,7 +43,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
-<!-- Chart.js (UMD) -->
+<!-- Chart.js UMD -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
@@ -129,7 +131,9 @@
             <tr>
               <th>Datum</th><th>Závod / Trať</th>
               <th id="h2hColA">A</th><th id="h2hColB">B</th>
-              <th>Body A</th><th>Body B</th><th>Výsledek</th>
+              <th>Body A</th><th>Body B</th>
+              <th>Rozdíl (A–B)</th>
+              <th>Výsledek</th>
             </tr>
           </thead>
           <tbody></tbody>
@@ -248,10 +252,10 @@
       </form>
     </div>
 
-    <!-- Upravit existující závod (vč. kvalifikace & výsledků) -->
+    <!-- Upravit existující závod + penalizace + audit -->
     <div class="card admin-only" id="adminEditCard">
       <strong>Upravit existující závod</strong>
-      <div class="small" style="margin-top:8px">Vyber závod, uprav parametry nebo doplň kvalifikaci / výsledky a video.</div>
+      <div class="small" style="margin-top:8px">Vyber závod, uprav parametry / kvalifikaci / výsledky, přidej penalizace, ulož. Změny se zapíší do auditu.</div>
       <div style="margin-top:10px">
         <select id="edit_select" style="width:100%;padding:8px;margin-bottom:8px"></select>
 
@@ -314,10 +318,21 @@
           <strong style="margin-top:10px;display:block">Výsledky závodu</strong>
           <div id="edit_positions" style="margin-top:8px"></div>
 
+          <hr style="border-color:#333;margin:12px 0">
+          <strong>Penalizace</strong>
+          <div id="penaltiesWrap" style="margin-top:8px"></div>
+          <button type="button" id="addPenaltyBtn" class="btn-ghost" style="margin-top:8px">+ Přidat penalizaci</button>
+          <div class="small muted" style="margin-top:6px">„Čas“ se bez měřených časů promítne jako +1 pozice. „Pozice +N“ posune jezdce o N míst dozadu. Přepočet je stabilní a nikdy neudělá z DNS finiš.</div>
+
           <div style="margin-top:10px">
             <button class="formBtn" type="submit">Uložit změny</button>
             <button id="edit_clear" type="button" class="btn-ghost" style="margin-left:8px">Zrušit výběr</button>
             <button id="edit_delete" type="button" class="btn-ghost" style="margin-left:8px">Smazat závod</button>
+          </div>
+
+          <div class="card" style="margin-top:12px">
+            <strong>Audit log</strong>
+            <div id="auditList" class="small" style="margin-top:6px">Načítám…</div>
           </div>
         </form>
       </div>
@@ -358,6 +373,9 @@ function ytId(url){ if(!url) return null; try{const u=new URL(url); if(u.hostnam
 function getResultsArray(r){ if(Array.isArray(r.vysledky)) return r.vysledky; if(Array.isArray(r.results)) return r.results; return []; }
 function getQualiArray(r){ if(Array.isArray(r.kvalifikace)) return r.kvalifikace; if(Array.isArray(r.qualifying)) return r.qualifying; return []; }
 function hasResults(r){ return getResultsArray(r).length>0; }
+function renderNameChip(name){ const clean = normName(name||'').trim(); const color = driverColors[clean] || '#bbb'; if(!clean) return ''; return `<span class="name-chip" style="border-color:${color};color:${color}">${escapeHtml(clean)}</span>`; }
+function renderNameListColored(list){ if(!list || !list.length) return ''; const front = list.slice(0,2); return front.map(n=>renderNameChip(n)).join(''); }
+function deepClone(o){ return JSON.parse(JSON.stringify(o)); }
 
 /* === Tabs === */
 $$('.tablink').forEach(btn=>{
@@ -383,7 +401,7 @@ auth.onAuthStateChanged(u=>{
   else{ adminUser.textContent=''; loginBtn.style.display='inline-block'; logoutBtn.style.display='none'; showAdminParts(false); $('#edit_select').value=''; $('#editRaceForm').style.display='none'; }
 });
 
-/* === Realtime Firestore (kolekce 'zavody') === */
+/* === Realtime Firestore === */
 function startRealtime(){
   db.collection('zavody').onSnapshot(snap=>{
     const arr=[]; snap.forEach(d=>arr.push({id:d.id,...d.data()}));
@@ -436,6 +454,50 @@ function renderNextRace(){
   el.innerHTML = `<strong>${escapeHtml(next.nazev||next.name)}</strong> / ${escapeHtml(next.trat||next.track||'')} <div class="small">Do startu: ${d}d ${h}h ${m}m</div>`;
 }
 
+/* === Penalizace – aplikace na výsledky === */
+/* typ: {driver:'Maty', kind:'pozice'|'cas', value:number, note?:string} */
+/* pravidla: DNS zůstává DNS. „cas“ => drop = 1. „pozice“ => drop = value. Stabilní „sort“ přes (původníIndex + drop). */
+function applyPenalties(baseResults, penalties){
+  if(!Array.isArray(baseResults) || !baseResults.length) return baseResults||[];
+  const arr = baseResults.slice(0,5).map(v=>v||'DNS');
+  if(!Array.isArray(penalties) || !penalties.length) return arr;
+
+  // map driver -> drop
+  const drops = {};
+  penalties.forEach(p=>{
+    const drv = normName(p.driver||p.jezdec||'');
+    if(!drv) return;
+    const kind = (p.kind||p.typ||'').toLowerCase();
+    let drop = 0;
+    if(kind==='pozice') drop = Math.max(0, Number(p.value)||0);
+    else if(kind==='cas') drop = 1; // bez telemetrie jako +1 pozice
+    if(drop>0){ drops[drv]=(drops[drv]||0)+drop; }
+  });
+
+  // vytvořit seznam s metadaty: DNS se řadí nakonec, beze změny pořadí DNS
+  const meta = arr.map((name,idx)=>({
+    name, idx, clean: normName(name),
+    isDNS: (name==='DNS')
+  }));
+
+  // body, které nejsou DNS, spočítáme nový klíč „rankKey = idx + drop“
+  meta.forEach(m=>{
+    if(m.isDNS) { m.rankKey = 999 + m.idx; } // DNS vždy za dokončené
+    else {
+      const drop = drops[m.clean]||0;
+      m.rankKey = m.idx + drop;
+    }
+  });
+
+  // stabilní seřazení podle rankKey, pak podle původního idx
+  meta.sort((a,b)=> a.rankKey - b.rankKey || a.idx - b.idx);
+
+  // výstupní první pětice jmen (DNS zůstane „DNS“)
+  const out = meta.map(m=>m.name).slice(0,5);
+
+  return out;
+}
+
 /* === Results (completed) === */
 function renderResultsTable(){
   const tbody = $('#resultsTable tbody'); tbody.innerHTML='';
@@ -444,16 +506,20 @@ function renderResultsTable(){
   completed.forEach(r=>{
     const dateStr = r.datum||r.date ? new Date(r.datum||r.date).toLocaleString() : '';
     const nameTrack = `${escapeHtml(r.nazev||r.name||'')} / ${escapeHtml(r.trat||r.track||'')}`;
-    const quali = getQualiArray(r);
-    const qualiFrontRow = (quali && quali.length) ? `${escapeHtml(quali[0]||'')}${quali[1]?(' & '+escapeHtml(quali[1])):''}` : '';
-    const arr=getResultsArray(r);
-    const cells = Array.from({length:5},(_,i)=>escapeHtml(arr[i]||'DNS')).map(c=>`<td>${c}</td>`).join('');
+    const qualiFrontRowHTML = renderNameListColored(getQualiArray(r));
+    const penal = Array.isArray(r.penalties)? r.penalties : [];
+    const applied = applyPenalties(getResultsArray(r), penal);
+    const cells = Array.from({length:5},(_,i)=>escapeHtml(applied[i]||'DNS')).map((c,i)=>{
+      const clean = normName(c);
+      const col = driverColors[clean] || (c==='DNS' ? '#aaa' : '#ccc');
+      return `<td style="color:${col}">${c}</td>`;
+    }).join('');
     const yt = r.youtube || r.video || r.youtubeUrl || r.youtube_link || r.link || r.odkaz;
     const id = ytId(yt);
     const video = id ? `<a href="${escapeHtml(yt)}" target="_blank"><img class="youtube-thumb" src="https://img.youtube.com/vi/${id}/hqdefault.jpg" alt="video"></a>` :
                  (yt ? `<a href="${escapeHtml(yt)}" target="_blank">Video</a>` : '');
     const tr=document.createElement('tr');
-    tr.innerHTML = `<td>${dateStr}</td><td>${nameTrack}</td><td>${qualiFrontRow}</td>${cells}<td>${video}</td>`;
+    tr.innerHTML = `<td>${dateStr}</td><td>${nameTrack}</td><td>${qualiFrontRowHTML}</td>${cells}<td>${video}</td>`;
     tbody.appendChild(tr);
   });
 }
@@ -481,7 +547,8 @@ function renderStandingsAndChart(){
     .sort((a,b)=> new Date(a.datum||a.date||0) - new Date(b.datum||b.date||0));
   const stats={}; drivers.forEach(d=>stats[d]={points:0,podiums:0,dns:0});
   completed.forEach(r=>{
-    const arr=getResultsArray(r);
+    const penal = Array.isArray(r.penalties)? r.penalties : [];
+    const arr = applyPenalties(getResultsArray(r), penal);
     // body + podia
     for(let i=0;i<5;i++){
       const raw=arr[i]; if(!raw || raw==='DNS') continue;
@@ -490,7 +557,7 @@ function renderStandingsAndChart(){
       stats[d].points += (pointsMap[i]||0);
       if(i<3) stats[d].podiums++;
     }
-    // DNS: kdokoli z drivers, kdo není v arr (po normalizaci)
+    // DNS: kdokoli z drivers, kdo není v aplikovaném arr (po normalizaci)
     drivers.forEach(d=>{
       const present = arr.some(x=>normName(x)===d);
       if(!present) stats[d].dns++;
@@ -512,7 +579,7 @@ function renderStandingsAndChart(){
   const datasets = drivers.map(d=>{
     let cum=0;
     const data = completed.map(r=>{
-      const arr=getResultsArray(r);
+      const arr = applyPenalties(getResultsArray(r), Array.isArray(r.penalties)?r.penalties:[]);
       const idx = arr.findIndex(x=>normName(x)===d);
       if(idx===-1 || arr[idx]==='DNS') return cum;
       cum += (pointsMap[idx]||0);
@@ -555,10 +622,12 @@ $('#addRaceForm').addEventListener('submit', async (e)=>{
     rychlost_doplneni: $('#add_refuel').value.trim(),
     pitstop: $('#add_pitstop').value,
     info: $('#add_info').value.trim(),
-    youtube: $('#add_youtube').value.trim() || null
+    youtube: $('#add_youtube').value.trim() || null,
+    penalties: []
   };
   try{
-    await db.collection('zavody').add(payload);
+    const docRef = await db.collection('zavody').add(payload);
+    await addAudit(docRef.id, {action:'create', summary:`Vytvořen závod "${payload.nazev}"`});
     $('#addRaceForm').reset();
     alert('Závod přidán.');
   }catch(e){ console.error(e); alert('Chyba ukládání závodu: '+e.message); }
@@ -577,10 +646,11 @@ function populateEditSelect(){
   if(currentVal){ sel.value=currentVal; if(sel.value===currentVal) sel.dispatchEvent(new Event('change')); }
 }
 
-$('#edit_select').addEventListener('change', ()=>{
+$('#edit_select').addEventListener('change', async ()=>{
   const id=$('#edit_select').value;
-  const form=$('#editRaceForm'); const posWrap=$('#edit_positions'); const qualiWrap=$('#edit_quali');
-  form.style.display='none'; posWrap.innerHTML=''; qualiWrap.innerHTML='';
+  const form=$('#editRaceForm'); const posWrap=$('#edit_positions'); const qualiWrap=$('#edit_quali'); const penWrap=$('#penaltiesWrap');
+  form.style.display='none'; posWrap.innerHTML=''; qualiWrap.innerHTML=''; penWrap.innerHTML='';
+  $('#auditList').textContent='Načítám…';
   if(!id) return;
   const r = racesCache.find(x=>x.id===id); if(!r) return;
   $('#edit_id').value=id;
@@ -621,23 +691,125 @@ $('#edit_select').addEventListener('change', ()=>{
     if(existing[i-1]) sel.value=existing[i-1];
     wrap.appendChild(lab); wrap.appendChild(sel); posWrap.appendChild(wrap);
   }
+
+  // penalizace
+  const pens = Array.isArray(r.penalties)? deepClone(r.penalties) : [];
+  renderPenaltiesEditor(penWrap, pens);
+
   form.style.display='block';
+
+  // audit log
+  loadAudit(id);
 });
+
+function renderPenaltiesEditor(container, pens){
+  container.innerHTML='';
+  if(pens.length===0){
+    const p=document.createElement('div'); p.className='small muted'; p.textContent='Zatím bez penalizací.'; container.appendChild(p);
+  }
+  pens.forEach((p,idx)=>{
+    const row=document.createElement('div'); row.className='row'; row.style.marginBottom='6px';
+
+    const c1=document.createElement('div'); c1.className='col';
+    const l1=document.createElement('label'); l1.textContent='Jezdec';
+    const s1=document.createElement('select');
+    [...drivers].forEach(d=>{ const o=document.createElement('option'); o.value=d; o.textContent=d; s1.appendChild(o); });
+    s1.value = p.driver || p.jezdec || drivers[0];
+    c1.appendChild(l1); c1.appendChild(s1);
+
+    const c2=document.createElement('div'); c2.className='col';
+    const l2=document.createElement('label'); l2.textContent='Typ';
+    const s2=document.createElement('select');
+    ['pozice','cas'].forEach(t=>{ const o=document.createElement('option'); o.value=t; o.textContent=(t==='pozice'?'Pozice +N':'Čas (+1 pozice)'); s2.appendChild(o); });
+    s2.value = (p.kind||p.typ||'pozice');
+    c2.appendChild(l2); c2.appendChild(s2);
+
+    const c3=document.createElement('div'); c3.className='col';
+    const l3=document.createElement('label'); l3.textContent='Hodnota';
+    const inp=document.createElement('input'); inp.type='number'; inp.min='0'; inp.step='1';
+    inp.value = Number(p.value|| (s2.value==='cas'?1:1));
+    c3.appendChild(l3); c3.appendChild(inp);
+
+    const c4=document.createElement('div'); c4.className='col';
+    const l4=document.createElement('label'); l4.textContent='Poznámka';
+    const note=document.createElement('input'); note.value = p.note || '';
+    c4.appendChild(l4); c4.appendChild(note);
+
+    const c5=document.createElement('div'); c5.style.display='flex'; c5.style.alignItems='flex-end';
+    const del=document.createElement('button'); del.type='button'; del.className='btn-ghost'; del.textContent='Smazat';
+    del.addEventListener('click',()=>{
+      pens.splice(idx,1);
+      renderPenaltiesEditor(container,pens);
+    });
+    c5.appendChild(del);
+
+    row.appendChild(c1); row.appendChild(c2); row.appendChild(c3); row.appendChild(c4); row.appendChild(c5);
+    container.appendChild(row);
+
+    // change handlers
+    s1.addEventListener('change',()=>{ p.driver=s1.value; });
+    s2.addEventListener('change',()=>{ p.kind=s2.value; if(s2.value==='cas' && Number(inp.value||0)===0) inp.value=1; });
+    inp.addEventListener('input',()=>{ p.value=Number(inp.value||0); });
+    note.addEventListener('input',()=>{ p.note=note.value; });
+  });
+
+  // přidat penalizaci
+  $('#addPenaltyBtn').onclick = ()=>{
+    pens.push({driver:drivers[0],kind:'pozice',value:1,note:''});
+    renderPenaltiesEditor(container,pens);
+  };
+
+  // uložení do form state (načte se v submitu)
+  container._value = pens;
+}
+
+async function loadAudit(raceId){
+  try{
+    const snap = await db.collection('zavody').doc(raceId).collection('audit').orderBy('ts','desc').limit(20).get();
+    if(snap.empty){ $('#auditList').textContent='Žádné záznamy.'; return; }
+    const list = [];
+    snap.forEach(d=>{
+      const a=d.data();
+      const when = a.ts ? new Date(a.ts).toLocaleString() : '';
+      list.push(`<div>- <span class="pill">${escapeHtml(a.by||'neznámý')}</span> • ${when} • ${escapeHtml(a.summary||a.action||'')}</div>`);
+    });
+    $('#auditList').innerHTML = list.join('');
+  }catch(e){
+    console.error(e);
+    $('#auditList').textContent='Chyba načtení auditu.';
+  }
+}
+
+async function addAudit(raceId, {action, summary}){
+  try{
+    const by = (auth.currentUser && (auth.currentUser.displayName||auth.currentUser.email)) || 'anonymous';
+    const ts = new Date().toISOString();
+    await db.collection('zavody').doc(raceId).collection('audit').add({action, summary, by, ts});
+  }catch(e){ console.error('Audit write error', e); }
+}
 
 $('#edit_clear').addEventListener('click', ()=>{ $('#edit_select').value=''; $('#editRaceForm').style.display='none'; });
 
 $('#edit_delete').addEventListener('click', async ()=>{
   const id=$('#edit_id').value; if(!id) return;
   if(!confirm('Smazat závod? Tuto akci nelze vrátit.')) return;
-  try{ await db.collection('zavody').doc(id).delete(); $('#edit_select').value=''; $('#editRaceForm').style.display='none'; }
-  catch(e){ console.error(e); alert('Chyba mazání: '+e.message); }
+  try{
+    await db.collection('zavody').doc(id).delete();
+    await addAudit(id, {action:'delete', summary:'Závod smazán'});
+    $('#edit_select').value=''; $('#editRaceForm').style.display='none';
+  }catch(e){ console.error(e); alert('Chyba mazání: '+e.message); }
 });
 
 $('#editRaceForm').addEventListener('submit', async (e)=>{
   e.preventDefault();
   const id=$('#edit_id').value; if(!id) return;
+
   const arr=[]; for(let i=1;i<=5;i++){ arr.push( $('#edit_pos'+i)?.value || 'DNS' ); }
   const qa=[]; for(let i=1;i<=5;i++){ qa.push( $('#edit_q'+i)?.value || 'DNS' ); }
+  const pensWrap = $('#penaltiesWrap');
+  const pens = (pensWrap && pensWrap._value) ? pensWrap._value : [];
+
+  const before = racesCache.find(x=>x.id===id) || {};
   const payload = {
     nazev: $('#edit_name').value.trim(),
     datum: $('#edit_date').value || null,
@@ -654,12 +826,30 @@ $('#editRaceForm').addEventListener('submit', async (e)=>{
     pitstop: $('#edit_pitstop').value,
     info: $('#edit_info').value.trim(),
     youtube: ($('#edit_youtube').value.trim() || null),
-    kvalifikace: qa, qualifying: qa, // pro jistotu obojí
-    vysledky: arr, results: arr
+    kvalifikace: qa, qualifying: qa,
+    vysledky: arr, results: arr,
+    penalties: pens
   };
+
   try{
     await db.collection('zavody').doc(id).set(payload,{merge:true});
+
+    // audit diff (velmi jednoduchý textový přehled)
+    const diffs = [];
+    const keys = ['nazev','datum','trat','vozidla','kategorie','tuning','bop','pneumatiky','smes','opotrebovani','spotreba','rychlost_doplneni','pitstop','info','youtube'];
+    keys.forEach(k=>{
+      const beforeVal = before[k] ?? '';
+      const afterVal = payload[k] ?? '';
+      if(String(beforeVal)!==String(afterVal)) diffs.push(`${k} změněno`);
+    });
+    if(JSON.stringify(getQualiArray(before))!==JSON.stringify(qa)) diffs.push('kvalifikace upravena');
+    if(JSON.stringify(getResultsArray(before))!==JSON.stringify(arr)) diffs.push('výsledky upraveny');
+    if(JSON.stringify(before.penalties||[])!==JSON.stringify(pens)) diffs.push('penalizace upraveny');
+
+    await addAudit(id, {action:'update', summary: diffs.length? diffs.join(', ') : 'bez změn'});
+
     alert('Závod upraven.');
+    loadAudit(id);
   }catch(e){ console.error(e); alert('Chyba ukládání: '+e.message); }
 });
 
@@ -672,21 +862,21 @@ function populateH2HDropdowns(){
 function h2hCompute(A,B){
   const completed = racesCache.filter(hasResults)
     .sort((a,b)=> new Date(a.datum||a.date||0) - new Date(b.datum||b.date||0));
-  const rows=[]; // per race detail
+  const rows=[];
   let races=0, winsA=0, winsB=0, draws=0, dnsA=0, dnsB=0;
   let ptsA=0, ptsB=0;
   let avgPosA=0, avgPosB=0, posCount=0;
 
   completed.forEach(r=>{
-    const res = getResultsArray(r);
-    const idxA = res.findIndex(x=>normName(x)===A || x===A);
-    const idxB = res.findIndex(x=>normName(x)===B || x===B);
-    const aIsDNS = (idxA===-1) || res[idxA]==='DNS';
-    const bIsDNS = (idxB===-1) || res[idxB]==='DNS';
+    const arr = applyPenalties(getResultsArray(r), Array.isArray(r.penalties)?r.penalties:[]);
+    const idxA = arr.findIndex(x=>normName(x)===A || x===A);
+    const idxB = arr.findIndex(x=>normName(x)===B || x===B);
+    const aIsDNS = (idxA===-1) || arr[idxA]==='DNS';
+    const bIsDNS = (idxB===-1) || arr[idxB]==='DNS';
 
     if(aIsDNS) dnsA++;
     if(bIsDNS) dnsB++;
-    if(aIsDNS && bIsDNS) return; // závod se do H2H nepočítá
+    if(aIsDNS && bIsDNS) return;
 
     races++;
 
@@ -695,10 +885,8 @@ function h2hCompute(A,B){
     const ptsRa = aIsDNS?0:(pointsMap[idxA]||0);
     const ptsRb = bIsDNS?0:(pointsMap[idxB]||0);
 
-    // body total
     ptsA += ptsRa; ptsB += ptsRb;
 
-    // průměrné umístění a výsledek
     let resultTxt='';
     if(!aIsDNS && !bIsDNS){
       avgPosA += (idxA+1);
@@ -710,10 +898,13 @@ function h2hCompute(A,B){
     }else if(!aIsDNS && bIsDNS){ winsA++; resultTxt = `${A} vyhrál (B DNS)`; }
     else if(aIsDNS && !bIsDNS){ winsB++; resultTxt = `${B} vyhrál (A DNS)`; }
 
+    let diff = '—';
+    if(!aIsDNS && !bIsDNS){ diff = ( (idxA+1) - (idxB+1) ); }
+
     rows.push({
       date: r.datum||r.date ? new Date(r.datum||r.date).toLocaleString() : '',
       label: `${r.nazev||r.name||''} / ${r.trat||r.track||''}`,
-      posA: pA, posB: pB, ptsA: ptsRa, ptsB: ptsRb, result: resultTxt
+      posA: pA, posB: pB, ptsA: ptsRa, ptsB: ptsRb, diff, result: resultTxt
     });
   });
 
@@ -746,7 +937,6 @@ function renderH2H(){
     <div>DNS: ${A}: ${r.dnsA} &nbsp;|&nbsp; ${B}: ${r.dnsB}</div>
   `;
 
-  // H2H main chart – průměr bodů na závod
   const avgPtsA = r.races? r.ptsA/r.races : 0;
   const avgPtsB = r.races? r.ptsB/r.races : 0;
   const ctx=$('#h2hChart').getContext('2d');
@@ -757,16 +947,22 @@ function renderH2H(){
     options:{ responsive:true, plugins:{legend:{labels:{color:'#fff'}}}, scales:{x:{ticks:{color:'#fff'}}, y:{ticks:{color:'#fff'}, beginAtZero:true}} }
   });
 
-  // H2H detail table
   const tbody=$('#h2hTable tbody'); tbody.innerHTML='';
   r.rows.forEach(row=>{
     const tr=document.createElement('tr');
-    tr.innerHTML = `<td>${row.date}</td><td>${escapeHtml(row.label)}</td><td>${row.posA}</td><td>${row.posB}</td><td>${row.ptsA}</td><td>${row.ptsB}</td><td>${escapeHtml(row.result)}</td>`;
+    tr.innerHTML = `
+      <td>${row.date}</td>
+      <td>${escapeHtml(row.label)}</td>
+      <td>${row.posA}</td>
+      <td>${row.posB}</td>
+      <td>${row.ptsA}</td>
+      <td>${row.ptsB}</td>
+      <td>${row.diff}</td>
+      <td>${escapeHtml(row.result)}</td>`;
     tbody.appendChild(tr);
   });
-  $('#h2hNote').textContent = 'Pozn.: H2H ignoruje závody, kde oba jezdci mají DNS. Pokud jeden DNS a druhý dojede, bere se to jako výhra finišujícího jezdce.';
+  $('#h2hNote').textContent = 'Pozn.: H2H ignoruje závody, kde oba jezdci mají DNS. Pokud jeden DNS a druhý dojede, bere se to jako výhra finišujícího jezdce. „Rozdíl (A–B)“ je definován jen, když oba dojeli.';
 
-  // Minigraf – body v čase (jen společné závody, chronologicky)
   const miniCtx=$('#h2hMiniChart').getContext('2d');
   const labels = r.rows.map((row,i)=>`${i+1}.`);
   const dataA = r.rows.map(row=>row.ptsA);
@@ -783,33 +979,24 @@ function renderH2H(){
 }
 $('#btnH2H').addEventListener('click', renderH2H);
 
-/* === .ICS generování (naplánované závody) === */
+/* === .ICS generování (naplánované závody) + VALARM -10 min === */
 function pad2(n){ return String(n).padStart(2,'0'); }
 function toICSDate(dt){
   const d = new Date(dt);
   return d.getUTCFullYear()+pad2(d.getUTCMonth()+1)+pad2(d.getUTCDate())+'T'+pad2(d.getUTCHours())+pad2(d.getUTCMinutes())+'00Z';
 }
-function plusMinutes(dt, mins){
-  const d = new Date(dt);
-  return new Date(d.getTime() + mins*60000);
-}
+function plusMinutes(dt, mins){ const d = new Date(dt); return new Date(d.getTime() + mins*60000); }
 function buildICS(){
   const planned = racesCache.filter(r=>!hasResults(r) && r.datum).sort((a,b)=>new Date(a.datum)-new Date(b.datum));
-  const lines=[
-    'BEGIN:VCALENDAR',
-    'VERSION:2.0',
-    'PRODID:-//Tamayo.cz//GT7 Championship//CZ',
-    'CALSCALE:GREGORIAN',
-    'METHOD:PUBLISH'
-  ];
+  const lines=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Tamayo.cz//GT7 Championship//CZ','CALSCALE:GREGORIAN','METHOD:PUBLISH'];
   planned.forEach(r=>{
     const startDate = new Date(r.datum||r.date);
-    const endDate = plusMinutes(startDate, 120); // + 2 hodiny
+    const endDate = plusMinutes(startDate, 120);
     const start = toICSDate(startDate);
     const end = toICSDate(endDate);
     const uid = (r.id||Math.random().toString(36).slice(2))+'@tamayo.cz';
-    const title = (r.nazev||r.name||'Závod');
-    const location = (r.trat||r.track||'');
+    const title = (r.nazev||r.name||'Závod').replace(/[\r\n]/g,' ');
+    const location = (r.trat||r.track||'').replace(/[\r\n]/g,' ').replace(/,/g,'\\,');
     const descParts = [];
     if(r.kategorie) descParts.push('Kategorie: '+r.kategorie);
     if(r.vozidla) descParts.push('Vozidla: '+r.vozidla);
@@ -822,8 +1009,9 @@ function buildICS(){
     lines.push('DTSTART:'+start);
     lines.push('DTEND:'+end);
     lines.push('SUMMARY:'+title);
-    lines.push('LOCATION:'+location.replace(/,/g,'\\,'));
+    lines.push('LOCATION:'+location);
     lines.push('DESCRIPTION:'+desc);
+    lines.push('BEGIN:VALARM'); lines.push('TRIGGER:-PT10M'); lines.push('ACTION:DISPLAY'); lines.push('DESCRIPTION:GT7 závod za 10 minut'); lines.push('END:VALARM');
     lines.push('END:VEVENT');
   });
   lines.push('END:VCALENDAR');
@@ -847,7 +1035,6 @@ function initTabs(){
 initTabs();
 startRealtime();
 setInterval(renderNextRace,60*1000); // odpočet
-
 </script>
 </body>
 </html>
