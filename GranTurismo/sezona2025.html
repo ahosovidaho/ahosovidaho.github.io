@@ -65,7 +65,7 @@
       <div class="card">
         <h2>Vývoj bodů</h2>
         <div class="legend" id="driver-legend"></div>
-        <canvas id="pointsChart" height="120"></canvas>
+        <canvas id="pointsChart" height="120" aria-label="Graf vývoje bodů" role="img"></canvas>
       </div>
 
       <div class="card">
@@ -163,11 +163,11 @@
       </div>
     </section>
 
-    <!-- Archiv sezón -->
+    <!-- Archiv -->
     <section id="archiv">
       <div class="card">
         <h2>Archiv sezón</h2>
-        <div class="muted">Tady bude souhrn i starších ročníků. Zatím pracujeme s 2025.</div>
+        <div class="muted">Zatím pracujeme s ročníkem 2025.</div>
       </div>
     </section>
 
@@ -179,7 +179,7 @@
       </div>
     </section>
 
-    <!-- Admin (edit jen tady) -->
+    <!-- Admin -->
     <section id="admin">
       <div class="card">
         <h2>Admin</h2>
@@ -264,10 +264,7 @@
           </div>
         </div>
 
-        <div id="result-form" class="row" style="margin-top:10px">
-          <!-- dynamicky 5 pozic -->
-        </div>
-
+        <div id="result-form" class="row" style="margin-top:10px"></div>
         <button id="btn-save-results" disabled>Uložit výsledky</button>
       </div>
     </section>
@@ -305,43 +302,37 @@ const POINTS = [10,8,6,4,2];
 let RACES = []; // [{...doc, id}]
 let EDIT_ID = null;
 
-/* ------------------- POMOCNÉ FUNKCE ------------------- */
+/* ------------------- POMOCNÉ ------------------- */
 function parseDate(s){
   if(!s) return null;
   const d = new Date(s);
   return isNaN(d.getTime()) ? null : d;
 }
+function fmtDate(d){
+  if(!d) return "—";
+  const dd = d.toLocaleString("cs-CZ",{year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit"});
+  return dd.replace(",","").replace(/\s/g," ");
+}
 function isCompleted(r){
-  // dokončený = má nenulové výsledky a na 1. místě je jezdec (ne "DNS")
   if(!Array.isArray(r.vysledky)) return false;
   const first = r.vysledky[0];
   const name = typeof first==='string' ? first : (first && first.driver) || "";
   return !!name && name!=="DNS";
 }
 function parseResultsArray(r){
-  // vrací 5 položek: {driver, carBrand, carModel, dns}
   const out = [];
   for(let i=0;i<5;i++){
     const e = (r.vysledky && r.vysledky[i]) ?? "DNS";
     if(typeof e === 'string'){
-      out.push({driver:e, carBrand:null, carModel:null, dns:(e==="DNS")});
+      out.push({driver:e, carBrand:null, carModel:null});
     }else if(e && typeof e==='object'){
       const d = e.driver || "DNS";
-      out.push({
-        driver:d, dns:(d==="DNS"),
-        carBrand: e.carBrand || e.brand || null,
-        carModel: e.carModel || e.model || null
-      });
+      out.push({ driver:d, carBrand:e.carBrand||e.brand||null, carModel:e.carModel||e.model||null });
     }else{
-      out.push({driver:"DNS", carBrand:null, carModel:null, dns:true});
+      out.push({driver:"DNS", carBrand:null, carModel:null});
     }
   }
   return out;
-}
-function fmtDate(d){
-  if(!d) return "—";
-  const dd = d.toLocaleString("cs-CZ",{year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit"});
-  return dd.replace(",","").replace(/\s/g," ");
 }
 function el(tag, attrs={}, html=""){
   const e = document.createElement(tag);
@@ -350,30 +341,29 @@ function el(tag, attrs={}, html=""){
   return e;
 }
 
-/* ------------------- NAČTENÍ TRATÍ (pro Admin datalist) ------------------- */
+/* ------------------- DATALIST TRATÍ ------------------- */
 async function installTrackDatalist(){
   try{
-    const res = await fetch('./tracks.json'); // volitelné; pokud chybí, nevadí
+    const res = await fetch('./tracks.json');
     if(!res.ok) return;
     const list = await res.json();
     const dl = document.getElementById('trackList');
     dl.innerHTML = "";
     list.forEach(t=> dl.appendChild(el('option', {value: t})));
-  }catch(e){ /* ticho */ }
+  }catch(e){ /* ignore */ }
 }
 
-/* ------------------- CARS.JSON + NORMALIZACE (PATCH) ------------------- */
-let CAR_LIST = []; // {brand, model, label}
+/* ------------------- CARS.JSON NORMALIZACE ------------------- */
+let CAR_LIST = [];
 function normBrand(b){
   if(!b) return '';
-  let t = String(b).trim().replace(/\s+/g,' ');
-  // pár rozumných map
-  if(/^TOYOTA$/i.test(t)) t = 'Toyota';
-  if(/^AMG$/i.test(t)) t = 'Mercedes-AMG';
-  if(/^MERCEDES(\-?BENZ)?$/i.test(t)) t = 'Mercedes-Benz';
-  if(/^VW$/i.test(t)) t = 'Volkswagen';
-  // první písmeno velké (ponecháme mezerované názvy)
-  return t.replace(/^\p{L}/u, c => c.toUpperCase());
+  const t = String(b).trim().replace(/\s+/g,' ');
+  const map = {
+    'amg':'Mercedes-AMG','mercedes':'Mercedes-Benz','mercedes-benz':'Mercedes-Benz',
+    'toyota':'Toyota','vw':'Volkswagen'
+  };
+  const key = t.toLowerCase();
+  return map[key] || t;
 }
 async function installGt7CarDatalist(){
   try{
@@ -383,18 +373,25 @@ async function installGt7CarDatalist(){
     CAR_LIST = raw.map(c=>{
       let brand = normBrand(c.brand||'');
       let model = (c.model||'').trim();
-      // odstranění duplicity značky v modelu (např. "Alfa Romeo 4C ..." -> "4C ...")
       if(brand && model.toLowerCase().startsWith(brand.toLowerCase()+" ")) {
         model = model.slice(brand.length).trim();
       }
       return {brand, model, label: `${brand} — ${model}`};
     });
-    // vytvořit datalist pro volné textové vyhledávání (kdybychom ho použili)
-    // (aktuálně nepovinné – výběry v Adminu si skládáme z brand->model)
-  }catch(e){ /* nevadí */ }
+  }catch(e){ /* ignore */ }
+}
+const brandDL = el('datalist',{id:'carBrandList'});
+const modelDL = el('datalist',{id:'carModelList'});
+document.body.appendChild(brandDL);
+document.body.appendChild(modelDL);
+function refreshCarDatalists(){
+  const brands = [...new Set(CAR_LIST.map(c=>c.brand).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'cs'));
+  brandDL.innerHTML = brands.map(b=> `<option value="${b}">`).join('');
+  const models = [...new Set(CAR_LIST.map(c=>c.model).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'cs'));
+  modelDL.innerHTML = models.map(m=> `<option value="${m}">`).join('');
 }
 
-/* ------------------- LIVE DATA Z FIRESTORE ------------------- */
+/* ------------------- SNAPSHOT ------------------- */
 const unsub = db.collection('zavody').onSnapshot(snap=>{
   RACES = snap.docs.map(d=> ({id:d.id, ...d.data()}));
   renderAllPublic();
@@ -402,44 +399,49 @@ const unsub = db.collection('zavody').onSnapshot(snap=>{
   fillResultRaceSelect();
 });
 
-/* ------------------- POČÍTÁNÍ POŘADÍ A GRAF ------------------- */
+/* ------------------- POŘADÍ + GRAF ------------------- */
 function computeStandings(){
   const s = {}; DRIVERS.forEach(n=> s[n]={points:0,podium:0,dns:0});
   const completed = RACES.filter(isCompleted).sort((a,b)=> parseDate(a.datum)-parseDate(b.datum));
   completed.forEach(r=>{
     const parsed = parseResultsArray(r);
-    // body + pódia
     parsed.forEach((p,idx)=>{
-      const name = p.driver;
-      if(name && name!=="DNS"){
-        if(s[name]){
-          s[name].points += (POINTS[idx]||0);
-          if(idx<3) s[name].podium++;
-        }
+      if(p.driver && p.driver!=="DNS" && s[p.driver]){
+        s[p.driver].points += (POINTS[idx]||0);
+        if(idx<3) s[p.driver].podium++;
       }
     });
-    // DNS: kdo není mezi startéry
     const starters = new Set(parsed.filter(x=>x.driver && x.driver!=="DNS").map(x=>x.driver));
-    DRIVERS.forEach(d=>{
-      if(!starters.has(d)) s[d].dns++;
-    });
+    DRIVERS.forEach(d=>{ if(!starters.has(d)) s[d].dns++; });
   });
-  // seřadit
   return Object.entries(s).sort((a,b)=> b[1].points - a[1].points || a[0].localeCompare(b[0]));
 }
 
 let pointsChart = null;
 function renderChart(){
-  const ctx = document.getElementById('pointsChart').getContext('2d');
+  const canvas = document.getElementById('pointsChart');
+  const ctx = canvas && canvas.getContext ? canvas.getContext('2d') : null;
   if(pointsChart && typeof pointsChart.destroy==='function') pointsChart.destroy();
 
+  if(!(window.Chart && ctx)){
+    // Chart.js nedostupný – vynecháme graf, ale stránka jede dál
+    return;
+  }
   const completed = RACES.filter(isCompleted).sort((a,b)=> parseDate(a.datum)-parseDate(b.datum));
   const labels = completed.map(r=> r.nazev || 'Závod');
+
+  // legenda
+  const legend = document.getElementById('driver-legend');
+  legend.innerHTML = '';
+  DRIVERS.forEach(n=>{
+    const pill = el('span', {class:'pill'}, `<span class="dot" style="background:${DRIVER_COLORS[n]||'#888'}"></span>${n}`);
+    legend.appendChild(pill);
+  });
+
   const datasets = DRIVERS.map(name=>{
     let sum = 0;
     const series = completed.map(r=>{
       const arr = parseResultsArray(r);
-      // najdu index pozice daného jezdce
       const idx = arr.findIndex(e=>e.driver===name);
       if(idx>=0 && arr[idx].driver!=="DNS") sum += (POINTS[idx]||0);
       return sum;
@@ -455,22 +457,12 @@ function renderChart(){
     };
   });
 
-  // legenda ve stejných barvách
-  const legend = document.getElementById('driver-legend');
-  legend.innerHTML = '';
-  DRIVERS.forEach(n=>{
-    const pill = el('span', {class:'pill'}, `<span class="dot" style="background:${DRIVER_COLORS[n]||'#888'}"></span>${n}`);
-    legend.appendChild(pill);
-  });
-
   pointsChart = new Chart(ctx, {
     type: 'line',
     data: { labels, datasets },
     options: {
       responsive:true,
-      plugins: {
-        legend: { labels: { color: '#fff' } }
-      },
+      plugins: { legend: { labels: { color: '#fff' } } },
       scales: {
         x: { ticks: { color:'#fff' }, grid:{color:'#333'} },
         y: { ticks: { color:'#fff' }, grid:{color:'#333'}, beginAtZero:true }
@@ -479,7 +471,7 @@ function renderChart(){
   });
 }
 
-/* ------------------- VÝPIS TABULEK (aktuální) ------------------- */
+/* ------------------- TABULKY PUBLIC ------------------- */
 function renderStandings(){
   const tbody = document.querySelector('#standings tbody'); tbody.innerHTML='';
   computeStandings().forEach(([name,data])=>{
@@ -504,11 +496,9 @@ function renderResultsTable(){
 }
 function renderPlannedTable(){
   const tbody = document.querySelector('#planned tbody'); tbody.innerHTML = '';
-  const now = new Date();
   const planned = RACES.filter(r=> !isCompleted(r)).sort((a,b)=> (parseDate(a.datum)||Infinity)-(parseDate(b.datum)||Infinity));
   planned.forEach(r=>{
     const when = parseDate(r.datum);
-    const tr = el('tr');
     const details = [
       r.cfg_class?`Kat: ${r.cfg_class}`:null,
       r.cfg_tyres?`Pneu: ${r.cfg_tyres}`:null,
@@ -518,6 +508,7 @@ function renderPlannedTable(){
       r.cfg_refuel?`Doplň.: ${r.cfg_refuel}`:null,
       r.cfg_mandPit?`Pit: ${r.cfg_mandPit}`:null
     ].filter(Boolean).join(' • ');
+    const tr = el('tr');
     tr.innerHTML = `
       <td>${when?fmtDate(when):'—'}</td>
       <td>${(r.nazev||'—')} / ${(r.trat||'—')}</td>
@@ -528,20 +519,17 @@ function renderPlannedTable(){
   document.getElementById('planned-wrapper').style.display = planned.length ? 'block' : 'none';
 }
 
-/* ------------------- NEJBLIŽŠÍ ZÁVOD + ODPOČET ------------------- */
+/* ------------------- NEJBLIŽŠÍ ZÁVOD ------------------- */
 let countdownTimer = null;
 function renderNextRace(){
   const box = document.getElementById('next-race-box');
-  const now = new Date();
-  const planned = RACES.filter(r=> !isCompleted(r))
-    .filter(r=> parseDate(r.datum))
+  if(countdownTimer){ clearInterval(countdownTimer); countdownTimer=null; }
+
+  const planned = RACES.filter(r=> !isCompleted(r) && parseDate(r.datum))
     .sort((a,b)=> parseDate(a.datum)-parseDate(b.datum));
   const next = planned[0];
 
-  if(countdownTimer){ clearInterval(countdownTimer); countdownTimer=null; }
-
   if(!next){
-    // zkusíme alespoň najít naplánovaný bez data
     const any = RACES.find(r=> !isCompleted(r) && !r.datum);
     if(any){
       box.innerHTML = `
@@ -558,11 +546,7 @@ function renderNextRace(){
   const dt = parseDate(next.datum);
   function tick(){
     const diff = dt - new Date();
-    if(diff <= 0){
-      // závod v minulosti → hledej další (po reálném proběhnutí bude v „dokončených“)
-      renderNextRace();
-      return;
-    }
+    if(diff <= 0){ renderNextRace(); return; }
     const d = Math.floor(diff/(24*3600e3));
     const h = Math.floor((diff%(24*3600e3))/3600e3);
     const m = Math.floor((diff%3600e3)/60e3);
@@ -599,24 +583,23 @@ function renderNextRace(){
 function renderBrandStats(){
   const tbody = document.querySelector('#brand-stats tbody'); tbody.innerHTML='';
   const completed = RACES.filter(isCompleted);
-  const counts = new Map(); // brand -> wins
+  const counts = new Map();
   completed.forEach(r=>{
-    const first = parseResultsArray(r)[0]; // vítěz
-    let brand = (first.carBrand && String(first.carBrand).trim()) || "Neznámé";
+    const winner = parseResultsArray(r)[0];
+    let brand = (winner.carBrand && String(winner.carBrand).trim()) || "Neznámé";
     if(!brand) brand = "Neznámé";
     counts.set(brand, (counts.get(brand)||0)+1);
   });
   const rows = [...counts.entries()].sort((a,b)=> b[1]-a[1] || a[0].localeCompare(b[0]));
-  rows.forEach(( [brand, n], i )=>{
+  if(!rows.length){
+    tbody.innerHTML = `<tr><td colspan="3" class="muted">Zatím nemáme data o vozech vítězů.</td></tr>`;
+    return;
+  }
+  rows.forEach(([brand,n],i)=>{
     const tr = el('tr'); tr.innerHTML = `<td>${i+1}</td><td>${brand}</td><td>${n}</td>`;
     tbody.appendChild(tr);
   });
-  if(!rows.length){
-    const tr = el('tr'); tr.innerHTML = `<td colspan="3" class="muted">Zatím nemáme data o vozech vítězů.</td>`;
-    tbody.appendChild(tr);
-  }
 }
-
 function longestStreakWins(){
   const streaks = {}; DRIVERS.forEach(d=>streaks[d]=0);
   const best = {};   DRIVERS.forEach(d=>best[d]=0);
@@ -630,9 +613,7 @@ function longestStreakWins(){
   });
   return Object.entries(best).sort((a,b)=> b[1]-a[1] || a[0].localeCompare(b[0]));
 }
-
 function lastPlaceWithoutDNS(){
-  // počítáme nejdelší sérii posledního místa mezi startéry
   const streaks = {}; DRIVERS.forEach(d=>streaks[d]=0);
   const best = {};   DRIVERS.forEach(d=>best[d]=0);
   const byDate = RACES.filter(isCompleted).sort((a,b)=>parseDate(a.datum)-parseDate(b.datum));
@@ -640,14 +621,13 @@ function lastPlaceWithoutDNS(){
     const arr = parseResultsArray(r).filter(x=>x.driver && x.driver!=="DNS");
     const last = arr[arr.length-1]?.driver || null;
     DRIVERS.forEach(d=>{
-      if(!arr.find(a=>a.driver===d)) { /* nejel → série se nepřerušuje ani nezvyšuje */ return; }
+      if(!arr.find(a=>a.driver===d)) return;
       if(d===last){ streaks[d]++; if(streaks[d]>best[d]) best[d]=streaks[d]; }
       else streaks[d]=0;
     });
   });
   return Object.entries(best).sort((a,b)=> b[1]-a[1] || a[0].localeCompare(b[0]));
 }
-
 function dnsCounts(){
   const res = {}; DRIVERS.forEach(d=>res[d]=0);
   const byDate = RACES.filter(isCompleted);
@@ -657,25 +637,18 @@ function dnsCounts(){
   });
   return Object.entries(res).sort((a,b)=> b[1]-a[1] || a[0].localeCompare(b[0]));
 }
-
 function renderStreaksAndDNS(){
   const wT = document.querySelector('#streak-wins tbody'); wT.innerHTML='';
-  longestStreakWins().forEach(([d, n])=>{
-    const tr = el('tr'); tr.innerHTML = `<td>${d}</td><td>${n}</td>`; wT.appendChild(tr);
-  });
-  if(!wT.children.length){ wT.innerHTML = `<tr><td colspan="2" class="muted">Zatím žádná data.</td></tr>`; }
+  longestStreakWins().forEach(([d, n])=>{ wT.innerHTML += `<tr><td>${d}</td><td>${n}</td></tr>`; });
+  if(!wT.children.length) wT.innerHTML = `<tr><td colspan="2" class="muted">Zatím žádná data.</td></tr>`;
 
   const lT = document.querySelector('#streak-last tbody'); lT.innerHTML='';
-  lastPlaceWithoutDNS().forEach(([d, n])=>{
-    const tr = el('tr'); tr.innerHTML = `<td>${d}</td><td>${n}</td>`; lT.appendChild(tr);
-  });
-  if(!lT.children.length){ lT.innerHTML = `<tr><td colspan="2" class="muted">Zatím žádná data.</td></tr>`; }
+  lastPlaceWithoutDNS().forEach(([d, n])=>{ lT.innerHTML += `<tr><td>${d}</td><td>${n}</td></tr>`; });
+  if(!lT.children.length) lT.innerHTML = `<tr><td colspan="2" class="muted">Zatím žádná data.</td></tr>`;
 
   const dT = document.querySelector('#dns-max tbody'); dT.innerHTML='';
-  dnsCounts().forEach(([d,n])=>{
-    const tr = el('tr'); tr.innerHTML = `<td>${d}</td><td>${n}</td>`; dT.appendChild(tr);
-  });
-  if(!dT.children.length){ dT.innerHTML = `<tr><td colspan="2" class="muted">Zatím žádná data.</td></tr>`; }
+  dnsCounts().forEach(([d,n])=>{ dT.innerHTML += `<tr><td>${d}</td><td>${n}</td></tr>`; });
+  if(!dT.children.length) dT.innerHTML = `<tr><td colspan="2" class="muted">Zatím žádná data.</td></tr>`;
 }
 
 /* ------------------- H2H ------------------- */
@@ -683,10 +656,7 @@ function fillH2HSelects(){
   const a = document.getElementById('h2hA');
   const b = document.getElementById('h2hB');
   a.innerHTML = ''; b.innerHTML='';
-  DRIVERS.forEach(n=>{
-    a.appendChild(el('option',{},n));
-    b.appendChild(el('option',{},n));
-  });
+  DRIVERS.forEach(n=>{ a.appendChild(el('option',{},n)); b.appendChild(el('option',{},n)); });
   a.value = 'Viki'; b.value='Maty';
 }
 function renderH2H(){
@@ -700,37 +670,27 @@ function renderH2H(){
     const arr = parseResultsArray(r);
     const posA = arr.findIndex(x=>x.driver===A);
     const posB = arr.findIndex(x=>x.driver===B);
-    if(posA<0 && posB<0) return; // nikdo nejel
-    let resA = posA<0?'DNS':(posA+1)+'.';
-    let resB = posB<0?'DNS':(posB+1)+'.';
-    const tr = el('tr');
-    tr.innerHTML = `<td>${fmtDate(parseDate(r.datum))}</td><td>${r.nazev||'—'}</td><td>${r.trat||'—'}</td><td>${resA}</td><td>${resB}</td>`;
-    tb.appendChild(tr);
+    if(posA<0 && posB<0) return;
+    const resA = posA<0?'DNS':(posA+1)+'.';
+    const resB = posB<0?'DNS':(posB+1)+'.';
+    tb.innerHTML += `<tr><td>${fmtDate(parseDate(r.datum))}</td><td>${r.nazev||'—'}</td><td>${r.trat||'—'}</td><td>${resA}</td><td>${resB}</td></tr>`;
     if(posA>=0 && posB>=0){
       if(posA < posB) aWins++; else if(posB < posA) bWins++; else ties++;
-      series.push({label:r.nazev||'Závod', diff:(posB-posA)}); // záporné = vyhrál A
+      series.push({label:r.nazev||'Závod', diff:(posB-posA)});
     }
   });
-
-  // mini graf rozdílu pozic (pod nulou = lepší A)
   const ctx = document.getElementById('h2hMiniChart').getContext('2d');
   if(window.h2hChart && typeof window.h2hChart.destroy==='function') window.h2hChart.destroy();
-  window.h2hChart = new Chart(ctx,{
-    type:'bar',
-    data:{ labels: series.map(s=>s.label), datasets:[{
-      label:`Pozice B - A (nižší je lepší A)`,
-      data: series.map(s=>s.diff),
-      backgroundColor:'#4b6cb7'
-    }]},
-    options:{
-      plugins:{ legend:{labels:{color:'#fff'}} },
-      scales:{
-        x:{ ticks:{color:'#fff'}, grid:{color:'#333'} },
-        y:{ ticks:{color:'#fff'}, grid:{color:'#333'}, beginAtZero:true }
+  if(window.Chart){
+    window.h2hChart = new Chart(ctx,{
+      type:'bar',
+      data:{ labels: series.map(s=>s.label), datasets:[{ label:`Pozice B - A (nižší je lepší A)`, data: series.map(s=>s.diff) }]},
+      options:{
+        plugins:{ legend:{labels:{color:'#fff'}} },
+        scales:{ x:{ticks:{color:'#fff'},grid:{color:'#333'}}, y:{ticks:{color:'#fff'},grid:{color:'#333'},beginAtZero:true} }
       }
-    }
-  });
-
+    });
+  }
   const sum = document.getElementById('h2h-summary');
   sum.innerHTML = `
     <div class="pill"><strong>${A}</strong> vítězství: ${aWins}</div>
@@ -741,7 +701,7 @@ function renderH2H(){
 document.getElementById('h2hA').addEventListener('change', renderH2H);
 document.getElementById('h2hB').addEventListener('change', renderH2H);
 
-/* ------------------- ADMIN: LOGIN + PŘIDÁNÍ / EDIT ------------------- */
+/* ------------------- ADMIN LOGIN ------------------- */
 document.getElementById('loginBtn').addEventListener('click', async ()=>{
   try{
     const provider = new firebase.auth.GoogleAuthProvider();
@@ -750,6 +710,7 @@ document.getElementById('loginBtn').addEventListener('click', async ()=>{
   }catch(e){ alert(e.message||e); }
 });
 
+/* ------------------- ADMIN: PŘIDÁNÍ / EDIT ------------------- */
 async function addRace(){
   const payload = {
     datum: document.getElementById('new-date').value || null,
@@ -765,12 +726,11 @@ async function addRace(){
     cfg_fuelUse: document.getElementById('cfg-fuelUse').value || '',
     cfg_refuel: document.getElementById('cfg-refuel').value || '',
     cfg_mandPit: document.getElementById('cfg-mandPit').value || 'NE',
-    cfg_notes: document.getElementById('cfg-notes').value || '',
-    // výsledky zatím nejsou
+    cfg_notes: document.getElementById('cfg-notes').value || ''
   };
   await db.collection('zavody').add(payload);
-  // vymazat formulář
-  ['new-date','new-name','new-track','cfg-vehicles','cfg-tyreWear','cfg-fuelUse','cfg-refuel','cfg-notes'].forEach(id=> document.getElementById(id).value='');
+  ['new-date','new-name','new-track','cfg-vehicles','cfg-tyreWear','cfg-fuelUse','cfg-refuel','cfg-notes']
+    .forEach(id=> document.getElementById(id).value='');
 }
 document.getElementById('btn-add-race').addEventListener('click', addRace);
 
@@ -789,7 +749,6 @@ function renderAdminTable(){
     tb.appendChild(tr);
   });
 }
-
 function startEdit(r){
   EDIT_ID = r.id;
   document.getElementById('new-date').value = r.datum ? new Date(r.datum).toISOString().slice(0,16) : '';
@@ -807,7 +766,6 @@ function startEdit(r){
   document.getElementById('cfg-mandPit').value = r.cfg_mandPit || 'NE';
   document.getElementById('cfg-notes').value = r.cfg_notes || '';
 
-  // výsledky editor
   fillResultRaceSelect(r.id);
   buildResultForm(r);
   document.getElementById('btn-save-edit').disabled = false;
@@ -841,7 +799,7 @@ document.getElementById('btn-save-edit').addEventListener('click', async ()=>{
   await db.collection('zavody').doc(EDIT_ID).update(payload);
 });
 
-/* ------------------- VÝSLEDKY EDITOR (s auty) ------------------- */
+/* ------------------- VÝSLEDKY EDITOR ------------------- */
 function fillResultRaceSelect(preselectId=null){
   const sel = document.getElementById('result-race'); sel.innerHTML='';
   const list = [...RACES].sort((a,b)=> (parseDate(a.datum)||Infinity)-(parseDate(b.datum)||Infinity));
@@ -859,7 +817,6 @@ document.getElementById('result-race').addEventListener('change', ()=>{
   document.getElementById('btn-save-results').disabled = !r;
   document.getElementById('yt-url').value = (r && r.youtube) || '';
 });
-
 function buildResultForm(race){
   const host = document.getElementById('result-form');
   host.innerHTML = '';
@@ -894,37 +851,24 @@ function buildResultForm(race){
     host.appendChild(row);
   }
 }
-// sdílené datalisty (naplníme po načtení cars.json)
-const brandDL = el('datalist',{id:'carBrandList'});
-const modelDL = el('datalist',{id:'carModelList'});
-document.body.appendChild(brandDL);
-document.body.appendChild(modelDL);
-
-function refreshCarDatalists(){
-  // unikátní značky
-  const brands = [...new Set(CAR_LIST.map(c=>c.brand).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'cs'));
-  brandDL.innerHTML = brands.map(b=> `<option value="${b}">`).join('');
-  // modely kompletní (když nezadá značku)
-  const models = [...new Set(CAR_LIST.map(c=>c.model).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'cs'));
-  modelDL.innerHTML = models.map(m=> `<option value="${m}">`).join('');
-}
-
 document.getElementById('btn-save-results').addEventListener('click', async ()=>{
   const id = document.getElementById('result-race').value;
   if(!id) return;
   const yt = document.getElementById('yt-url').value.trim();
-  const form = [...document.querySelectorAll('#result-form .card')];
-  const out = form.map(card=>{
+  const cards = [...document.querySelectorAll('#result-form .card')];
+  const out = cards.map(card=>{
     const driver = card.querySelector('.res-driver').value;
     const brand = card.querySelector('.res-brand').value.trim();
     const model = card.querySelector('.res-model').value.trim();
-    if(driver==='DNS') return 'DNS'; // kompatibilita se starým formátem
+    if(driver==='DNS') return 'DNS';
     const obj = { driver };
     if(brand) obj.carBrand = brand;
     if(model) obj.carModel = model;
     return obj;
   });
-  await db.collection('zavody').doc(id).update({ vysledky: out, youtube: yt || firebase.firestore.FieldValue.delete() });
+  const payload = { vysledky: out };
+  if(yt) payload.youtube = yt; else payload.youtube = firebase.firestore.FieldValue.delete();
+  await db.collection('zavody').doc(id).update(payload);
 });
 
 /* ------------------- FULL PUBLIC RENDER ------------------- */
