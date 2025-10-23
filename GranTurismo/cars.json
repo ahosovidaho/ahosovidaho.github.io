@@ -1,1 +1,2206 @@
-[]
+[
+  {
+    "brand": "Abarth",
+    "model": "Abarth 500 '09"
+  },
+  {
+    "brand": "Abarth",
+    "model": "FIAT Abarth 595 Esseesse '70"
+  },
+  {
+    "brand": "Abarth",
+    "model": "Abarth 1500 Biposto Bertone B.A.T 1 '52"
+  },
+  {
+    "brand": "AFEELA",
+    "model": "AFEELA Prototype 2024"
+  },
+  {
+    "brand": "AFEELA",
+    "model": "AFEELA 1 '26"
+  },
+  {
+    "brand": "Alfa Romeo",
+    "model": "Alfa Romeo 4C Launch Edition '14"
+  },
+  {
+    "brand": "Alfa Romeo",
+    "model": "Alfa Romeo 4C Gr.3 Road Car"
+  },
+  {
+    "brand": "Alfa Romeo",
+    "model": "Alfa Romeo 4C Gr.4"
+  },
+  {
+    "brand": "Alfa Romeo",
+    "model": "Alfa Romeo 4C Gr.3"
+  },
+  {
+    "brand": "Alfa Romeo",
+    "model": "Alfa Romeo 8C 2900B Touring Berlinetta '38"
+  },
+  {
+    "brand": "Alfa Romeo",
+    "model": "Alfa Romeo 8C Competizione '08"
+  },
+  {
+    "brand": "Alfa Romeo",
+    "model": "Alfa Romeo 155 2.5 V6 TI '93"
+  },
+  {
+    "brand": "Alfa Romeo",
+    "model": "Alfa Romeo Giulia Sprint GT Veloce '67"
+  },
+  {
+    "brand": "Alfa Romeo",
+    "model": "Alfa Romeo Giulia GTAm '20"
+  },
+  {
+    "brand": "Alfa Romeo",
+    "model": "Alfa Romeo GIULIA TZ2 carrozzata da ZAGATO '65"
+  },
+  {
+    "brand": "Alfa Romeo",
+    "model": "Alfa Romeo MiTo 1.4 T Sport '09"
+  },
+  {
+    "brand": "Alpine",
+    "model": "Alpine A110 1600S '72"
+  },
+  {
+    "brand": "Alpine",
+    "model": "Alpine A110 Première Édition '17"
+  },
+  {
+    "brand": "Alpine",
+    "model": "Alpine A220 Race Car '68"
+  },
+  {
+    "brand": "Alpine",
+    "model": "Alpine Vision Gran Turismo"
+  },
+  {
+    "brand": "Alpine",
+    "model": "Alpine Vision Gran Turismo Race Mode"
+  },
+  {
+    "brand": "Alpine",
+    "model": "Alpine Vision Gran Turismo 2017"
+  },
+  {
+    "brand": "AMG",
+    "model": "Mercedes-Benz 300 SEL 6.8 AMG '71"
+  },
+  {
+    "brand": "AMG",
+    "model": "Mercedes-Benz A 45 AMG 4MATIC '13"
+  },
+  {
+    "brand": "AMG",
+    "model": "Mercedes-AMG C 63 S '15"
+  },
+  {
+    "brand": "AMG",
+    "model": "Mercedes-AMG GT S '15"
+  },
+  {
+    "brand": "AMG",
+    "model": "Mercedes-AMG GT R '17"
+  },
+  {
+    "brand": "AMG",
+    "model": "Mercedes-AMG GT Black Series '20"
+  },
+  {
+    "brand": "AMG",
+    "model": "Mercedes-AMG GT Safety Car"
+  },
+  {
+    "brand": "AMG",
+    "model": "Mercedes-AMG GT3 '16"
+  },
+  {
+    "brand": "AMG",
+    "model": "Mercedes-AMG GT3 '20"
+  },
+  {
+    "brand": "AMG",
+    "model": "Mercedes-Benz SLS AMG '10"
+  },
+  {
+    "brand": "AMG",
+    "model": "Mercedes-Benz SLS AMG Gr.4"
+  },
+  {
+    "brand": "AMG",
+    "model": "Mercedes-Benz SLS AMG GT3 '11"
+  },
+  {
+    "brand": "AMG",
+    "model": "Mercedes-Benz AMG Vision Gran Turismo"
+  },
+  {
+    "brand": "AMG",
+    "model": "Mercedes-Benz AMG Vision Gran Turismo Racing Series"
+  },
+  {
+    "brand": "Amuse",
+    "model": "Amuse NISMO 380RS Super Leggera"
+  },
+  {
+    "brand": "Amuse",
+    "model": "Amuse S2000 GT1 Turbo"
+  },
+  {
+    "brand": "Aston Martin",
+    "model": "Aston Martin DB3S '53"
+  },
+  {
+    "brand": "Aston Martin",
+    "model": "Aston Martin DB5 '64"
+  },
+  {
+    "brand": "Aston Martin",
+    "model": "Aston Martin DB11 '16"
+  },
+  {
+    "brand": "Aston Martin",
+    "model": "Aston Martin DBR9 GT1 '10"
+  },
+  {
+    "brand": "Aston Martin",
+    "model": "Aston Martin DP-100 Vision Gran Turismo"
+  },
+  {
+    "brand": "Aston Martin",
+    "model": "Aston Martin One-77 '11"
+  },
+  {
+    "brand": "Aston Martin",
+    "model": "Aston Martin Valkyrie '21"
+  },
+  {
+    "brand": "Aston Martin",
+    "model": "Aston Martin V8 Vantage S '15"
+  },
+  {
+    "brand": "Aston Martin",
+    "model": "Aston Martin Vantage '18"
+  },
+  {
+    "brand": "Aston Martin",
+    "model": "Aston Martin Vantage Gr.4"
+  },
+  {
+    "brand": "Aston Martin",
+    "model": "Aston Martin V12 Vantage GT3 '12"
+  },
+  {
+    "brand": "Aston Martin",
+    "model": "Aston Martin Vulcan '16"
+  },
+  {
+    "brand": "Audi",
+    "model": "Audi R8 4.2 FSI R tronic '07"
+  },
+  {
+    "brand": "Audi",
+    "model": "Audi R8 Coupé V10 plus '16"
+  },
+  {
+    "brand": "Audi",
+    "model": "Audi R8 LMS '15"
+  },
+  {
+    "brand": "Audi",
+    "model": "Audi R8 LMS Evo '19"
+  },
+  {
+    "brand": "Audi",
+    "model": "Audi R18 TDI '11"
+  },
+  {
+    "brand": "Audi",
+    "model": "Audi R18 '16"
+  },
+  {
+    "brand": "Audi",
+    "model": "Audi RS 5 Turbo DTM '19"
+  },
+  {
+    "brand": "Audi",
+    "model": "Audi Sport quattro S1 Pikes Peak '87"
+  },
+  {
+    "brand": "Audi",
+    "model": "Audi TT Coupé 3.2 quattro '03"
+  },
+  {
+    "brand": "Audi",
+    "model": "Audi TTS Coupé '09"
+  },
+  {
+    "brand": "Audi",
+    "model": "Audi TTS Coupé '14"
+  },
+  {
+    "brand": "Audi",
+    "model": "Audi TT Cup '16"
+  },
+  {
+    "brand": "Audi",
+    "model": "Audi Vision Gran Turismo"
+  },
+  {
+    "brand": "Audi",
+    "model": "Audi e-tron Vision Gran Turismo"
+  },
+  {
+    "brand": "Autobianchi",
+    "model": "Autobianchi A112 Abarth '85"
+  },
+  {
+    "brand": "BAC",
+    "model": "BAC Mono '16"
+  },
+  {
+    "brand": "BMW",
+    "model": "BMW 3.0 CSL '71"
+  },
+  {
+    "brand": "BMW",
+    "model": "BMW 3.0 CSL '73"
+  },
+  {
+    "brand": "BMW",
+    "model": "BMW i3 '15"
+  },
+  {
+    "brand": "BMW",
+    "model": "BMW M2 Competition '18"
+  },
+  {
+    "brand": "BMW",
+    "model": "BMW M3 '89"
+  },
+  {
+    "brand": "BMW",
+    "model": "BMW M3 Sport Evolution '89"
+  },
+  {
+    "brand": "BMW",
+    "model": "BMW M3 '97"
+  },
+  {
+    "brand": "BMW",
+    "model": "BMW M3 Coupé '03"
+  },
+  {
+    "brand": "BMW",
+    "model": "BMW M3 Coupé '07"
+  },
+  {
+    "brand": "BMW",
+    "model": "BMW M3 GT '11"
+  },
+  {
+    "brand": "BMW",
+    "model": "BMW M4 Coupé '14"
+  },
+  {
+    "brand": "BMW",
+    "model": "BMW M4 Safety Car"
+  },
+  {
+    "brand": "BMW",
+    "model": "BMW M4 Gr.4"
+  },
+  {
+    "brand": "BMW",
+    "model": "BMW M6 GT3 Endurance Model '16"
+  },
+  {
+    "brand": "BMW",
+    "model": "BMW M6 GT3 Sprint Model '16"
+  },
+  {
+    "brand": "BMW",
+    "model": "BMW McLaren F1 GTR Race Car '97"
+  },
+  {
+    "brand": "BMW",
+    "model": "BMW Vision Gran Turismo"
+  },
+  {
+    "brand": "BMW",
+    "model": "BMW Z4 3.0i '03"
+  },
+  {
+    "brand": "BMW",
+    "model": "BMW Z4 GT3 '11"
+  },
+  {
+    "brand": "BMW",
+    "model": "BMW Z8 '01"
+  },
+  {
+    "brand": "Bugatti",
+    "model": "Bugatti Chiron '16"
+  },
+  {
+    "brand": "Bugatti",
+    "model": "Bugatti Veyron 16.4 '13"
+  },
+  {
+    "brand": "Bugatti",
+    "model": "Bugatti Veyron Gr.4"
+  },
+  {
+    "brand": "Bugatti",
+    "model": "Bugatti Vision Gran Turismo"
+  },
+  {
+    "brand": "Bugatti",
+    "model": "Bugatti Vision Gran Turismo (Gr.1)"
+  },
+  {
+    "brand": "BVLGARI",
+    "model": "BVLGARI Aluminium Vision Gran Turismo"
+  },
+  {
+    "brand": "Chaparral",
+    "model": "Chaparral 2J '70"
+  },
+  {
+    "brand": "Chaparral",
+    "model": "Chevrolet Chaparral 2X Vision Gran Turismo"
+  },
+  {
+    "brand": "Chevrolet",
+    "model": "Chevrolet Camaro Z28 '69"
+  },
+  {
+    "brand": "Chevrolet",
+    "model": "Chevrolet Camaro SS '16"
+  },
+  {
+    "brand": "Chevrolet",
+    "model": "Chevrolet Camaro ZL1 1LE Package '18"
+  },
+  {
+    "brand": "Chevrolet",
+    "model": "Chevrolet Chevelle SS 454 Sport Coupé '70"
+  },
+  {
+    "brand": "Chevrolet",
+    "model": "Chevrolet Corvette (C1) '58"
+  },
+  {
+    "brand": "Chevrolet",
+    "model": "Chevrolet Corvette Stingray Racer Concept '59"
+  },
+  {
+    "brand": "Chevrolet",
+    "model": "Chevrolet Corvette Sting Ray Sport Coupe (C2) '63"
+  },
+  {
+    "brand": "Chevrolet",
+    "model": "Chevrolet Corvette Stingray L46 350 (C3) '69"
+  },
+  {
+    "brand": "Chevrolet",
+    "model": "Chevrolet Corvette Stingray Convertible (C3) '69"
+  },
+  {
+    "brand": "Chevrolet",
+    "model": "Chevrolet Corvette ZR-1 (C4) '89"
+  },
+  {
+    "brand": "Chevrolet",
+    "model": "Chevrolet Corvette Z06 (C5) '01"
+  },
+  {
+    "brand": "Chevrolet",
+    "model": "Chevrolet Corvette ZR1 (C6) '09"
+  },
+  {
+    "brand": "Chevrolet",
+    "model": "Chevrolet Corvette C7 Stingray '14"
+  },
+  {
+    "brand": "Chevrolet",
+    "model": "Chevrolet Corvette C7 ZR1 '19"
+  },
+  {
+    "brand": "Chevrolet",
+    "model": "Chevrolet Corvette C7 Gr.3 Road Car"
+  },
+  {
+    "brand": "Chevrolet",
+    "model": "Chevrolet Corvette C7 Gr.4"
+  },
+  {
+    "brand": "Chevrolet",
+    "model": "Chevrolet Corvette C7 Gr.3"
+  },
+  {
+    "brand": "Chevrolet",
+    "model": "Chevrolet Corvette C8 Stingray '20"
+  },
+  {
+    "brand": "Chevrolet",
+    "model": "Chevrolet Corvette CX Concept '25"
+  },
+  {
+    "brand": "Chevrolet",
+    "model": "Chevrolet Corvette CX.R Vision Gran Turismo Concept"
+  },
+  {
+    "brand": "Chris Holstrom Concepts",
+    "model": "Chris Holstrom Concepts 1967 Chevy Nova"
+  },
+  {
+    "brand": "Citroën",
+    "model": "Citroën BX 19 TRS '87"
+  },
+  {
+    "brand": "Citroën",
+    "model": "Citroën DS 21 Pallas '70"
+  },
+  {
+    "brand": "Citroën",
+    "model": "GT by Citroën Road Car"
+  },
+  {
+    "brand": "Citroën",
+    "model": "GT by Citroën Gr.4"
+  },
+  {
+    "brand": "Citroën",
+    "model": "GT by Citroën Race Car (Gr.3)"
+  },
+  {
+    "brand": "Daihatsu",
+    "model": "Daihatsu Copen Active Top '02"
+  },
+  {
+    "brand": "Daihatsu",
+    "model": "DAIHATSU COPEN RJ Vision Gran Turismo"
+  },
+  {
+    "brand": "De Tomaso",
+    "model": "De Tomaso Mangusta '69"
+  },
+  {
+    "brand": "De Tomaso",
+    "model": "De Tomaso Mangusta (Christian Dior)"
+  },
+  {
+    "brand": "De Tomaso",
+    "model": "De Tomaso Pantera '71"
+  },
+  {
+    "brand": "DMC",
+    "model": "DMC DeLorean S2 '04"
+  },
+  {
+    "brand": "Dodge",
+    "model": "Dodge Challenger R/T '70"
+  },
+  {
+    "brand": "Dodge",
+    "model": "Dodge Challenger SRT Demon '18"
+  },
+  {
+    "brand": "Dodge",
+    "model": "Dodge Charger R/T 426 Hemi '68"
+  },
+  {
+    "brand": "Dodge",
+    "model": "Dodge Charger SRT Hellcat '15"
+  },
+  {
+    "brand": "Dodge",
+    "model": "Dodge Charger SRT Hellcat Safety Car"
+  },
+  {
+    "brand": "Dodge",
+    "model": "Dodge Super Bee '70"
+  },
+  {
+    "brand": "Dodge",
+    "model": "Dodge Viper GTS '02"
+  },
+  {
+    "brand": "Dodge",
+    "model": "Dodge Viper SRT10 Coupe '06"
+  },
+  {
+    "brand": "Dodge",
+    "model": "Dodge Viper GTS '13"
+  },
+  {
+    "brand": "Dodge",
+    "model": "Dodge Viper Gr.4"
+  },
+  {
+    "brand": "Dodge",
+    "model": "Dodge Viper SRT GT3-R '15"
+  },
+  {
+    "brand": "Dodge",
+    "model": "Dodge SRT Tomahawk S Vision Gran Turismo"
+  },
+  {
+    "brand": "Dodge",
+    "model": "Dodge SRT Tomahawk GTS-R Vision Gran Turismo"
+  },
+  {
+    "brand": "Dodge",
+    "model": "Dodge SRT Tomahawk Vision Gran Turismo (Gr.1)"
+  },
+  {
+    "brand": "Dodge",
+    "model": "Dodge SRT Tomahawk X Vision Gran Turismo"
+  },
+  {
+    "brand": "DS AUTOMOBILES",
+    "model": "DS 3 Racing '11"
+  },
+  {
+    "brand": "Eckert's Rod & Custom",
+    "model": "Eckert's Rod & Custom Mach Forty"
+  },
+  {
+    "brand": "Ferrari",
+    "model": "Ferrari 250 GT Berlinetta passo corto '61"
+  },
+  {
+    "brand": "Ferrari",
+    "model": "Ferrari 250 GTO '62"
+  },
+  {
+    "brand": "Ferrari",
+    "model": "Ferrari 308 GTB '75"
+  },
+  {
+    "brand": "Ferrari",
+    "model": "Ferrari 330 P4 '67"
+  },
+  {
+    "brand": "Ferrari",
+    "model": "Ferrari 365 GTB4 '71"
+  },
+  {
+    "brand": "Ferrari",
+    "model": "Ferrari 430 Scuderia '07"
+  },
+  {
+    "brand": "Ferrari",
+    "model": "Ferrari 458 Italia '09"
+  },
+  {
+    "brand": "Ferrari",
+    "model": "Ferrari 458 Italia Gr.4"
+  },
+  {
+    "brand": "Ferrari",
+    "model": "Ferrari 458 Italia GT3 '13"
+  },
+  {
+    "brand": "Ferrari",
+    "model": "Ferrari 500 Mondial Pinin Farina Coupe '54"
+  },
+  {
+    "brand": "Ferrari",
+    "model": "Ferrari 512 BB '76"
+  },
+  {
+    "brand": "Ferrari",
+    "model": "Ferrari 812 Superfast '17"
+  },
+  {
+    "brand": "Ferrari",
+    "model": "Ferrari Dino 246 GT '71"
+  },
+  {
+    "brand": "Ferrari",
+    "model": "Enzo Ferrari '02"
+  },
+  {
+    "brand": "Ferrari",
+    "model": "Ferrari F8 Tributo '19"
+  },
+  {
+    "brand": "Ferrari",
+    "model": "Ferrari F12berlinetta '12"
+  },
+  {
+    "brand": "Ferrari",
+    "model": "Ferrari F40 '92"
+  },
+  {
+    "brand": "Ferrari",
+    "model": "Ferrari F50 '95"
+  },
+  {
+    "brand": "Ferrari",
+    "model": "Ferrari F430 '06"
+  },
+  {
+    "brand": "Ferrari",
+    "model": "Ferrari FXX K '14"
+  },
+  {
+    "brand": "Ferrari",
+    "model": "Ferrari GTO '84"
+  },
+  {
+    "brand": "Ferrari",
+    "model": "Ferrari LaFerrari '13"
+  },
+  {
+    "brand": "Ferrari",
+    "model": "Ferrari Testarossa '91"
+  },
+  {
+    "brand": "Ferrari",
+    "model": "Ferrari Vision Gran Turismo"
+  },
+  {
+    "brand": "FIAT",
+    "model": "FIAT 500 F '68"
+  },
+  {
+    "brand": "FIAT",
+    "model": "FIAT 500 1.2 8V Lounge SS '08"
+  },
+  {
+    "brand": "Ford",
+    "model": "1932 Ford Roadster"
+  },
+  {
+    "brand": "Ford",
+    "model": "Ford Escort RS Cosworth '92"
+  },
+  {
+    "brand": "Ford",
+    "model": "Ford F-150 SVT Raptor '11"
+  },
+  {
+    "brand": "Ford",
+    "model": "Ford Focus ST '15"
+  },
+  {
+    "brand": "Ford",
+    "model": "Ford Focus RS '18"
+  },
+  {
+    "brand": "Ford",
+    "model": "Ford Focus Gr.B Rally Car"
+  },
+  {
+    "brand": "Ford",
+    "model": "Ford GT '06"
+  },
+  {
+    "brand": "Ford",
+    "model": "Ford GT '17"
+  },
+  {
+    "brand": "Ford",
+    "model": "Ford GT LM Spec II Test Car"
+  },
+  {
+    "brand": "Ford",
+    "model": "Ford GT LM Race Car Spec II"
+  },
+  {
+    "brand": "Ford",
+    "model": "Ford GT Race Car '18"
+  },
+  {
+    "brand": "Ford",
+    "model": "Ford GT40 Mark I '66"
+  },
+  {
+    "brand": "Ford",
+    "model": "Ford Mark IV Race Car '67"
+  },
+  {
+    "brand": "Ford",
+    "model": "Ford Mustang Boss 429 '69"
+  },
+  {
+    "brand": "Ford",
+    "model": "Ford Mustang Mach 1 '71"
+  },
+  {
+    "brand": "Ford",
+    "model": "Ford Mustang GT Premium Fastback '15"
+  },
+  {
+    "brand": "Ford",
+    "model": "Ford Mustang Gr.3 Road Car"
+  },
+  {
+    "brand": "Ford",
+    "model": "Ford Mustang Gr.4"
+  },
+  {
+    "brand": "Ford",
+    "model": "Ford Mustang Gr.3"
+  },
+  {
+    "brand": "Ford",
+    "model": "Ford Mustang Gr.B Rally Car"
+  },
+  {
+    "brand": "Ford",
+    "model": "Ford Shelby GT350R '16"
+  },
+  {
+    "brand": "Ford",
+    "model": "Ford Sierra RS 500 Cosworth '87"
+  },
+  {
+    "brand": "Garage RCR",
+    "model": "Garage RCR Civic"
+  },
+  {
+    "brand": "Genesis",
+    "model": "Genesis G70 3.3T AWD Prestige Package '22"
+  },
+  {
+    "brand": "Genesis",
+    "model": "Genesis G70 GR4"
+  },
+  {
+    "brand": "Genesis",
+    "model": "Genesis X GR3"
+  },
+  {
+    "brand": "Genesis",
+    "model": "Genesis X Gran Berlinetta Vision Gran Turismo Concept"
+  },
+  {
+    "brand": "Genesis",
+    "model": "Genesis X Gran Racer Vision Gran Turismo Concept"
+  },
+  {
+    "brand": "Gran Turismo",
+    "model": "Gran Turismo F1500T-A"
+  },
+  {
+    "brand": "Gran Turismo",
+    "model": "Gran Turismo F3500-A"
+  },
+  {
+    "brand": "Gran Turismo",
+    "model": "Gran Turismo Racing Kart 125 Shifter"
+  },
+  {
+    "brand": "Gran Turismo",
+    "model": "Gran Turismo Red Bull X2014 Junior"
+  },
+  {
+    "brand": "Gran Turismo",
+    "model": "Gran Turismo Red Bull X2014 Standard"
+  },
+  {
+    "brand": "Gran Turismo",
+    "model": "Gran Turismo Red Bull X2019 Competition"
+  },
+  {
+    "brand": "Gran Turismo",
+    "model": "Gran Turismo Red Bull X2019 25th Anniversary"
+  },
+  {
+    "brand": "GReddy",
+    "model": "GReddy Fugu Z"
+  },
+  {
+    "brand": "Greening Auto Company",
+    "model": "Greening Auto Company Maverick"
+  },
+  {
+    "brand": "Honda",
+    "model": "Honda Beat '91"
+  },
+  {
+    "brand": "Honda",
+    "model": "Honda Civic Si Extra (EF) '87"
+  },
+  {
+    "brand": "Honda",
+    "model": "Honda Civic SiR･II (EG) '93"
+  },
+  {
+    "brand": "Honda",
+    "model": "Honda Civic Type R (EK) '97"
+  },
+  {
+    "brand": "Honda",
+    "model": "Honda Civic Type R (EK) '98"
+  },
+  {
+    "brand": "Honda",
+    "model": "Honda Civic Type R (FK2) '15"
+  },
+  {
+    "brand": "Honda",
+    "model": "Honda Civic Type R Limited Edition (FK8) '20"
+  },
+  {
+    "brand": "Honda",
+    "model": "Honda Civic Type R (FL5) '22"
+  },
+  {
+    "brand": "Honda",
+    "model": "Honda Civic Type R (EK) Touring Car"
+  },
+  {
+    "brand": "Honda",
+    "model": "Honda CR-V e:HEV EX・Black Edition '21"
+  },
+  {
+    "brand": "Honda",
+    "model": "Honda Fit Hybrid '14"
+  },
+  {
+    "brand": "Honda",
+    "model": "Honda Integra Type R (DC2) '95"
+  },
+  {
+    "brand": "Honda",
+    "model": "Honda Integra Type R (DC2) '98"
+  },
+  {
+    "brand": "Honda",
+    "model": "Honda N-ONE RS '22"
+  },
+  {
+    "brand": "Honda",
+    "model": "Honda NSX Type R '92"
+  },
+  {
+    "brand": "Honda",
+    "model": "Honda NSX Type R '02"
+  },
+  {
+    "brand": "Honda",
+    "model": "Honda NSX '17"
+  },
+  {
+    "brand": "Honda",
+    "model": "Honda NSX Gr.4"
+  },
+  {
+    "brand": "Honda",
+    "model": "Honda NSX Gr.3"
+  },
+  {
+    "brand": "Honda",
+    "model": "Honda NSX Gr.B Rally Car"
+  },
+  {
+    "brand": "Honda",
+    "model": "Honda NSX GT500 '00"
+  },
+  {
+    "brand": "Honda",
+    "model": "Honda NSX GT500 '08"
+  },
+  {
+    "brand": "Honda",
+    "model": "Honda NSX CONCEPT-GT '16"
+  },
+  {
+    "brand": "Honda",
+    "model": "Honda Project 2&4 powered by RC213V"
+  },
+  {
+    "brand": "Honda",
+    "model": "Honda RA272 '65"
+  },
+  {
+    "brand": "Honda",
+    "model": "Honda S660 '15"
+  },
+  {
+    "brand": "Honda",
+    "model": "Honda S800 '66"
+  },
+  {
+    "brand": "Honda",
+    "model": "Honda S2000 '99"
+  },
+  {
+    "brand": "Honda",
+    "model": "Honda Sports Vision Gran Turismo"
+  },
+  {
+    "brand": "Hyundai",
+    "model": "Hyundai ELANTRA N '23"
+  },
+  {
+    "brand": "Hyundai",
+    "model": "Hyundai Genesis Coupe 3.8 Track '13"
+  },
+  {
+    "brand": "Hyundai",
+    "model": "Hyundai Genesis Gr.4"
+  },
+  {
+    "brand": "Hyundai",
+    "model": "Hyundai Genesis Gr.3"
+  },
+  {
+    "brand": "Hyundai",
+    "model": "Hyundai Genesis Gr.B Rally Car"
+  },
+  {
+    "brand": "Hyundai",
+    "model": "Hyundai IONIQ 5 N '24"
+  },
+  {
+    "brand": "Hyundai",
+    "model": "HYUNDAI N 2025 Vision Gran Turismo"
+  },
+  {
+    "brand": "Hyundai",
+    "model": "HYUNDAI N 2025 Vision Gran Turismo (Gr.1)"
+  },
+  {
+    "brand": "Infiniti",
+    "model": "INFINITI CONCEPT Vision Gran Turismo"
+  },
+  {
+    "brand": "Italdesign",
+    "model": "Italdesign EXENEO Vision Gran Turismo Off-road Mode"
+  },
+  {
+    "brand": "Italdesign",
+    "model": "Italdesign EXENEO Vision Gran Turismo Street Mode"
+  },
+  {
+    "brand": "Jaguar",
+    "model": "Jaguar D-type '54"
+  },
+  {
+    "brand": "Jaguar",
+    "model": "Jaguar E-type Coupé '61"
+  },
+  {
+    "brand": "Jaguar",
+    "model": "Jaguar F-type R Coupé '14"
+  },
+  {
+    "brand": "Jaguar",
+    "model": "Jaguar F-type Gr.4"
+  },
+  {
+    "brand": "Jaguar",
+    "model": "Jaguar F-type Gr.3"
+  },
+  {
+    "brand": "Jaguar",
+    "model": "Jaguar Vision Gran Turismo Coupé"
+  },
+  {
+    "brand": "Jaguar",
+    "model": "Jaguar Vision Gran Turismo Roadster"
+  },
+  {
+    "brand": "Jaguar",
+    "model": "Jaguar Vision Gran Turismo SV"
+  },
+  {
+    "brand": "Jaguar",
+    "model": "Jaguar XJ13 '66"
+  },
+  {
+    "brand": "Jaguar",
+    "model": "Jaguar XJ220 '92"
+  },
+  {
+    "brand": "Jaguar",
+    "model": "Jaguar XJR-9 '88"
+  },
+  {
+    "brand": "Jeep",
+    "model": "Jeep Willys MB '45"
+  },
+  {
+    "brand": "KTM",
+    "model": "KTM X-BOW R '12"
+  },
+  {
+    "brand": "Lamborghini",
+    "model": "Lamborghini Aventador LP 700-4 '11"
+  },
+  {
+    "brand": "Lamborghini",
+    "model": "Lamborghini Aventador LP 750-4 Superveloce '15"
+  },
+  {
+    "brand": "Lamborghini",
+    "model": "Lamborghini Countach LP400 '74"
+  },
+  {
+    "brand": "Lamborghini",
+    "model": "Lamborghini Countach 25th Anniversary '88"
+  },
+  {
+    "brand": "Lamborghini",
+    "model": "Lamborghini Diablo GT '00"
+  },
+  {
+    "brand": "Lamborghini",
+    "model": "Lamborghini Gallardo LP 560-4 '08"
+  },
+  {
+    "brand": "Lamborghini",
+    "model": "Lamborghini Huracán LP 610-4 '15"
+  },
+  {
+    "brand": "Lamborghini",
+    "model": "Lamborghini Huracán Gr.4"
+  },
+  {
+    "brand": "Lamborghini",
+    "model": "Lamborghini Huracán GT3 '15"
+  },
+  {
+    "brand": "Lamborghini",
+    "model": "Lamborghini Miura P400 Bertone Prototype '67"
+  },
+  {
+    "brand": "Lamborghini",
+    "model": "Lamborghini Murciélago LP 640 '09"
+  },
+  {
+    "brand": "Lamborghini",
+    "model": "Lamborghini Urus '18"
+  },
+  {
+    "brand": "Lamborghini",
+    "model": "Lamborghini Veneno '14"
+  },
+  {
+    "brand": "Lamborghini",
+    "model": "Lambo V12 Vision Gran Turismo"
+  },
+  {
+    "brand": "Lancia",
+    "model": "Lancia Delta HF Integrale Evoluzione '91"
+  },
+  {
+    "brand": "Lancia",
+    "model": "Lancia Delta HF Integrale Rally Car '92"
+  },
+  {
+    "brand": "Lancia",
+    "model": "Lancia Stratos '73"
+  },
+  {
+    "brand": "Lexus",
+    "model": "Lexus LC500 '17"
+  },
+  {
+    "brand": "Lexus",
+    "model": "Lexus LF-LC GT \"Vision Gran Turismo\""
+  },
+  {
+    "brand": "Lexus",
+    "model": "Lexus LFA '10"
+  },
+  {
+    "brand": "Lexus",
+    "model": "Lexus RC F '14"
+  },
+  {
+    "brand": "Lexus",
+    "model": "Lexus RC F Gr.4"
+  },
+  {
+    "brand": "Lexus",
+    "model": "Lexus RC F GT3 prototype '16"
+  },
+  {
+    "brand": "Lexus",
+    "model": "Lexus RC F GT3 '17"
+  },
+  {
+    "brand": "Lexus",
+    "model": "Lexus RC F GT500 '16"
+  },
+  {
+    "brand": "Lexus",
+    "model": "Lexus SC430 GT500 '08"
+  },
+  {
+    "brand": "Maserati",
+    "model": "Maserati A6GCS/53 Spyder '54"
+  },
+  {
+    "brand": "Maserati",
+    "model": "Maserati GranTurismo S '08"
+  },
+  {
+    "brand": "Maserati",
+    "model": "Maserati MC20 '20"
+  },
+  {
+    "brand": "Maserati",
+    "model": "Maserati Merak SS '80"
+  },
+  {
+    "brand": "Mazda",
+    "model": "Mazda 787B '91"
+  },
+  {
+    "brand": "Mazda",
+    "model": "Mazda Atenza Sedan XD L Package '15"
+  },
+  {
+    "brand": "Mazda",
+    "model": "Mazda Atenza Gr.3 Road Car"
+  },
+  {
+    "brand": "Mazda",
+    "model": "Mazda Atenza Gr.4"
+  },
+  {
+    "brand": "Mazda",
+    "model": "Mazda Atenza Gr.3"
+  },
+  {
+    "brand": "Mazda",
+    "model": "Mazda CX-30 X Smart Edition '21"
+  },
+  {
+    "brand": "Mazda",
+    "model": "Mazda Demio XD Touring '15"
+  },
+  {
+    "brand": "Mazda",
+    "model": "Mazda LM55 Vision Gran Turismo"
+  },
+  {
+    "brand": "Mazda",
+    "model": "Mazda LM55 Vision Gran Turismo (Gr.1)"
+  },
+  {
+    "brand": "Mazda",
+    "model": "MAZDA3 X Burgundy Selection '19"
+  },
+  {
+    "brand": "Mazda",
+    "model": "MAZDA3 Gr.4"
+  },
+  {
+    "brand": "Mazda",
+    "model": "Mazda Eunos Roadster (NA Special Package) '89"
+  },
+  {
+    "brand": "Mazda",
+    "model": "Mazda Roadster S (ND) '15"
+  },
+  {
+    "brand": "Mazda",
+    "model": "Mazda Roadster NR-A (ND) '22"
+  },
+  {
+    "brand": "Mazda",
+    "model": "MAZDA SPIRIT RACING ROADSTER 12R '25"
+  },
+  {
+    "brand": "Mazda",
+    "model": "Mazda Roadster Touring Car"
+  },
+  {
+    "brand": "Mazda",
+    "model": "Mazda RX-7 GT-X (FC) '90"
+  },
+  {
+    "brand": "Mazda",
+    "model": "Mazda RX-7 Spirit R Type A (FD) '02"
+  },
+  {
+    "brand": "Mazda",
+    "model": "Mazda RX-8 Spirit R '12"
+  },
+  {
+    "brand": "Mazda",
+    "model": "Mazda RX500 '70"
+  },
+  {
+    "brand": "Mazda",
+    "model": "Mazda RX-VISION '15"
+  },
+  {
+    "brand": "Mazda",
+    "model": "MAZDA RX-VISION GT3 CONCEPT"
+  },
+  {
+    "brand": "Mazda",
+    "model": "MAZDA RX-VISION GT3 CONCEPT Stealth Model"
+  },
+  {
+    "brand": "McLaren",
+    "model": "McLaren 650S Coupe '14"
+  },
+  {
+    "brand": "McLaren",
+    "model": "McLaren 650S Gr.4"
+  },
+  {
+    "brand": "McLaren",
+    "model": "McLaren 650S GT3 '15"
+  },
+  {
+    "brand": "McLaren",
+    "model": "McLaren F1 '94"
+  },
+  {
+    "brand": "McLaren",
+    "model": "McLaren F1 GTR - BMW '95"
+  },
+  {
+    "brand": "McLaren",
+    "model": "McLaren MP4-12C '10"
+  },
+  {
+    "brand": "McLaren",
+    "model": "McLaren MP4/4 '88"
+  },
+  {
+    "brand": "McLaren",
+    "model": "McLaren P1 GTR '16"
+  },
+  {
+    "brand": "McLaren",
+    "model": "McLaren Ultimate Vision Gran Turismo"
+  },
+  {
+    "brand": "McLaren",
+    "model": "McLaren Ultimate Vision Gran Turismo (Gr.1)"
+  },
+  {
+    "brand": "Mercedes-Benz",
+    "model": "Mercedes-Benz 190 E 2.5-16 Evolution II '91"
+  },
+  {
+    "brand": "Mercedes-Benz",
+    "model": "Mercedes-Benz 300 SL (W194) '52"
+  },
+  {
+    "brand": "Mercedes-Benz",
+    "model": "Mercedes-Benz 300 SL Coupé '54"
+  },
+  {
+    "brand": "Mercedes-Benz",
+    "model": "Mercedes-Benz CLK-LM '98"
+  },
+  {
+    "brand": "Mercedes-Benz",
+    "model": "Mercedes-Benz S Barker Tourer '29"
+  },
+  {
+    "brand": "Mercedes-Benz",
+    "model": "Sauber Mercedes C9 '89"
+  },
+  {
+    "brand": "Mercedes-Benz",
+    "model": "Mercedes-Benz SLR McLaren '09"
+  },
+  {
+    "brand": "Mercedes-Benz",
+    "model": "Mercedes-Benz Unimog Type 411 '62"
+  },
+  {
+    "brand": "Mercedes-Benz",
+    "model": "Mercedes-Benz W 196 R '55"
+  },
+  {
+    "brand": "MINI",
+    "model": "MINI Clubman Vision Gran Turismo"
+  },
+  {
+    "brand": "MINI",
+    "model": "Mini-Cooper 'S' '65"
+  },
+  {
+    "brand": "MINI",
+    "model": "MINI Cooper S '05"
+  },
+  {
+    "brand": "Mitsubishi",
+    "model": "Mitsubishi Concept XR-PHEV EVOLUTION Vision Gran Turismo"
+  },
+  {
+    "brand": "Mitsubishi",
+    "model": "Mitsubishi GTO Twin Turbo '91"
+  },
+  {
+    "brand": "Mitsubishi",
+    "model": "Mitsubishi Lancer Evolution III GSR '95"
+  },
+  {
+    "brand": "Mitsubishi",
+    "model": "Mitsubishi Lancer Evolution IV GSR '96"
+  },
+  {
+    "brand": "Mitsubishi",
+    "model": "Mitsubishi Lancer Evolution V GSR '98"
+  },
+  {
+    "brand": "Mitsubishi",
+    "model": "Mitsubishi Lancer Evolution VI GSR T.M. EDITION Special Color Package '99"
+  },
+  {
+    "brand": "Mitsubishi",
+    "model": "Mitsubishi Lancer Evolution VIII MR GSR '04"
+  },
+  {
+    "brand": "Mitsubishi",
+    "model": "Mitsubishi Lancer Evolution IX MR GSR '06"
+  },
+  {
+    "brand": "Mitsubishi",
+    "model": "Mitsubishi Lancer Evolution Final Edition '15"
+  },
+  {
+    "brand": "Mitsubishi",
+    "model": "Mitsubishi Lancer Evolution Final Edition Gr.B Road Car"
+  },
+  {
+    "brand": "Mitsubishi",
+    "model": "Mitsubishi Lancer Evolution Final Edition Gr.4"
+  },
+  {
+    "brand": "Mitsubishi",
+    "model": "Mitsubishi Lancer Evolution Final Edition Gr.3"
+  },
+  {
+    "brand": "Mitsubishi",
+    "model": "Mitsubishi Lancer Evolution Final Edition Gr.B Rally Car"
+  },
+  {
+    "brand": "Nismo",
+    "model": "NISMO 400R '95"
+  },
+  {
+    "brand": "Nismo",
+    "model": "NISMO R34 GT-R Z-tune '05"
+  },
+  {
+    "brand": "Nissan",
+    "model": "Nissan 180SX Type X '96"
+  },
+  {
+    "brand": "Nissan",
+    "model": "NISSAN CONCEPT 2020 Vision Gran Turismo"
+  },
+  {
+    "brand": "Nissan",
+    "model": "Nissan Fairlady Z 432 '69"
+  },
+  {
+    "brand": "Nissan",
+    "model": "Nissan Fairlady 240ZG (HS30) '71"
+  },
+  {
+    "brand": "Nissan",
+    "model": "Nissan Fairlady Z 300ZX TwinTurbo 2seater (Z32) '89"
+  },
+  {
+    "brand": "Nissan",
+    "model": "Nissan Fairlady Z Version S (Z33) '07"
+  },
+  {
+    "brand": "Nissan",
+    "model": "Nissan Fairlady Z (Z34) '08"
+  },
+  {
+    "brand": "Nissan",
+    "model": "Nissan Z Performance '23"
+  },
+  {
+    "brand": "Nissan",
+    "model": "Nissan GT-R Premium edition '17"
+  },
+  {
+    "brand": "Nissan",
+    "model": "Nissan GT-R NISMO '17"
+  },
+  {
+    "brand": "Nissan",
+    "model": "Nissan GT-R Premium edition T-spec '24"
+  },
+  {
+    "brand": "Nissan",
+    "model": "Nissan GT-R Safety Car"
+  },
+  {
+    "brand": "Nissan",
+    "model": "Nissan GT-R Gr.4"
+  },
+  {
+    "brand": "Nissan",
+    "model": "Nissan GT-R NISMO GT3 '13"
+  },
+  {
+    "brand": "Nissan",
+    "model": "Nissan GT-R NISMO GT3 '18"
+  },
+  {
+    "brand": "Nissan",
+    "model": "Nissan GT-R Gr.B Rally Car"
+  },
+  {
+    "brand": "Nissan",
+    "model": "Nissan GT-R GT500 '08"
+  },
+  {
+    "brand": "Nissan",
+    "model": "Nissan GT-R NISMO GT500 '16"
+  },
+  {
+    "brand": "Nissan",
+    "model": "Nissan GT-R LM NISMO '15"
+  },
+  {
+    "brand": "Nissan",
+    "model": "Nissan Qashqai Tekna 190 2wd e-Power '22"
+  },
+  {
+    "brand": "Nissan",
+    "model": "Nissan R92CP '92"
+  },
+  {
+    "brand": "Nissan",
+    "model": "Nissan Sileighty '98"
+  },
+  {
+    "brand": "Nissan",
+    "model": "Nissan Silvia Q's (S13) '88"
+  },
+  {
+    "brand": "Nissan",
+    "model": "Nissan Silvia K's Dia Selection (S13) '90"
+  },
+  {
+    "brand": "Nissan",
+    "model": "Nissan Silvia K's Type S (S14) '94"
+  },
+  {
+    "brand": "Nissan",
+    "model": "Nissan Silvia K's Aero (S14) '96"
+  },
+  {
+    "brand": "Nissan",
+    "model": "Nissan Silvia spec-R Aero (S15) '02"
+  },
+  {
+    "brand": "Nissan",
+    "model": "Nissan Silvia spec-R Aero (S15) Touring Car"
+  },
+  {
+    "brand": "Nissan",
+    "model": "Nissan Skyline Hard Top 2000GT-R (KPGC10) '70"
+  },
+  {
+    "brand": "Nissan",
+    "model": "Nissan Skyline 2000GT-R (KPGC110) '73"
+  },
+  {
+    "brand": "Nissan",
+    "model": "Nissan Skyline GTS-R (R31) '87"
+  },
+  {
+    "brand": "Nissan",
+    "model": "Nissan Skyline GT-R NISMO (R32) '90"
+  },
+  {
+    "brand": "Nissan",
+    "model": "Nissan Skyline GT-R V･spec II (R32) '94"
+  },
+  {
+    "brand": "Nissan",
+    "model": "Nissan Skyline GT-R V･spec (R33) '97"
+  },
+  {
+    "brand": "Nissan",
+    "model": "Nissan Skyline GT-R V･spec II Nür (R34) '02"
+  },
+  {
+    "brand": "Nissan",
+    "model": "Nissan Skyline Super Silhouette Group 5 '84"
+  },
+  {
+    "brand": "Nissan",
+    "model": "Nissan GT-R GT500 '99"
+  },
+  {
+    "brand": "Opel",
+    "model": "Opel Corsa GSE Vision Gran Turismo"
+  },
+  {
+    "brand": "Pagani",
+    "model": "Pagani Huayra '13"
+  },
+  {
+    "brand": "Pagani",
+    "model": "Pagani Zonda R '09"
+  },
+  {
+    "brand": "Peugeot",
+    "model": "Peugeot 205 GTI '88"
+  },
+  {
+    "brand": "Peugeot",
+    "model": "Peugeot 205 Turbo 16 Evolution 2 '86"
+  },
+  {
+    "brand": "Peugeot",
+    "model": "Peugeot 208 GTi by Peugeot Sport '14"
+  },
+  {
+    "brand": "Peugeot",
+    "model": "Peugeot 908 HDi FAP '10"
+  },
+  {
+    "brand": "Peugeot",
+    "model": "Peugeot L500R HYbrid Vision Gran Turismo, 2017"
+  },
+  {
+    "brand": "Peugeot",
+    "model": "Peugeot L750R HYbrid Vision Gran Turismo, 2017"
+  },
+  {
+    "brand": "Peugeot",
+    "model": "Peugeot RCZ GT Line '15"
+  },
+  {
+    "brand": "Peugeot",
+    "model": "Peugeot RCZ Gr.3 Road Car"
+  },
+  {
+    "brand": "Peugeot",
+    "model": "Peugeot RCZ Gr.4"
+  },
+  {
+    "brand": "Peugeot",
+    "model": "Peugeot RCZ Gr.3"
+  },
+  {
+    "brand": "Peugeot",
+    "model": "Peugeot RCZ Gr.B Rally Car"
+  },
+  {
+    "brand": "Peugeot",
+    "model": "Peugeot SUV 2008 Allure '21"
+  },
+  {
+    "brand": "Peugeot",
+    "model": "PEUGEOT Vision Gran Turismo"
+  },
+  {
+    "brand": "Peugeot",
+    "model": "PEUGEOT Vision Gran Turismo (Gr.3)"
+  },
+  {
+    "brand": "Plymouth",
+    "model": "Plymouth Superbird '70"
+  },
+  {
+    "brand": "Plymouth",
+    "model": "Plymouth XNR Ghia Roadster '60"
+  },
+  {
+    "brand": "Pontiac",
+    "model": "Pontiac Firebird Trans Am '78"
+  },
+  {
+    "brand": "Pontiac",
+    "model": "Pontiac GTO 'The Judge' '69"
+  },
+  {
+    "brand": "Porsche",
+    "model": "Porsche 356 A/1500 GS Carrera '56"
+  },
+  {
+    "brand": "Porsche",
+    "model": "Porsche 356 A/1500 GS GT Carrera Speedster '56"
+  },
+  {
+    "brand": "Porsche",
+    "model": "Porsche 911 Carrera RS (901) '73"
+  },
+  {
+    "brand": "Porsche",
+    "model": "Porsche 911 Turbo (930) '81"
+  },
+  {
+    "brand": "Porsche",
+    "model": "Porsche 911 Carrera RS (964) '92"
+  },
+  {
+    "brand": "Porsche",
+    "model": "Porsche 911 Carrera RS (993) '95"
+  },
+  {
+    "brand": "Porsche",
+    "model": "Porsche 911 Carrera RS Club Sport (993) '95"
+  },
+  {
+    "brand": "Porsche",
+    "model": "Porsche 911 GT1 Strassenversion '97"
+  },
+  {
+    "brand": "Porsche",
+    "model": "Porsche 911 GT3 (996) '01"
+  },
+  {
+    "brand": "Porsche",
+    "model": "Porsche 911 GT3 (997) '09"
+  },
+  {
+    "brand": "Porsche",
+    "model": "Porsche 911 GT3 RS (991) '16"
+  },
+  {
+    "brand": "Porsche",
+    "model": "Porsche 911 Turbo S (992) '20"
+  },
+  {
+    "brand": "Porsche",
+    "model": "Porsche 911 GT3 RS (992) '22"
+  },
+  {
+    "brand": "Porsche",
+    "model": "Porsche 911 RSR (991) '17"
+  },
+  {
+    "brand": "Porsche",
+    "model": "Porsche 917 LIVING LEGEND"
+  },
+  {
+    "brand": "Porsche",
+    "model": "Porsche 917K '70"
+  },
+  {
+    "brand": "Porsche",
+    "model": "Porsche 918 Spyder '13"
+  },
+  {
+    "brand": "Porsche",
+    "model": "Porsche 919 Hybrid '16"
+  },
+  {
+    "brand": "Porsche",
+    "model": "Porsche 959 '87"
+  },
+  {
+    "brand": "Porsche",
+    "model": "Porsche 962 C '88"
+  },
+  {
+    "brand": "Porsche",
+    "model": "Porsche Carrera GT '04"
+  },
+  {
+    "brand": "Porsche",
+    "model": "Porsche Carrera GTS (904) '64"
+  },
+  {
+    "brand": "Porsche",
+    "model": "Porsche Cayman GT4 '16"
+  },
+  {
+    "brand": "Porsche",
+    "model": "Porsche Cayman GT4 Clubsport '16"
+  },
+  {
+    "brand": "Porsche",
+    "model": "Porsche Mission X '23"
+  },
+  {
+    "brand": "Porsche",
+    "model": "Porsche Spyder type 550/1500RS '55"
+  },
+  {
+    "brand": "Porsche",
+    "model": "Porsche Taycan Turbo S '19"
+  },
+  {
+    "brand": "Porsche",
+    "model": "Porsche Vision Gran Turismo"
+  },
+  {
+    "brand": "Porsche",
+    "model": "Porsche Vision Gran Turismo Spyder"
+  },
+  {
+    "brand": "Radical",
+    "model": "Radical SR3 SL '13"
+  },
+  {
+    "brand": "RE Amemiya",
+    "model": "RE Amemiya FD3S RX-7"
+  },
+  {
+    "brand": "Renault",
+    "model": "Renault Avantime 3.0 V6 24V '02"
+  },
+  {
+    "brand": "Renault",
+    "model": "Renault Sport Clio V6 24V '00"
+  },
+  {
+    "brand": "Renault",
+    "model": "Renault Sport Clio R.S. 220 EDC Trophy '15"
+  },
+  {
+    "brand": "Renault",
+    "model": "Renault Sport Clio R.S. 220 EDC Trophy '16"
+  },
+  {
+    "brand": "Renault",
+    "model": "Renault Kangoo 1.4 '01"
+  },
+  {
+    "brand": "Renault",
+    "model": "Renault Sport Mégane R.S. Trophy '11"
+  },
+  {
+    "brand": "Renault",
+    "model": "Renault Sport Mégane R.S. Trophy Safety Car"
+  },
+  {
+    "brand": "Renault",
+    "model": "Renault Sport Mégane Gr.4"
+  },
+  {
+    "brand": "Renault",
+    "model": "Renault Sport Mégane Trophy '11"
+  },
+  {
+    "brand": "Renault",
+    "model": "Renault R4 GTL '85"
+  },
+  {
+    "brand": "Renault",
+    "model": "Renault R5 Turbo '80"
+  },
+  {
+    "brand": "Renault",
+    "model": "Renault R8 Gordini '66"
+  },
+  {
+    "brand": "Renault",
+    "model": "Renault Sport R.S.01 '16"
+  },
+  {
+    "brand": "Renault",
+    "model": "Renault Sport R.S.01 GT3 '16"
+  },
+  {
+    "brand": "Roadster Shop",
+    "model": "Roadster Shop Rampage"
+  },
+  {
+    "brand": "RUF",
+    "model": "RUF CTR3 '07"
+  },
+  {
+    "brand": "RUF",
+    "model": "RUF RGT 4.2 '16"
+  },
+  {
+    "brand": "Shelby",
+    "model": "Shelby Cobra 427 '66"
+  },
+  {
+    "brand": "Shelby",
+    "model": "Shelby Cobra Daytona Coupe '64"
+  },
+  {
+    "brand": "Shelby",
+    "model": "Shelby G.T.350 '65"
+  },
+  {
+    "brand": "Škoda",
+    "model": "Škoda Vision Gran Turismo"
+  },
+  {
+    "brand": "Subaru",
+    "model": "Subaru BRZ S '15"
+  },
+  {
+    "brand": "Subaru",
+    "model": "Subaru BRZ STI Sport '18"
+  },
+  {
+    "brand": "Subaru",
+    "model": "Subaru BRZ S '21"
+  },
+  {
+    "brand": "Subaru",
+    "model": "Subaru BRZ Drift Car '17"
+  },
+  {
+    "brand": "Subaru",
+    "model": "Subaru BRZ GT300 '21"
+  },
+  {
+    "brand": "Subaru",
+    "model": "Subaru Impreza 22B-STi Version '98"
+  },
+  {
+    "brand": "Subaru",
+    "model": "Subaru Impreza Coupe WRX Type R STi Version VI '99"
+  },
+  {
+    "brand": "Subaru",
+    "model": "Subaru Impreza Sedan WRX STi '04"
+  },
+  {
+    "brand": "Subaru",
+    "model": "Subaru Impreza Rally Car '98"
+  },
+  {
+    "brand": "Subaru",
+    "model": "SUBARU VIZIV GT Vision Gran Turismo"
+  },
+  {
+    "brand": "Subaru",
+    "model": "Subaru WRX STI Type S '14"
+  },
+  {
+    "brand": "Subaru",
+    "model": "Subaru WRX Gr.B Road Car"
+  },
+  {
+    "brand": "Subaru",
+    "model": "Subaru WRX STI Isle of Man Time Attack Car '16"
+  },
+  {
+    "brand": "Subaru",
+    "model": "Subaru WRX Gr.4"
+  },
+  {
+    "brand": "Subaru",
+    "model": "Subaru WRX Gr.3"
+  },
+  {
+    "brand": "Subaru",
+    "model": "Subaru WRX Gr.B Rally Car"
+  },
+  {
+    "brand": "Super Formula",
+    "model": "Dallara SF19 Super Formula / Honda '19"
+  },
+  {
+    "brand": "Super Formula",
+    "model": "Dallara SF19 Super Formula / Toyota '19"
+  },
+  {
+    "brand": "Super Formula",
+    "model": "Dallara SF23 Super Formula / Honda '23"
+  },
+  {
+    "brand": "Super Formula",
+    "model": "Dallara SF23 Super Formula / Toyota '23"
+  },
+  {
+    "brand": "Suzuki",
+    "model": "Suzuki Cappuccino (EA11R) '91"
+  },
+  {
+    "brand": "Suzuki",
+    "model": "Suzuki Carry KC '12"
+  },
+  {
+    "brand": "Suzuki",
+    "model": "Suzuki V6 Escudo Pikes Peak Special '98"
+  },
+  {
+    "brand": "Suzuki",
+    "model": "Suzuki Jimny XC '18"
+  },
+  {
+    "brand": "Suzuki",
+    "model": "Suzuki Jimny Sierra JC '18"
+  },
+  {
+    "brand": "Suzuki",
+    "model": "Suzuki Swift Sport '07"
+  },
+  {
+    "brand": "Suzuki",
+    "model": "Suzuki Swift Sport '17"
+  },
+  {
+    "brand": "Suzuki",
+    "model": "Suzuki Swift Sport KATANA Edition Gr.4"
+  },
+  {
+    "brand": "Suzuki",
+    "model": "SUZUKI Vision Gran Turismo"
+  },
+  {
+    "brand": "Suzuki",
+    "model": "SUZUKI Vision Gran Turismo (Gr.3 Version)"
+  },
+  {
+    "brand": "Tesla",
+    "model": "Tesla Model 3 Performance '23"
+  },
+  {
+    "brand": "Tesla",
+    "model": "Tesla Model S Signature Performance '12"
+  },
+  {
+    "brand": "Toyota",
+    "model": "TOYOTA 86 GT '15"
+  },
+  {
+    "brand": "Toyota",
+    "model": "TOYOTA 86 GT\"Limited\" '16"
+  },
+  {
+    "brand": "Toyota",
+    "model": "Toyota 86 GRMN '16"
+  },
+  {
+    "brand": "Toyota",
+    "model": "Toyota GR86 RZ '21"
+  },
+  {
+    "brand": "Toyota",
+    "model": "Toyota 86 Gr.4"
+  },
+  {
+    "brand": "Toyota",
+    "model": "TOYOTA 86 Gr.B Rally Car"
+  },
+  {
+    "brand": "Toyota",
+    "model": "Toyota 2000GT '67"
+  },
+  {
+    "brand": "Toyota",
+    "model": "Toyota Alphard Executive Lounge '18"
+  },
+  {
+    "brand": "Toyota",
+    "model": "Toyota Ambulance Himedic '21"
+  },
+  {
+    "brand": "Toyota",
+    "model": "Toyota Aqua S '11"
+  },
+  {
+    "brand": "Toyota",
+    "model": "Toyota C-HR S '18"
+  },
+  {
+    "brand": "Toyota",
+    "model": "Toyota Celica GT-FOUR (ST205) '94"
+  },
+  {
+    "brand": "Toyota",
+    "model": "Toyota Celica GT-FOUR Rally Car (ST205) '95"
+  },
+  {
+    "brand": "Toyota",
+    "model": "Toyota Corolla Levin 3door 1600GT APEX (AE86) '83"
+  },
+  {
+    "brand": "Toyota",
+    "model": "Toyota Crown Athlete G '13"
+  },
+  {
+    "brand": "Toyota",
+    "model": "Toyota Crown Athlete G Safety Car"
+  },
+  {
+    "brand": "Toyota",
+    "model": "Toyota FT-1"
+  },
+  {
+    "brand": "Toyota",
+    "model": "Toyota FT-1 Vision Gran Turismo"
+  },
+  {
+    "brand": "Toyota",
+    "model": "Toyota FT-1 Vision Gran Turismo Gr.3"
+  },
+  {
+    "brand": "Toyota",
+    "model": "TOYOTA GR010 HYBRID '21"
+  },
+  {
+    "brand": "Toyota",
+    "model": "Toyota GR Corolla MORIZO Edition '22"
+  },
+  {
+    "brand": "Toyota",
+    "model": "Toyota GR Supra RZ '19"
+  },
+  {
+    "brand": "Toyota",
+    "model": "Toyota GR Supra RZ '20"
+  },
+  {
+    "brand": "Toyota",
+    "model": "Toyota GR Supra Race Car '19"
+  },
+  {
+    "brand": "Toyota",
+    "model": "Toyota GR Supra Racing Concept '18"
+  },
+  {
+    "brand": "Toyota",
+    "model": "Toyota GR Yaris 1st Edition RZ \"High Performance\" '20"
+  },
+  {
+    "brand": "Toyota",
+    "model": "Toyota GT-One (TS020) '99"
+  },
+  {
+    "brand": "Toyota",
+    "model": "Toyota Hiace Van DX '16"
+  },
+  {
+    "brand": "Toyota",
+    "model": "Toyota Land Cruiser FJ40V '74"
+  },
+  {
+    "brand": "Toyota",
+    "model": "Toyota MR2 GT-S '97"
+  },
+  {
+    "brand": "Toyota",
+    "model": "Toyota Prius G '09"
+  },
+  {
+    "brand": "Toyota",
+    "model": "Toyota RAV4 Adventure '20"
+  },
+  {
+    "brand": "Toyota",
+    "model": "TOYOTA S-FR '15"
+  },
+  {
+    "brand": "Toyota",
+    "model": "TOYOTA S-FR Racing Concept '16"
+  },
+  {
+    "brand": "Toyota",
+    "model": "Toyota Sports 800 '65"
+  },
+  {
+    "brand": "Toyota",
+    "model": "Toyota Sprinter Trueno 3door 1600GT APEX (AE86) '83"
+  },
+  {
+    "brand": "Toyota",
+    "model": "Toyota Sprinter Trueno 3door 1600GT APEX (AE86 Shuichi Shigeno Version)"
+  },
+  {
+    "brand": "Toyota",
+    "model": "Toyota Supra 3.0GT Turbo A '88"
+  },
+  {
+    "brand": "Toyota",
+    "model": "Toyota Supra RZ '97"
+  },
+  {
+    "brand": "Toyota",
+    "model": "Toyota Supra GT500 '97"
+  },
+  {
+    "brand": "Toyota",
+    "model": "Toyota TS030 Hybrid '12"
+  },
+  {
+    "brand": "Toyota",
+    "model": "Toyota TS050 - Hybrid '16"
+  },
+  {
+    "brand": "Toyota",
+    "model": "Toyota Tundra TRD Pro '19"
+  },
+  {
+    "brand": "TVR",
+    "model": "TVR Tuscan Speed 6 '00"
+  },
+  {
+    "brand": "Volkswagen",
+    "model": "Volkswagen 1200 '66"
+  },
+  {
+    "brand": "Volkswagen",
+    "model": "Volkswagen Beetle Gr.3"
+  },
+  {
+    "brand": "Volkswagen",
+    "model": "Volkswagen Golf I GTI '83"
+  },
+  {
+    "brand": "Volkswagen",
+    "model": "Volkswagen Golf VII GTI '14"
+  },
+  {
+    "brand": "Volkswagen",
+    "model": "Volkswagen GTI Roadster Vision Gran Turismo"
+  },
+  {
+    "brand": "Volkswagen",
+    "model": "Volkswagen GTI Supersport Vision Gran Turismo"
+  },
+  {
+    "brand": "Volkswagen",
+    "model": "Volkswagen GTI Vision Gran Turismo (Gr.3)"
+  },
+  {
+    "brand": "Volkswagen",
+    "model": "Volkswagen ID.R '19"
+  },
+  {
+    "brand": "Volkswagen",
+    "model": "Volkswagen Polo GTI '14"
+  },
+  {
+    "brand": "Volkswagen",
+    "model": "Volkswagen Sambabus Typ 2 (T1) '62"
+  },
+  {
+    "brand": "Volkswagen",
+    "model": "Volkswagen Scirocco R '10"
+  },
+  {
+    "brand": "Volkswagen",
+    "model": "Volkswagen Scirocco Gr.4"
+  },
+  {
+    "brand": "Volvo",
+    "model": "Volvo 240 SE Estate '93"
+  },
+  {
+    "brand": "Volvo",
+    "model": "Volvo V40 T5 R-Design '13"
+  },
+  {
+    "brand": "Wicked Fabrication",
+    "model": "Wicked Fabrication GT 51"
+  },
+  {
+    "brand": "Zagato",
+    "model": "IsoRivolta Zagato Vision Gran Turismo"
+  }
+]
