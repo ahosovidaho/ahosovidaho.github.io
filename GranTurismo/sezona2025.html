@@ -33,7 +33,7 @@
   .legend-chip{display:inline-flex;align-items:center;gap:6px;margin-right:10px}
   .chip{display:inline-block;width:10px;height:10px;border-radius:2px}
   .name-chip{display:inline-block;padding:2px 6px;border-radius:10px;border:1px solid #2a2a2a;margin-right:6px;line-height:1}
-  .pill{display:inline-block;border:1px solid #2a2a2a;border-radius:999px;padding:2px 8px}
+  .pill{display:inline-block;border:1px solid #2a2a2a;border-radius:999px;padding:2px 8px;margin:2px 4px 0 0}
   .muted{color:#9aa0a6}
   /* profil – ikonové metriky */
   .kpi-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:8px}
@@ -45,6 +45,9 @@
   .driver-list{display:flex;gap:8px;flex-wrap:wrap}
   .driver-tag{border:1px solid #2a2a2a;border-radius:999px;padding:6px 10px;cursor:pointer}
   .driver-tag.active{border-color:#fff;box-shadow:0 0 0 1px #fff inset}
+  /* zvýraznění nejbližšího závodu */
+  #nextRaceInfo .race-title{font-size:16px;font-weight:700}
+  #nextRaceInfo .countdown{display:inline-block;font-weight:800;color:var(--accent2);font-size:18px;margin-top:4px}
   @media(max-width:800px){ .row{flex-direction:column} .youtube-thumb{width:80px} th,td{font-size:13px} header h1{font-size:18px} }
 </style>
 
@@ -423,9 +426,11 @@
           <label for="edit_pitstop">Povinný pit-stop</label>
           <select id="edit_pitstop"><option>ANO</option><option>NE</option></select>
 
-          <label for="edit_info">Doplňující info</label><textarea id="edit_info" autocomplete="off"></textarea>
+          <label for="edit_info">Doplňující info</label>
+          <textarea id="edit_info" autocomplete="off"></textarea>
 
-          <label for="edit_youtube">Odkaz na YouTube</label><input id="edit_youtube" type="url" placeholder="https://www.youtube.com/watch?v=..." autocomplete="off"/>
+          <label for="edit_youtube">Odkaz na YouTube</label>
+          <input id="edit_youtube" type="url" placeholder="https://www.youtube.com/watch?v=..." autocomplete="off"/>
 
           <hr style="border-color:#333;margin:12px 0">
 
@@ -515,7 +520,6 @@ function hasNonDNSResult(r){
   const arr = getResultsArray(r);
   return Array.isArray(arr) && arr.some(v => v && v !== '' && v !== 'DNS');
 }
-// Dokončený závod = má datum v minulosti + má aspoň jeden výsledek ≠ DNS
 function isCompleted(r){
   const dt = r.datum || r.date;
   if(!dt) return false;
@@ -593,7 +597,7 @@ function renderNextRace(){
   if(!next){
     const plannedNoDate = racesCache.find(r=>!isCompleted(r) && !(r.datum||r.date));
     if(plannedNoDate){
-      el.innerHTML = `<strong>${escapeHtml(plannedNoDate.nazev||plannedNoDate.name||'')}</strong> / ${escapeHtml(plannedNoDate.trat||plannedNoDate.track||'')}`;
+      el.innerHTML = `<div class="race-title"><strong>${escapeHtml(plannedNoDate.nazev||plannedNoDate.name||'')}</strong> / ${escapeHtml(plannedNoDate.trat||plannedNoDate.track||'')}</div>`;
     }else{
       el.textContent='Žádný nadcházející závod.';
     }
@@ -602,18 +606,29 @@ function renderNextRace(){
   }
   $('#btnRemind30').disabled = false;
   const dt = new Date(next.datum||next.date);
-  const diff = dt - new Date();
-  const d = Math.max(0, Math.floor(diff/1000/60/60/24));
-  const h = Math.max(0, Math.floor(diff/1000/60/60)%24);
-  const m = Math.max(0, Math.floor(diff/1000/60)%60);
-  const rows = [];
-  if(next.kategorie) rows.push(`<span class="pill">Kat.: ${escapeHtml(next.kategorie)}</span>`);
-  if(next.vozidla) rows.push(`<span class="pill">Vozidla: ${escapeHtml(next.vozidla)}</span>`);
-  if(next.pitstop) rows.push(`<span class="pill">Pit-stop: ${escapeHtml(next.pitstop)}</span>`);
-  if(next.pocet_kol) rows.push(`<span class="pill">Kola: ${escapeHtml(next.pocet_kol)}</span>`);
-  el.innerHTML = `<strong>${escapeHtml(next.nazev||next.name)}</strong> / ${escapeHtml(next.trat||next.track||'')}
-    <div class="small">Do startu: ${d}d ${h}h ${m}m</div>
-    <div class="small" style="margin-top:6px">${rows.join(' ')}</div>`;
+  let diff = dt - new Date();
+  if(diff < 0) diff = 0;
+  const d = Math.floor(diff/1000/60/60/24);
+  const h = Math.floor(diff/1000/60/60)%24;
+  const m = Math.floor(diff/1000/60)%60;
+  const s = Math.floor(diff/1000)%60;
+
+  const chips = [];
+  if(next.kategorie) chips.push(`<span class="pill">Kat.: ${escapeHtml(next.kategorie)}</span>`);
+  if(next.vozidla) chips.push(`<span class="pill">Vozidla: ${escapeHtml(next.vozidla)}</span>`);
+  if(next.tuning) chips.push(`<span class="pill">Tuning: ${escapeHtml(next.tuning)}</span>`);
+  if(next.bop) chips.push(`<span class="pill">BoP: ${escapeHtml(next.bop)}</span>`);
+  if(next.pneumatiky || next.tyres) chips.push(`<span class="pill">Pneu: ${escapeHtml(next.pneumatiky || next.tyres)}</span>`);
+  if(next.smes || next.compound) chips.push(`<span class="pill">Pov. směs: ${escapeHtml(next.smes || next.compound)}</span>`);
+  if(next.opotrebovani || next.tyreWear) chips.push(`<span class="pill">Opotř.: ${escapeHtml(next.opotrebovani || next.tyreWear)}</span>`);
+  if(next.spotreba || next.fuel) chips.push(`<span class="pill">Spotřeba: ${escapeHtml(next.spotreba || next.fuel)}</span>`);
+  if(next.pitstop) chips.push(`<span class="pill">Pit-stop: ${escapeHtml(next.pitstop)}</span>`);
+  if(next.pocet_kol) chips.push(`<span class="pill">Kola: ${escapeHtml(next.pocet_kol)}</span>`);
+
+  el.innerHTML = `
+    <div class="race-title"><strong>${escapeHtml(next.nazev||next.name)}</strong> / ${escapeHtml(next.trat||next.track||'')}</div>
+    <div>Do startu: <span class="countdown">${d}d ${String(h).padStart(2,'0')}h ${String(m).padStart(2,'0')}m ${String(s).padStart(2,'0')}s</span></div>
+    <div class="small" style="margin-top:6px">${chips.join(' ')}</div>`;
 }
 
 /* === Reminder (local) === */
@@ -841,7 +856,6 @@ function renderAdvancedStats(){
     const attend = completed.length? ((races/completed.length)*100):0;
     return {d, avg, stdev, bzr:(races? (body/races):0), attend};
   }).sort((a,b)=>{
-    // nejlepší nahoře: nižší Ø pozice -> lepší; pokud null, poslední
     if(a.avg==null && b.avg==null) return 0;
     if(a.avg==null) return 1;
     if(b.avg==null) return -1;
@@ -882,7 +896,7 @@ function renderAdvancedStats(){
     tbodyQ.appendChild(tr);
   });
 
-  /* Forma (poslední 3/5 závodů) – používá pozice, lepší = menší */
+  /* Forma (poslední 3/5 závodů) */
   const tbodyF=$('#formTable tbody'); tbodyF.innerHTML='';
   const rowsF = drivers.map(d=>{
     const positions = completed.map(r=>posForDriver(r,d,true)).filter(x=>x!=='DNS');
@@ -892,7 +906,6 @@ function renderAdvancedStats(){
     const avg5 = last5.length? (last5.reduce((a,b)=>a+b,0)/last5.length) : null;
     return {d, avg3, avg5};
   }).sort((a,b)=>{
-    // seřadit podle avg3 (lepší nahoře), fallback avg5
     const a3 = a.avg3??Infinity, b3 = b.avg3??Infinity;
     if(a3!==b3) return a3-b3;
     const a5 = a.avg5??Infinity, b5 = b.avg5??Infinity;
@@ -1369,7 +1382,7 @@ $('#editRaceForm').addEventListener('submit', async (e)=>{
     penalties: pens
   };
 
-  // Pokud jde o budoucí závod a výsledky/kvali jsou prázdné (nebo jen DNS), ulož prázdná pole.
+  // Budoucí závod -> prázdné výsledky/kvali a auta
   const isFuture = payload.datum && (new Date(payload.datum) > new Date());
   const onlyEmptyOrDNS = (a)=> !a.some(v=>v && v!=='DNS');
   if(isFuture){
@@ -1683,7 +1696,6 @@ function buildProfileDriverList(){
     });
     wrap.appendChild(btn);
   });
-  // default: první jezdec
   if(drivers.length){ wrap.querySelector('.driver-tag').click(); }
 }
 function renderProfile(drv){
@@ -1721,7 +1733,6 @@ function renderProfile(drv){
   $('#kpiDNS').textContent=dns;
   $('#kpiPoints').textContent=points;
 
-  // Forma posledních 5 (pozice) – nižší lepší, osa Y invertovaná
   const last5 = rows.filter(r=>r.p!=='DNS').slice(-5);
   const ctx = $('#profileFormChart').getContext('2d');
   if(profileFormChart && typeof profileFormChart.destroy==='function') profileFormChart.destroy();
@@ -1731,9 +1742,7 @@ function renderProfile(drv){
     options:{ responsive:true, plugins:{legend:{labels:{color:'#fff'}}}, scales:{ x:{ticks:{color:'#fff'}}, y:{ticks:{color:'#fff'}, reverse:true, min:1} } }
   });
 
-  // Další metriky
   const moreT=$('#profileMoreTable tbody'); moreT.innerHTML='';
-  // nejúspěšnější značka/trať (podle bodů)
   const brandPoints=new Map(), trackPoints=new Map();
   completed.forEach(r=>{
     const base=getResultsArray(r), cars=Array.isArray(r.result_cars)?r.result_cars:[];
@@ -1777,7 +1786,6 @@ function renderProfile(drv){
     const tr=document.createElement('tr'); tr.innerHTML=`<td>${k}</td><td>${v}</td>`; moreT.appendChild(tr);
   });
 
-  // Všechny odjeté závody – nové nahoře (nejstarší dole)
   const listT=$('#profileRacesTable tbody'); listT.innerHTML='';
   rows.slice().sort((a,b)=>b.ts - a.ts).forEach(r=>{
     const tr=document.createElement('tr');
@@ -1795,7 +1803,8 @@ initTabs();
 startRealtime();
 installGt7TrackDatalist();
 installGt7CarDatalist();
-setInterval(()=>{ renderNextRace(); scheduleReminderIfDue(); },60*1000);
+/* sekundový refresh odpočtu (ostatní logika beze změn) */
+setInterval(renderNextRace, 1000);
 </script>
 </body>
 </html>
