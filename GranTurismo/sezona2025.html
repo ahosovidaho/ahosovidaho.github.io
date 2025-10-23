@@ -518,7 +518,14 @@ function getResultsArray(r){ if(Array.isArray(r.vysledky)) return r.vysledky; if
 function getQualiArray(r){ if(Array.isArray(r.kvalifikace)) return r.kvalifikace; if(Array.isArray(r.qualifying)) return r.qualifying; return []; }
 function hasNonDNSResult(r){
   const arr = getResultsArray(r);
-  return Array.isArray(arr) && arr.some(v => v && v !== '' && v !== 'DNS');
+  if(!Array.isArray(arr)) return false;
+  return arr.some(v => {
+    if(v==null) return false;
+    const s = String(v).trim();
+    // Treat placeholders as empty: '', '—', '-', '–', 'DNS'
+    if(s==='' || s==='DNS' || s==='—' || s==='-' || s==='–') return false;
+    return true;
+  });
 }
 function isCompleted(r){
   const dt = r.datum || r.date;
