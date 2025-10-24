@@ -165,6 +165,31 @@ tbody tr:hover{ background: rgba(255,255,255,0.04); }
 
 /* Container spacing under hero */
 .container{ margin-top: 14px; }
+
+  /* Planned: compact table */
+#plannedTable{
+  font-size:13px;
+  line-height:1.25;
+  table-layout:fixed;
+}
+#plannedTable th, #plannedTable td{
+  padding:6px 8px;
+}
+#plannedTable td:nth-child(2){ min-width:180px; }  /* Závod */
+#plannedTable td:nth-child(4){ min-width:220px; }  /* Vozidla */
+#plannedTable td:last-child{ min-width:220px; }    /* Info */
+#plannedTable td{
+  word-break:break-word;
+  hyphens:auto;
+}
+
+/* vlastní scroll pro kartu s plánovanými závody */
+.card:has(#plannedTable){
+  max-height:70vh;
+  overflow:auto;
+}
+
+  
 </style>
 </head>
 <body>
