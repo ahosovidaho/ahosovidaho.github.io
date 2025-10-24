@@ -353,7 +353,9 @@ thead th{ background:#0c0f16; }
 
     <div class="card">
       <strong>Pořadí závodníků</strong>
-      <table id="standings"><thead><tr><th>Závodník</th><th>Body</th><th>Pódiová umístění</th><th>DNS</th></tr></thead><tbody></tbody></table>
+      <table id="standings"><thead><tr>
+  <th>Závodník</th><th>Body</th><th>Vítězství</th><th>Pódiová umístění</th><th>DNS</th>
+</tr></thead><tbody></tbody></table>
     </div>
 
     <div class="card">
@@ -1035,34 +1037,61 @@ function renderDriverLegend(){
   });
 }
 function renderStandingsAndChart(){
-  const completed = racesCache.filter(isCompleted)
+  // zachováno: bereme jen dokončené závody stejnou logikou jako dřív v projektu
+  const completed = racesCache
+    .filter(hasResults)
     .sort((a,b)=> new Date(a.datum||a.date||0) - new Date(b.datum||b.date||0));
-  const stats={}; drivers.forEach(d=>stats[d]={points:0,podiums:0,dns:0});
+
+  // nově přidáno: wins
+  const stats={};
+  drivers.forEach(d=>stats[d]={points:0,wins:0,podiums:0,dns:0});
+
   completed.forEach(r=>{
     const penal = Array.isArray(r.penalties)? r.penalties : [];
     const arr = applyPenalties(getResultsArray(r), penal);
+
+    // výherce (1. místo) – započti výhru, pokud je platné jméno
+    const winner = arr[0];
+    if(winner && winner!=='DNS'){
+      const wName = normName(winner);
+      if(!stats[wName]) stats[wName]={points:0,wins:0,podiums:0,dns:0};
+      stats[wName].wins++;
+    }
+
+    // body + pódia
     for(let i=0;i<5;i++){
       const raw=arr[i]; if(!raw || raw==='DNS') continue;
       const d=normName(raw);
-      if(!stats[d]) stats[d]={points:0,podiums:0,dns:0};
+      if(!stats[d]) stats[d]={points:0,wins:0,podiums:0,dns:0};
       stats[d].points += (pointsMap[i]||0);
       if(i<3) stats[d].podiums++;
     }
+
+    // DNS (neúčast/“nevidět” v top5)
     drivers.forEach(d=>{
       const present = arr.some(x=>normName(x)===d);
       if(!present) stats[d].dns++;
     });
   });
 
-  const tbody=$('#standings tbody'); tbody.innerHTML='';
-  Object.keys(stats).sort((a,b)=>stats[b].points - stats[a].points)
+  // tabulka pořadí – jen přidaný sloupec Vítězství
+  const tbody=$('#standings tbody'); 
+  tbody.innerHTML='';
+  Object.keys(stats)
+    .sort((a,b)=> stats[b].points - stats[a].points) // primárně podle bodů (stejné jako dřív)
     .forEach(name=>{
       const s=stats[name];
       const tr=document.createElement('tr');
-      tr.innerHTML=`<td>${escapeHtml(name)}</td><td>${s.points}</td><td>${s.podiums}</td><td>${s.dns}</td>`;
+      tr.innerHTML = `
+        <td>${escapeHtml(name)}</td>
+        <td>${s.points}</td>
+        <td>${s.wins}</td>
+        <td>${s.podiums}</td>
+        <td>${s.dns}</td>`;
       tbody.appendChild(tr);
     });
 
+  // kumulativní graf bodů (beze změn)
   const labels = completed.map(r=> r.nazev||r.name|| (r.trat||r.track||'Závod'));
   const datasets = drivers.map(d=>{
     let cum=0;
@@ -1070,13 +1099,30 @@ function renderStandingsAndChart(){
       const arr = applyPenalties(getResultsArray(r), Array.isArray(r.penalties)?r.penalties:[]);
       const idx = arr.findIndex(x=>normName(x)===d);
       if(idx===-1 || arr[idx]==='DNS') return cum;
-      cum += (pointsMap[idx]||0); return cum;
+      cum += (pointsMap[idx]||0);
+      return cum;
     });
-    return {label:d,data, borderColor:driverColors[d]||'#ccc', backgroundColor:driverColors[d]||'#ccc', fill:false, tension:0.2};
+    return {
+      label:d,
+      data,
+      borderColor:driverColors[d]||'#ccc',
+      backgroundColor:driverColors[d]||'#ccc',
+      fill:false,
+      tension:0.2
+    };
   });
+
   const ctx=$('#pointsChart').getContext('2d');
   if(pointsChart && typeof pointsChart.destroy==='function') pointsChart.destroy();
-  pointsChart = new Chart(ctx,{ type:'line', data:{labels,datasets}, options:{ responsive:true, plugins:{legend:{labels:{color:'#fff'}}}, scales:{x:{ticks:{color:'#fff'}}, y:{ticks:{color:'#fff'}, beginAtZero:true}} }});
+  pointsChart = new Chart(ctx,{
+    type:'line',
+    data:{labels,datasets},
+    options:{
+      responsive:true,
+      plugins:{legend:{labels:{color:'#fff'}}},
+      scales:{x:{ticks:{color:'#fff'}}, y:{ticks:{color:'#fff'}, beginAtZero:true}}
+    }
+  });
 }
 
 /* === Odvozené / pokročilé statistiky === */
