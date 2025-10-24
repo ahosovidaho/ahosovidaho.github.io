@@ -1933,19 +1933,30 @@ function renderTitleMath(){
   const thirdPts  = third  ? (pointsNow[third]||0)  : 0;
 
   // 5) Prahy pro "je ve hře" – podle max dosažitelných bodů všech
-  const maxPossibleSorted = [...drivers].map(d=>maxPossible[d]).sort((a,b)=>b-a);
-  const thresholdTitle  = maxPossibleSorted[0] || 0; // top max
-  const thresholdPodium = maxPossibleSorted[2] || 0; // 3. max
+// … máš spočítané:
+// - pointsNow[d] pro každého
+// - sortedNow = jezdci seřazení podle pointsNow
+// - leader = sortedNow[0], leaderPts = pointsNow[leader]
+// - thirdPts = pointsNow[sortedNow[2]] || 0
+// - remaining, maxPerRace, maxPossible[d] = pointsNow[d] + remaining*maxPerRace
 
+// ✅ prahy "matematicky ve hře"
+const thresholdTitle  = leaderPts; // stačí dorovnat/překonat aktuální body lídra
+const thresholdPodium = thirdPts;  // stačí dorovnat/překonat aktuální body 3. místa
+
+// …v mapování řádku pro každého jezdce použij:
+const inTitle  = maxD >= thresholdTitle  ? 'ANO' : 'NE';
+const inPodium = maxD >= thresholdPodium ? 'ANO' : 'NE';
+
+  
   // 6) Magic number pro lídra
-  const second = sortedNow[1] || null;
-  const secondPts = second ? (pointsNow[second]||0) : 0;
-  const needGapToClinich = Math.max(0, (remaining*maxPerRace) - (leaderPts - secondPts) + 1);
-  const clinchTxt = remaining===0
-    ? 'Sezóna je uzavřená.'
-    : (needGapToClinich===0
-        ? `Lídr (${leader||'—'}) už má jistotu titulu.`
-        : `Lídr (${leader||'—'}) potřebuje navýšit náskok o ${needGapToClinich} bodů, aby měl jistotu titulu.`);
+ const othersMaxPossible = Math.max(0, ...drivers.filter(d=>d!==leader).map(d=>maxPossible[d]));
+const leaderClinched = remaining===0 ? true : (leaderPts > othersMaxPossible);
+const needToClinch = Math.max(0, othersMaxPossible - leaderPts + 1);
+
+const clinchTxt = leaderClinched
+  ? `Lídr (${leader||'—'}) má matematicky jistý titul.`
+  : `Aby měl lídr jistotu titulu už teď, potřebuje ještě ${needToClinch} bodů náskoku (i při ideálním průběhu pro soupeře).`;
 
   meta.innerHTML = `Zbývá závodů: <strong>${remaining}</strong> • Max bodů / závod: <strong>${maxPerRace}</strong><br>${clinchTxt}`;
 
