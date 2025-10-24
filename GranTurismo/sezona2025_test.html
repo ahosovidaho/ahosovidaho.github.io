@@ -1890,19 +1890,18 @@ function renderAdvancedStats(){
   });
 }
 
-<script>
 // === Titulová matematika (what-if) ===
 function renderTitleMath(){
   const tbody = document.querySelector('#titleMathTable tbody');
-  const meta  = document.querySelector('#titleMathMeta');
+  const meta = document.querySelector('#titleMathMeta');
   if(!tbody || !meta) return;
 
-  // 1) Dokončené závody podle naší funkce (neplést s plánovanými)
+  // 1) Dokončené závody = jen ty, které projdou isCompletedRace
   const completed = (racesCache||[]).filter(isCompletedRace);
 
-  // 2) Body teď
+  // body teď
   const pointsNow = {};
-  drivers.forEach(d => pointsNow[d] = 0);
+  drivers.forEach(d=>pointsNow[d]=0);
 
   completed.forEach(r=>{
     const penal = Array.isArray(r.penalties)? r.penalties : [];
@@ -1911,73 +1910,85 @@ function renderTitleMath(){
       const name = arr[i];
       if(!name || name==='DNS' || name==='—') continue;
       const d = normName(name);
-      pointsNow[d] = (pointsNow[d]||0) + (pointsMap[i]||0);
+      if(pointsNow[d]==null) pointsNow[d]=0;
+      pointsNow[d] += (pointsMap[i]||0);
     }
   });
 
-  // 3) Zbývající závody a maximum na závod
-  const remaining   = (racesCache||[]).filter(r=>!isCompletedRace(r)).length;
-  const maxPerRace  = pointsMap[0] || 10;
+  // 2) Zbývající závody = vše, co NENÍ completed
+  const remaining = (racesCache||[]).filter(r=>!isCompletedRace(r)).length;
+  const maxPerRace = pointsMap[0] || 10;
 
-  // 4) Max dosažitelné pro každého
+  // 3) Max dosažitelné
   const maxPossible = {};
-  drivers.forEach(d => {
-    maxPossible[d] = (pointsNow[d]||0) + remaining * maxPerRace;
+  drivers.forEach(d=>{
+    maxPossible[d] = (pointsNow[d]||0) + remaining*maxPerRace;
   });
 
-  // 5) Současné pořadí + prahy
+  // 4) Současné pořadí
   const sortedNow = [...drivers].sort((a,b)=>(pointsNow[b]||0)-(pointsNow[a]||0));
-  const leader    = sortedNow[0] || null;
-  const third     = sortedNow[2] || null;
+  const leader = sortedNow[0] || null;
+  const third  = sortedNow[2] || null;
   const leaderPts = leader ? (pointsNow[leader]||0) : 0;
   const thirdPts  = third  ? (pointsNow[third]||0)  : 0;
 
-  // prahy – dorovnání stačí
-  const thresholdTitle  = leaderPts;
-  const thresholdPodium = thirdPts;
+  // 5) Prahy pro "je ve hře" – podle max dosažitelných bodů všech
+// … máš spočítané:
+// - pointsNow[d] pro každého
+// - sortedNow = jezdci seřazení podle pointsNow
+// - leader = sortedNow[0], leaderPts = pointsNow[leader]
+// - thirdPts = pointsNow[sortedNow[2]] || 0
+// - remaining, maxPerRace, maxPossible[d] = pointsNow[d] + remaining*maxPerRace
 
-  // 6) Řádky do tabulky
-  const rows = drivers.map(d=>{
-    const pts  = pointsNow[d]||0;
-    const maxD = maxPossible[d]||0;
-    return {
-      d,
-      pts,
-      maxD,
-      inTitle:  maxD >= thresholdTitle  ? 'ANO' : 'NE',
-      inPodium: maxD >= thresholdPodium ? 'ANO' : 'NE',
-      toFirst:  Math.max(0, thresholdTitle  - pts),
-      toThird:  Math.max(0, thresholdPodium - pts)
-    };
-  }).sort((a,b)=> b.maxD - a.maxD || b.pts - a.pts || a.d.localeCompare(b.d));
+// ✅ prahy "matematicky ve hře"
+const thresholdTitle  = leaderPts; // stačí dorovnat/překonat aktuální body lídra
+const thresholdPodium = thirdPts;  // stačí dorovnat/překonat aktuální body 3. místa
 
+// …v mapování řádku pro každého jezdce použij:
+const inTitle  = maxD >= thresholdTitle  ? 'ANO' : 'NE';
+const inPodium = maxD >= thresholdPodium ? 'ANO' : 'NE';
+
+  
+  // 6) Magic number pro lídra
+ const othersMaxPossible = Math.max(0, ...drivers.filter(d=>d!==leader).map(d=>maxPossible[d]));
+const leaderClinched = remaining===0 ? true : (leaderPts > othersMaxPossible);
+const needToClinch = Math.max(0, othersMaxPossible - leaderPts + 1);
+
+const clinchTxt = leaderClinched
+  ? `Lídr (${leader||'—'}) má matematicky jistý titul.`
+  : `Aby měl lídr jistotu titulu už teď, potřebuje ještě ${needToClinch} bodů náskoku (i při ideálním průběhu pro soupeře).`;
+
+  meta.innerHTML = `Zbývá závodů: <strong>${remaining}</strong> • Max bodů / závod: <strong>${maxPerRace}</strong><br>${clinchTxt}`;
+
+  // 7) Render tabulky
   tbody.innerHTML = '';
-  rows.forEach(r=>{
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>${r.d}</td>
-      <td>${r.pts}</td>
-      <td>${r.maxD}</td>
-      <td>${r.inTitle}</td>
-      <td>${r.inPodium}</td>
-      <td>${r.toFirst}</td>
-      <td>${r.toThird}</td>`;
-    tbody.appendChild(tr);
+  const rows = [...drivers].map(d=>{
+    const now = pointsNow[d]||0;
+    const maxD = maxPossible[d]||0;
+    const inTitle  = maxD >= thresholdTitle  ? 'ANO' : 'NE';
+    const inPodium = maxD >= thresholdPodium ? 'ANO' : 'NE';
+    const miss1 = Math.max(0, leaderPts - now);
+    const miss3 = Math.max(0, thirdPts  - now);
+    return {d, now, maxD, inTitle, inPodium, miss1, miss3};
   });
 
-  // 7) „Clinch“ (jistota titulu)
-  const othersMax = Math.max(0, ...drivers.filter(d=>d!==leader).map(d=>maxPossible[d]||0));
-  const leaderClinched = remaining===0 ? true : (leaderPts > othersMax);
-  const needToClinch   = Math.max(0, othersMax - leaderPts + 1);
+  rows.sort((a,b)=> (b.now - a.now) || (b.maxD - a.maxD));
 
-  meta.textContent = leader
-    ? `Zbývá závodů: ${remaining} • Max na závod: ${maxPerRace} • Prahy: titul ≥ ${leaderPts}, pódium ≥ ${thirdPts}. `
-      + (leaderClinched
-         ? `Lídr (${leader}) má matematicky jistý titul.`
-         : `Aby měl lídr (${leader}) jistotu už teď, potřebuje ještě ${needToClinch} bodů náskoku.`)
-    : `Zbývá závodů: ${remaining} • Max na závod: ${maxPerRace}`;
+  rows.forEach(row=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML = `
+      <td>${escapeHtml(row.d)}</td>
+      <td>${row.now}</td>
+      <td>${row.maxD}</td>
+      <td style="color:${row.inTitle==='ANO' ? '#4caf50' : '#ccc'}">${row.inTitle}</td>
+      <td style="color:${row.inPodium==='ANO' ? '#4caf50' : '#ccc'}">${row.inPodium}</td>
+      <td>${row.miss1}</td>
+      <td>${row.miss3}</td>
+    `;
+    tbody.appendChild(tr);
+  });
 }
-</script>
+  
   
 /* === Profil závodníka === */
 function renderProfileInit(){
