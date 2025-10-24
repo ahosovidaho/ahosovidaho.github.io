@@ -1547,6 +1547,7 @@ const GT7_CARS_FALLBACK = [
   "Alfa Romeo — 4C '14","Peugeot — RCZ Gr.3","Renault Sport — Mégane Trophy '11","Citroën — GT by Citroën Road Car",
   "Bugatti — Veyron 16.4 '13","Pagani — Huayra '13"
 ];
+
 async function installGt7CarDatalist() {
   let carsRaw = null;
   try {
@@ -1555,60 +1556,73 @@ async function installGt7CarDatalist() {
   } catch {}
   if (!carsRaw) carsRaw = GT7_CARS_FALLBACK.slice();
 
+  // Normalizace do {brand, model, label}
   CAR_LIST = [];
-  if(Array.isArray(carsRaw)){
-    carsRaw.forEach(item=>{
-      if(typeof item==='string'){
+  if (Array.isArray(carsRaw)) {
+    carsRaw.forEach(item => {
+      if (typeof item === 'string') {
         const m = item.split('—');
-        if(m.length>=2){
-          const brand=m[0].trim(), model=m.slice(1).join('—').trim();
-          CAR_LIST.push({brand, model, label:`${brand} — ${model}`});
-        }else{
-          CAR_LIST.push({brand:item.trim(), model:'', label:item.trim()});
+        if (m.length >= 2) {
+          const brand = m[0].trim(), model = m.slice(1).join('—').trim();
+          CAR_LIST.push({ brand, model, label: `${brand} — ${model}` });
+        } else {
+          CAR_LIST.push({ brand: item.trim(), model: '', label: item.trim() });
         }
-      }else if(item && typeof item==='object'){
-        const brand = (item.brand||item.maker||'').trim();
-        const model = (item.model||item.name||'').trim() + (item.year?` '${String(item.year).slice(-2)}`:'');
-        if(brand || model) CAR_LIST.push({brand, model, label:`${brand} — ${model}`});
+      } else if (item && typeof item === 'object') {
+        const brand = (item.brand || item.maker || '').trim();
+        const model = (item.model || item.name || '').trim() + (item.year ? ` '${String(item.year).slice(-2)}` : '');
+        const label = [brand, model].filter(Boolean).join(' — ');
+        if (label) CAR_LIST.push({ brand, model, label });
       }
     });
   }
 
-  // Index podle značek
-  CAR_INDEX = {brands:[], byBrand:{}};
-  CAR_LIST.forEach(c=>{
-    if(!c.brand) return;
-    if(!CAR_INDEX.byBrand[c.brand]) CAR_INDEX.byBrand[c.brand]=new Set();
-    if(c.model) CAR_INDEX.byBrand[c.brand].add(c.model);
+  // Index podle značek (pro brand/model selecty v Editu)
+  CAR_INDEX = { brands: [], byBrand: {} };
+  CAR_LIST.forEach(c => {
+    if (!c.brand) return;
+    if (!CAR_INDEX.byBrand[c.brand]) CAR_INDEX.byBrand[c.brand] = new Set();
+    if (c.model) CAR_INDEX.byBrand[c.brand].add(c.model);
   });
   CAR_INDEX.brands = Object.keys(CAR_INDEX.byBrand).sort((a,b)=>a.localeCompare(b,'cs'));
-  Object.keys(CAR_INDEX.byBrand).forEach(b=>{
+  Object.keys(CAR_INDEX.byBrand).forEach(b => {
     CAR_INDEX.byBrand[b] = Array.from(CAR_INDEX.byBrand[b]).sort((a,b)=>a.localeCompare(b,'cs'));
   });
 
-  // datalist pro textové pole "Povolená vozidla"
+  // === DATALIST pro "Povolená vozidla" (Add form) ===
   const datalist = document.getElementById('gt7Cars');
-  function fill(options){
-    datalist.innerHTML='';
-    options.slice(0,800).forEach(c=>{
-      const opt=document.createElement('option'); opt.value=c.label; datalist.appendChild(opt);
+  const labels = CAR_LIST
+    .map(c => c.label)
+    .filter(Boolean)
+    .sort((a,b)=>a.localeCompare(b,'cs'));
+
+  // FIX: fill umí zpracovat přímo pole stringů
+  function fill(arr) {
+    datalist.innerHTML = '';
+    arr.slice(0, 800).forEach(label => {
+      const val = typeof label === 'string' ? label : (label && label.label) || '';
+      if (!val) return;
+      const opt = document.createElement('option');
+      opt.value = val;
+      datalist.appendChild(opt);
     });
   }
-  const labels = CAR_LIST.map(c=>c.label).sort((a,b)=>a.localeCompare(b,'cs'));
+
   fill(labels);
 
-  document.querySelectorAll('input[data-car-input]').forEach(inp=>{
+  // Live filtrování poslední položky oddělené čárkou
+  document.querySelectorAll('input[data-car-input]').forEach(inp => {
     inp.setAttribute('list','gt7Cars');
-    inp.addEventListener('input', ()=>{
-      const val = inp.value;
-      const parts = val.split(',');
-      const last = parts[parts.length-1].trim().toLowerCase();
-      const filtered = last? labels.filter(x=>x.toLowerCase().includes(last)) : labels;
-      fill(filtered.map(l=>({label:l})));
+    inp.addEventListener('input', () => {
+      const parts = inp.value.split(',');
+      const last = (parts[parts.length - 1] || '').trim().toLowerCase();
+      const filtered = last ? labels.filter(x => x.toLowerCase().includes(last)) : labels;
+      fill(filtered);
     });
   });
 
-  if(carsReadyResolve) carsReadyResolve();
+  // pro editor (brand/model selecty) – signalizace "ready"
+  if (carsReadyResolve) carsReadyResolve();
 }
 
 /* === Car-based stats === */
