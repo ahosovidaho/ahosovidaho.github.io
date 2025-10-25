@@ -228,9 +228,30 @@ tbody tr:hover{ background: rgba(255,255,255,0.04); }
     </div>
 
     <div class="card">
-      <strong>Pořadí závodníků</strong>
+  <strong>Pořadí závodníků <span id="standingsMeta" class="small muted"></span></strong>
       <table id="standings"><thead><tr><th>Závodník</th><th>Body</th><th>Vítězství</th><th>Pódiová umístění</th><th>DNS</th></tr></thead><tbody></tbody></table>
     </div>
+
+    <div class="card">
+  <strong>Titulová matematika <span class="small" id="tmMetaHome"></span></strong>
+  <table id="titleMathTableHome">
+    <thead>
+      <tr>
+        <th>Jezdec</th>
+        <th>Body</th>
+        <th>Max. možné</th>
+        <th>Potřeba na titul</th>
+        <th>Ve hře o titul</th>
+        <th>Ve hře o pódium</th>
+        <th>Pravděpodobnost podle formy</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+  <div class="small" style="margin-top:6px;color:#9aa0a6">
+    Pozn.: Orientační výpočet – neřeší tie-break (výhry) při rovnosti bodů.
+  </div>
+</div>
 
     <div class="card">
       <strong>Výsledky závodů</strong>
@@ -330,19 +351,22 @@ tbody tr:hover{ background: rgba(255,255,255,0.04); }
 
 <div class="card">
   <strong>Titulová matematika <span class="small" id="tmMeta"></span></strong>
-  <table id="titleMathTable">
-    <thead>
-      <tr>
-        <th>Jezdec</th>
-        <th>Body</th>
-        <th>Max. možné</th>
-        <th>Potřeba na titul</th>
-        <th>Ve hře o titul</th>
-        <th>Ve hře o pódium</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
+
+<table id="titleMathTable">
+  <thead>
+    <tr>
+      <th>Jezdec</th>
+      <th>Body</th>
+      <th>Max. možné</th>
+      <th>Potřeba na titul</th>
+      <th>Ve hře o titul</th>
+      <th>Ve hře o pódium</th>
+      <th>Pravděpodobnost podle formy</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+  
   <div class="small" style="margin-top:6px;color:#9aa0a6">
     Pozn.: Orientační výpočet – neřeší tie-break (výhry) při rovnosti bodů.
   </div>
@@ -940,6 +964,13 @@ function renderDriverLegend(){
 function renderStandingsAndChart(){
   const completed = racesCache.filter(isCompletedRace)
     .sort((a,b)=> new Date(a.datum||a.date||0) - new Date(b.datum||b.date||0));
+
+  // META: doplněk k nadpisu „Pořadí závodníků“
+  const X = completed.length;                                   // odjeté závody
+  const Y = racesCache.filter(r=>!isCompletedRace(r)).length;   // zbývající naplánované
+  const meta = document.getElementById('standingsMeta');
+  if (meta) meta.textContent = `po ${X} odjetých závodech • zbývá ${Y} naplánovaných`;
+
   const stats={}; drivers.forEach(d=>stats[d]={points:0,podiums:0,wins:0,dns:0});
   completed.forEach(r=>{
     const penal = Array.isArray(r.penalties)? r.penalties : [];
@@ -985,82 +1016,189 @@ function renderStandingsAndChart(){
   pointsChart = new Chart(ctx,{ type:'line', data:{labels,datasets}, options:{ responsive:true, plugins:{legend:{labels:{color:'#fff'}}}, scales:{x:{ticks:{color:'#fff'}}, y:{ticks:{color:'#fff'}, beginAtZero:true}} }});
 }
 
-/* === Titulová matematika === */
-function renderTitleMath(){
-  // 1) Nasbíráme body z dokončených závodů (stejná logika jako jinde)
+/* === Titulová matematika – simulace BT/PL + render pro 2 tabulky === */
+/* VLOŽIT NA TOP-LEVEL (mimo jiné funkce) */
+
+function simulateTitleOddsBT(trials = 2000, lastN = 5, decay = 0.85) {
+  // 1) dokončené závody
   const completed = racesCache
     .filter(isCompletedRace)
     .sort((a,b)=> new Date(a.datum||a.date||0) - new Date(b.datum||b.date||0));
 
-  const pts = {};
-  drivers.forEach(d=>pts[d]=0);
+  // 2) body a výhry po současnost (pro tie-break i výchozí stav)
+  const basePts = {}; const baseWins = {};
+  drivers.forEach(d=>{ basePts[d]=0; baseWins[d]=0; });
 
   completed.forEach(r=>{
-    const applied = applyPenalties(getResultsArray(r), Array.isArray(r.penalties)? r.penalties : []);
+    const arr = applyPenalties(getResultsArray(r), Array.isArray(r.penalties)? r.penalties : []);
     for(let i=0;i<5;i++){
-      const n = applied[i];
+      const n = arr[i];
       if(!n || n==='DNS' || n==='—') continue;
-      const drv = normName(n);
-      pts[drv] = (pts[drv]||0) + (pointsMap[i]||0);
+      const d = normName(n);
+      basePts[d] += (pointsMap[i]||0);
+      if(i===0) baseWins[d] += 1;
     }
   });
 
-  // 2) Zbývající závody a max bodů na závod
-  const remaining = racesCache.filter(r=>!isCompletedRace(r)).length;
-  const maxPerRace = Math.max(...pointsMap); // u tebe je to 10
+  // 3) forma z posledních lastN závodů (vážená decay)
+  const last = completed.slice(-lastN);
+  const formScore = {}; drivers.forEach(d=>formScore[d]=0);
+  last.forEach((r, idx)=>{
+    const w = Math.pow(decay, (last.length-1-idx));
+    const arr = applyPenalties(getResultsArray(r), Array.isArray(r.penalties)? r.penalties : []);
+    // body za formu: 1.=5, 2.=4, ... 5.=1, DNS/— = 0
+    for(let i=0;i<5;i++){
+      const n = arr[i];
+      if(!n || n==='DNS' || n==='—') continue;
+      const d = normName(n);
+      const formPts = (5 - i); // 1..5 -> 5..1
+      formScore[d] += w * formPts;
+    }
+  });
 
-  // 3) Současné pořadí (pro zjištění lídra a 3. místa)
+  // 4) síly (Plackett–Luce): kladné, normalizované kolem 1
+  const eps = 0.001;
+  const raw = drivers.map(d=>formScore[d] || 0);
+  const mean = raw.length ? (raw.reduce((a,b)=>a+b,0)/raw.length) : 0;
+  const strengths = {};
+  drivers.forEach(d=>{
+    // baseline 1.0, formu přimícháme (škálování 0.15 drží konzervativně)
+    const s = 1.0 + ( (formScore[d] - mean) * 0.15 );
+    strengths[d] = Math.max(eps, s);
+  });
+
+  // 5) kolik závodů zbývá
+  const remaining = racesCache.filter(r=>!isCompletedRace(r)).length;
+  if(remaining<=0){
+    // už není co simulovat
+    const res = {}; drivers.forEach(d=> res[d] = 0 );
+    // urči vítěze aktuálního stavu
+    const arr = drivers.map(d=>({d, pts:basePts[d], wins:baseWins[d]}))
+      .sort((a,b)=> b.pts - a.pts || b.wins - a.wins);
+    if(arr[0]) res[arr[0].d] = 1;
+    return res;
+  }
+
+  // 6) pomocné: Plackett–Luce vzorek pořadí (náhodně podle "strengths")
+  function plSampleOrder() {
+    const pool = drivers.slice();
+    const order = [];
+    while(order.length < pool.length){
+      let sum = 0;
+      pool.forEach(d=> sum += strengths[d]);
+      // vyber jednoho podle vah
+      let r = Math.random() * sum;
+      let pick = pool[0];
+      for(const d of pool){
+        r -= strengths[d];
+        if(r <= 0){ pick = d; break; }
+      }
+      order.push(pick);
+      pool.splice(pool.indexOf(pick),1);
+    }
+    return order; // celé pořadí (1..N)
+  }
+
+  // 7) simulace
+  const winsCount = {}; drivers.forEach(d=>winsCount[d]=0);
+  for(let t=0;t<trials;t++){
+    const pts = {...basePts};
+    const simWins = {...baseWins};
+
+    for(let r=0;r<remaining;r++){
+      const order = plSampleOrder();
+      // body dáváme jen top 5 podle pointsMap
+      for(let i=0;i<Math.min(5, order.length); i++){
+        const d = order[i];
+        pts[d] += (pointsMap[i]||0);
+      }
+      simWins[order[0]] += 1;
+    }
+
+    // urči šampiona v této simulaci
+    const arr = drivers.map(d=>({d, pts:pts[d], wins:simWins[d]}))
+      .sort((a,b)=> b.pts - a.pts || b.wins - a.wins || (Math.random()-0.5)); // náhodný tie-break
+    winsCount[arr[0].d] += 1;
+  }
+
+  // 8) pravděpodobnosti
+  const probs = {};
+  drivers.forEach(d=> probs[d] = winsCount[d] / trials);
+  return probs;
+}
+
+function renderTitleMath(){
+  // 1) aktuální body a completed
+  const completed = racesCache
+    .filter(isCompletedRace)
+    .sort((a,b)=> new Date(a.datum||a.date||0) - new Date(b.datum||b.date||0));
+
+  const pts = {}; drivers.forEach(d=>pts[d]=0);
+  completed.forEach(r=>{
+    const arr = applyPenalties(getResultsArray(r), Array.isArray(r.penalties)? r.penalties : []);
+    for(let i=0;i<5;i++){
+      const n = arr[i];
+      if(!n || n==='DNS' || n==='—') continue;
+      const d = normName(n);
+      pts[d] = (pts[d]||0) + (pointsMap[i]||0);
+    }
+  });
+
+  // 2) zbylé závody a prahy
+  const remaining = racesCache.filter(r=>!isCompletedRace(r)).length;
+  const maxPerRace = Math.max(...pointsMap);
+
   const standingArr = drivers.map(d=>({ name:d, pts:(pts[d]||0) }))
     .sort((a,b)=> b.pts - a.pts);
 
   const leaderPts = standingArr[0]?.pts || 0;
   const thirdPts  = standingArr[2]?.pts ?? 0;
 
-  // 4) Max dosažitelné body pro každého
+  // 3) max možné body
   const maxPossible = {};
   drivers.forEach(d=>{
     maxPossible[d] = (pts[d]||0) + remaining * maxPerRace;
   });
 
-  // 5) Tvojemu požadavku odpovídající prahy:
-  //    - "Ve hře o titul": stačí být schopen dorovnat/překonat současného lídra
-  //    - "Ve hře o pódium": stačí dorovnat/překonat současné 3. místo
-  const thresholdTitle  = leaderPts;
-  const thresholdPodium = thirdPts;
+  // 4) pravděpodobnosti dle formy (BT/PL)
+  const probs = simulateTitleOddsBT(2000, 5, 0.85);
 
-  // 6) Render tabulky
-  const tbody = document.querySelector('#titleMathTable tbody');
-  if(!tbody) return;
-  tbody.innerHTML = '';
-
-  // řadíme stejně jako pořadí (aktuální body)
-  standingArr.forEach(row=>{
+  // 5) řádky
+  const rowsHtml = standingArr.map(row=>{
     const name = row.name;
     const nowPts = row.pts;
     const maxPts = maxPossible[name];
-    const needForTitle = Math.max(0, thresholdTitle - nowPts);
-    const canWin = maxPts >= thresholdTitle;
-    const canPodium = maxPts >= thresholdPodium;
+    const needForTitle = Math.max(0, leaderPts - nowPts);
+    const canWin = maxPts >= leaderPts;
+    const canPodium = maxPts >= thirdPts;
+    const p = Math.max(0, Math.min(1, probs[name]||0));
+    const probStr = (p*100).toFixed(p>=0.995?0: (p>=0.1?1:2)) + ' %';
 
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>${escapeHtml(name)}</td>
-      <td>${nowPts}</td>
-      <td>${maxPts}</td>
-      <td>${needForTitle}</td>
-      <td>${canWin ? 'ANO' : 'NE'}</td>
-      <td>${canPodium ? 'ANO' : 'NE'}</td>
-    `;
-    tbody.appendChild(tr);
+    return `
+      <tr>
+        <td>${escapeHtml(name)}</td>
+        <td>${nowPts}</td>
+        <td>${maxPts}</td>
+        <td>${needForTitle}</td>
+        <td>${canWin ? 'ANO' : 'NE'}</td>
+        <td>${canPodium ? 'ANO' : 'NE'}</td>
+        <td>${probStr}</td>
+      </tr>`;
+  }).join('');
+
+  ['#titleMathTable', '#titleMathTableHome'].forEach(sel=>{
+    const tbl = document.querySelector(sel);
+    if(!tbl) return;
+    const tbody = tbl.querySelector('tbody');
+    if(tbody) tbody.innerHTML = rowsHtml;
   });
 
-  // 7) Meta info (kolik závodů zbývá, kolik bodů lze získat)
-  const meta = document.querySelector('#tmMeta');
-  if(meta){
-    meta.textContent = `• zbývá závodů: ${remaining} • max bodů na závod: ${maxPerRace}`;
-  }
+  const metaText = `• zbývá závodů: ${remaining} • max bodů na závod: ${maxPerRace} • BT/PL z posledních 5 závodů (decay 0.85)`;
+  ['#tmMeta', '#tmMetaHome'].forEach(sel=>{
+    const meta = document.querySelector(sel);
+    if(meta) meta.textContent = metaText;
+  });
 }
-
   
 /* === H2H === */
 function populateH2HDropdowns(){
@@ -1837,6 +1975,7 @@ function renderCarStats(){
 function renderAdvancedStats(){
   const completed = racesCache.filter(isCompletedRace)
     .sort((a,b)=> new Date(a.datum||a.date) - new Date(b.datum||b.date));
+
   // Guard
   if(completed.length===0){
     ['streaksTable','consistencyTable','qualiRaceTable','formTable','penaltyImpactTable'].forEach(id=>{
@@ -1875,22 +2014,84 @@ function renderAdvancedStats(){
     });
   });
 
-  // Rekordy & série (jednoduché metriky)
-  const stTB = $('#streaksTable tbody'); stTB.innerHTML='';
-  // nejdelší série bodovaných závodů, výher, pódií pro každého a vyber top
-  function longestStreak(values, pred){ let best=0, cur=0; values.forEach(v=>{ if(pred(v)){cur++; best=Math.max(best,cur);} else {cur=0;} }); return best; }
-  const records = [];
-  drivers.forEach(d=>{
-    const f = agg[d].finishes;
-    records.push({cat:'Nejvíc výher v sezóně', drv:d, val: agg[d].wins, note:''});
-    records.push({cat:'Nejdelší série pódií', drv:d, val: longestStreak(f, x=>x<=3), note:''});
-    records.push({cat:'Nejdelší série bodů', drv:d, val: longestStreak(f, x=>x>=1 && x<=5), note:''});
-    records.push({cat:'Nejdelší série bez bodu', drv:d, val: longestStreak(f, x=>x>5 || !x), note:''});
-  });
-  records.sort((a,b)=> b.val-a.val);
-  records.slice(0,12).forEach(r=>{
-    const tr=document.createElement('tr'); tr.innerHTML=`<td>${r.cat}</td><td>${r.drv}</td><td>${r.val}</td><td>${r.note||''}</td>`; stTB.appendChild(tr);
-  });
+  /* === Rekordy & série – skupinové zobrazení bez duplicit === */
+  {
+    const stTB = $('#streaksTable tbody'); 
+    if (stTB) stTB.innerHTML='';
+
+    // Pomůcky
+    function longestStreak(values, pred){
+      let best=0, cur=0; 
+      values.forEach(v=>{
+        if(pred(v)){ cur++; if(cur>best) best=cur; }
+        else { cur=0; }
+      });
+      return best;
+    }
+    // DNS streak přes všechny závody (i když jezdec „nebodoval“/nefiguruje v pořadí)
+    function longestDnsStreakFor(driver){
+      let best=0, cur=0;
+      completed.forEach(r=>{
+        const base = getResultsArray(r);
+        const arr  = applyPenalties(base, Array.isArray(r.penalties)? r.penalties : []);
+        const i    = arr.findIndex(x=>normName(x)===driver);
+        const isDNS = (i===-1) || arr[i]==='DNS' || arr[i]==='—';
+        if(isDNS){ cur++; if(cur>best) best=cur; } else { cur=0; }
+      });
+      return best;
+    }
+
+    // Kategorie → {max, names[], note}
+    const cats = {
+      'Nejvíc výher v sezóně'        : { max: 0, names: [], note: '' },
+      'Nejdelší série výher v sezóně': { max: 0, names: [], note: '' },
+      'Nejdelší série pódií'         : { max: 0, names: [], note: '' },
+      'Nejdelší série bodů'          : { max: 0, names: [], note: '' },
+      'Nejdelší série DNS'           : { max: 0, names: [], note: '' }
+    };
+
+    // Naplnění hodnot a držitelů
+    drivers.forEach(d=>{
+      const f = agg[d].finishes; // pouze dokončené závody (pozice 1..5)
+      const vals = {
+        'Nejvíc výher v sezóně'        : agg[d].wins,
+        'Nejdelší série výher v sezóně': longestStreak(f, x=>x===1),
+        'Nejdelší série pódií'         : longestStreak(f, x=>x<=3),
+        'Nejdelší série bodů'          : longestStreak(f, x=>x>=1 && x<=5),
+        'Nejdelší série DNS'           : longestDnsStreakFor(d)
+      };
+      Object.entries(vals).forEach(([cat,v])=>{
+        const val = v||0;
+        if(val > cats[cat].max){ cats[cat].max = val; cats[cat].names = val>0 ? [d] : []; }
+        else if(val === cats[cat].max && val>0){
+          if(!cats[cat].names.includes(d)) cats[cat].names.push(d);
+        }
+      });
+    });
+
+    // Pořadí řádků
+    const order = [
+      'Nejvíc výher v sezóně',
+      'Nejdelší série výher v sezóně',
+      'Nejdelší série pódií',
+      'Nejdelší série bodů',
+      'Nejdelší série DNS'
+    ];
+
+    // Render (ignoruj kategorie s nulovým maximem, ať je tabulka kompaktní)
+    if (stTB) {
+      order.forEach(cat=>{
+        const c = cats[cat];
+        if(!c || c.max<=0) return;
+        const namesHtml = c.names.length
+          ? c.names.map(n=>`<span class="name-chip" style="border-color:${driverColors[n]||'#888'};color:${driverColors[n]||'#ccc'}">${escapeHtml(n)}</span>`).join(' ')
+          : '—';
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${cat}</td><td>${namesHtml}</td><td>${c.max}</td><td>${escapeHtml(c.note||'')}</td>`;
+        stTB.appendChild(tr);
+      });
+    }
+  }
 
   // Průměry a konzistence
   const consTB = $('#consistencyTable tbody'); consTB.innerHTML='';
@@ -1910,7 +2111,7 @@ function renderAdvancedStats(){
     consTB.appendChild(tr);
   });
 
-  // Quali vs Race
+  // Kvalifikace vs. závod
   const qTB=$('#qualiRaceTable tbody'); qTB.innerHTML='';
   const linesQR = drivers.map(d=>{
     const a=agg[d];
@@ -1966,6 +2167,7 @@ function renderAdvancedStats(){
     pTB.appendChild(tr);
   });
 }
+ 
 
 /* === Profil závodníka === */
 function renderProfileInit(){
