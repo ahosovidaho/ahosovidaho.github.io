@@ -1975,6 +1975,7 @@ function renderCarStats(){
 function renderAdvancedStats(){
   const completed = racesCache.filter(isCompletedRace)
     .sort((a,b)=> new Date(a.datum||a.date) - new Date(b.datum||b.date));
+
   // Guard
   if(completed.length===0){
     ['streaksTable','consistencyTable','qualiRaceTable','formTable','penaltyImpactTable'].forEach(id=>{
@@ -2013,66 +2014,85 @@ function renderAdvancedStats(){
     });
   });
 
-    // Rekordy & série – skupinové zobrazení bez duplicit
-  const stTB = $('#streaksTable tbody'); 
-  stTB.innerHTML='';
+  /* === Rekordy & série – skupinové zobrazení bez duplicit === */
+  {
+    const stTB = $('#streaksTable tbody'); 
+    if (stTB) stTB.innerHTML='';
 
-  function longestStreak(values, pred){
-    let best=0, cur=0; 
-    values.forEach(v=>{
-      if(pred(v)){ cur++; best=Math.max(best,cur); }
-      else { cur=0; }
+    // Pomůcky
+    function longestStreak(values, pred){
+      let best=0, cur=0; 
+      values.forEach(v=>{
+        if(pred(v)){ cur++; if(cur>best) best=cur; }
+        else { cur=0; }
+      });
+      return best;
+    }
+    // DNS streak přes všechny závody (i když jezdec „nebodoval“/nefiguruje v pořadí)
+    function longestDnsStreakFor(driver){
+      let best=0, cur=0;
+      completed.forEach(r=>{
+        const base = getResultsArray(r);
+        const arr  = applyPenalties(base, Array.isArray(r.penalties)? r.penalties : []);
+        const i    = arr.findIndex(x=>normName(x)===driver);
+        const isDNS = (i===-1) || arr[i]==='DNS' || arr[i]==='—';
+        if(isDNS){ cur++; if(cur>best) best=cur; } else { cur=0; }
+      });
+      return best;
+    }
+
+    // Kategorie → {max, names[], note}
+    const cats = {
+      'Nejvíc výher v sezóně'        : { max: 0, names: [], note: '' },
+      'Nejdelší série výher v sezóně': { max: 0, names: [], note: '' },
+      'Nejdelší série pódií'         : { max: 0, names: [], note: '' },
+      'Nejdelší série bodů'          : { max: 0, names: [], note: '' },
+      'Nejdelší série DNS'           : { max: 0, names: [], note: '' }
+    };
+
+    // Naplnění hodnot a držitelů
+    drivers.forEach(d=>{
+      const f = agg[d].finishes; // pouze dokončené závody (pozice 1..5)
+      const vals = {
+        'Nejvíc výher v sezóně'        : agg[d].wins,
+        'Nejdelší série výher v sezóně': longestStreak(f, x=>x===1),
+        'Nejdelší série pódií'         : longestStreak(f, x=>x<=3),
+        'Nejdelší série bodů'          : longestStreak(f, x=>x>=1 && x<=5),
+        'Nejdelší série DNS'           : longestDnsStreakFor(d)
+      };
+      Object.entries(vals).forEach(([cat,v])=>{
+        const val = v||0;
+        if(val > cats[cat].max){ cats[cat].max = val; cats[cat].names = val>0 ? [d] : []; }
+        else if(val === cats[cat].max && val>0){
+          if(!cats[cat].names.includes(d)) cats[cat].names.push(d);
+        }
+      });
     });
-    return best;
+
+    // Pořadí řádků
+    const order = [
+      'Nejvíc výher v sezóně',
+      'Nejdelší série výher v sezóně',
+      'Nejdelší série pódií',
+      'Nejdelší série bodů',
+      'Nejdelší série DNS'
+    ];
+
+    // Render (ignoruj kategorie s nulovým maximem, ať je tabulka kompaktní)
+    if (stTB) {
+      order.forEach(cat=>{
+        const c = cats[cat];
+        if(!c || c.max<=0) return;
+        const namesHtml = c.names.length
+          ? c.names.map(n=>`<span class="name-chip" style="border-color:${driverColors[n]||'#888'};color:${driverColors[n]||'#ccc'}">${escapeHtml(n)}</span>`).join(' ')
+          : '—';
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${cat}</td><td>${namesHtml}</td><td>${c.max}</td><td>${escapeHtml(c.note||'')}</td>`;
+        stTB.appendChild(tr);
+      });
+    }
   }
 
-  // Připrav kategorie → {max, names[]}
-  const cats = {
-    'Nejvíc výher v sezóně':      { max: 0, names: [], note: '' },
-    'Nejdelší série pódií':       { max: 0, names: [], note: '' },
-    'Nejdelší série bodů':        { max: 0, names: [], note: '' },
-    'Nejdelší série bez bodu':    { max: 0, names: [], note: '' },
-  };
-
-  // Spočítat hodnoty pro každého jezdce a naplnit max + jména na maximu
-  drivers.forEach(d=>{
-    const f = agg[d].finishes; // jen odjeté (bez DNS), jako dřív
-    const vals = {
-      'Nejvíc výher v sezóně':   agg[d].wins,
-      'Nejdelší série pódií':    longestStreak(f, x=>x<=3),
-      'Nejdelší série bodů':     longestStreak(f, x=>x>=1 && x<=5),
-      'Nejdelší série bez bodu': longestStreak(f, x=>x>5 || !x),
-    };
-    Object.keys(vals).forEach(cat=>{
-      const v = vals[cat]||0;
-      if (v > cats[cat].max) {
-        cats[cat].max = v;
-        cats[cat].names = v>0 ? [d] : []; // když je max 0, neukládej jména
-      } else if (v === cats[cat].max && v > 0) {
-        cats[cat].names.push(d);
-      }
-    });
-  });
-
-  // Pořadí kategorií v tabulce (volitelné)
-  const order = [
-    'Nejvíc výher v sezóně',
-    'Nejdelší série pódií',
-    'Nejdelší série bodů',
-    'Nejdelší série bez bodu',
-  ];
-
-  order.forEach(cat=>{
-    const c = cats[cat];
-    const namesHtml = c.names.length
-      ? c.names.map(n=>`<span class="name-chip" style="border-color:${driverColors[n]||'#888'};color:${driverColors[n]||'#ccc'}">${escapeHtml(n)}</span>`).join(' ')
-      : '—';
-    const valStr = c.max>0 ? c.max : '—';
-    const tr=document.createElement('tr');
-    tr.innerHTML = `<td>${cat}</td><td>${namesHtml}</td><td>${valStr}</td><td>${escapeHtml(c.note||'')}</td>`;
-    stTB.appendChild(tr);
-  });
-  
   // Průměry a konzistence
   const consTB = $('#consistencyTable tbody'); consTB.innerHTML='';
   function avg(arr){ return arr.length? (arr.reduce((a,b)=>a+b,0)/arr.length) : null; }
@@ -2091,7 +2111,7 @@ function renderAdvancedStats(){
     consTB.appendChild(tr);
   });
 
-  // Quali vs Race
+  // Kvalifikace vs. závod
   const qTB=$('#qualiRaceTable tbody'); qTB.innerHTML='';
   const linesQR = drivers.map(d=>{
     const a=agg[d];
@@ -2147,6 +2167,7 @@ function renderAdvancedStats(){
     pTB.appendChild(tr);
   });
 }
+ 
 
 /* === Profil závodníka === */
 function renderProfileInit(){
