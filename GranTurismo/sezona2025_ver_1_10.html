@@ -332,14 +332,15 @@ tbody tr:hover{ background: rgba(255,255,255,0.04); }
   <strong>Titulová matematika <span class="small" id="tmMeta"></span></strong>
   <table id="titleMathTable">
     <thead>
-      <tr>
-        <th>Jezdec</th>
-        <th>Body</th>
-        <th>Max. možné</th>
-        <th>Potřeba na titul</th>
-        <th>Ve hře o titul</th>
-        <th>Ve hře o pódium</th>
-      </tr>
+     <tr>
+  <th>Jezdec</th>
+  <th>Body</th>
+  <th>Max. možné</th>
+  <th>Potřeba na titul</th>
+  <th>Pravděpodobnost podle formy</th>
+  <th>Ve hře o titul</th>
+  <th>Ve hře o TOP3</th>
+</tr>
     </thead>
     <tbody></tbody>
   </table>
@@ -992,76 +993,117 @@ function renderStandingsAndChart(){
   pointsChart = new Chart(ctx,{ type:'line', data:{labels,datasets}, options:{ responsive:true, plugins:{legend:{labels:{color:'#fff'}}}, scales:{x:{ticks:{color:'#fff'}}, y:{ticks:{color:'#fff'}, beginAtZero:true}} }});
 }
 
-/* === Titulová matematika === */
+/* === Titulová matematika (s pravděpodobností podle formy) === */
 function renderTitleMath(){
-  // 1) Nasbíráme body z dokončených závodů (stejná logika jako jinde)
+  // Dokončené závody chronologicky
   const completed = racesCache
     .filter(isCompletedRace)
     .sort((a,b)=> new Date(a.datum||a.date||0) - new Date(b.datum||b.date||0));
 
-  const pts = {};
-  drivers.forEach(d=>pts[d]=0);
+  // Současné body
+  const pts = {}; drivers.forEach(d=>pts[d]=0);
 
+  // Body po závodech + časová řada bodů na závod pro "formu"
+  const perRacePoints = {}; drivers.forEach(d=>perRacePoints[d]=[]);
   completed.forEach(r=>{
     const applied = applyPenalties(getResultsArray(r), Array.isArray(r.penalties)? r.penalties : []);
-    for(let i=0;i<5;i++){
-      const n = applied[i];
-      if(!n || n==='DNS' || n==='—') continue;
-      const drv = normName(n);
-      pts[drv] = (pts[drv]||0) + (pointsMap[i]||0);
-    }
+    drivers.forEach(d=>{
+      const idx = applied.findIndex(x=>normName(x)===d);
+      const p = (idx>-1 && applied[idx]!=='DNS' && applied[idx]!=='—') ? (pointsMap[idx]||0) : 0;
+      pts[d] = (pts[d]||0) + p;
+      perRacePoints[d].push(p);
+    });
   });
 
-  // 2) Zbývající závody a max bodů na závod
+  // Zbývající závody a práh
   const remaining = racesCache.filter(r=>!isCompletedRace(r)).length;
-  const maxPerRace = Math.max(...pointsMap); // u tebe je to 10
+  const maxPerRace = Math.max(...pointsMap);
 
-  // 3) Současné pořadí (pro zjištění lídra a 3. místa)
+  // Pořadí pro zjištění prahů
   const standingArr = drivers.map(d=>({ name:d, pts:(pts[d]||0) }))
     .sort((a,b)=> b.pts - a.pts);
 
   const leaderPts = standingArr[0]?.pts || 0;
   const thirdPts  = standingArr[2]?.pts ?? 0;
 
-  // 4) Max dosažitelné body pro každého
+  // Max dosažitelné (pro zobrazení)
   const maxPossible = {};
   drivers.forEach(d=>{
     maxPossible[d] = (pts[d]||0) + remaining * maxPerRace;
   });
 
-  // 5) Tvojemu požadavku odpovídající prahy:
-  //    - "Ve hře o titul": stačí být schopen dorovnat/překonat současného lídra
-  //    - "Ve hře o pódium": stačí dorovnat/překonat současné 3. místo
-  const thresholdTitle  = leaderPts;
-  const thresholdPodium = thirdPts;
+  // --- Pravděpodobnost podle formy (Monte Carlo) ---
+  // Distribuce formy = posledních 5 hodnot z perRacePoints[d] (pokud není, použij sezónní průměr nebo 0)
+  function lastN(arr, n){ return arr.slice(Math.max(0, arr.length - n)); }
+  function avg(arr){ return arr.length ? arr.reduce((s,x)=>s+x,0)/arr.length : 0; }
+  function sample(arr){
+    // bezpečně: prázdné -> 0
+    if(!arr || !arr.length) return 0;
+    const i = Math.floor(Math.random()*arr.length);
+    return arr[i]||0;
+  }
+  function probReach(nowPts, neededAbs, outcomes, rem, trials){
+    // chceme P(nowPts + sum >= neededAbs)
+    const needed = Math.max(0, neededAbs - nowPts);
+    if(needed<=0) return 1;
+    if(rem<=0) return 0;
+    // Pokud outcomes vše 0 → nikdy se nepřidají body
+    const positive = outcomes.some(x=>x>0);
+    if(!positive) return 0;
+    let ok=0;
+    for(let t=0;t<trials;t++){
+      let sum=0;
+      for(let r=0;r<rem;r++){
+        sum += sample(outcomes);
+        // malá optimalizace: když už splněno, můžeme skončit dřív
+        if(sum>=needed){ ok++; break; }
+      }
+    }
+    return ok/trials;
+  }
 
-  // 6) Render tabulky
+  // Render tabulky
   const tbody = document.querySelector('#titleMathTable tbody');
   if(!tbody) return;
   tbody.innerHTML = '';
 
-  // řadíme stejně jako pořadí (aktuální body)
+  // Počet simulací – kompromis rychlost/hladkost
+  const TRIALS = 2000;
+
   standingArr.forEach(row=>{
     const name = row.name;
     const nowPts = row.pts;
     const maxPts = maxPossible[name];
-    const needForTitle = Math.max(0, thresholdTitle - nowPts);
-    const canWin = maxPts >= thresholdTitle;
-    const canPodium = maxPts >= thresholdPodium;
+
+    const needTitle = Math.max(0, leaderPts - nowPts);
+    const canWin    = maxPts >= leaderPts;
+    const canPodium = maxPts >= thirdPts;
+
+    // outcomes = posledních 5 bodových výnosů; fallback = sezónní průměr (deterministicky),
+    // když jezdec ještě nemá 5 (nebo žádné) závody.
+    let outcomes = lastN(perRacePoints[name]||[], 5);
+    if(outcomes.length===0){
+      const seasonAvg = avg(perRacePoints[name]||[]);
+      outcomes = seasonAvg>0 ? [seasonAvg] : [0];
+    }
+
+    const pForm = remaining>0 ? probReach(nowPts, leaderPts, outcomes, remaining, TRIALS) : (nowPts>=leaderPts?1:0);
+    const pFormPct = Math.round(pForm*100);
 
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td>${escapeHtml(name)}</td>
       <td>${nowPts}</td>
       <td>${maxPts}</td>
-      <td>${needForTitle}</td>
+      <td>${needTitle}</td>
+      <td>${pFormPct}%</td>
       <td>${canWin ? 'ANO' : 'NE'}</td>
       <td>${canPodium ? 'ANO' : 'NE'}</td>
     `;
     tbody.appendChild(tr);
   });
 
-  // 7) Meta info (kolik závodů zbývá, kolik bodů lze získat)
+  // Meta info
   const meta = document.querySelector('#tmMeta');
   if(meta){
     meta.textContent = `• zbývá závodů: ${remaining} • max bodů na závod: ${maxPerRace}`;
