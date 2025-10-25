@@ -2013,23 +2013,66 @@ function renderAdvancedStats(){
     });
   });
 
-  // Rekordy & série (jednoduché metriky)
-  const stTB = $('#streaksTable tbody'); stTB.innerHTML='';
-  // nejdelší série bodovaných závodů, výher, pódií pro každého a vyber top
-  function longestStreak(values, pred){ let best=0, cur=0; values.forEach(v=>{ if(pred(v)){cur++; best=Math.max(best,cur);} else {cur=0;} }); return best; }
-  const records = [];
+    // Rekordy & série – skupinové zobrazení bez duplicit
+  const stTB = $('#streaksTable tbody'); 
+  stTB.innerHTML='';
+
+  function longestStreak(values, pred){
+    let best=0, cur=0; 
+    values.forEach(v=>{
+      if(pred(v)){ cur++; best=Math.max(best,cur); }
+      else { cur=0; }
+    });
+    return best;
+  }
+
+  // Připrav kategorie → {max, names[]}
+  const cats = {
+    'Nejvíc výher v sezóně':      { max: 0, names: [], note: '' },
+    'Nejdelší série pódií':       { max: 0, names: [], note: '' },
+    'Nejdelší série bodů':        { max: 0, names: [], note: '' },
+    'Nejdelší série bez bodu':    { max: 0, names: [], note: '' },
+  };
+
+  // Spočítat hodnoty pro každého jezdce a naplnit max + jména na maximu
   drivers.forEach(d=>{
-    const f = agg[d].finishes;
-    records.push({cat:'Nejvíc výher v sezóně', drv:d, val: agg[d].wins, note:''});
-    records.push({cat:'Nejdelší série pódií', drv:d, val: longestStreak(f, x=>x<=3), note:''});
-    records.push({cat:'Nejdelší série bodů', drv:d, val: longestStreak(f, x=>x>=1 && x<=5), note:''});
-    records.push({cat:'Nejdelší série bez bodu', drv:d, val: longestStreak(f, x=>x>5 || !x), note:''});
-  });
-  records.sort((a,b)=> b.val-a.val);
-  records.slice(0,12).forEach(r=>{
-    const tr=document.createElement('tr'); tr.innerHTML=`<td>${r.cat}</td><td>${r.drv}</td><td>${r.val}</td><td>${r.note||''}</td>`; stTB.appendChild(tr);
+    const f = agg[d].finishes; // jen odjeté (bez DNS), jako dřív
+    const vals = {
+      'Nejvíc výher v sezóně':   agg[d].wins,
+      'Nejdelší série pódií':    longestStreak(f, x=>x<=3),
+      'Nejdelší série bodů':     longestStreak(f, x=>x>=1 && x<=5),
+      'Nejdelší série bez bodu': longestStreak(f, x=>x>5 || !x),
+    };
+    Object.keys(vals).forEach(cat=>{
+      const v = vals[cat]||0;
+      if (v > cats[cat].max) {
+        cats[cat].max = v;
+        cats[cat].names = v>0 ? [d] : []; // když je max 0, neukládej jména
+      } else if (v === cats[cat].max && v > 0) {
+        cats[cat].names.push(d);
+      }
+    });
   });
 
+  // Pořadí kategorií v tabulce (volitelné)
+  const order = [
+    'Nejvíc výher v sezóně',
+    'Nejdelší série pódií',
+    'Nejdelší série bodů',
+    'Nejdelší série bez bodu',
+  ];
+
+  order.forEach(cat=>{
+    const c = cats[cat];
+    const namesHtml = c.names.length
+      ? c.names.map(n=>`<span class="name-chip" style="border-color:${driverColors[n]||'#888'};color:${driverColors[n]||'#ccc'}">${escapeHtml(n)}</span>`).join(' ')
+      : '—';
+    const valStr = c.max>0 ? c.max : '—';
+    const tr=document.createElement('tr');
+    tr.innerHTML = `<td>${cat}</td><td>${namesHtml}</td><td>${valStr}</td><td>${escapeHtml(c.note||'')}</td>`;
+    stTB.appendChild(tr);
+  });
+  
   // Průměry a konzistence
   const consTB = $('#consistencyTable tbody'); consTB.innerHTML='';
   function avg(arr){ return arr.length? (arr.reduce((a,b)=>a+b,0)/arr.length) : null; }
