@@ -233,6 +233,27 @@ tbody tr:hover{ background: rgba(255,255,255,0.04); }
     </div>
 
     <div class="card">
+  <strong>Titulová matematika <span class="small" id="tmMetaHome"></span></strong>
+  <table id="titleMathTableHome">
+    <thead>
+      <tr>
+        <th>Jezdec</th>
+        <th>Body</th>
+        <th>Max. možné</th>
+        <th>Potřeba na titul</th>
+        <th>Ve hře o titul</th>
+        <th>Ve hře o pódium</th>
+        <th>Pravděpodobnost podle formy</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+  <div class="small" style="margin-top:6px;color:#9aa0a6">
+    Pozn.: Orientační výpočet – neřeší tie-break (výhry) při rovnosti bodů.
+  </div>
+</div>
+
+    <div class="card">
       <strong>Výsledky závodů</strong>
       <table id="resultsTable">
         <thead>
@@ -1144,7 +1165,7 @@ function simulateTitleOddsBT(simCount=2000, K=5, decay=0.85){
   return out; // map(name -> P(titul))
 }
 
-/* Render tabulky – doplněno o sloupec „Pravděpodobnost podle formy“ */
+/* === Titulová matematika (BT/PL) – render pro více tabulek === */
 function renderTitleMath(){
   // 1) aktuální body z dokončených závodů
   const completed = racesCache
@@ -1179,36 +1200,46 @@ function renderTitleMath(){
   });
 
   // 4) simulovaná pravděpodobnost titulu podle formy (BT/PL)
-  const probs = simulateTitleOddsBT(2000, 5, 0.85); // můžeš klidně snížit/ zvýšit N
+  const probs = simulateTitleOddsBT(2000, 5, 0.85);
 
-  // 5) render
-  const tbody = document.querySelector('#titleMathTable tbody');
-  if(!tbody) return;
-  tbody.innerHTML = '';
-
-  standingArr.forEach(row=>{
+  // 5) připravíme řádky jako HTML string (jednou) a nasypeme do více tabulek
+  const rowsHtml = standingArr.map(row=>{
     const name = row.name;
     const nowPts = row.pts;
     const maxPts = maxPossible[name];
     const needForTitle = Math.max(0, leaderPts - nowPts);
     const canWin = maxPts >= leaderPts;
     const canPodium = maxPts >= thirdPts;
-
     const p = Math.max(0, Math.min(1, probs[name]||0));
     const probStr = (p*100).toFixed(p>=0.995?0: (p>=0.1?1:2)) + ' %';
 
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>${escapeHtml(name)}</td>
-      <td>${nowPts}</td>
-      <td>${maxPts}</td>
-      <td>${needForTitle}</td>
-      <td>${canWin ? 'ANO' : 'NE'}</td>
-      <td>${canPodium ? 'ANO' : 'NE'}</td>
-      <td>${probStr}</td>
-    `;
-    tbody.appendChild(tr);
+    return `
+      <tr>
+        <td>${escapeHtml(name)}</td>
+        <td>${nowPts}</td>
+        <td>${maxPts}</td>
+        <td>${needForTitle}</td>
+        <td>${canWin ? 'ANO' : 'NE'}</td>
+        <td>${canPodium ? 'ANO' : 'NE'}</td>
+        <td>${probStr}</td>
+      </tr>`;
+  }).join('');
+
+  // 6) naplníme všechny instance tabulky (statistiky + home)
+  ['#titleMathTable', '#titleMathTableHome'].forEach(sel=>{
+    const tbl = document.querySelector(sel);
+    if(!tbl) return;
+    const tbody = tbl.querySelector('tbody');
+    if(tbody) tbody.innerHTML = rowsHtml;
   });
+
+  // 7) meta info (obě místa)
+  const metaText = `• zbývá závodů: ${remaining} • max bodů na závod: ${maxPerRace} • BT z posledních 5 závodů (decay 0.85)`;
+  ['#tmMeta', '#tmMetaHome'].forEach(sel=>{
+    const meta = document.querySelector(sel);
+    if(meta) meta.textContent = metaText;
+  });
+}
 
   const meta = document.querySelector('#tmMeta');
   if(meta){
