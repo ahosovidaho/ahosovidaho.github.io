@@ -940,6 +940,13 @@ function renderDriverLegend(){
 function renderStandingsAndChart(){
   const completed = racesCache.filter(isCompletedRace)
     .sort((a,b)=> new Date(a.datum||a.date||0) - new Date(b.datum||b.date||0));
+
+  // META: doplněk k nadpisu „Pořadí závodníků“
+  const X = completed.length;                                   // odjeté závody
+  const Y = racesCache.filter(r=>!isCompletedRace(r)).length;   // zbývající naplánované
+  const meta = document.getElementById('standingsMeta');
+  if (meta) meta.textContent = `po ${X} odjetých závodech • zbývá ${Y} naplánovaných`;
+
   const stats={}; drivers.forEach(d=>stats[d]={points:0,podiums:0,wins:0,dns:0});
   completed.forEach(r=>{
     const penal = Array.isArray(r.penalties)? r.penalties : [];
