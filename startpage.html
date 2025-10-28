@@ -140,6 +140,19 @@
       font-weight: 600;
     }
 
+    .departure-destination {
+      margin-top: 6px;
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    .departure-meta {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 6px;
+    }
+
     .badge {
       padding: 4px 10px;
       border-radius: 999px;
@@ -305,6 +318,32 @@
       color: var(--danger);
     }
 
+    .panel-actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .ghost-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(148, 163, 184, 0.3);
+      background: transparent;
+      color: var(--text);
+      font-weight: 500;
+      cursor: pointer;
+      transition: border 0.2s ease, color 0.2s ease, background 0.2s ease;
+    }
+
+    .ghost-button:hover {
+      border-color: rgba(56, 189, 248, 0.6);
+      color: var(--accent);
+      background: rgba(56, 189, 248, 0.1);
+    }
+
     @media (max-width: 1024px) {
       body {
         padding: 24px;
@@ -355,6 +394,12 @@
         </div>
         <div id="departures-content">
           <p>Načítám nejbližší odjezdy…</p>
+        </div>
+        <div class="panel-actions">
+          <button type="button" class="ghost-button" id="departures-set-key">
+            <i class="fa-solid fa-key"></i>
+            <span id="departures-key-label">Nastavit API klíč</span>
+          </button>
         </div>
       </section>
 
@@ -411,11 +456,14 @@
         timezone: 'Europe/Prague'
       },
       departures: {
-        stopId: 'U2220Z1',
+        stopIds: ['U680Z1P'],
         stopLabel: 'Slavia – nádraží Eden',
         apiKey: '',
         directionFilter: 'Kooh-i-noor',
-        limit: 6
+        limit: 8,
+        minutesBefore: 0,
+        minutesAfter: 45,
+        timezone: 'Europe/Prague'
       },
       connectivity: {
         url: 'http://192.168.1.1/status',
@@ -465,12 +513,101 @@
     const newsContent = document.getElementById('news-content');
     const serverList = document.getElementById('server-list');
     const linksGrid = document.getElementById('links-grid');
+    const departuresSetKeyButton = document.getElementById('departures-set-key');
+    const departuresKeyLabel = document.getElementById('departures-key-label');
 
     function formatDate(date) {
       return new Intl.DateTimeFormat('cs-CZ', {
         hour: '2-digit',
         minute: '2-digit'
       }).format(date);
+    }
+
+    function formatClock(date) {
+      return date ? formatDate(date) : '—';
+    }
+
+    function toDate(value) {
+      return value ? new Date(value) : null;
+    }
+
+    function minutesUntil(date) {
+      if (!date) return null;
+      const diff = Math.ceil((date.getTime() - Date.now()) / 60000);
+      return diff < 0 ? 0 : diff;
+    }
+
+    function createBadge(label, extraClass = '') {
+      const classes = ['badge'];
+      if (extraClass) classes.push(extraClass);
+      return `<span class="${classes.join(' ')}">${label}</span>`;
+    }
+
+    function safeArray(value) {
+      if (Array.isArray(value)) return value;
+      if (typeof value === 'string') {
+        return value
+          .split(',')
+          .map(part => part.trim())
+          .filter(Boolean);
+      }
+      return [];
+    }
+
+    const ROUTE_TYPE_ICONS = {
+      0: '🚋',
+      1: 'Ⓜ️',
+      2: '🚆',
+      3: '🚌',
+      11: '🚎'
+    };
+
+    const GOLEMIO_STORAGE_KEY = 'golemio_api_key';
+
+    function readStoredGolemioKey() {
+      try {
+        const stored = localStorage.getItem(GOLEMIO_STORAGE_KEY);
+        return stored ? stored.trim() : '';
+      } catch (error) {
+        console.warn('localStorage není dostupný pro Golemio klíč:', error);
+        return '';
+      }
+    }
+
+    function persistGolemioKey(value) {
+      try {
+        if (value) {
+          localStorage.setItem(GOLEMIO_STORAGE_KEY, value.trim());
+        } else {
+          localStorage.removeItem(GOLEMIO_STORAGE_KEY);
+        }
+      } catch (error) {
+        console.warn('Nelze uložit Golemio klíč do localStorage:', error);
+      }
+    }
+
+    function getGolemioApiKey() {
+      const stored = readStoredGolemioKey();
+      if (stored) return stored;
+      return (CONFIG.departures.apiKey || '').trim();
+    }
+
+    function updateDeparturesKeyLabel() {
+      if (!departuresKeyLabel) return;
+      const hasKey = Boolean(getGolemioApiKey());
+      departuresKeyLabel.textContent = hasKey ? 'Změnit API klíč' : 'Nastavit API klíč';
+    }
+
+    if (departuresSetKeyButton) {
+      departuresSetKeyButton.addEventListener('click', () => {
+        const current = readStoredGolemioKey();
+        const next = window.prompt('Zadej Golemio API klíč (X-Access-Token).\nPrázdný vstup klíč odstraní.', current);
+        if (next === null) return;
+        const trimmed = next.trim();
+        persistGolemioKey(trimmed);
+        updateDeparturesKeyLabel();
+        loadDepartures();
+      });
     }
 
     const weatherCodeLabels = {
@@ -535,58 +672,116 @@
     }
 
     async function loadDepartures() {
-      if (!CONFIG.departures.apiKey) {
+      updateDeparturesKeyLabel();
+
+      const apiKey = getGolemioApiKey();
+      if (!apiKey) {
         departuresContent.innerHTML = `
-          <p class="error-message">Zadej API klíč pro PID (Golemio) v objektu CONFIG.departures.apiKey.</p>
-          <p class="timestamp">Zastávka: ${CONFIG.departures.stopLabel} (směr ${CONFIG.departures.directionFilter})</p>
+          <p class="error-message">Pro načtení odjezdů je potřeba Golemio API klíč.</p>
+          <p class="timestamp">Klikni na tlačítko „${departuresKeyLabel ? departuresKeyLabel.textContent : 'Nastavit API klíč'}“ a vlož svůj token.</p>
+          <p class="timestamp">Zastávka: ${CONFIG.departures.stopLabel} · směr ${CONFIG.departures.directionFilter}</p>
         `;
         return;
       }
 
+      const stopIds = safeArray(CONFIG.departures.stopIds);
+      if (!stopIds.length) {
+        departuresContent.innerHTML = '<p class="error-message">Chybí nastavení ID zastávek (CONFIG.departures.stopIds).</p>';
+        return;
+      }
+
       try {
-        const url = `https://api.golemio.cz/v2/pid/departureboards/${CONFIG.departures.stopId}?minutesBefore=0&minutesAfter=45&limit=20`;
-        const response = await fetch(url, {
+        const params = new URLSearchParams({
+          ids: stopIds.join(','),
+          minutesBefore: String(CONFIG.departures.minutesBefore ?? 0),
+          minutesAfter: String(CONFIG.departures.minutesAfter ?? 30),
+          limit: String(Math.max(CONFIG.departures.limit ?? 6, 1)),
+          preferredTimezone: CONFIG.departures.timezone || 'Europe/Prague',
+          includeMetroTrains: 'true'
+        });
+
+        const response = await fetch(`https://api.golemio.cz/v2/pid/departureboards?${params.toString()}`, {
           headers: {
-            'X-Access-Token': CONFIG.departures.apiKey
+            'X-Access-Token': apiKey,
+            'Accept': 'application/json'
           }
         });
-        if (!response.ok) throw new Error('Nepodařilo se načíst odjezdy.');
+
+        if (!response.ok) throw new Error('Nepodařilo se načíst odjezdy. Zkontroluj klíč nebo limity API.');
         const data = await response.json();
+        const directionFilter = (CONFIG.departures.directionFilter || '').toLowerCase();
+
         const departures = (data.departures || [])
           .filter(item => {
-            if (!CONFIG.departures.directionFilter) return true;
-            const direction = item.trip && item.trip.direction;
-            return direction && direction.toLowerCase().includes(CONFIG.departures.directionFilter.toLowerCase());
+            if (!directionFilter) return true;
+            const possible = [
+              item.trip?.headsign,
+              item.trip?.direction,
+              item.last_stop?.name,
+              item.route?.long_name
+            ];
+            return possible.some(value => typeof value === 'string' && value.toLowerCase().includes(directionFilter));
           })
-          .slice(0, CONFIG.departures.limit);
+          .slice(0, CONFIG.departures.limit ?? 6);
 
         if (!departures.length) {
-          departuresContent.innerHTML = '<p>Nebyly nalezeny žádné odjezdy pro zadaný směr.</p>';
+          departuresContent.innerHTML = '<p>Nebyly nalezeny žádné odjezdy pro zadané parametry.</p>';
           return;
         }
 
-        const items = departures.map(dep => {
-          const planned = dep.departure_timestamp;
-          const delayMinutes = dep.departure_delay ? Math.round(dep.departure_delay / 60) : 0;
-          const time = planned ? formatDate(new Date(planned)) : '—';
-          const line = dep.route && (dep.route.short_name || dep.route.long_name) ? dep.route.short_name || dep.route.long_name : 'Linka';
-          const direction = dep.trip?.direction || '—';
-          const delayBadge = delayMinutes === 0 ? '<span class="badge success">Včas</span>' : delayMinutes > 0 ? `<span class="badge warning">+${delayMinutes} min</span>` : `<span class="badge warning">${delayMinutes} min</span>`;
+        const listMarkup = departures.map(dep => {
+          const scheduled = dep.departure_timestamp?.scheduled;
+          const predicted = dep.departure_timestamp?.predicted;
+          const scheduledDate = toDate(scheduled);
+          const predictedDate = toDate(predicted);
+          const displayDate = predictedDate || scheduledDate;
+          const absoluteLabel = formatClock(displayDate);
+          const countdownMinutes = minutesUntil(displayDate);
+          const countdownLabel = countdownMinutes === null ? '—' : countdownMinutes === 0 ? 'odjíždí' : `${countdownMinutes} min`;
+          const countdownClass = countdownMinutes !== null && countdownMinutes <= 1 ? 'success' : '';
+
+          let delayMinutes = null;
+          if (scheduledDate && predictedDate) {
+            delayMinutes = Math.round((predictedDate.getTime() - scheduledDate.getTime()) / 60000);
+          } else if (typeof dep.departure_delay === 'number') {
+            delayMinutes = Math.round(dep.departure_delay / 60);
+          }
+
+          let delayBadge = '';
+          if (delayMinutes !== null) {
+            if (delayMinutes === 0) {
+              delayBadge = createBadge('Včas', 'success');
+            } else if (delayMinutes > 0) {
+              delayBadge = createBadge(`+${delayMinutes} min`, 'danger');
+            } else {
+              delayBadge = createBadge(`${delayMinutes} min`, 'success');
+            }
+          }
+
+          const line = dep.route?.short_name || dep.route?.long_name || 'Linka';
+          const routeTypeRaw = dep.route?.type;
+          const routeType = typeof routeTypeRaw === 'number' ? routeTypeRaw : Number(routeTypeRaw);
+          const icon = Number.isFinite(routeType) ? (ROUTE_TYPE_ICONS[routeType] || '') : '';
+          const platform = dep.stop?.platform_code || dep.stop?.platform_name;
+          const headsignBase = dep.trip?.headsign || dep.trip?.direction || dep.last_stop?.name || '—';
+          const headsign = platform ? `${headsignBase} · st. ${platform}` : headsignBase;
+
+          const badges = [createBadge(countdownLabel, countdownClass), delayBadge].filter(Boolean).join('');
 
           return `
             <div class="departure-item">
               <div>
-                <div class="badge">${line}</div>
-                <div>${direction}</div>
+                <div class="badge">${icon ? `${icon} ` : ''}${line}</div>
+                <div class="departure-destination">${headsign}</div>
               </div>
-              <div class="departure-time">${time}</div>
-              <div>${delayBadge}</div>
+              <div class="departure-time">${absoluteLabel}</div>
+              <div class="departure-meta">${badges}</div>
             </div>
           `;
         }).join('');
 
         departuresContent.innerHTML = `
-          <div class="departure-list">${items}</div>
+          <div class="departure-list">${listMarkup}</div>
           <div class="timestamp">${CONFIG.departures.stopLabel} · Poslední kontrola ${formatDate(new Date())}</div>
         `;
       } catch (error) {
