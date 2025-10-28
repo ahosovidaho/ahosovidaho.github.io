@@ -458,15 +458,15 @@
       departures: {
         stopIds: ['U680Z1P'],
         stopLabel: 'Slavia – nádraží Eden',
-        apiKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NDA4NSwiaWF0IjoxNzYxNTg5NjAzLCJleHAiOjExNzYxNTg5NjAzLCJpc3MiOiJnb2xlbWlvIiwianRpIjoiZmJjNzNiMjYtYjg5Mi00MzA3LWJhZTItMGUwMWJhOTRjYjYyIn0.2qkhf1N1Xd5JI_FDdTyEJsZXUHvE1mFBNx2X2PE8-Rw',
-        directionFilter: ['Kooh-i-noor', 'Koh-i-noor'],
+        apiKey: '',
+        directionFilter: ['Koh-i-noor'],
         limit: 8,
         minutesBefore: 0,
-        minutesAfter: 20,
+        minutesAfter: 45,
         timezone: 'Europe/Prague'
       },
       connectivity: {
-        url: 'http://94.241.91.32',
+        url: 'http://192.168.1.1/status',
         method: 'GET',
         timeoutMs: 4000,
         mode: 'no-cors'
@@ -558,6 +558,15 @@
           .filter(Boolean);
       }
       return [];
+    }
+
+    function detectIdParam(ids) {
+      if (!ids.length) return 'ids';
+      const isASW = ids.every(id => /^\d+(?:_\d+)?$/.test(id));
+      const isCIS = ids.every(id => /^[A-Z]\d+Z\d+P$/i.test(id));
+      if (isASW) return 'aswIds';
+      if (isCIS) return 'cisIds';
+      return 'ids';
     }
 
     function normalizeSearchText(value) {
@@ -716,14 +725,15 @@
       }
 
       try {
+        const idParamName = detectIdParam(stopIds);
         const params = new URLSearchParams({
-          ids: stopIds.join(','),
           minutesBefore: String(CONFIG.departures.minutesBefore ?? 0),
           minutesAfter: String(CONFIG.departures.minutesAfter ?? 30),
           limit: String(Math.max(CONFIG.departures.limit ?? 6, 1)),
           preferredTimezone: CONFIG.departures.timezone || 'Europe/Prague',
           includeMetroTrains: 'true'
         });
+        params.set(idParamName, stopIds.join(','));
 
         const response = await fetch(`https://api.golemio.cz/v2/pid/departureboards?${params.toString()}`, {
           headers: {
@@ -738,37 +748,47 @@
           .flatMap(buildSearchVariants)
           .filter(Boolean);
 
-        const departures = (data.departures || [])
-          .filter(item => {
-            if (!directionFilters.length) return true;
-            const possible = [
-              item.trip?.headsign,
-              item.trip?.direction,
-              item.last_stop?.name,
-              item.route?.long_name,
-              item.route?.description
-            ]
-              .flatMap(buildSearchVariants)
-              .filter(Boolean);
+        const allDepartures = Array.isArray(data.departures) ? data.departures : [];
 
-            if (!possible.length) return false;
+        const filteredDepartures = directionFilters.length
+          ? allDepartures.filter(item => {
+              const possible = [
+                item.trip?.headsign,
+                item.trip?.direction,
+                item.last_stop?.name,
+                item.route?.long_name,
+                item.route?.description
+              ]
+                .flatMap(buildSearchVariants)
+                .filter(Boolean);
 
-            return directionFilters.some(filterTerm =>
-              possible.some(candidate =>
-                candidate.includes(filterTerm) || filterTerm.includes(candidate)
-              )
-            );
-          })
+              if (!possible.length) return false;
+
+              return directionFilters.some(filterTerm =>
+                possible.some(candidate =>
+                  candidate.includes(filterTerm) || filterTerm.includes(candidate)
+                )
+              );
+            })
+          : allDepartures;
+
+        const departures = (filteredDepartures.length ? filteredDepartures : allDepartures)
           .slice(0, CONFIG.departures.limit ?? 6);
 
         if (!departures.length) {
           departuresContent.innerHTML = `
-            <p>Nebyly nalezeny žádné odjezdy pro aktuální filtr.</p>
-            <p class="timestamp">Zastávka: ${CONFIG.departures.stopLabel} · směr ${formatDirectionSummary()}.</p>
-            <p class="timestamp">Zkus upravit filtr směru nebo rozsah minut v nastavení.</p>
+            <p>Nebyly nalezeny žádné odjezdy pro zadané parametry.</p>
+            <p class="timestamp">Zastávka: ${CONFIG.departures.stopLabel} · Poslední kontrola ${formatDate(new Date())}</p>
           `;
           return;
         }
+
+        const usedFilter = filteredDepartures.length
+          ? `směr ${formatDirectionSummary()}`
+          : 'všechny směry';
+        const filterNote = directionFilters.length && !filteredDepartures.length
+          ? '⚠️ filtr nic nenašel, zobrazuji '
+          : '';
 
         const listMarkup = departures.map(dep => {
           const scheduled = dep.departure_timestamp?.scheduled;
@@ -823,7 +843,9 @@
 
         departuresContent.innerHTML = `
           <div class="departure-list">${listMarkup}</div>
-          <div class="timestamp">${CONFIG.departures.stopLabel} · Poslední kontrola ${formatDate(new Date())}</div>
+          <div class="timestamp">
+            ${CONFIG.departures.stopLabel} · ${filterNote}${usedFilter} · Poslední kontrola ${formatDate(new Date())}
+          </div>
         `;
       } catch (error) {
         departuresContent.innerHTML = `<p class="error-message">${error.message}</p>`;
