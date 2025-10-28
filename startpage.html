@@ -570,6 +570,15 @@
         .trim();
     }
 
+    function buildSearchVariants(value) {
+      const normalized = normalizeSearchText(value);
+      if (!normalized) return [];
+      const collapsed = normalized.replace(/\s+/g, '');
+      return collapsed && collapsed !== normalized
+        ? [normalized, collapsed]
+        : [normalized];
+    }
+
     const ROUTE_TYPE_ICONS = {
       0: '🚋',
       1: 'Ⓜ️',
@@ -726,7 +735,7 @@
         if (!response.ok) throw new Error('Nepodařilo se načíst odjezdy. Zkontroluj klíč nebo limity API.');
         const data = await response.json();
         const directionFilters = safeArray(CONFIG.departures.directionFilter)
-          .map(normalizeSearchText)
+          .flatMap(buildSearchVariants)
           .filter(Boolean);
 
         const departures = (data.departures || [])
@@ -736,15 +745,18 @@
               item.trip?.headsign,
               item.trip?.direction,
               item.last_stop?.name,
-              item.route?.long_name
+              item.route?.long_name,
+              item.route?.description
             ]
-              .map(normalizeSearchText)
+              .flatMap(buildSearchVariants)
               .filter(Boolean);
 
             if (!possible.length) return false;
 
             return directionFilters.some(filterTerm =>
-              possible.some(candidate => candidate.includes(filterTerm))
+              possible.some(candidate =>
+                candidate.includes(filterTerm) || filterTerm.includes(candidate)
+              )
             );
           })
           .slice(0, CONFIG.departures.limit ?? 6);
