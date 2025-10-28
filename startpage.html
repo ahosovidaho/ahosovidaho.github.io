@@ -459,7 +459,7 @@
         stopIds: ['U680Z1P'],
         stopLabel: 'Slavia – nádraží Eden',
         apiKey: '',
-        directionFilter: 'Kooh-i-noor',
+        directionFilter: ['Kooh-i-noor', 'Koh-i-noor'],
         limit: 8,
         minutesBefore: 0,
         minutesAfter: 45,
@@ -516,6 +516,12 @@
     const departuresSetKeyButton = document.getElementById('departures-set-key');
     const departuresKeyLabel = document.getElementById('departures-key-label');
 
+    function formatDirectionSummary() {
+      const filters = safeArray(CONFIG.departures.directionFilter);
+      if (!filters.length) return 'všechny směry';
+      return filters.join(', ');
+    }
+
     function formatDate(date) {
       return new Intl.DateTimeFormat('cs-CZ', {
         hour: '2-digit',
@@ -552,6 +558,16 @@
           .filter(Boolean);
       }
       return [];
+    }
+
+    function normalizeSearchText(value) {
+      if (typeof value !== 'string') return '';
+      return value
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .replace(/[\s\-–—]+/g, ' ')
+        .trim();
     }
 
     const ROUTE_TYPE_ICONS = {
@@ -679,7 +695,7 @@
         departuresContent.innerHTML = `
           <p class="error-message">Pro načtení odjezdů je potřeba Golemio API klíč.</p>
           <p class="timestamp">Klikni na tlačítko „${departuresKeyLabel ? departuresKeyLabel.textContent : 'Nastavit API klíč'}“ a vlož svůj token.</p>
-          <p class="timestamp">Zastávka: ${CONFIG.departures.stopLabel} · směr ${CONFIG.departures.directionFilter}</p>
+          <p class="timestamp">Zastávka: ${CONFIG.departures.stopLabel} · směr ${formatDirectionSummary()}</p>
         `;
         return;
       }
@@ -709,23 +725,36 @@
 
         if (!response.ok) throw new Error('Nepodařilo se načíst odjezdy. Zkontroluj klíč nebo limity API.');
         const data = await response.json();
-        const directionFilter = (CONFIG.departures.directionFilter || '').toLowerCase();
+        const directionFilters = safeArray(CONFIG.departures.directionFilter)
+          .map(normalizeSearchText)
+          .filter(Boolean);
 
         const departures = (data.departures || [])
           .filter(item => {
-            if (!directionFilter) return true;
+            if (!directionFilters.length) return true;
             const possible = [
               item.trip?.headsign,
               item.trip?.direction,
               item.last_stop?.name,
               item.route?.long_name
-            ];
-            return possible.some(value => typeof value === 'string' && value.toLowerCase().includes(directionFilter));
+            ]
+              .map(normalizeSearchText)
+              .filter(Boolean);
+
+            if (!possible.length) return false;
+
+            return directionFilters.some(filterTerm =>
+              possible.some(candidate => candidate.includes(filterTerm))
+            );
           })
           .slice(0, CONFIG.departures.limit ?? 6);
 
         if (!departures.length) {
-          departuresContent.innerHTML = '<p>Nebyly nalezeny žádné odjezdy pro zadané parametry.</p>';
+          departuresContent.innerHTML = `
+            <p>Nebyly nalezeny žádné odjezdy pro aktuální filtr.</p>
+            <p class="timestamp">Zastávka: ${CONFIG.departures.stopLabel} · směr ${formatDirectionSummary()}.</p>
+            <p class="timestamp">Zkus upravit filtr směru nebo rozsah minut v nastavení.</p>
+          `;
           return;
         }
 
