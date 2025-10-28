@@ -193,8 +193,21 @@
     .main-layout {
       display: grid;
       gap: 24px;
-      grid-template-columns: 1fr 2fr 1fr;
+      grid-template-columns: minmax(220px, 1fr) minmax(0, 2fr) minmax(220px, 1fr);
+      grid-template-areas: 'links news servers';
       align-items: start;
+    }
+
+    #links-panel {
+      grid-area: links;
+    }
+
+    #news-panel {
+      grid-area: news;
+    }
+
+    #servers-panel {
+      grid-area: servers;
     }
 
     .news-list {
@@ -236,8 +249,8 @@
     }
 
     .links-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      display: flex;
+      flex-direction: column;
       gap: 12px;
     }
 
@@ -299,6 +312,10 @@
 
       .main-layout {
         grid-template-columns: 1fr;
+        grid-template-areas:
+          'links'
+          'news'
+          'servers';
       }
     }
 
