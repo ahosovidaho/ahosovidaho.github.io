@@ -23,11 +23,13 @@
       --warning: #facc15;
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     }
+
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
     }
+
     body {
       background: radial-gradient(circle at top, #1e293b, #0f172a 45%);
       color: var(--text);
@@ -36,30 +38,36 @@
       display: flex;
       justify-content: center;
     }
+
     .app {
       width: min(1200px, 100%);
       display: flex;
       flex-direction: column;
       gap: 24px;
     }
+
     header {
       display: flex;
       flex-direction: column;
       gap: 8px;
     }
+
     header h1 {
       font-size: clamp(32px, 5vw, 44px);
       font-weight: 700;
     }
+
     header p {
       color: var(--text-muted);
       max-width: 600px;
     }
+
     .top-grid {
       display: grid;
       gap: 24px;
       grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
     }
+
     .panel {
       background: var(--bg-card);
       border: 1px solid var(--border);
@@ -72,10 +80,12 @@
       gap: 16px;
       transition: transform 0.2s ease, border 0.2s ease;
     }
+
     .panel:hover {
       transform: translateY(-2px);
       border-color: rgba(56, 189, 248, 0.4);
     }
+
     .panel-header {
       display: flex;
       align-items: center;
@@ -86,29 +96,35 @@
       font-size: 12px;
       color: var(--text-muted);
     }
+
     .panel-header i {
       font-size: 14px;
     }
+
     .weather-main {
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 12px;
     }
+
     .weather-temp {
       font-size: clamp(40px, 5vw, 56px);
       font-weight: 700;
     }
+
     .weather-meta {
       display: grid;
       gap: 6px;
       font-size: 14px;
       color: var(--text-muted);
     }
+
     .departure-list {
       display: grid;
       gap: 12px;
     }
+
     .departure-item {
       display: grid;
       grid-template-columns: 1fr auto auto;
@@ -118,10 +134,12 @@
       border-radius: 12px;
       background: rgba(148, 163, 184, 0.08);
     }
+
     .departure-time {
       font-size: 20px;
       font-weight: 600;
     }
+
     .badge {
       padding: 4px 10px;
       border-radius: 999px;
@@ -132,23 +150,28 @@
       background: rgba(148, 163, 184, 0.16);
       color: var(--text);
     }
+
     .badge.success {
       background: rgba(52, 211, 153, 0.15);
       color: var(--success);
     }
+
     .badge.danger {
       background: rgba(248, 113, 113, 0.15);
       color: var(--danger);
     }
+
     .badge.warning {
       background: rgba(250, 204, 21, 0.15);
       color: var(--warning);
     }
+
     .status {
       display: flex;
       align-items: center;
       gap: 12px;
     }
+
     .status .indicator {
       width: 10px;
       height: 10px;
@@ -156,63 +179,81 @@
       background: var(--warning);
       box-shadow: 0 0 0 4px rgba(250, 204, 21, 0.16);
     }
+
     .status.online .indicator {
       background: var(--success);
       box-shadow: 0 0 0 4px rgba(52, 211, 153, 0.16);
     }
+
     .status.offline .indicator {
       background: var(--danger);
       box-shadow: 0 0 0 4px rgba(248, 113, 113, 0.16);
     }
+
     .main-layout {
       display: grid;
       gap: 24px;
-      grid-template-columns: 2fr 1fr;
+      grid-template-columns: minmax(220px, 1fr) minmax(0, 2fr) minmax(220px, 1fr);
+      grid-template-areas: 'links news servers';
+      align-items: start;
     }
 
-    .main-column {
-      display: grid;
-      gap: 24px;
-      grid-template-columns: 1fr 2fr 1fr;
-      align-items: start;
+    #links-panel {
+      grid-area: links;
+    }
+
+    #news-panel {
+      grid-area: news;
+    }
+
+    #servers-panel {
+      grid-area: servers;
     }
 
     .news-list {
       display: grid;
       gap: 16px;
     }
+
     .news-item {
       display: grid;
       gap: 8px;
       padding-bottom: 12px;
       border-bottom: 1px solid rgba(148, 163, 184, 0.1);
     }
+
     .news-item:last-child {
       border-bottom: none;
       padding-bottom: 0;
     }
+
     .news-item a {
       color: var(--text);
       font-weight: 600;
       text-decoration: none;
       font-size: 18px;
     }
+
     .news-item a:hover {
       color: var(--accent);
     }
+
     .news-meta {
       font-size: 13px;
       color: var(--text-muted);
     }
+
     .news-summary {
       font-size: 14px;
       color: var(--text-muted);
     }
+
     .links-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      display: flex;
+      flex-direction: column;
       gap: 12px;
     }
+
     .quick-link {
       display: flex;
       align-items: center;
@@ -225,14 +266,17 @@
       font-weight: 500;
       transition: background 0.2s ease;
     }
+
     .quick-link:hover {
       background: rgba(56, 189, 248, 0.16);
       color: var(--accent);
     }
+
     .server-list {
       display: grid;
       gap: 16px;
     }
+
     .server-item {
       padding: 16px;
       border-radius: 12px;
@@ -240,34 +284,46 @@
       display: grid;
       gap: 8px;
     }
+
     .server-header {
       display: flex;
       align-items: center;
       gap: 12px;
     }
+
     .server-header i {
       font-size: 20px;
     }
+
     .timestamp {
       font-size: 12px;
       color: var(--text-muted);
     }
+
     .error-message {
       font-size: 14px;
       color: var(--danger);
     }
+
     @media (max-width: 1024px) {
       body {
         padding: 24px;
       }
+
       .main-layout {
         grid-template-columns: 1fr;
+        grid-template-areas:
+          'links'
+          'news'
+          'servers';
       }
     }
+
     @media (max-width: 640px) {
       body {
         padding: 16px;
       }
+
       .panel {
         padding: 16px;
       }
@@ -280,6 +336,7 @@
       <h1>Domácí start</h1>
       <p>Soukromá nástěnka pro každodenní přehled – počasí, MHD, dostupnost domácí sítě a rychlé odkazy.</p>
     </header>
+
     <div class="top-grid">
       <section class="panel" id="weather-panel">
         <div class="panel-header">
@@ -290,6 +347,7 @@
           <p>Načítám aktuální počasí…</p>
         </div>
       </section>
+
       <section class="panel" id="departures-panel">
         <div class="panel-header">
           <i class="fa-solid fa-train-tram"></i>
@@ -299,6 +357,7 @@
           <p>Načítám nejbližší odjezdy…</p>
         </div>
       </section>
+
       <section class="panel" id="internet-panel">
         <div class="panel-header">
           <i class="fa-solid fa-wifi"></i>
@@ -316,16 +375,6 @@
     </div>
 
     <div class="main-layout">
-      <div class="main-column">
-        <section class="panel" id="news-panel">
-          <div class="panel-header">
-            <i class="fa-solid fa-newspaper"></i>
-            <span>iRozhlas.cz – nejnovější zprávy</span>
-          </div>
-          <div id="news-content">
-            <p>Stahuji aktuální články…</p>
-          </div>
-        </section>
       <aside class="panel" id="links-panel">
         <div class="panel-header">
           <i class="fa-solid fa-bookmark"></i>
@@ -334,14 +383,6 @@
         <div class="links-grid" id="links-grid"></div>
       </aside>
 
-        <section class="panel" id="links-panel">
-          <div class="panel-header">
-            <i class="fa-solid fa-bookmark"></i>
-            <span>Rychlé odkazy</span>
-          </div>
-          <div class="links-grid" id="links-grid"></div>
-        </section>
-      </div>
       <section class="panel" id="news-panel">
         <div class="panel-header">
           <i class="fa-solid fa-newspaper"></i>
@@ -361,6 +402,7 @@
       </aside>
     </div>
   </div>
+
   <script>
     const CONFIG = {
       weather: {
@@ -417,17 +459,20 @@
         { label: 'Bankovnictví', url: 'https://ib.examplebank.cz', icon: 'fa-piggy-bank' }
       ]
     };
+
     const weatherContent = document.getElementById('weather-content');
     const departuresContent = document.getElementById('departures-content');
     const newsContent = document.getElementById('news-content');
     const serverList = document.getElementById('server-list');
     const linksGrid = document.getElementById('links-grid');
+
     function formatDate(date) {
       return new Intl.DateTimeFormat('cs-CZ', {
         hour: '2-digit',
         minute: '2-digit'
       }).format(date);
     }
+
     const weatherCodeLabels = {
       0: 'Jasno',
       1: 'Převážně jasno',
@@ -458,6 +503,7 @@
       96: 'Bouřka s krupobitím',
       99: 'Silná bouřka'
     };
+
     async function loadWeather() {
       try {
         const { latitude, longitude, timezone } = CONFIG.weather;
@@ -468,6 +514,7 @@
         const current = data.current;
         const weatherLabel = weatherCodeLabels[current.weather_code] || 'Počasí neznámé';
         const updatedAt = new Date(current.time);
+
         weatherContent.innerHTML = `
           <div class="weather-main">
             <div>
@@ -486,6 +533,7 @@
         weatherContent.innerHTML = `<p class="error-message">${error.message}</p>`;
       }
     }
+
     async function loadDepartures() {
       if (!CONFIG.departures.apiKey) {
         departuresContent.innerHTML = `
@@ -494,6 +542,7 @@
         `;
         return;
       }
+
       try {
         const url = `https://api.golemio.cz/v2/pid/departureboards/${CONFIG.departures.stopId}?minutesBefore=0&minutesAfter=45&limit=20`;
         const response = await fetch(url, {
@@ -510,10 +559,12 @@
             return direction && direction.toLowerCase().includes(CONFIG.departures.directionFilter.toLowerCase());
           })
           .slice(0, CONFIG.departures.limit);
+
         if (!departures.length) {
           departuresContent.innerHTML = '<p>Nebyly nalezeny žádné odjezdy pro zadaný směr.</p>';
           return;
         }
+
         const items = departures.map(dep => {
           const planned = dep.departure_timestamp;
           const delayMinutes = dep.departure_delay ? Math.round(dep.departure_delay / 60) : 0;
@@ -521,6 +572,7 @@
           const line = dep.route && (dep.route.short_name || dep.route.long_name) ? dep.route.short_name || dep.route.long_name : 'Linka';
           const direction = dep.trip?.direction || '—';
           const delayBadge = delayMinutes === 0 ? '<span class="badge success">Včas</span>' : delayMinutes > 0 ? `<span class="badge warning">+${delayMinutes} min</span>` : `<span class="badge warning">${delayMinutes} min</span>`;
+
           return `
             <div class="departure-item">
               <div>
@@ -532,6 +584,7 @@
             </div>
           `;
         }).join('');
+
         departuresContent.innerHTML = `
           <div class="departure-list">${items}</div>
           <div class="timestamp">${CONFIG.departures.stopLabel} · Poslední kontrola ${formatDate(new Date())}</div>
@@ -540,11 +593,13 @@
         departuresContent.innerHTML = `<p class="error-message">${error.message}</p>`;
       }
     }
+
     function withTimeout(promise, timeout) {
       return new Promise((resolve, reject) => {
         const timer = setTimeout(() => {
           reject(new Error('Vypršel časový limit.'));
         }, timeout);
+
         promise
           .then(value => {
             clearTimeout(timer);
@@ -556,9 +611,11 @@
           });
       });
     }
+
     async function checkEndpoint({ url, method = 'GET', timeoutMs = 5000, mode = 'cors', headers }) {
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), timeoutMs);
+
       try {
         const response = await fetch(url, {
           method,
@@ -574,14 +631,17 @@
         throw error;
       }
     }
+
     async function checkConnectivity() {
       const statusEl = document.getElementById('internet-status');
       const statusTextEl = statusEl.querySelector('.status-text');
       const timestampEl = document.getElementById('internet-timestamp');
       const errorEl = document.getElementById('internet-error');
+
       statusEl.classList.remove('online', 'offline');
       statusTextEl.textContent = 'Kontroluji dostupnost…';
       errorEl.textContent = '';
+
       try {
         const ok = await withTimeout(checkEndpoint(CONFIG.connectivity), CONFIG.connectivity.timeoutMs + 1000);
         statusEl.classList.add(ok ? 'online' : 'offline');
@@ -594,6 +654,7 @@
         errorEl.textContent = 'Zkontroluj CORS nebo adresu zařízení.';
       }
     }
+
     function renderLinks() {
       linksGrid.innerHTML = CONFIG.links.map(link => `
         <a class="quick-link" href="${link.url}" target="_blank" rel="noopener">
@@ -602,9 +663,11 @@
         </a>
       `).join('');
     }
+
     async function checkServers() {
       serverList.innerHTML = '';
       const now = formatDate(new Date());
+
       for (const server of CONFIG.servers) {
         const item = document.createElement('div');
         item.className = 'server-item';
@@ -618,6 +681,7 @@
           </div>
         `;
         serverList.appendChild(item);
+
         try {
           const ok = await withTimeout(checkEndpoint({ ...server, timeoutMs: 5000 }), 6000);
           item.innerHTML = `
@@ -651,6 +715,7 @@
         }
       }
     }
+
     async function loadNews() {
       try {
         const url = `https://api.allorigins.win/raw?url=${encodeURIComponent(CONFIG.news.feedUrl)}`;
@@ -660,10 +725,12 @@
         const parser = new DOMParser();
         const xml = parser.parseFromString(text, 'application/xml');
         const items = Array.from(xml.querySelectorAll('item')).slice(0, CONFIG.news.limit);
+
         if (!items.length) {
           newsContent.innerHTML = '<p>Nenačteny žádné články.</p>';
           return;
         }
+
         const list = items.map(item => {
           const title = item.querySelector('title')?.textContent || 'Bez názvu';
           const link = item.querySelector('link')?.textContent || '#';
@@ -674,6 +741,7 @@
             .replace(/&nbsp;/g, ' ')
             .replace(/\s+/g, ' ')
             .trim();
+
           return `
             <article class="news-item">
               <a href="${link}" target="_blank" rel="noopener">${title}</a>
@@ -682,11 +750,13 @@
             </article>
           `;
         }).join('');
+
         newsContent.innerHTML = `<div class="news-list">${list}</div>`;
       } catch (error) {
         newsContent.innerHTML = `<p class="error-message">${error.message}</p>`;
       }
     }
+
     function init() {
       renderLinks();
       loadWeather();
@@ -694,12 +764,14 @@
       loadDepartures();
       checkConnectivity();
       checkServers();
+
       setInterval(loadWeather, 20 * 60 * 1000);
       setInterval(loadNews, 30 * 60 * 1000);
       setInterval(loadDepartures, 60 * 1000);
       setInterval(checkConnectivity, 60 * 1000);
       setInterval(checkServers, 5 * 60 * 1000);
     }
+
     document.addEventListener('DOMContentLoaded', init);
   </script>
 </body>
