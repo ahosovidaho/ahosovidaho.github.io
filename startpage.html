@@ -193,12 +193,8 @@
     .main-layout {
       display: grid;
       gap: 24px;
-      grid-template-columns: 2fr 1fr;
-    }
-
-    .main-column {
-      display: grid;
-      gap: 24px;
+      grid-template-columns: 1fr 2fr 1fr;
+      align-items: start;
     }
 
     .news-list {
@@ -362,25 +358,23 @@
     </div>
 
     <div class="main-layout">
-      <div class="main-column">
-        <section class="panel" id="news-panel">
-          <div class="panel-header">
-            <i class="fa-solid fa-newspaper"></i>
-            <span>iRozhlas.cz – nejnovější zprávy</span>
-          </div>
-          <div id="news-content">
-            <p>Stahuji aktuální články…</p>
-          </div>
-        </section>
+      <aside class="panel" id="links-panel">
+        <div class="panel-header">
+          <i class="fa-solid fa-bookmark"></i>
+          <span>Rychlé odkazy</span>
+        </div>
+        <div class="links-grid" id="links-grid"></div>
+      </aside>
 
-        <section class="panel" id="links-panel">
-          <div class="panel-header">
-            <i class="fa-solid fa-bookmark"></i>
-            <span>Rychlé odkazy</span>
-          </div>
-          <div class="links-grid" id="links-grid"></div>
-        </section>
-      </div>
+      <section class="panel" id="news-panel">
+        <div class="panel-header">
+          <i class="fa-solid fa-newspaper"></i>
+          <span>iRozhlas.cz – nejnovější zprávy</span>
+        </div>
+        <div id="news-content">
+          <p>Stahuji aktuální články…</p>
+        </div>
+      </section>
 
       <aside class="panel" id="servers-panel">
         <div class="panel-header">
