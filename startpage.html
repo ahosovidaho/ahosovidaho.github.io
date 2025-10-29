@@ -9,7 +9,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-p0rV4D6wXYSMBi3uB5pRgJWSn8z0QKBFsSDnoefUp0tOSAuF0zZjwkzPWxgSWAIymFcpnG8m7nWwIBQHyZhCgA==" crossorigin="anonymous" referrerpolicy="no-referrer"/>
+  <!-- SRI integrity odstraněno – původní hash neodpovídal a CSS se blokovalo -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" referrerpolicy="no-referrer" />
 
   <style>
     :root{
@@ -26,10 +27,8 @@
     header h1{font-size:clamp(32px,5vw,44px);font-weight:700}
     header p{color:var(--text-muted);max-width:600px}
     .top-grid{display:grid;gap:24px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
-    .panel{background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:20px;backdrop-filter:blur(16px);box-shadow:0 20px 40px -24px rgba(15,23,42,.65);display:flex;flex-direction:column;gap:16px;transition:transform .2s ease,border .2s ease}
-    .panel:hover{transform:translateY(-2px);border-color:rgba(56,189,248,.4)}
+    .panel{background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:20px;backdrop-filter:blur(16px);box-shadow:0 20px 40px -24px rgba(15,23,42,.65);display:flex;flex-direction:column;gap:16px}
     .panel-header{display:flex;align-items:center;gap:12px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;font-size:12px;color:var(--text-muted)}
-    .panel-header i{font-size:14px}
     .weather-main{display:flex;align-items:center;justify-content:space-between;gap:12px}
     .weather-temp{font-size:clamp(40px,5vw,56px);font-weight:700}
     .weather-meta{display:grid;gap:6px;font-size:14px;color:var(--text-muted)}
@@ -54,7 +53,7 @@
     .main-layout{display:grid;gap:24px;grid-template-columns:minmax(220px,1fr) minmax(0,2fr) minmax(220px,1fr);grid-template-areas:'links news servers';align-items:start}
     #links-panel{grid-area:links} #news-panel{grid-area:news} #servers-panel{grid-area:servers}
     .links-grid{display:flex;flex-direction:column;gap:12px}
-    .quick-link{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;background:rgba(148,163,184,.08);color:var(--text);text-decoration:none;font-weight:500;transition:background .2s ease}
+    .quick-link{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;background:rgba(148,163,184,.08);color:var(--text);text-decoration:none;font-weight:500}
     .quick-link:hover{background:rgba(56,189,248,.16);color:var(--accent)}
     .server-list{display:grid;gap:16px}
     .server-item{padding:16px;border-radius:12px;background:rgba(148,163,184,.08);display:grid;gap:8px}
@@ -67,16 +66,6 @@
     .news-item{display:grid;gap:8px;padding-bottom:12px;border-bottom:1px solid rgba(148,163,184,.1)}
     .news-item:last-child{border-bottom:none;padding-bottom:0}
     .news-item a{color:var(--text);font-weight:600;text-decoration:none;font-size:18px}
-    .news-item a:hover{color:var(--accent)}
-
-    @media (max-width:1024px){
-      body{padding:24px}
-      .main-layout{grid-template-columns:1fr;grid-template-areas:'links' 'news' 'servers'}
-    }
-    @media (max-width:640px){
-      body{padding:16px}
-      .panel{padding:16px}
-    }
   </style>
 </head>
 <body>
@@ -143,18 +132,19 @@
 
   <script>
   (function(){
-    /* ====== Konfigurace ====== */
+    /* ==================== KONFIG ==================== */
     const CONFIG = {
       weather:{ latitude:50.0704, longitude:14.4709, timezone:'Europe/Prague' },
       departures:{
         stopIds:['U680Z1P'],
         stopLabel:'Slavia – nádraží Eden',
-        apiKey:'',
+        apiKey:'',                     // nebo nastav přes tlačítko
+        proxyUrl:'',                   // <— pokud běží stránka na veřejné HTTPS doméně, nastav sem svou proxy (např. https://golemio-proxy.tamayo.cz/dep)
         directionFilter:[],
         routeFilter:[],
-        platformFilter:'A',                 // 'A' | 'B' | '' (vše) – NEplatí pro vlaky
-        displayMode:'mins',                 // 'mins' nebo 'time'
-        limit:8, minutesBefore:0, minutesAfter:45, timezone:'Europe/Prague'
+        platformFilter:'A',            // 'A' | 'B' | ''  (neplatí pro vlaky)
+        displayMode:'mins',            // 'mins' nebo 'time'
+        limit:12, minutesBefore:0, minutesAfter:45, timezone:'Europe/Prague'
       },
       connectivity:{ url:'http://192.168.1.1/status', method:'GET', timeoutMs:4000, mode:'no-cors' },
       servers:[
@@ -173,7 +163,7 @@
       ]
     };
 
-    /* ====== DOM refs ====== */
+    /* ==================== DOM ==================== */
     const weatherContent = document.getElementById('weather-content');
     const departuresContent = document.getElementById('departures-content');
     const newsContent = document.getElementById('news-content');
@@ -184,18 +174,18 @@
     const departuresTogglePlatform = document.getElementById('departures-toggle-platform');
     const departuresPlatformLabel = document.getElementById('departures-platform-label');
 
-    /* ====== Utils ====== */
+    /* ==================== Utils ==================== */
     const ROUTE_TYPE_ICONS = {0:'🚋',1:'Ⓜ️',2:'🚆',3:'🚌',11:'🚎'};
     const GOLEMIO_STORAGE_KEY = 'golemio_api_key';
     const PLATFORM_STORAGE_KEY = 'departures_platform';
+    const isHttps = () => location.protocol === 'https:';
+    const isLocalhost = () => /^(localhost|127\.0\.0\.1)$/i.test(location.hostname);
 
     const safeArray = v => Array.isArray(v) ? v : (typeof v==='string' ? v.split(',').map(s=>s.trim()).filter(Boolean) : []);
     const formatDate = d => new Intl.DateTimeFormat('cs-CZ',{hour:'2-digit',minute:'2-digit'}).format(d);
     const toDate = v => v ? new Date(v) : null;
     const minutesUntil = d => { if(!d) return null; const diff=Math.ceil((d.getTime()-Date.now())/60000); return diff<0?0:diff; };
     const createBadge = (t,cls='') => `<span class="badge ${cls}">${t}</span>`;
-    const normalize = s => (typeof s==='string'? s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[\s\-–—]+/g,' ').trim() : '');
-    const variants = s => { const n=normalize(s); if(!n) return []; const c=n.replace(/\s+/g,''); return c&&c!==n?[n,c]:[n]; };
 
     const readStoredKey = () => { try{ return (localStorage.getItem(GOLEMIO_STORAGE_KEY)||'').trim(); }catch{ return ''; } };
     const persistKey = v => { try{ v?localStorage.setItem(GOLEMIO_STORAGE_KEY,v.trim()):localStorage.removeItem(GOLEMIO_STORAGE_KEY);}catch{} };
@@ -204,33 +194,10 @@
 
     const readPlatformPref = () => { try { return (localStorage.getItem(PLATFORM_STORAGE_KEY) || ''); } catch { return ''; } };
     const persistPlatformPref = (v) => { try { localStorage.setItem(PLATFORM_STORAGE_KEY, v); } catch {} };
-    function updatePlatformLabel(){
-      if (!departuresPlatformLabel) return;
-      const p = (CONFIG.departures.platformFilter || '').toString().toUpperCase();
-      departuresPlatformLabel.textContent = `Směr: ${p || 'vše'}`;
-    }
+    const updatePlatformLabel = () => { const p=(CONFIG.departures.platformFilter||'').toUpperCase(); departuresPlatformLabel.textContent=`Směr: ${p||'vše'}`; };
 
-    function readUrlParams(){
-      const p = new URLSearchParams(location.search);
-      const o = {};
-      if (p.get('ids'))       o.stopIds = p.get('ids').split(',').map(s=>s.trim()).filter(Boolean);
-      if (p.get('title'))     o.stopLabel = p.get('title').trim();
-      if (p.get('limit'))     o.limit = Math.max(1, parseInt(p.get('limit'),10) || CONFIG.departures.limit);
-      if (p.get('mode'))      o.displayMode = (p.get('mode').toLowerCase()==='time') ? 'time' : 'mins';
-      if (p.get('platform'))  o.platformFilter = p.get('platform').trim().toUpperCase();
-      if (p.get('before'))    o.minutesBefore = Math.max(0, parseInt(p.get('before'),10) || 0);
-      if (p.get('after'))     o.minutesAfter = Math.max(1, parseInt(p.get('after'),10) || CONFIG.departures.minutesAfter);
-      if (p.get('dir'))       o.directionFilter = p.get('dir').split(',').map(s=>s.trim()).filter(Boolean);
-      if (p.get('route'))     o.routeFilter = p.get('route').split(',').map(s=>s.trim()).filter(Boolean);
-      return o;
-    }
-
-    /* === NOVÉ: detekce spuštění z file:// kvůli CORS === */
-    const isFileOrigin = () => location.protocol === 'file:';
-
-    /* ====== Weather ====== */
-    const weatherLabels = {0:'Jasno',1:'Převážně jasno',2:'Oblačno',3:'Zataženo',45:'Mlha',48:'Mrznoucí mlha',51:'Mírné mrholení',53:'Mrholení',55:'Intenzivní mrholení',56:'Mrznoucí mrholení',57:'Mrznoucí mrholení',61:'Slabý déšť',63:'Déšť',65:'Silný déšť',66:'Mrznoucí déšť',67:'Mrznoucí déšť',71:'Slabé sněžení',73:'Sněžení',75:'Silné sněžení',77:'Kroupy',80:'Přeháňky',81:'Déšť',82:'Silný déšť',85:'Sněhové přeháňky',86:'Silné sněhové přeháňky',95:'Bouřka',96:'Bouřka s krupobitím',99:'Silná bouřka'};
-
+    /* ==================== Počasí ==================== */
+    const weatherLabels={0:'Jasno',1:'Převážně jasno',2:'Oblačno',3:'Zataženo',45:'Mlha',48:'Mrznoucí mlha',51:'Mírné mrholení',53:'Mrholení',55:'Intenzivní mrholení',56:'Mrznoucí mrholení',57:'Mrznoucí mrholení',61:'Slabý déšť',63:'Déšť',65:'Silný déšť',66:'Mrznoucí déšť',67:'Mrznoucí déšť',71:'Slabé sněžení',73:'Sněžení',75:'Silné sněžení',77:'Kroupy',80:'Přeháňky',81:'Déšť',82:'Silný déšť',85:'Sněhové přeháňky',86:'Silné sněhové přeháňky',95:'Bouřka',96:'Bouřka s krupobitím',99:'Silná bouřka'};
     async function loadWeather(){
       try{
         const {latitude,longitude,timezone}=CONFIG.weather;
@@ -238,7 +205,7 @@
         const res=await fetch(url);
         if(!res.ok) throw new Error('Nepodařilo se načíst počasí.');
         const data=await res.json(); const c=data.current; const label=weatherLabels[c.weather_code]||'Počasí neznámé';
-        weatherContent.innerHTML = `
+        weatherContent.innerHTML=`
           <div class="weather-main">
             <div><div class="weather-temp">${Math.round(c.temperature_2m)}°C</div><div>${label}</div></div>
             <div class="weather-meta">
@@ -248,28 +215,31 @@
               <span class="timestamp">Aktualizováno ${formatDate(new Date(c.time))}</span>
             </div>
           </div>`;
-      }catch(e){ weatherContent.innerHTML = `<p class="error-message">${e.message}</p>`; }
+      }catch(e){ weatherContent.innerHTML=`<p class="error-message">${e.message}</p>`; }
     }
 
-    /* ====== Departures ====== */
+    /* ==================== Odjezdy ==================== */
+    function normalize(s){ return (typeof s==='string'? s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[\s\-–—]+/g,' ').trim() : ''); }
+    function variants(s){ const n=normalize(s); if(!n) return []; const c=n.replace(/\s+/g,''); return c&&c!==n?[n,c]:[n]; }
     function directionSummary(){ const f=safeArray(CONFIG.departures.directionFilter); return f.length?f.join(', '):'všechny směry'; }
 
     async function loadDepartures(){
-      /* NOVÉ: přehledné varování při file:// */
-      if (isFileOrigin()) {
+      updateKeyLabel();
+
+      // Pokud běžíme na HTTPS a nemáš proxy, vysvětli proč to spadne
+      const needsProxy = isHttps() && !isLocalhost() && !CONFIG.departures.proxyUrl;
+      if (needsProxy) {
         departuresContent.innerHTML = `
-          <p class="error-message">Nelze načíst odjezdy: stránka běží z <code>file://</code> a prohlížeč blokuje požadavek s&nbsp;vlastní hlavičkou.</p>
-          <p class="timestamp">Spusť přes <strong>http://localhost</strong> (např. <code>python3 -m http.server 8080</code>) nebo ji hostuj na webu.</p>`;
+          <p class="error-message">Nelze načíst odjezdy přímo z Golemio z veřejné HTTPS domény kvůli CORS.</p>
+          <p class="timestamp">Řešení: nastav <strong>CONFIG.departures.proxyUrl</strong> na vlastní proxy (např. Cloudflare Worker/Netlify), která přidá hlavičku <code>X-Access-Token</code> a <code>Access-Control-Allow-Origin</code>. Nebo spusť stránku lokálně přes <code>http://localhost</code>.</p>`;
         return;
       }
 
-      updateKeyLabel();
       const apiKey=getApiKey();
       if(!apiKey){
         departuresContent.innerHTML = `
           <p class="error-message">Pro načtení odjezdů je potřeba Golemio API klíč.</p>
-          <p class="timestamp">Klikni na „${departuresKeyLabel?departuresKeyLabel.textContent:'Nastavit API klíč'}“ a vlož token.</p>
-          <p class="timestamp">Zastávka: ${CONFIG.departures.stopLabel} · ${directionSummary()}</p>`;
+          <p class="timestamp">Klikni na „${departuresKeyLabel?departuresKeyLabel.textContent:'Nastavit API klíč'}“ a vlož token.</p>`;
         return;
       }
 
@@ -282,10 +252,24 @@
           minutesAfter:String(CONFIG.departures.minutesAfter??30), limit:String(Math.max(CONFIG.departures.limit??6,1)),
           preferredTimezone:CONFIG.departures.timezone||'Europe/Prague', includeMetroTrains:'true'
         });
-        const res=await fetch(`https://api.golemio.cz/v2/pid/departureboards?${params.toString()}`,{
-          headers:{'X-Access-Token':apiKey,'Accept':'application/json'}
-        });
-        if(!res.ok){ const t=await res.text().catch(()=> ''); throw new Error(`HTTP ${res.status}: ${t||'Nepodařilo se načíst odjezdy.'}`); }
+
+        // když je definována proxyUrl, pošli dotaz přes ni
+        let url;
+        let headers = {'Accept':'application/json'};
+        if (CONFIG.departures.proxyUrl) {
+          // proxy by měla sama přidat X-Access-Token na backendu; pokud chceš posílat token i z frontendu, přidej zde.
+          url = `${CONFIG.departures.proxyUrl}?${params.toString()}`;
+          headers['X-Access-Token'] = apiKey; // povoleno pokud proxy je na stejné doméně a vrací správné CORS
+        } else {
+          url = `https://api.golemio.cz/v2/pid/departureboards?${params.toString()}`;
+          headers['X-Access-Token'] = apiKey;
+        }
+
+        const res=await fetch(url,{ headers });
+        if(!res.ok){
+          const t=await res.text().catch(()=> '');
+          throw new Error(`HTTP ${res.status}: ${t||'Nepodařilo se načíst odjezdy.'}`);
+        }
         const data=await res.json();
 
         const platform = (CONFIG.departures.platformFilter||'').toString().trim().toLowerCase();
@@ -293,16 +277,14 @@
         const routeFilter = safeArray(CONFIG.departures.routeFilter).map(s=>s.toLowerCase());
         const all = Array.isArray(data.departures)? data.departures : [];
 
-        // 1) Platforma A/B NEplatí pro vlaky (type === 2) → S9 projde vždy
         const byPlatform = platform ? all.filter(d=>{
           const type = Number(d.route?.type);
-          if (type === 2) return true;
+          if (type === 2) return true; // vlaky – nefiltruj platformu
           const code=(d.stop?.platform_code||'').toString().toLowerCase();
           const name=(d.stop?.platform_name||'').toString().toLowerCase();
           return code===platform || name===`st. ${platform}` || name===platform;
         }) : all;
 
-        // 2) Volitelný filtr linek (short_name), např. ['S9']
         const byRoute = routeFilter.length
           ? byPlatform.filter(d => {
               const short = String(d.route?.short_name || '').toLowerCase();
@@ -310,7 +292,6 @@
             })
           : byPlatform;
 
-        // 3) Volitelný textový filtr směru / headsignu
         const filtered = dirFilters.length ? byRoute.filter(d=>{
           const possible=[d.trip?.headsign,d.trip?.direction,d.last_stop?.name,d.route?.long_name,d.route?.description]
             .flatMap(variants).filter(Boolean);
@@ -322,7 +303,7 @@
           const bits=[];
           if(platform) bits.push(`st. ${platform.toUpperCase()}`);
           if(routeFilter.length) bits.push(`linky ${routeFilter.join(', ').toUpperCase()}`);
-          if(dirFilters.length) bits.push(`směr ${directionSummary()}`);
+          if(dirFilters.length) bits.push(`směr ${dirFilters.join(', ')}`);
           departuresContent.innerHTML = `
             <p>Nebyly nalezeny žádné odjezdy pro zadaný filtr (${bits.join(' · ')||'všechny směry'}).</p>
             <p class="timestamp">${CONFIG.departures.stopLabel} · Poslední kontrola ${formatDate(new Date())}</p>`;
@@ -332,11 +313,10 @@
         const list = filtered.slice(0, CONFIG.departures.limit??6).map(dep=>{
           const s=dep.departure_timestamp?.scheduled, p=dep.departure_timestamp?.predicted;
           const sd=toDate(s), pd=toDate(p), show=pd||sd;
-          const hhmm = show ? formatDate(show) : '—';
+          const timeLabel = show ? formatDate(show) : '—';
           const mins = minutesUntil(show);
-
           const mode = CONFIG.departures.displayMode||'mins';
-          const cnt = (mode==='time') ? hhmm : (mins===null?'—':(mins===0?'odjíždí':`${mins} min`));
+          const cnt = (mode==='time') ? timeLabel : (mins===null?'—':(mins===0?'odjíždí':`${mins} min`));
           const cntClass = (mode==='mins' && mins!==null && mins<=1) ? 'success' : '';
 
           let delay=null;
@@ -358,7 +338,7 @@
                 <div class="badge">${icon?`${icon} `:''}${line}</div>
                 <div class="departure-destination">${headFull}</div>
               </div>
-              <div class="departure-time">${hhmm}</div>
+              <div class="departure-time">${timeLabel}</div>
               <div class="departure-meta">${createBadge(cnt,cntClass)}${delayBadge}</div>
             </div>`;
         }).join('');
@@ -377,7 +357,7 @@
       }
     }
 
-    /* ====== News ====== */
+    /* ==================== News ==================== */
     async function loadNews(){
       try{
         const url=`https://api.allorigins.win/raw?url=${encodeURIComponent(CONFIG.news.feedUrl)}`;
@@ -397,14 +377,20 @@
       }catch(e){ newsContent.innerHTML = `<p class="error-message">${e.message}</p>`; }
     }
 
-    /* ====== Connectivity / Servers ====== */
+    /* ==================== Connectivity / Servers (Mixed Content safe) ==================== */
     function withTimeout(promise, ms){
       return new Promise((res,rej)=>{
         const t=setTimeout(()=>rej(new Error('Vypršel časový limit.')),ms);
         promise.then(v=>{clearTimeout(t);res(v)}).catch(e=>{clearTimeout(t);rej(e)});
       });
     }
+    function isHttpUrl(u){ try{ return new URL(u, location.href).protocol === 'http:'; }catch{ return false; } }
+
     async function checkEndpoint({url,method='GET',timeoutMs=5000,mode='cors',headers}){
+      // Pokud stránka běží na HTTPS a cíl je HTTP, raději nespouštěj (Mixed Content)
+      if (isHttps() && isHttpUrl(url)) {
+        throw new Error('Blokováno prohlížečem (Mixed Content: HTTPS stránka → HTTP cíl).');
+      }
       const ctrl=new AbortController(); const tm=setTimeout(()=>ctrl.abort(),timeoutMs);
       try{ const r=await fetch(url,{method,mode,cache:'no-store',headers,signal:ctrl.signal}); clearTimeout(tm); return r.ok||r.type==='opaque'; }
       catch(e){ clearTimeout(tm); throw e; }
@@ -418,7 +404,9 @@
       try{
         const ok=await withTimeout(checkEndpoint(CONFIG.connectivity), CONFIG.connectivity.timeoutMs+1000);
         statusEl.classList.add(ok?'online':'offline'); statusText.textContent=ok?'Gateway je dostupná':'Gateway je nedostupná'; ts.textContent=`Aktualizováno ${formatDate(new Date())}`;
-      }catch{ statusEl.classList.add('offline'); statusText.textContent='Gateway nedostupná'; ts.textContent=`Aktualizováno ${formatDate(new Date())}`; err.textContent='Zkontroluj CORS nebo adresu zařízení.'; }
+      }catch(e){
+        statusEl.classList.add('offline'); statusText.textContent='Gateway nedostupná'; ts.textContent=`Aktualizováno ${formatDate(new Date())}`; err.textContent=e.message||'Chyba připojení.';
+      }
     }
     function renderLinks(){
       linksGrid.innerHTML = CONFIG.links.map(l=>`
@@ -435,13 +423,29 @@
         try{
           const ok=await withTimeout(checkEndpoint({...s,timeoutMs:5000}),6000);
           item.innerHTML=`<div class="server-header"><i class="fa-solid ${s.icon}"></i><div><div>${s.name}</div><div class="timestamp">Aktualizováno ${now}</div></div></div><div class="status ${ok?'online':'offline'}"><div class="indicator"></div><div>${ok?'Online':'Offline'}</div></div>`;
-        }catch{
-          item.innerHTML=`<div class="server-header"><i class="fa-solid ${s.icon}"></i><div><div>${s.name}</div><div class="timestamp">Aktualizováno ${now}</div></div></div><div class="status offline"><div class="indicator"></div><div>Offline</div></div><p class="error-message">Nelze navázat spojení. Ověř adresu a CORS.</p>`;
+        }catch(e){
+          item.innerHTML=`<div class="server-header"><i class="fa-solid ${s.icon}"></i><div><div>${s.name}</div><div class="timestamp">Aktualizováno ${now}</div></div></div><div class="status offline"><div class="indicator"></div><div>Offline</div></div><p class="error-message">${e.message||'Nelze navázat spojení.'}</p>`;
         }
       }
     }
 
-    /* ====== Init ====== */
+    /* ==================== Init ==================== */
+    function readUrlParams(){
+      const p = new URLSearchParams(location.search);
+      const o = {};
+      if (p.get('ids'))       o.stopIds = p.get('ids').split(',').map(s=>s.trim()).filter(Boolean);
+      if (p.get('title'))     o.stopLabel = p.get('title').trim();
+      if (p.get('limit'))     o.limit = Math.max(1, parseInt(p.get('limit'),10) || CONFIG.departures.limit);
+      if (p.get('mode'))      o.displayMode = (p.get('mode').toLowerCase()==='time') ? 'time' : 'mins';
+      if (p.get('platform'))  o.platformFilter = p.get('platform').trim().toUpperCase();
+      if (p.get('before'))    o.minutesBefore = Math.max(0, parseInt(p.get('before'),10) || 0);
+      if (p.get('after'))     o.minutesAfter = Math.max(1, parseInt(p.get('after'),10) || CONFIG.departures.minutesAfter);
+      if (p.get('dir'))       o.directionFilter = p.get('dir').split(',').map(s=>s.trim()).filter(Boolean);
+      if (p.get('route'))     o.routeFilter = p.get('route').split(',').map(s=>s.trim()).filter(Boolean);
+      if (p.get('proxy'))     o.proxyUrl = p.get('proxy').trim();
+      return o;
+    }
+
     function init(){
       Object.assign(CONFIG.departures, readUrlParams());
 
