@@ -170,13 +170,14 @@
         timezone: 'Europe/Prague'
       },
       departures: {
-        stopIds: ['U680Z1P'],           // GTFS stop_id pro Slavia – nádraží Eden
+        stopIds: ['U680Z1P'],           // výchozí GTFS stop_id
         stopLabel: 'Slavia – nádraží Eden',
-        apiKey: '',                     // token se bere z localStorage (tlačítko dole)
-        directionFilter: [],// volitelný textový filtr
-        platformFilter: 'A',            // ← NOVÉ: filtr podle stání (A/B)
+        apiKey: '',                     // token bere přednostně z localStorage
+        directionFilter: [],            // volitelný textový filtr (většinou prázdné)
+        platformFilter: 'A',            // 'A' nebo 'B' = směr
+        displayMode: 'mins',            // 'mins' (za X min) | 'time' (HH:MM)
         limit: 8,
-        minutesBefore: 5,
+        minutesBefore: 0,
         minutesAfter: 45,
         timezone: 'Europe/Prague'
       },
@@ -210,29 +211,30 @@
     const departuresSetKeyButton = document.getElementById('departures-set-key');
     const departuresKeyLabel = document.getElementById('departures-key-label');
 
-    function formatDirectionSummary() {
-      const filters = safeArray(CONFIG.departures.directionFilter);
-      if (!filters.length) return 'všechny směry';
-      return filters.join(', ');
+    /* ==== Helpers ==== */
+    function safeArray(value) {
+      if (Array.isArray(value)) return value;
+      if (typeof value === 'string') return value.split(',').map(s=>s.trim()).filter(Boolean);
+      return [];
     }
-    function formatDate(date) { return new Intl.DateTimeFormat('cs-CZ', { hour: '2-digit', minute: '2-digit' }).format(date); }
+    function formatDate(date) { return new Intl.DateTimeFormat('cs-CZ', { hour:'2-digit', minute:'2-digit' }).format(date); }
     function formatClock(date) { return date ? formatDate(date) : '—'; }
     function toDate(value) { return value ? new Date(value) : null; }
-    function minutesUntil(date) { if (!date) return null; const diff = Math.ceil((date.getTime() - Date.now()) / 60000); return diff < 0 ? 0 : diff; }
-    function createBadge(label, extraClass = '') { const classes = ['badge']; if (extraClass) classes.push(extraClass); return `<span class="${classes.join(' ')}">${label}</span>`; }
-    function safeArray(value) { if (Array.isArray(value)) return value; if (typeof value === 'string') { return value.split(',').map(p=>p.trim()).filter(Boolean);} return []; }
-    function normalizeSearchText(value) { if (typeof value !== 'string') return ''; return value.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[\s\-–—]+/g,' ').trim(); }
-    function buildSearchVariants(value) { const n = normalizeSearchText(value); if (!n) return []; const c = n.replace(/\s+/g,''); return c && c!==n ? [n,c] : [n]; }
+    function minutesUntil(date) { if (!date) return null; const diff = Math.ceil((date.getTime()-Date.now())/60000); return diff < 0 ? 0 : diff; }
+    function createBadge(label, extraClass='') { const c=['badge']; if (extraClass) c.push(extraClass); return `<span class="${c.join(' ')}">${label}</span>`; }
+    function normalizeSearchText(v){ if(typeof v!=='string')return''; return v.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[\s\-–—]+/g,' ').trim(); }
+    function buildSearchVariants(v){ const n=normalizeSearchText(v); if(!n) return []; const c=n.replace(/\s+/g,''); return c&&c!==n?[n,c]:[n]; }
+    function formatDirectionSummary() { const f = safeArray(CONFIG.departures.directionFilter); return f.length ? f.join(', ') : 'všechny směry'; }
 
     const ROUTE_TYPE_ICONS = { 0:'🚋', 1:'Ⓜ️', 2:'🚆', 3:'🚌', 11:'🚎' };
     const GOLEMIO_STORAGE_KEY = 'golemio_api_key';
 
-    function readStoredGolemioKey() { try { const s = localStorage.getItem(GOLEMIO_STORAGE_KEY); return s ? s.trim() : ''; } catch { return ''; } }
-    function persistGolemioKey(v) { try { if (v) localStorage.setItem(GOLEMIO_STORAGE_KEY, v.trim()); else localStorage.removeItem(GOLEMIO_STORAGE_KEY);} catch {} }
-    function getGolemioApiKey() { const s = readStoredGolemioKey(); if (s) return s; return (CONFIG.departures.apiKey || '').trim(); }
-    function updateDeparturesKeyLabel() { if (!departuresKeyLabel) return; const hasKey = Boolean(getGolemioApiKey()); departuresKeyLabel.textContent = hasKey ? 'Změnit API klíč' : 'Nastavit API klíč'; }
-    if (departuresSetKeyButton) {
-      departuresSetKeyButton.addEventListener('click', () => {
+    function readStoredGolemioKey(){ try{ const s=localStorage.getItem(GOLEMIO_STORAGE_KEY); return s? s.trim():''; }catch{ return ''; } }
+    function persistGolemioKey(v){ try{ if(v) localStorage.setItem(GOLEMIO_STORAGE_KEY, v.trim()); else localStorage.removeItem(GOLEMIO_STORAGE_KEY);}catch{} }
+    function getGolemioApiKey(){ const s=readStoredGolemioKey(); return s || (CONFIG.departures.apiKey||'').trim(); }
+    function updateDeparturesKeyLabel(){ if(!departuresKeyLabel) return; departuresKeyLabel.textContent = getGolemioApiKey() ? 'Změnit API klíč' : 'Nastavit API klíč'; }
+    if (departuresSetKeyButton){
+      departuresSetKeyButton.addEventListener('click', ()=>{
         const current = readStoredGolemioKey();
         const next = window.prompt('Zadej Golemio API klíč (X-Access-Token).\nPrázdný vstup klíč odstraní.', current);
         if (next === null) return;
@@ -240,6 +242,24 @@
         updateDeparturesKeyLabel();
         loadDepartures();
       });
+    }
+
+    /* === URL parametry ve stylu Scriptable ===
+       ?ids=U680Z1P,U123 | &title=Slavia | &limit=12 | &mode=mins|time
+       &platform=A|B | &before=0 | &after=45 | &dir=Koh-i-noor,Vypich
+    */
+    function readUrlParams(){
+      const p = new URLSearchParams(location.search);
+      const opt = {};
+      if (p.get('ids'))      opt.stopIds = p.get('ids').split(',').map(s=>s.trim()).filter(Boolean);
+      if (p.get('title'))    opt.stopLabel = p.get('title').trim();
+      if (p.get('limit'))    opt.limit = Math.max(1, parseInt(p.get('limit'),10) || CONFIG.departures.limit);
+      if (p.get('mode'))     opt.displayMode = (p.get('mode').toLowerCase()==='time') ? 'time' : 'mins';
+      if (p.get('platform')) opt.platformFilter = p.get('platform').trim().toUpperCase(); // A/B
+      if (p.get('before'))   opt.minutesBefore = Math.max(0, parseInt(p.get('before'),10) || 0);
+      if (p.get('after'))    opt.minutesAfter  = Math.max(1, parseInt(p.get('after'),10)  || CONFIG.departures.minutesAfter);
+      if (p.get('dir'))      opt.directionFilter = p.get('dir').split(',').map(s=>s.trim()).filter(Boolean);
+      return opt;
     }
 
     const weatherCodeLabels = { 0:'Jasno',1:'Převážně jasno',2:'Oblačno',3:'Zataženo',45:'Mlha',48:'Mrznoucí mlha',51:'Mírné mrholení',53:'Mrholení',55:'Intenzivní mrholení',56:'Mrznoucí mrholení',57:'Mrznoucí mrholení',61:'Slabý déšť',63:'Déšť',65:'Silný déšť',66:'Mrznoucí déšť',67:'Mrznoucí déšť',71:'Slabé sněžení',73:'Sněžení',75:'Silné sněžení',77:'Kroupy',80:'Přeháňky',81:'Déšť',82:'Silný déšť',85:'Sněhové přeháňky',86:'Silné sněhové přeháňky',95:'Bouřka',96:'Bouřka s krupobitím',99:'Silná bouřka' };
@@ -272,7 +292,7 @@
       }
     }
 
-    /* ======== OPRAVENÝ WIDGET ODJEZDŮ ======== */
+    /* ======== OPRAVENÝ WIDGET ODJEZDŮ (Scriptable-like) ======== */
     async function loadDepartures() {
       updateDeparturesKeyLabel();
 
@@ -280,8 +300,8 @@
       if (!apiKey) {
         departuresContent.innerHTML = `
           <p class="error-message">Pro načtení odjezdů je potřeba Golemio API klíč.</p>
-          <p class="timestamp">Klikni na tlačítko „${departuresKeyLabel ? departuresKeyLabel.textContent : 'Nastavit API klíč'}“ a vlož svůj token.</p>
-          <p class="timestamp">Zastávka: ${CONFIG.departures.stopLabel} · směr ${formatDirectionSummary()}</p>`;
+          <p class="timestamp">Klikni na „${departuresKeyLabel ? departuresKeyLabel.textContent : 'Nastavit API klíč'}“ a vlož token.</p>
+          <p class="timestamp">Zastávka: ${CONFIG.departures.stopLabel} · ${formatDirectionSummary()}</p>`;
         return;
       }
 
@@ -292,54 +312,47 @@
       }
 
       try {
-        // U680Z1P = GTFS stop_id → parametr "ids"
+        // U680Z1P je GTFS stop_id → API parametr "ids"
         const params = new URLSearchParams({
+          ids: stopIds.join(','),
           minutesBefore: String(CONFIG.departures.minutesBefore ?? 0),
           minutesAfter: String(CONFIG.departures.minutesAfter ?? 30),
           limit: String(Math.max(CONFIG.departures.limit ?? 6, 1)),
           preferredTimezone: CONFIG.departures.timezone || 'Europe/Prague',
           includeMetroTrains: 'true'
         });
-        params.set('ids', stopIds.join(','));
 
-        const url = `https://api.golemio.cz/v2/pid/departureboards?${params.toString()}`;
-        const response = await fetch(url, {
+        const response = await fetch(`https://api.golemio.cz/v2/pid/departureboards?${params.toString()}`, {
           headers: { 'X-Access-Token': apiKey, 'Accept': 'application/json' }
         });
 
         if (!response.ok) {
-          const text = await response.text().catch(() => '');
+          const text = await response.text().catch(()=>'');
           throw new Error(`HTTP ${response.status}: ${text || 'Nepodařilo se načíst odjezdy.'}`);
         }
 
         const data = await response.json();
 
-        // --- filtry ---
+        // --- filtry (platforma A/B, volitelně textový headsign) ---
         const directionFilters = safeArray(CONFIG.departures.directionFilter)
           .flatMap(buildSearchVariants)
           .filter(Boolean);
 
         const platformFilter = (CONFIG.departures.platformFilter || '')
-          .toString()
-          .trim()
-          .toLowerCase();
+          .toString().trim().toLowerCase();
 
-        const allDepartures = Array.isArray(data.departures) ? data.departures : [];
+        const all = Array.isArray(data.departures) ? data.departures : [];
 
-        // 1) filtr podle stání (st. A / st. B)
-        const platformFiltered = platformFilter
-          ? allDepartures.filter(d => {
-              const code = (d.stop?.platform_code || '').toString().toLowerCase(); // např. "a"
-              const name = (d.stop?.platform_name || '').toString().toLowerCase(); // např. "st. a"
-              return code === platformFilter
-                  || name === `st. ${platformFilter}`
-                  || name === platformFilter;
+        const byPlatform = platformFilter
+          ? all.filter(d => {
+              const code = (d.stop?.platform_code || '').toString().toLowerCase();   // "a"
+              const name = (d.stop?.platform_name || '').toString().toLowerCase();   // "st. a"
+              return code === platformFilter || name === `st. ${platformFilter}` || name === platformFilter;
             })
-          : allDepartures;
+          : all;
 
-        // 2) volitelný textový filtr (headsign)
-        const filteredDepartures = directionFilters.length
-          ? platformFiltered.filter(item => {
+        const filtered = directionFilters.length
+          ? byPlatform.filter(item => {
               const possible = [
                 item.trip?.headsign,
                 item.trip?.direction,
@@ -347,36 +360,29 @@
                 item.route?.long_name,
                 item.route?.description
               ].flatMap(buildSearchVariants).filter(Boolean);
-
               if (!possible.length) return false;
-
-              return directionFilters.some(filterTerm =>
-                possible.some(candidate =>
-                  candidate.includes(filterTerm) || filterTerm.includes(candidate)
-                )
-              );
+              return directionFilters.some(f => possible.some(c => c.includes(f) || f.includes(c)));
             })
-          : platformFiltered;
+          : byPlatform;
 
-        // Když po filtrech nic nezbyde → ukaž čistě hlášku (žádný fallback)
-        if (!filteredDepartures.length) {
-          const usedBitsEmpty = [];
-          if (platformFilter) usedBitsEmpty.push(`st. ${platformFilter.toUpperCase()}`);
-          if (directionFilters.length) usedBitsEmpty.push(`směr ${formatDirectionSummary()}`);
-          const usedEmpty = usedBitsEmpty.length ? usedBitsEmpty.join(' · ') : 'všechny směry';
-
+        if (!filtered.length) {
+          const bits = [];
+          if (platformFilter) bits.push(`st. ${platformFilter.toUpperCase()}`);
+          if (directionFilters.length) bits.push(`směr ${formatDirectionSummary()}`);
           departuresContent.innerHTML = `
-            <p>Nebyly nalezeny žádné odjezdy pro zadaný filtr (${usedEmpty}).</p>
+            <p>Nebyly nalezeny žádné odjezdy pro zadaný filtr (${bits.join(' · ') || 'všechny směry'}).</p>
             <p class="timestamp">${CONFIG.departures.stopLabel} · Poslední kontrola ${formatDate(new Date())}</p>`;
           return;
         }
 
-        const departures = filteredDepartures.slice(0, CONFIG.departures.limit ?? 6);
+        const departures = filtered.slice(0, CONFIG.departures.limit ?? 6);
 
         const usedBits = [];
         if (platformFilter) usedBits.push(`st. ${platformFilter.toUpperCase()}`);
         if (directionFilters.length) usedBits.push(`směr ${formatDirectionSummary()}`);
         const usedFilter = usedBits.length ? usedBits.join(' · ') : 'všechny směry';
+
+        const displayMode = CONFIG.departures.displayMode || 'mins';
 
         const listMarkup = departures.map(dep => {
           const scheduled = dep.departure_timestamp?.scheduled;
@@ -385,13 +391,24 @@
           const predictedDate = toDate(predicted);
           const displayDate = predictedDate || scheduledDate;
           const absoluteLabel = formatClock(displayDate);
+
           const countdownMinutes = minutesUntil(displayDate);
-          const countdownLabel = countdownMinutes === null ? '—' : countdownMinutes === 0 ? 'odjíždí' : `${countdownMinutes} min`;
-          const countdownClass = countdownMinutes !== null && countdownMinutes <= 1 ? 'success' : '';
+
+          let countdownLabel;
+          if (displayMode === 'time') {
+            countdownLabel = absoluteLabel;
+          } else {
+            countdownLabel = (countdownMinutes === null) ? '—'
+              : (countdownMinutes === 0 ? 'odjíždí' : `${countdownMinutes} min`);
+          }
+          const countdownClass = (displayMode === 'mins' && countdownMinutes !== null && countdownMinutes <= 1) ? 'success' : '';
 
           let delayMinutes = null;
-          if (scheduledDate && predictedDate) delayMinutes = Math.round((predictedDate.getTime() - scheduledDate.getTime()) / 60000);
-          else if (typeof dep.departure_delay === 'number') delayMinutes = Math.round(dep.departure_delay / 60);
+          if (scheduledDate && predictedDate) {
+            delayMinutes = Math.round((predictedDate.getTime() - scheduledDate.getTime()) / 60000);
+          } else if (typeof dep.departure_delay === 'number') {
+            delayMinutes = Math.round(dep.departure_delay / 60);
+          }
 
           let delayBadge = '';
           if (delayMinutes !== null) {
@@ -434,7 +451,7 @@
 
     function withTimeout(promise, timeout) {
       return new Promise((resolve, reject) => {
-        const timer = setTimeout(() => { reject(new Error('Vypršel časový limit.')); }, timeout);
+        const timer = setTimeout(() => reject(new Error('Vypršel časový limit.')), timeout);
         promise.then(v => { clearTimeout(timer); resolve(v); })
                .catch(err => { clearTimeout(timer); reject(err); });
       });
@@ -533,47 +550,14 @@
       }
     }
 
-    async function loadNews() {
-      try {
-        const url = `https://api.allorigins.win/raw?url=${encodeURIComponent(CONFIG.news.feedUrl)}`;
-        const response = await fetch(url);
-        if (!response.ok) throw new Error('Nepodařilo se načíst RSS.');
-        const text = await response.text();
-        const parser = new DOMParser();
-        const xml = parser.parseFromString(text, 'application/xml');
-        const items = Array.from(xml.querySelectorAll('item')).slice(0, CONFIG.news.limit);
-
-        if (!items.length) {
-          newsContent.innerHTML = '<p>Nenačteny žádné články.</p>';
-          return;
-        }
-
-        const list = items.map(item => {
-          const title = item.querySelector('title')?.textContent || 'Bez názvu';
-          const link = item.querySelector('link')?.textContent || '#';
-          const pubDate = item.querySelector('pubDate') ? new Date(item.querySelector('pubDate').textContent) : null;
-          const rawDescription = item.querySelector('description')?.textContent || '';
-          const description = rawDescription.replace(/<[^>]*>/g, ' ').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim();
-
-          return `
-            <article class="news-item">
-              <a href="${link}" target="_blank" rel="noopener">${title}</a>
-              <div class="news-meta">${pubDate ? formatDate(pubDate) : ''}</div>
-              <p class="news-summary">${description}</p>
-            </article>`;
-        }).join('');
-
-        newsContent.innerHTML = `<div class="news-list">${list}</div>`;
-      } catch (error) {
-        newsContent.innerHTML = `<p class="error-message">${error.message}</p>`;
-      }
-    }
-
     function init() {
+      // přimícháme URL parametry ve stylu Scriptable
+      Object.assign(CONFIG.departures, readUrlParams());
+
       renderLinks();
       loadWeather();
       loadNews();
-      loadDepartures();      // ← opravený widget
+      loadDepartures();      // ← MHD widget
       checkConnectivity();
       checkServers();
 
