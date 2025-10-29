@@ -97,8 +97,14 @@
         <div class="panel-header"><i class="fa-solid fa-train-tram"></i><span>Odjezdy MHD</span></div>
         <div id="departures-content"><p>Načítám nejbližší odjezdy…</p></div>
         <div class="panel-actions">
+          <!-- NOVÉ: přepínač směru A/B/vše -->
+          <button type="button" class="ghost-button" id="departures-toggle-platform">
+            <i class="fa-solid fa-right-left"></i>
+            <span id="departures-platform-label">Směr: A</span>
+          </button>
           <button type="button" class="ghost-button" id="departures-set-key">
-            <i class="fa-solid fa-key"></i><span id="departures-key-label">Nastavit API klíč</span>
+            <i class="fa-solid fa-key"></i>
+            <span id="departures-key-label">Nastavit API klíč</span>
           </button>
         </div>
       </section>
@@ -144,9 +150,9 @@
         stopIds:['U680Z1P'],                 // GTFS stop_id → Golemio param "ids"
         stopLabel:'Slavia – nádraží Eden',
         apiKey:'',                           // přednost má localStorage
-        directionFilter:[],                  // volitelné (většinou prázdné)
-        routeFilter:[],                      // NOVÉ: např. ['S9'] pro omezení na linky
-        platformFilter:'A',                  // 'A' nebo 'B' = směr (na vlaky se neuplatní)
+        directionFilter:[],                  // volitelné
+        routeFilter:[],                      // např. ['S9'] pro omezení na linky
+        platformFilter:'A',                  // 'A' | 'B' | '' (vše) – NEplatí pro vlaky
         displayMode:'mins',                  // 'mins' nebo 'time'
         limit:8, minutesBefore:0, minutesAfter:45, timezone:'Europe/Prague'
       },
@@ -175,10 +181,13 @@
     const linksGrid = document.getElementById('links-grid');
     const departuresSetKeyButton = document.getElementById('departures-set-key');
     const departuresKeyLabel = document.getElementById('departures-key-label');
+    const departuresTogglePlatform = document.getElementById('departures-toggle-platform');
+    const departuresPlatformLabel = document.getElementById('departures-platform-label');
 
     /* ====== Utils ====== */
     const ROUTE_TYPE_ICONS = {0:'🚋',1:'Ⓜ️',2:'🚆',3:'🚌',11:'🚎'};
     const GOLEMIO_STORAGE_KEY = 'golemio_api_key';
+    const PLATFORM_STORAGE_KEY = 'departures_platform';
 
     const safeArray = v => Array.isArray(v) ? v : (typeof v==='string' ? v.split(',').map(s=>s.trim()).filter(Boolean) : []);
     const formatDate = d => new Intl.DateTimeFormat('cs-CZ',{hour:'2-digit',minute:'2-digit'}).format(d);
@@ -193,6 +202,14 @@
     const getApiKey = () => readStoredKey() || (CONFIG.departures.apiKey||'').trim();
     const updateKeyLabel = () => { if(departuresKeyLabel) departuresKeyLabel.textContent = getApiKey() ? 'Změnit API klíč' : 'Nastavit API klíč'; };
 
+    const readPlatformPref = () => { try { return (localStorage.getItem(PLATFORM_STORAGE_KEY) || ''); } catch { return ''; } };
+    const persistPlatformPref = (v) => { try { localStorage.setItem(PLATFORM_STORAGE_KEY, v); } catch {} };
+    function updatePlatformLabel(){
+      if (!departuresPlatformLabel) return;
+      const p = (CONFIG.departures.platformFilter || '').toString().toUpperCase();
+      departuresPlatformLabel.textContent = `Směr: ${p || 'vše'}`;
+    }
+
     function readUrlParams(){
       const p = new URLSearchParams(location.search);
       const o = {};
@@ -204,7 +221,7 @@
       if (p.get('before'))    o.minutesBefore = Math.max(0, parseInt(p.get('before'),10) || 0);
       if (p.get('after'))     o.minutesAfter = Math.max(1, parseInt(p.get('after'),10) || CONFIG.departures.minutesAfter);
       if (p.get('dir'))       o.directionFilter = p.get('dir').split(',').map(s=>s.trim()).filter(Boolean);
-      if (p.get('route'))     o.routeFilter = p.get('route').split(',').map(s=>s.trim()).filter(Boolean); // NOVÉ
+      if (p.get('route'))     o.routeFilter = p.get('route').split(',').map(s=>s.trim()).filter(Boolean);
       return o;
     }
 
@@ -231,7 +248,7 @@
       }catch(e){ weatherContent.innerHTML = `<p class="error-message">${e.message}</p>`; }
     }
 
-    /* ====== Departures (opraveno + S9 podpora) ====== */
+    /* ====== Departures (opraveno + S9 podpora + přepínač směru) ====== */
     function directionSummary(){ const f=safeArray(CONFIG.departures.directionFilter); return f.length?f.join(', '):'všechny směry'; }
 
     async function loadDepartures(){
@@ -263,19 +280,18 @@
         const platform = (CONFIG.departures.platformFilter||'').toString().trim().toLowerCase();
         const dirFilters = safeArray(CONFIG.departures.directionFilter).flatMap(variants).filter(Boolean);
         const routeFilter = safeArray(CONFIG.departures.routeFilter).map(s=>s.toLowerCase());
-
         const all = Array.isArray(data.departures)? data.departures : [];
 
-        // 1) Platforma A/B NEplatí pro vlaky (type === 2) → S9 vždy projde
+        // 1) Platforma A/B NEplatí pro vlaky (type === 2) → S9 projde vždy
         const byPlatform = platform ? all.filter(d=>{
           const type = Number(d.route?.type);
-          if (type === 2) return true; // vlak: neomezujeme nástupištěm
+          if (type === 2) return true; // vlak: neomezovat nástupištěm
           const code=(d.stop?.platform_code||'').toString().toLowerCase();
           const name=(d.stop?.platform_name||'').toString().toLowerCase(); // "st. a"
           return code===platform || name===`st. ${platform}` || name===platform;
         }) : all;
 
-        // 2) Volitelný filtr linek (short_name) – např. ['S9']
+        // 2) Volitelný filtr linek (short_name), např. ['S9']
         const byRoute = routeFilter.length
           ? byPlatform.filter(d => {
               const short = String(d.route?.short_name || '').toLowerCase();
@@ -416,18 +432,42 @@
 
     /* ====== Init ====== */
     function init(){
-      Object.assign(CONFIG.departures, readUrlParams()); // ?ids=&platform=&mode=&route=S9
+      // načti parametry z URL
+      Object.assign(CONFIG.departures, readUrlParams());
+
+      // preferovaná platforma z localStorage (pokud není v URL)
+      const urlHasPlatform = new URLSearchParams(location.search).has('platform');
+      if (!urlHasPlatform) {
+        const storedPlat = readPlatformPref();
+        if (storedPlat === '' || storedPlat === 'A' || storedPlat === 'B') {
+          CONFIG.departures.platformFilter = storedPlat || '';
+        }
+      }
+
+      // tlačítka
       if (departuresSetKeyButton){
         departuresSetKeyButton.addEventListener('click',()=>{
           const cur=readStoredKey();
-          const nxt=window.prompt('Zadej Golemio API klíč (X-Access-Token).\nPrázdný vstup klíč odstraní.',cur);
+          const nxt=window.prompt('Zadej Golemio API klíč (X-Access-Token).\nPrázdný vstup klíč odstraní.',cur||'');
           if(nxt===null) return;
-          persistKey(nxt.trim()); updateKeyLabel(); loadDepartures();
+          persistKey((nxt||'').trim()); updateKeyLabel(); loadDepartures();
         });
       }
+      if (departuresTogglePlatform){
+        departuresTogglePlatform.addEventListener('click', ()=>{
+          const cur = (CONFIG.departures.platformFilter || '').toString().toUpperCase(); // '', 'A', 'B'
+          const next = cur === 'A' ? 'B' : (cur === 'B' ? '' : 'A'); // A → B → vše → A
+          CONFIG.departures.platformFilter = next;
+          persistPlatformPref(next);
+          updatePlatformLabel();
+          loadDepartures();
+        });
+      }
+
       renderLinks();
       loadWeather();
       loadNews();
+      updatePlatformLabel();
       loadDepartures();
       checkConnectivity();
       checkServers();
