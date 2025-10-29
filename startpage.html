@@ -145,7 +145,8 @@
         stopLabel:'Slavia – nádraží Eden',
         apiKey:'',                           // přednost má localStorage
         directionFilter:[],                  // volitelné (většinou prázdné)
-        platformFilter:'A',                  // 'A' nebo 'B' = směr
+        routeFilter:[],                      // NOVÉ: např. ['S9'] pro omezení na linky
+        platformFilter:'A',                  // 'A' nebo 'B' = směr (na vlaky se neuplatní)
         displayMode:'mins',                  // 'mins' nebo 'time'
         limit:8, minutesBefore:0, minutesAfter:45, timezone:'Europe/Prague'
       },
@@ -203,6 +204,7 @@
       if (p.get('before'))    o.minutesBefore = Math.max(0, parseInt(p.get('before'),10) || 0);
       if (p.get('after'))     o.minutesAfter = Math.max(1, parseInt(p.get('after'),10) || CONFIG.departures.minutesAfter);
       if (p.get('dir'))       o.directionFilter = p.get('dir').split(',').map(s=>s.trim()).filter(Boolean);
+      if (p.get('route'))     o.routeFilter = p.get('route').split(',').map(s=>s.trim()).filter(Boolean); // NOVÉ
       return o;
     }
 
@@ -229,7 +231,7 @@
       }catch(e){ weatherContent.innerHTML = `<p class="error-message">${e.message}</p>`; }
     }
 
-    /* ====== Departures (opraveno) ====== */
+    /* ====== Departures (opraveno + S9 podpora) ====== */
     function directionSummary(){ const f=safeArray(CONFIG.departures.directionFilter); return f.length?f.join(', '):'všechny směry'; }
 
     async function loadDepartures(){
@@ -257,25 +259,43 @@
         });
         if(!res.ok){ const t=await res.text().catch(()=> ''); throw new Error(`HTTP ${res.status}: ${t||'Nepodařilo se načíst odjezdy.'}`); }
         const data=await res.json();
+
         const platform = (CONFIG.departures.platformFilter||'').toString().trim().toLowerCase();
         const dirFilters = safeArray(CONFIG.departures.directionFilter).flatMap(variants).filter(Boolean);
+        const routeFilter = safeArray(CONFIG.departures.routeFilter).map(s=>s.toLowerCase());
 
         const all = Array.isArray(data.departures)? data.departures : [];
+
+        // 1) Platforma A/B NEplatí pro vlaky (type === 2) → S9 vždy projde
         const byPlatform = platform ? all.filter(d=>{
+          const type = Number(d.route?.type);
+          if (type === 2) return true; // vlak: neomezujeme nástupištěm
           const code=(d.stop?.platform_code||'').toString().toLowerCase();
           const name=(d.stop?.platform_name||'').toString().toLowerCase(); // "st. a"
           return code===platform || name===`st. ${platform}` || name===platform;
         }) : all;
 
-        const filtered = dirFilters.length ? byPlatform.filter(d=>{
+        // 2) Volitelný filtr linek (short_name) – např. ['S9']
+        const byRoute = routeFilter.length
+          ? byPlatform.filter(d => {
+              const short = String(d.route?.short_name || '').toLowerCase();
+              return short && routeFilter.includes(short);
+            })
+          : byPlatform;
+
+        // 3) Volitelný textový filtr směru / headsignu
+        const filtered = dirFilters.length ? byRoute.filter(d=>{
           const possible=[d.trip?.headsign,d.trip?.direction,d.last_stop?.name,d.route?.long_name,d.route?.description]
             .flatMap(variants).filter(Boolean);
           if(!possible.length) return false;
           return dirFilters.some(f=>possible.some(c=>c.includes(f)||f.includes(c)));
-        }) : byPlatform;
+        }) : byRoute;
 
         if(!filtered.length){
-          const bits=[]; if(platform) bits.push(`st. ${platform.toUpperCase()}`); if(dirFilters.length) bits.push(`směr ${directionSummary()}`);
+          const bits=[];
+          if(platform) bits.push(`st. ${platform.toUpperCase()}`);
+          if(routeFilter.length) bits.push(`linky ${routeFilter.join(', ').toUpperCase()}`);
+          if(dirFilters.length) bits.push(`směr ${directionSummary()}`);
           departuresContent.innerHTML = `
             <p>Nebyly nalezeny žádné odjezdy pro zadaný filtr (${bits.join(' · ')||'všechny směry'}).</p>
             <p class="timestamp">${CONFIG.departures.stopLabel} · Poslední kontrola ${formatDate(new Date())}</p>`;
@@ -316,7 +336,10 @@
             </div>`;
         }).join('');
 
-        const usedBits=[]; if(platform) usedBits.push(`st. ${platform.toUpperCase()}`); if(dirFilters.length) usedBits.push(`směr ${directionSummary()}`);
+        const usedBits=[];
+        if(platform) usedBits.push(`st. ${platform.toUpperCase()}`);
+        if(routeFilter.length) usedBits.push(`linky ${routeFilter.join(', ').toUpperCase()}`);
+        if(dirFilters.length) usedBits.push(`směr ${directionSummary()}`);
         const used = usedBits.length ? usedBits.join(' · ') : 'všechny směry';
 
         departuresContent.innerHTML = `
@@ -393,7 +416,7 @@
 
     /* ====== Init ====== */
     function init(){
-      Object.assign(CONFIG.departures, readUrlParams()); // podpora ?ids=&platform=&mode=...
+      Object.assign(CONFIG.departures, readUrlParams()); // ?ids=&platform=&mode=&route=S9
       if (departuresSetKeyButton){
         departuresSetKeyButton.addEventListener('click',()=>{
           const cur=readStoredKey();
