@@ -75,10 +75,7 @@
     .ghost-button:hover { border-color: rgba(56, 189, 248, 0.6); color: var(--accent); background: rgba(56, 189, 248, 0.1); }
     @media (max-width: 1024px) {
       body { padding: 24px; }
-      .main-layout {
-        grid-template-columns: 1fr;
-        grid-template-areas: 'links' 'news' 'servers';
-      }
+      .main-layout { grid-template-columns: 1fr; grid-template-areas: 'links' 'news' 'servers'; }
     }
     @media (max-width: 640px) {
       body { padding: 16px; }
@@ -173,10 +170,11 @@
         timezone: 'Europe/Prague'
       },
       departures: {
-        stopIds: ['U680Z1P'], // GTFS stop_id pro Slavia – nádraží Eden
+        stopIds: ['U680Z1P'],           // GTFS stop_id pro Slavia – nádraží Eden
         stopLabel: 'Slavia – nádraží Eden',
-        apiKey: '', // používá se localStorage, tlačítko dole
-        directionFilter: ['Koh-i-noor'],
+        apiKey: '',                     // token se bere z localStorage (tlačítko dole)
+        directionFilter: ['Koh-i-noor'],// volitelný textový filtr
+        platformFilter: 'A',            // ← NOVÉ: filtr podle stání (A/B)
         limit: 8,
         minutesBefore: 0,
         minutesAfter: 45,
@@ -274,7 +272,7 @@
       }
     }
 
-    /* ======== OPRAVENÝ WIDGET ODJEZDŮ (jen tato funkce byla změněna) ======== */
+    /* ======== OPRAVENÝ WIDGET ODJEZDŮ ======== */
     async function loadDepartures() {
       updateDeparturesKeyLabel();
 
@@ -316,14 +314,32 @@
 
         const data = await response.json();
 
+        // --- filtry ---
         const directionFilters = safeArray(CONFIG.departures.directionFilter)
           .flatMap(buildSearchVariants)
           .filter(Boolean);
 
+        const platformFilter = (CONFIG.departures.platformFilter || '')
+          .toString()
+          .trim()
+          .toLowerCase();
+
         const allDepartures = Array.isArray(data.departures) ? data.departures : [];
 
+        // 1) filtr podle stání (st. A / st. B)
+        const platformFiltered = platformFilter
+          ? allDepartures.filter(d => {
+              const code = (d.stop?.platform_code || '').toString().toLowerCase(); // např. "a"
+              const name = (d.stop?.platform_name || '').toString().toLowerCase(); // např. "st. a"
+              return code === platformFilter
+                  || name === `st. ${platformFilter}`
+                  || name === platformFilter;
+            })
+          : allDepartures;
+
+        // 2) volitelný textový filtr (headsign)
         const filteredDepartures = directionFilters.length
-          ? allDepartures.filter(item => {
+          ? platformFiltered.filter(item => {
               const possible = [
                 item.trip?.headsign,
                 item.trip?.direction,
@@ -340,20 +356,27 @@
                 )
               );
             })
-          : allDepartures;
+          : platformFiltered;
 
-        const departures = (filteredDepartures.length ? filteredDepartures : allDepartures)
-          .slice(0, CONFIG.departures.limit ?? 6);
+        // Když po filtrech nic nezbyde → ukaž čistě hlášku (žádný fallback)
+        if (!filteredDepartures.length) {
+          const usedBitsEmpty = [];
+          if (platformFilter) usedBitsEmpty.push(`st. ${platformFilter.toUpperCase()}`);
+          if (directionFilters.length) usedBitsEmpty.push(`směr ${formatDirectionSummary()}`);
+          const usedEmpty = usedBitsEmpty.length ? usedBitsEmpty.join(' · ') : 'všechny směry';
 
-        if (!departures.length) {
           departuresContent.innerHTML = `
-            <p>Nebyly nalezeny žádné odjezdy pro zadané parametry.</p>
-            <p class="timestamp">Zastávka: ${CONFIG.departures.stopLabel} · Poslední kontrola ${formatDate(new Date())}</p>`;
+            <p>Nebyly nalezeny žádné odjezdy pro zadaný filtr (${usedEmpty}).</p>
+            <p class="timestamp">${CONFIG.departures.stopLabel} · Poslední kontrola ${formatDate(new Date())}</p>`;
           return;
         }
 
-        const usedFilter = filteredDepartures.length ? `směr ${formatDirectionSummary()}` : 'všechny směry';
-        const filterNote = directionFilters.length && !filteredDepartures.length ? '⚠️ filtr nic nenašel, zobrazuji ' : '';
+        const departures = filteredDepartures.slice(0, CONFIG.departures.limit ?? 6);
+
+        const usedBits = [];
+        if (platformFilter) usedBits.push(`st. ${platformFilter.toUpperCase()}`);
+        if (directionFilters.length) usedBits.push(`směr ${formatDirectionSummary()}`);
+        const usedFilter = usedBits.length ? usedBits.join(' · ') : 'všechny směry';
 
         const listMarkup = departures.map(dep => {
           const scheduled = dep.departure_timestamp?.scheduled;
@@ -401,7 +424,7 @@
         departuresContent.innerHTML = `
           <div class="departure-list">${listMarkup}</div>
           <div class="timestamp">
-            ${CONFIG.departures.stopLabel} · ${filterNote}${usedFilter} · Poslední kontrola ${formatDate(new Date())}
+            ${CONFIG.departures.stopLabel} · ${usedFilter} · Poslední kontrola ${formatDate(new Date())}
           </div>`;
       } catch (error) {
         departuresContent.innerHTML = `<p class="error-message">${error.message}</p>`;
@@ -550,7 +573,7 @@
       renderLinks();
       loadWeather();
       loadNews();
-      loadDepartures();      // ← opraveno
+      loadDepartures();      // ← opravený widget
       checkConnectivity();
       checkServers();
 
