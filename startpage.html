@@ -54,13 +54,13 @@
     </header>
 
     <div class="top-grid">
-      <!-- Počasí – beze změn -->
+      <!-- Počasí (beze změn) -->
       <section class="panel" id="weather-panel">
         <div class="panel-header"><i class="fa-solid fa-cloud-sun"></i><span>Počasí</span></div>
         <div id="weather-content"><p>Načítám aktuální počasí…</p></div>
       </section>
 
-      <!-- ODJEZDY MHD – UPRAVENO -->
+      <!-- ODJEZDY MHD (upraveno) -->
       <section class="panel" id="departures-panel">
         <div class="panel-header"><i class="fa-solid fa-train-tram"></i><span>Odjezdy MHD</span></div>
         <div id="departures-content"><p>Načítám nejbližší odjezdy…</p></div>
@@ -71,7 +71,7 @@
         </div>
       </section>
 
-      <!-- Internet – beze změn (může hlásit Mixed Content pokud běžíš přes HTTPS a cíl je HTTP) -->
+      <!-- Internet (beze změn) -->
       <section class="panel" id="internet-panel">
         <div class="panel-header"><i class="fa-solid fa-wifi"></i><span>Domácí internet</span></div>
         <div id="internet-status" class="status"><div class="indicator"></div><div><div class="status-text">Kontroluji dostupnost…</div><div class="timestamp" id="internet-timestamp"></div></div></div>
@@ -81,14 +81,16 @@
   </div>
 
   <script>
+    // ====== KONFIG ======
     const CONFIG = {
       weather: { latitude: 50.0704, longitude: 14.4709, timezone: 'Europe/Prague' },
       departures: {
-        stopIds: ['U680Z1P','U680Z301'], // tram Slavia – Nádraží Eden + vlak Praha-Eden (S9)
+        // Předtím ['U680Z1P','U680Z301'] → 404; necháme jen hlavní ID.
+        stopIds: ['U680Z1P'], // S9 přijde díky includeMetroTrains=true
         stopLabel: 'Slavia – nádraží Eden',
-        proxyUrl: 'https://golemio.m88wqgcdpd.workers.dev/', // <— TVŮJ WORKER. nech prázdné pro přímé volání Golemio (vyžaduje klíč)
-        apiKey: '', // jen když proxyUrl je prázdné
-        directionFilter: ['Koh-i-noor'], // volitelné – filtr textem
+        proxyUrl: 'https://golemio.m88wqgcdpd.workers.dev/', // ← tvůj Worker; nech prázdné pro přímé volání (CORS!)
+        apiKey: '', // jen když proxyUrl je prázdné a běžíš lokálně
+        directionFilter: ['Koh-i-noor'],
         limit: 12,
         minutesBefore: 0,
         minutesAfter: 45,
@@ -97,15 +99,16 @@
       connectivity: { url: 'http://192.168.1.1/status', method: 'GET', timeoutMs: 4000, mode: 'no-cors' }
     };
 
-    // --- UI elementy
+    // ====== ELEMENTY ======
+    const weatherContent = document.getElementById('weather-content');
     const departuresContent = document.getElementById('departures-content');
+    const directionBtn = document.getElementById('departures-direction');
     const departuresSetKeyButton = document.getElementById('departures-set-key');
     const departuresKeyLabel = document.getElementById('departures-key-label');
     const departuresSetProxyButton = document.getElementById('departures-set-proxy');
     const departuresProxyLabel = document.getElementById('departures-proxy-label');
-    const directionBtn = document.getElementById('departures-direction');
 
-    // --- utility
+    // ====== UTIL ======
     function safeArray(v){ if(Array.isArray(v)) return v; if(typeof v==='string') return v.split(',').map(s=>s.trim()).filter(Boolean); return []; }
     function formatDate(d){ return new Intl.DateTimeFormat('cs-CZ',{hour:'2-digit',minute:'2-digit'}).format(d); }
     function toDate(v){ return v ? new Date(v) : null; }
@@ -113,21 +116,18 @@
     function createBadge(label, extra=''){ const cls=['badge']; if(extra) cls.push(extra); return `<span class="${cls.join(' ')}">${label}</span>`; }
     function normalizeSearchText(value){ if(typeof value!=='string') return ''; return value.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[\s\-–—]+/g,' ').trim(); }
     function buildSearchVariants(value){ const n=normalizeSearchText(value); if(!n) return []; const c=n.replace(/\s+/g,''); return c&&c!==n?[n,c]:[n]; }
-
     const ROUTE_TYPE_ICONS={0:'🚋',1:'Ⓜ️',2:'🚆',3:'🚌',11:'🚎'};
 
-    // --- localStorage keys
+    // ====== STORAGE KEYS ======
     const GOLEMIO_STORAGE_KEY='golemio_api_key';
     const PROXY_STORAGE_KEY='golemio_proxy_url';
     const PLATFORM_STORAGE_KEY='departures_platform'; // 'all' | 'A' | 'B'
 
-    // --- A/B toggle pouze pro tram
+    // ====== A/B toggle jen pro tram Slavia – Nádraží Eden ======
     const TRAM_STOP_ID='U680Z1P';
-    const TRAIN_STOP_ID='U680Z301';
     function getPlatformState(){ const val=(localStorage.getItem(PLATFORM_STORAGE_KEY)||'all').toUpperCase(); return ['ALL','A','B'].includes(val)?(val==='ALL'?'all':val):'all'; }
     function setPlatformState(v){ localStorage.setItem(PLATFORM_STORAGE_KEY,v); }
     function labelForPlatform(p){ return p==='A'?'Směr: A':p==='B'?'Směr: B':'Směr: vše'; }
-
     if(directionBtn){
       directionBtn.textContent = labelForPlatform(getPlatformState());
       directionBtn.onclick = () => {
@@ -139,18 +139,16 @@
       };
     }
 
-    // --- klíč & proxy
+    // ====== KEY & PROXY ======
     function readStored(k){ try{const v=localStorage.getItem(k); return v? v.trim():'';}catch{return '';} }
     function persist(k,v){ try{ v? localStorage.setItem(k,v.trim()) : localStorage.removeItem(k);}catch{} }
     function getApiKey(){ return readStored(GOLEMIO_STORAGE_KEY) || (CONFIG.departures.apiKey||'').trim(); }
     function getProxyUrl(){ return readStored(PROXY_STORAGE_KEY) || (CONFIG.departures.proxyUrl||'').trim(); }
-
     function updateButtons(){
       const hasKey=!!getApiKey(); const hasProxy=!!getProxyUrl();
       if(departuresKeyLabel) departuresKeyLabel.textContent = hasKey ? 'Změnit API klíč' : 'Nastavit API klíč';
       if(departuresProxyLabel) departuresProxyLabel.textContent = hasProxy ? 'Změnit proxy' : 'Nastavit proxy';
     }
-
     if(departuresSetKeyButton){
       departuresSetKeyButton.addEventListener('click',()=>{
         const cur=readStored(GOLEMIO_STORAGE_KEY);
@@ -170,8 +168,8 @@
       });
     }
 
-    function buildGolemioUrl(){
-      const ids = safeArray(CONFIG.departures.stopIds).join(',');
+    function buildGolemioUrl(idsList){
+      const ids = safeArray(idsList).join(',');
       const qs = new URLSearchParams({
         ids,
         minutesBefore:String(CONFIG.departures.minutesBefore??0),
@@ -187,32 +185,43 @@
       updateButtons();
       const proxyUrl = getProxyUrl();
       const apiKey   = getApiKey();
+      const idsArr   = safeArray(CONFIG.departures.stopIds);
 
-      // kontrola vstupů
-      if(!safeArray(CONFIG.departures.stopIds).length){
+      if(!idsArr.length){
         departuresContent.innerHTML = '<p class="error-message">Chybí nastavení ID zastávek.</p>'; return;
       }
       if(!proxyUrl && !apiKey){
         departuresContent.innerHTML = `
-          <p class="error-message">Nelze načíst odjezdy přímo z Golemio z veřejné HTTPS domény kvůli CORS.</p>
-          <p class="timestamp">Řešení: nastav <strong>CONFIG.departures.proxyUrl</strong> na vlastní proxy (Cloudflare Worker), která přidá hlavičku X-Access-Token a Access-Control-Allow-Origin. Nebo vlož API klíč a spusť stránku lokálně (http://localhost).</p>
+          <p class="error-message">Nelze načíst odjezdy přímo z Golemio (CORS z veřejné domény).</p>
+          <p class="timestamp">Řešení: nastav proxy (Cloudflare Worker) nebo spusť stránku lokálně přes http://localhost.</p>
         `;
         return;
       }
 
       try{
-        const url = buildGolemioUrl();
-        const finalUrl = proxyUrl ? `${proxyUrl.replace(/\/+$/,'')}/?${url.split('?')[1]}` : url;
+        // První pokus s aktuálním polem IDs (u nás je to už jen U680Z1P)
+        const baseUrl = buildGolemioUrl(idsArr);
+        const finalUrl = proxyUrl ? `${proxyUrl.replace(/\/+$/,'')}/?${baseUrl.split('?')[1]}` : baseUrl;
 
-        const res = await fetch(finalUrl, {
+        let res = await fetch(finalUrl, {
           headers: proxyUrl ? { 'Accept':'application/json' } : { 'Accept':'application/json','X-Access-Token': apiKey }
         });
-        if(!res.ok) throw new Error(`HTTP ${res.status}`);
 
+        // Fallback: pokud 404 (typicky pri víc IDs), zkusíme pouze první ID
+        if (!res.ok && res.status === 404 && idsArr.length > 1) {
+          const singleUrl = buildGolemioUrl([idsArr[0]]);
+          const finalSingleUrl = proxyUrl ? `${proxyUrl.replace(/\/+$/,'')}/?${singleUrl.split('?')[1]}` : singleUrl;
+          res = await fetch(finalSingleUrl, {
+            headers: proxyUrl ? { 'Accept':'application/json' } : { 'Accept':'application/json','X-Access-Token': apiKey }
+          });
+        }
+
+        if(!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
+
         let departuresRaw = Array.isArray(data.departures) ? data.departures : [];
 
-        // A/B filtr pouze pro TRAM_STOP_ID
+        // A/B filtr POUZE pro tram Slavia – Nádraží Eden
         const platformState = getPlatformState(); // 'all'|'A'|'B'
         const platformFiltered = departuresRaw.filter(d=>{
           const stopId = d?.stop?.id;
@@ -221,7 +230,7 @@
             if(platformState==='all') return true;
             return plat === platformState;
           }
-          return true; // vlaky S9 a další neomezujeme
+          return true; // vlaky a další neomezujeme
         });
 
         // Filtr směru (volitelné)
@@ -300,8 +309,7 @@
       }
     }
 
-    // ——— Počasí (rychlé, beze změn)
-    const weatherContent=document.getElementById('weather-content');
+    // ====== Počasí (rychlé, beze změn) ======
     const weatherCodeLabels={0:'Jasno',1:'Převážně jasno',2:'Oblačno',3:'Zataženo',45:'Mlha',48:'Mrznoucí mlha',51:'Mírné mrholení',53:'Mrholení',55:'Intenzivní mrholení',56:'Mrznoucí mrholení',57:'Mrznoucí mrholení',61:'Slabý déšť',63:'Déšť',65:'Silný déšť',66:'Mrznoucí déšť',67:'Mrznoucí déšť',71:'Slabé sněžení',73:'Sněžení',75:'Silné sněžení',77:'Kroupy',80:'Přeháňky',81:'Déšť',82:'Silný déšť',85:'Sněhové přeháňky',86:'Silné sněhové přeháňky',95:'Bouřka',96:'Bouřka s krupobitím',99:'Silná bouřka'};
     async function loadWeather(){
       try{
@@ -322,6 +330,7 @@
       }catch(e){ weatherContent.innerHTML=`<p class="error-message">${e.message}</p>`; }
     }
 
+    // ====== INIT ======
     function init(){
       loadWeather();
       loadDepartures();
