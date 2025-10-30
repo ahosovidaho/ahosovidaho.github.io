@@ -146,9 +146,8 @@
       weather: { latitude: 50.0704, longitude: 14.4709, timezone: 'Europe/Prague' },
       departures: {
         stopLabel: 'Slavia – nádraží Eden',
-        proxyUrl: 'https://golemio.m88wqgcdpd.workers.dev/', // ✨ výchozí proxy podle tvé konzole
-        apiKey: '',                 // nepoužívá se, pokud jede proxy
-        directionFilter: [],        // směr řešíme přes ID
+        proxyUrl: 'https://golemio.m88wqgcdpd.workers.dev/', // můžeš změnit tlačítkem
+        apiKey: '',                 // když proxy není k dispozici a běžíš lokálně
         limit: 12,
         minutesBefore: 0,
         minutesAfter: 45,
@@ -237,7 +236,7 @@
     if(departuresSetProxyButton){
       departuresSetProxyButton.addEventListener('click',()=>{
         const cur=readStored(PROXY_STORAGE_KEY) || (CONFIG.departures.proxyUrl||'');
-        const next=window.prompt('Zadej URL proxy (Cloudflare Worker).\nNapř.: https://golemio.můj-worker.workers.dev/',cur||'');
+        const next=window.prompt('Zadej URL proxy (Cloudflare Worker).',cur||'');
         if(next===null) return;
         persist(PROXY_STORAGE_KEY,next.trim().replace(/\s+/g,''));
         updateButtons(); loadDepartures();
@@ -253,13 +252,13 @@
         const next = (cur === 'A') ? 'B' : 'A';
         setPlatformState(next);
         directionBtnEl.textContent = labelForPlatform(next);
-        loadDepartures(); // znovu načíst s jiným ID
+        loadDepartures();
       };
     }
 
-    function buildGolemioUrl(idsList){
+    function buildGolemioQuery(idsList){
       const ids = safeArray(idsList).join(',');
-      const qs = new URLSearchParams({
+      return new URLSearchParams({
         ids,
         minutesBefore:String(CONFIG.departures.minutesBefore??0),
         minutesAfter:String(CONFIG.departures.minutesAfter??30),
@@ -267,7 +266,31 @@
         preferredTimezone:CONFIG.departures.timezone||'Europe/Prague',
         includeMetroTrains:'true'
       }).toString();
-      return `https://api.golemio.cz/v2/pid/departureboards?${qs}`;
+    }
+
+    // --- Fallback fetch pro různé typy Workerů ---
+    async function tryProxyVariants(proxyBase, query, headers){
+      const base = proxyBase.replace(/\/+$/,''); // bez trailing /
+      const variants = [
+        `${base}/v2/pid/departureboards?${query}`, // Worker očekává plnou cestu
+        `${base}/?${query}`,                        // Worker očekává jen query na /
+        `${base}?${query}`                          // pro jistotu i bez lomítka
+      ];
+
+      let lastErr;
+      for (const url of variants){
+        try{
+          const r = await fetch(url, { headers });
+          if (r.ok) return r;
+          // když 404, zkus další variantu
+          if (r.status === 404) { lastErr = new Error('HTTP 404'); continue; }
+          // jiný kód -> vrať rovnou (a nech zpracovat volajícího)
+          return r;
+        }catch(e){
+          lastErr = e;
+        }
+      }
+      throw lastErr || new Error('Nepodařilo se kontaktovat proxy');
     }
 
     async function loadDepartures(){
@@ -282,27 +305,27 @@
       if(!proxyUrl && !apiKey){
         departuresContent.innerHTML = `
           <p class="error-message">Na veřejné doméně nelze Golemio volat přímo (CORS).</p>
-          <p class="timestamp">Nastav proxy (Cloudflare Worker) v tlačítku „Nastavit proxy“.</p>
+          <p class="timestamp">Nastav proxy (Cloudflare Worker) v tlačítku „Nastavit proxy“ nebo spusť lokálně (http://localhost).</p>
         `;
         return;
       }
 
       try{
-        const baseUrl = buildGolemioUrl(idsArr);
-        const q = baseUrl.split('?')[1] || '';
-        const baseProxy = proxyUrl.replace(/\/+$/,'');
-        // ✨ OPRAVA: proxy potřebuje úplnou cestu /v2/pid/departureboards
-        const finalUrl = proxyUrl
-          ? `${baseProxy}/v2/pid/departureboards?${q}`
-          : baseUrl;
+        const q = buildGolemioQuery(idsArr);
 
-        const res = await fetch(finalUrl, {
-          headers: proxyUrl ? { 'Accept':'application/json' }
-                            : { 'Accept':'application/json','X-Access-Token': apiKey }
-        });
-        if(!res.ok) throw new Error(`HTTP ${res.status}`);
+        // 1) Přes proxy (pokud je nastavena)
+        let res;
+        if (proxyUrl) {
+          res = await tryProxyVariants(proxyUrl, q, { 'Accept':'application/json' });
+          if(!res.ok) throw new Error(`HTTP ${res.status}`);
+        } else {
+          // 2) Přímé API (funguje typicky jen z http://localhost)
+          const direct = `https://api.golemio.cz/v2/pid/departureboards?${q}`;
+          res = await fetch(direct, { headers: { 'Accept':'application/json', 'X-Access-Token': apiKey }});
+          if(!res.ok) throw new Error(`HTTP ${res.status}`);
+        }
+
         const data = await res.json();
-
         const departuresRaw = Array.isArray(data.departures) ? data.departures : [];
         const departures = departuresRaw.slice(0, CONFIG.departures.limit ?? 6);
 
@@ -360,7 +383,8 @@
           <div class="timestamp">${CONFIG.departures.stopLabel} · ${labelForPlatform(getPlatformState())} · Poslední kontrola ${formatDate(new Date())}</div>
         `;
       }catch(err){
-        departuresContent.innerHTML = `<p class="error-message">Chyba: ${err.message || err}</p>`;
+        departuresContent.innerHTML = `<p class="error-message">Chyba: ${err.message || err}</p>
+        <p class="timestamp">Tip: Klikni na „Nastavit proxy“ a zkus jinou adresu. Tvůj Worker může očekávat jiný tvar URL.</p>`;
       }
     }
 
