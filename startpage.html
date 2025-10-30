@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <!-- Font Awesome bez integrity (vyhne se blokaci kvůli špatné SRI hash) -->
+  <!-- Font Awesome bez integrity (vyhne se blokaci špatným SRI) -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" referrerpolicy="no-referrer">
 
   <style>
@@ -92,14 +92,18 @@
         <div id="weather-content"><p>Načítám aktuální počasí…</p></div>
       </section>
 
-      <!-- ODJEZDY MHD (OPRAVENO) -->
+      <!-- Odjezdy MHD -->
       <section class="panel" id="departures-panel">
         <div class="panel-header"><i class="fa-solid fa-train-tram"></i><span>Odjezdy MHD</span></div>
         <div id="departures-content"><p>Načítám nejbližší odjezdy…</p></div>
         <div class="panel-actions">
-          <button type="button" class="ghost-button" id="departures-direction">Směr: vše</button>
-          <button type="button" class="ghost-button" id="departures-set-key"><i class="fa-solid fa-key"></i><span id="departures-key-label">Nastavit API klíč</span></button>
-          <button type="button" class="ghost-button" id="departures-set-proxy"><i class="fa-solid fa-shuffle"></i><span id="departures-proxy-label">Nastavit proxy</span></button>
+          <button type="button" class="ghost-button" id="departures-direction">Směr: A (Koh-i-noor)</button>
+          <button type="button" class="ghost-button" id="departures-set-key">
+            <i class="fa-solid fa-key"></i><span id="departures-key-label">Nastavit API klíč</span>
+          </button>
+          <button type="button" class="ghost-button" id="departures-set-proxy">
+            <i class="fa-solid fa-shuffle"></i><span id="departures-proxy-label">Nastavit proxy</span>
+          </button>
         </div>
       </section>
 
@@ -117,7 +121,7 @@
       </section>
     </div>
 
-    <!-- SPODNÍ ČÁST – vrácena -->
+    <!-- Spodní část -->
     <div class="main-layout">
       <aside class="panel" id="links-panel">
         <div class="panel-header"><i class="fa-solid fa-bookmark"></i><span>Rychlé odkazy</span></div>
@@ -137,15 +141,15 @@
   </div>
 
   <script>
-    // ====== KONFIG ======
+    // ========== KONFIG ==========
     const CONFIG = {
       weather: { latitude: 50.0704, longitude: 14.4709, timezone: 'Europe/Prague' },
       departures: {
-        stopIds: ['U680Z1P'], // S9 přijde díky includeMetroTrains=true
         stopLabel: 'Slavia – nádraží Eden',
-        proxyUrl: 'https://golemio.m88wqgcdpd.workers.dev/', // tvůj Cloudflare Worker
-        apiKey: '', // jen pokud proxyUrl je prázdné a běžíš lokálně
-        directionFilter: [], // necháme prázdné; při „Směr: vše“ si můžeš kdykoli doplnit
+        // Výchozí proxy (můžeš změnit tlačítkem „Nastavit proxy“)
+        proxyUrl: 'https://golemio.viktor-tamayo.workers.dev/',
+        apiKey: '',                 // nepoužívá se, pokud jede proxy
+        directionFilter: [],        // nepoužíváme, směr řešíme přes ID
         limit: 12,
         minutesBefore: 0,
         minutesAfter: 45,
@@ -168,7 +172,7 @@
       ]
     };
 
-    // ====== ELEMENTY ======
+    // ========== ELEMENTY ==========
     const weatherContent = document.getElementById('weather-content');
     const departuresContent = document.getElementById('departures-content');
     const directionBtn = document.getElementById('departures-direction');
@@ -181,47 +185,39 @@
     const linksGrid = document.getElementById('links-grid');
     const serverList = document.getElementById('server-list');
 
-    // ====== UTIL ======
+    // ========== UTIL ==========
     function safeArray(v){ if(Array.isArray(v)) return v; if(typeof v==='string') return v.split(',').map(s=>s.trim()).filter(Boolean); return []; }
     function formatDate(d){ return new Intl.DateTimeFormat('cs-CZ',{hour:'2-digit',minute:'2-digit'}).format(d); }
     function toDate(v){ return v ? new Date(v) : null; }
     function minutesUntil(d){ if(!d) return null; const diff = Math.ceil((d.getTime()-Date.now())/60000); return diff<0?0:diff; }
     function createBadge(label, extra=''){ const cls=['badge']; if(extra) cls.push(extra); return `<span class="${cls.join(' ')}">${label}</span>`; }
-    function normalizeSearchText(value){ if(typeof value!=='string') return ''; return value.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[\s\-–—]+/g,' ').trim(); }
-    function buildSearchVariants(value){ const n=normalizeSearchText(value); if(!n) return []; const c=n.replace(/\s+/g,''); return c&&c!==n?[n,c]:[n]; }
     const ROUTE_TYPE_ICONS={0:'🚋',1:'Ⓜ️',2:'🚆',3:'🚌',11:'🚎'};
 
-    // ====== STORAGE KEYS ======
+    // ========== STORAGE KEYS ==========
     const GOLEMIO_STORAGE_KEY='golemio_api_key';
     const PROXY_STORAGE_KEY='golemio_proxy_url';
-    const PLATFORM_STORAGE_KEY='departures_platform'; // 'all' | 'A' | 'B'
+    const PLATFORM_STORAGE_KEY='departures_platform'; // 'A' | 'B'
 
-    // ====== A/B toggle pro tram Slavia – Nádraží Eden (+ fallback na headsign) ======
-    const TRAM_STOP_ID='U680Z1P';
-    const PLATFORM_FALLBACK_HEADSIGNS = {
-      A: ['koh i noor'],           // když API nedá platform_code
-      B: ['kubanske namesti']
-    };
+    // ========== CIS ID pro Slavia – Nádraží Eden ==========
+    const TRAM_STOP_A  = 'U680Z1P';  // směr Koh-i-noor (A)
+    const TRAM_STOP_B  = 'U680Z2P';  // směr Kubánské náměstí (B)
+    const TRAIN_STOP_S = 'U680Z301'; // Praha-Eden (S9) – vždy
 
     function getPlatformState(){
-      const val=(localStorage.getItem(PLATFORM_STORAGE_KEY)||'all').toUpperCase();
-      return ['ALL','A','B'].includes(val)?(val==='ALL'?'all':val):'all';
+      const val=(localStorage.getItem(PLATFORM_STORAGE_KEY)||'A').toUpperCase();
+      return (val==='B') ? 'B' : 'A';
     }
     function setPlatformState(v){ localStorage.setItem(PLATFORM_STORAGE_KEY,v); }
-    function labelForPlatform(p){ return p==='A'?'Směr: A':p==='B'?'Směr: B':'Směr: vše'; }
+    function labelForPlatform(p){ return p==='B'?'Směr: B (Kubánské nám.)':'Směr: A (Koh-i-noor)'; }
 
-    if(directionBtn){
-      directionBtn.textContent = labelForPlatform(getPlatformState());
-      directionBtn.onclick = () => {
-        const cur=getPlatformState();
-        const next= cur==='all'?'A':(cur==='A'?'B':'all');
-        setPlatformState(next);
-        directionBtn.textContent=labelForPlatform(next);
-        loadDepartures();
-      };
+    // Vyber ID pro dotaz podle A/B; vlak S9 přidáme vždy
+    function buildIdsForFetch(){
+      const p = getPlatformState(); // 'A' nebo 'B'
+      const tramId = (p === 'B') ? TRAM_STOP_B : TRAM_STOP_A;
+      return [tramId, TRAIN_STOP_S];
     }
 
-    // ====== KEY & PROXY ======
+    // ========== KEY & PROXY ==========
     function readStored(k){ try{const v=localStorage.getItem(k); return v? v.trim():'';}catch{return '';} }
     function persist(k,v){ try{ v? localStorage.setItem(k,v.trim()) : localStorage.removeItem(k);}catch{} }
     function getApiKey(){ return readStored(GOLEMIO_STORAGE_KEY) || (CONFIG.departures.apiKey||'').trim(); }
@@ -234,7 +230,7 @@
     if(departuresSetKeyButton){
       departuresSetKeyButton.addEventListener('click',()=>{
         const cur=readStored(GOLEMIO_STORAGE_KEY);
-        const next=window.prompt('Zadej Golemio API klíč (X-Access-Token).\nPrázdný vstup klíč odstraní.',cur);
+        const next=window.prompt('Zadej Golemio API klíč (X-Access-Token).\nPrázdný vstup klíč odstraní.',cur||'');
         if(next===null) return;
         persist(GOLEMIO_STORAGE_KEY,next.trim());
         updateButtons(); loadDepartures();
@@ -243,11 +239,23 @@
     if(departuresSetProxyButton){
       departuresSetProxyButton.addEventListener('click',()=>{
         const cur=readStored(PROXY_STORAGE_KEY) || (CONFIG.departures.proxyUrl||'');
-        const next=window.prompt('Zadej URL proxy (Cloudflare Worker).\nPrázdný vstup proxy odstraní.',cur);
+        const next=window.prompt('Zadej URL proxy (Cloudflare Worker).\nPrázdný vstup proxy odstraní.',cur||'');
         if(next===null) return;
         persist(PROXY_STORAGE_KEY,next.trim());
         updateButtons(); loadDepartures();
       });
+    }
+
+    // Tlačítko směr
+    if (directionBtn) {
+      directionBtn.textContent = labelForPlatform(getPlatformState());
+      directionBtn.onclick = () => {
+        const cur = getPlatformState();
+        const next = (cur === 'A') ? 'B' : 'A';
+        setPlatformState(next);
+        directionBtn.textContent = labelForPlatform(next);
+        loadDepartures(); // znovu načíst s jiným ID
+      };
     }
 
     function buildGolemioUrl(idsList){
@@ -267,90 +275,37 @@
       updateButtons();
       const proxyUrl = getProxyUrl();
       const apiKey   = getApiKey();
-      const idsArr   = safeArray(CONFIG.departures.stopIds);
+      const idsArr   = buildIdsForFetch();
 
       if(!idsArr.length){
-        departuresContent.innerHTML = '<p class="error-message">Chybí nastavení ID zastávky.</p>'; return;
+        departuresContent.innerHTML = '<p class="error-message">Chybí ID zastávek.</p>'; return;
       }
       if(!proxyUrl && !apiKey){
         departuresContent.innerHTML = `
           <p class="error-message">Na veřejné doméně nelze Golemio volat přímo (CORS).</p>
-          <p class="timestamp">Řešení: nastav proxy (Cloudflare Worker) – v tlačítku „Nastavit proxy“.</p>
+          <p class="timestamp">Nastav proxy (Cloudflare Worker) v tlačítku „Nastavit proxy“.</p>
         `;
         return;
       }
 
       try{
-        const baseUrl = buildGolemioUrl(idsArr);
-        const finalUrl = proxyUrl ? `${proxyUrl.replace(/\/+$/,'')}/?${baseUrl.split('?')[1]}` : baseUrl;
+        const baseUrl  = buildGolemioUrl(idsArr);
+        const finalUrl = proxyUrl ? `${proxyUrl.replace(/\/+$/,'')}/?${baseUrl.split('?')[1]}`
+                                  : baseUrl;
 
-        let res = await fetch(finalUrl, {
-          headers: proxyUrl ? { 'Accept':'application/json' } : { 'Accept':'application/json','X-Access-Token': apiKey }
+        const res = await fetch(finalUrl, {
+          headers: proxyUrl ? { 'Accept':'application/json' }
+                            : { 'Accept':'application/json','X-Access-Token': apiKey }
         });
         if(!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
 
-        let departuresRaw = Array.isArray(data.departures) ? data.departures : [];
-
-        // ——— Platformní filtr + fallback podle headsignu (jen tram na TRAM_STOP_ID) ———
-        const platformState = getPlatformState(); // 'all'|'A'|'B'
-        let platformFiltered = departuresRaw;
-
-        if(platformState !== 'all'){
-          // nejprve přímý filtr podle platform_code
-          const direct = departuresRaw.filter(d=>{
-            const isTram = Number(d?.route?.type) === 0;
-            const stopId = d?.stop?.id;
-            const plat = (d?.stop?.platform_code || '').toUpperCase();
-            if(isTram && stopId === TRAM_STOP_ID){
-              return plat === platformState;
-            }
-            return true; // vlaky a ostatní necháme projít
-          });
-
-          // pokud u tram nic nezůstalo, zkus fallback podle headsignu
-          const hasTramAfterDirect = direct.some(d => Number(d?.route?.type) === 0 && d?.stop?.id === TRAM_STOP_ID);
-          if(!hasTramAfterDirect){
-            const wanted = PLATFORM_FALLBACK_HEADSIGNS[platformState] || [];
-            platformFiltered = departuresRaw.filter(d=>{
-              const isTram = Number(d?.route?.type) === 0;
-              const stopId = d?.stop?.id;
-              if(isTram && stopId === TRAM_STOP_ID){
-                const head = normalizeSearchText(d?.trip?.headsign || d?.last_stop?.name || '');
-                return wanted.some(w => head.includes(w));
-              }
-              return true; // zbytek bez omezení
-            });
-          } else {
-            platformFiltered = direct;
-          }
-        }
-
-        // ——— Volitelný textový filtr směru: platí jen pro „Směr: vše“ ———
-        const directionFiltersConfig = safeArray(CONFIG.departures.directionFilter);
-        const directionFilters = (platformState === 'all')
-          ? directionFiltersConfig.flatMap(buildSearchVariants).filter(Boolean)
-          : [];
-
-        const afterDirection = directionFilters.length
-          ? platformFiltered.filter(item=>{
-              const possible=[
-                item.trip?.headsign,
-                item.trip?.direction,
-                item.last_stop?.name,
-                item.route?.long_name,
-                item.route?.description
-              ].flatMap(buildSearchVariants).filter(Boolean);
-              if(!possible.length) return false;
-              return directionFilters.some(f=>possible.some(c=>c.includes(f)||f.includes(c)));
-            })
-          : platformFiltered;
-
-        const departures = afterDirection.slice(0, CONFIG.departures.limit ?? 6);
+        const departuresRaw = Array.isArray(data.departures) ? data.departures : [];
+        const departures = departuresRaw.slice(0, CONFIG.departures.limit ?? 6);
 
         if(!departures.length){
           departuresContent.innerHTML = `
-            <p>Nebyly nalezeny žádné odjezdy pro zadaný filtr (${labelForPlatform(getPlatformState()).replace('Směr: ','')}).</p>
+            <p>Nebyly nalezeny žádné odjezdy pro zadaný směr (${labelForPlatform(getPlatformState()).replace('Směr: ','')}).</p>
             <p class="timestamp">${CONFIG.departures.stopLabel} · Poslední kontrola ${formatDate(new Date())}</p>
           `;
           return;
@@ -406,7 +361,7 @@
       }
     }
 
-    // ====== Počasí ======
+    // ========== Počasí ==========
     const weatherCodeLabels={0:'Jasno',1:'Převážně jasno',2:'Oblačno',3:'Zataženo',45:'Mlha',48:'Mrznoucí mlha',51:'Mírné mrholení',53:'Mrholení',55:'Intenzivní mrholení',56:'Mrznoucí mrholení',57:'Mrznoucí mrholení',61:'Slabý déšť',63:'Déšť',65:'Silný déšť',66:'Mrznoucí déšť',67:'Mrznoucí déšť',71:'Slabé sněžení',73:'Sněžení',75:'Silné sněžení',77:'Kroupy',80:'Přeháňky',81:'Déšť',82:'Silný déšť',85:'Sněhové přeháňky',86:'Silné sněhové přeháňky',95:'Bouřka',96:'Bouřka s krupobitím',99:'Silná bouřka'};
     async function loadWeather(){
       try{
@@ -427,7 +382,7 @@
       }catch(e){ weatherContent.innerHTML=`<p class="error-message">${e.message}</p>`; }
     }
 
-    // ====== Rychlé odkazy ======
+    // ========== Rychlé odkazy ==========
     function renderLinks(){
       linksGrid.innerHTML = CONFIG.links.map(link => `
         <a class="quick-link" href="${link.url}" target="_blank" rel="noopener">
@@ -437,17 +392,15 @@
       `).join('');
     }
 
-    // ====== RSS zprávy (bez chyb na HTTPS – ukáže se návod) ======
+    // ========== RSS (na HTTPS zobrazí návod kvůli CORS) ==========
     async function loadNews(){
-      // Bez vlastní proxy má RSS na HTTPS CORS bariéry – zobraz vysvětlení
       newsContent.innerHTML = `
-        <p class="timestamp">Na veřejné doméně (HTTPS) je RSS blokováno CORS.</p>
-        <p class="timestamp">řešení: přidej proxy (Cloudflare Worker) pro RSS nebo spusť stránku lokálně (http://localhost).</p>
+        <p class="timestamp">Na veřejné doméně (HTTPS) je RSS často blokováno CORS.</p>
+        <p class="timestamp">Řešení: přidej RSS proxy (Cloudflare Worker) nebo spusť lokálně (http://localhost).</p>
       `;
-      // (Pokud máš druhý Worker pro RSS, klidně sem doplň fetch přes něj.)
     }
 
-    // ====== Monitoring serverů (vyhne se Mixed Content chybě) ======
+    // ========== Monitoring (vyhne se Mixed Content) ==========
     async function checkServers(){
       serverList.innerHTML = '';
       const isHttps = location.protocol === 'https:';
@@ -467,7 +420,6 @@
         `;
         serverList.appendChild(item);
 
-        // Na https doméně nemůžeme volat http://192.168.* kvůli Mixed Content => ukaž vysvětlení
         if (isHttps && server.url.startsWith('http://')) {
           item.innerHTML = `
             <div class="server-header">
@@ -482,7 +434,6 @@
           continue;
         }
 
-        // Jinak by šel běžný check... (zde vynecháno, aby na HTTPS nic nepadalo)
         item.innerHTML = `
           <div class="server-header">
             <i class="fa-solid ${server.icon}"></i>
@@ -496,7 +447,7 @@
       }
     }
 
-    // ====== INIT ======
+    // ========== INIT ==========
     function init(){
       renderLinks();
       loadWeather();
