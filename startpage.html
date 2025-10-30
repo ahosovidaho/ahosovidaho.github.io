@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <!-- Font Awesome bez integrity (vyhne se blokaci špatným SRI) -->
+  <!-- Bez SRI, ať se neblokuje načtení -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" referrerpolicy="no-referrer">
 
   <style>
@@ -146,10 +146,9 @@
       weather: { latitude: 50.0704, longitude: 14.4709, timezone: 'Europe/Prague' },
       departures: {
         stopLabel: 'Slavia – nádraží Eden',
-        // Výchozí proxy (můžeš změnit tlačítkem „Nastavit proxy“)
-        proxyUrl: 'https://golemio.viktor-tamayo.workers.dev/',
+        proxyUrl: 'https://golemio.m88wqgcdpd.workers.dev/', // ✨ výchozí proxy podle tvé konzole
         apiKey: '',                 // nepoužívá se, pokud jede proxy
-        directionFilter: [],        // nepoužíváme, směr řešíme přes ID
+        directionFilter: [],        // směr řešíme přes ID
         limit: 12,
         minutesBefore: 0,
         minutesAfter: 45,
@@ -210,7 +209,6 @@
     function setPlatformState(v){ localStorage.setItem(PLATFORM_STORAGE_KEY,v); }
     function labelForPlatform(p){ return p==='B'?'Směr: B (Kubánské nám.)':'Směr: A (Koh-i-noor)'; }
 
-    // Vyber ID pro dotaz podle A/B; vlak S9 přidáme vždy
     function buildIdsForFetch(){
       const p = getPlatformState(); // 'A' nebo 'B'
       const tramId = (p === 'B') ? TRAM_STOP_B : TRAM_STOP_A;
@@ -239,21 +237,22 @@
     if(departuresSetProxyButton){
       departuresSetProxyButton.addEventListener('click',()=>{
         const cur=readStored(PROXY_STORAGE_KEY) || (CONFIG.departures.proxyUrl||'');
-        const next=window.prompt('Zadej URL proxy (Cloudflare Worker).\nPrázdný vstup proxy odstraní.',cur||'');
+        const next=window.prompt('Zadej URL proxy (Cloudflare Worker).\nNapř.: https://golemio.můj-worker.workers.dev/',cur||'');
         if(next===null) return;
-        persist(PROXY_STORAGE_KEY,next.trim());
+        persist(PROXY_STORAGE_KEY,next.trim().replace(/\s+/g,''));
         updateButtons(); loadDepartures();
       });
     }
 
     // Tlačítko směr
-    if (directionBtn) {
-      directionBtn.textContent = labelForPlatform(getPlatformState());
-      directionBtn.onclick = () => {
+    const directionBtnEl = document.getElementById('departures-direction');
+    if (directionBtnEl) {
+      directionBtnEl.textContent = labelForPlatform(getPlatformState());
+      directionBtnEl.onclick = () => {
         const cur = getPlatformState();
         const next = (cur === 'A') ? 'B' : 'A';
         setPlatformState(next);
-        directionBtn.textContent = labelForPlatform(next);
+        directionBtnEl.textContent = labelForPlatform(next);
         loadDepartures(); // znovu načíst s jiným ID
       };
     }
@@ -289,9 +288,13 @@
       }
 
       try{
-        const baseUrl  = buildGolemioUrl(idsArr);
-        const finalUrl = proxyUrl ? `${proxyUrl.replace(/\/+$/,'')}/?${baseUrl.split('?')[1]}`
-                                  : baseUrl;
+        const baseUrl = buildGolemioUrl(idsArr);
+        const q = baseUrl.split('?')[1] || '';
+        const baseProxy = proxyUrl.replace(/\/+$/,'');
+        // ✨ OPRAVA: proxy potřebuje úplnou cestu /v2/pid/departureboards
+        const finalUrl = proxyUrl
+          ? `${baseProxy}/v2/pid/departureboards?${q}`
+          : baseUrl;
 
         const res = await fetch(finalUrl, {
           headers: proxyUrl ? { 'Accept':'application/json' }
@@ -392,7 +395,7 @@
       `).join('');
     }
 
-    // ========== RSS (na HTTPS zobrazí návod kvůli CORS) ==========
+    // ========== RSS (na HTTPS ukáže návod kvůli CORS) ==========
     async function loadNews(){
       newsContent.innerHTML = `
         <p class="timestamp">Na veřejné doméně (HTTPS) je RSS často blokováno CORS.</p>
