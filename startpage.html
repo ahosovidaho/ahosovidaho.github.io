@@ -85,12 +85,11 @@
     const CONFIG = {
       weather: { latitude: 50.0704, longitude: 14.4709, timezone: 'Europe/Prague' },
       departures: {
-        // Předtím ['U680Z1P','U680Z301'] → 404; necháme jen hlavní ID.
         stopIds: ['U680Z1P'], // S9 přijde díky includeMetroTrains=true
         stopLabel: 'Slavia – nádraží Eden',
-        proxyUrl: 'https://golemio.m88wqgcdpd.workers.dev/', // ← tvůj Worker; nech prázdné pro přímé volání (CORS!)
+        proxyUrl: 'https://golemio.m88wqgcdpd.workers.dev/', // tvůj Worker
         apiKey: '', // jen když proxyUrl je prázdné a běžíš lokálně
-        directionFilter: ['Koh-i-noor'],
+        directionFilter: [], // <— prázdné; případně doplň, ale použije se jen při „Směr: vše“
         limit: 12,
         minutesBefore: 0,
         minutesAfter: 45,
@@ -199,7 +198,6 @@
       }
 
       try{
-        // První pokus s aktuálním polem IDs (u nás je to už jen U680Z1P)
         const baseUrl = buildGolemioUrl(idsArr);
         const finalUrl = proxyUrl ? `${proxyUrl.replace(/\/+$/,'')}/?${baseUrl.split('?')[1]}` : baseUrl;
 
@@ -207,7 +205,7 @@
           headers: proxyUrl ? { 'Accept':'application/json' } : { 'Accept':'application/json','X-Access-Token': apiKey }
         });
 
-        // Fallback: pokud 404 (typicky pri víc IDs), zkusíme pouze první ID
+        // Fallback pro případ, že bys někdy vrátil víc IDs a Golemio by dalo 404
         if (!res.ok && res.status === 404 && idsArr.length > 1) {
           const singleUrl = buildGolemioUrl([idsArr[0]]);
           const finalSingleUrl = proxyUrl ? `${proxyUrl.replace(/\/+$/,'')}/?${singleUrl.split('?')[1]}` : singleUrl;
@@ -233,8 +231,12 @@
           return true; // vlaky a další neomezujeme
         });
 
-        // Filtr směru (volitelné)
-        const directionFilters = safeArray(CONFIG.departures.directionFilter).flatMap(buildSearchVariants).filter(Boolean);
+        // Filtr směru použijeme jen pokud je „Směr: vše“
+        const directionFiltersConfig = safeArray(CONFIG.departures.directionFilter);
+        const directionFilters = (platformState === 'all')
+          ? directionFiltersConfig.flatMap(buildSearchVariants).filter(Boolean)
+          : [];
+
         const afterDirection = directionFilters.length
           ? platformFiltered.filter(item=>{
               const possible=[
