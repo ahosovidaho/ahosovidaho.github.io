@@ -8,34 +8,25 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <!-- Bez SRI, ať se neblokuje načtení -->
+  <!-- bez SRI -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" referrerpolicy="no-referrer">
 
   <style>
-    :root{
-      color-scheme:dark;
-      --bg:#0f172a;--bg-card:rgba(15,23,42,.8);--bg-card-solid:#111a33;--border:rgba(148,163,184,.2);
-      --text:#e2e8f0;--text-muted:#94a3b8;--accent:#38bdf8;
-      --danger:#f87171;--success:#34d399;--warning:#facc15;
-      font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif
-    }
+    :root{color-scheme:dark;--bg:#0f172a;--bg-card:rgba(15,23,42,.8);--bg-card-solid:#111a33;--border:rgba(148,163,184,.2);--text:#e2e8f0;--text-muted:#94a3b8;--accent:#38bdf8;--danger:#f87171;--success:#34d399;--warning:#facc15;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
     *{box-sizing:border-box;margin:0;padding:0}
     body{min-height:100vh;background:radial-gradient(circle at top,#1e293b,#0f172a 45%);color:var(--text);padding:32px;display:flex;justify-content:center}
     .app{width:min(1200px,100%);display:flex;flex-direction:column;gap:24px}
     header{display:flex;flex-direction:column;gap:8px}
     header h1{font-size:clamp(32px,5vw,44px);font-weight:700}
     header p{color:var(--text-muted);max-width:600px}
-
     .top-grid{display:grid;gap:24px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
-    .panel{background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:20px;backdrop-filter:blur(16px);box-shadow:0 20px 40px -24px rgba(15,23,42,.65);display:flex;flex-direction:column;gap:16px;transition:transform .2s ease,border .2s ease}
-    .panel:hover{transform:translateY(-2px);border-color:rgba(56,189,248,.4)}
+    .panel{background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:20px;backdrop-filter:blur(16px);box-shadow:0 20px 40px -24px rgba(15,23,42,.65);display:flex;flex-direction:column;gap:16px}
     .panel-header{display:flex;align-items:center;gap:12px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;font-size:12px;color:var(--text-muted)}
     .panel-actions{display:flex;gap:12px;flex-wrap:wrap}
-    .ghost-button{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:12px;border:1px solid rgba(148,163,184,.3);background:transparent;color:var(--text);font-weight:500;cursor:pointer;transition:border .2s ease,color .2s ease,background .2s ease}
+    .ghost-button{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:12px;border:1px solid rgba(148,163,184,.3);background:transparent;color:var(--text);font-weight:500;cursor:pointer}
     .ghost-button:hover{border-color:rgba(56,189,248,.6);color:var(--accent);background:rgba(56,189,248,.1)}
     .timestamp{font-size:12px;color:var(--text-muted)}
     .error-message{font-size:14px;color:var(--danger)}
-
     .departure-list{display:grid;gap:12px}
     .departure-item{display:grid;grid-template-columns:1fr auto auto;gap:12px;align-items:center;padding:12px 14px;border-radius:12px;background:rgba(148,163,184,.08)}
     .departure-time{font-size:20px;font-weight:600}
@@ -45,16 +36,11 @@
     .badge.success{background:rgba(52,211,153,.15);color:var(--success)}
     .badge.danger{background:rgba(248,113,113,.15);color:var(--danger)}
     .badge.warning{background:rgba(250,204,21,.15);color:var(--warning)}
-
     .main-layout{display:grid;gap:24px;grid-template-columns:minmax(220px,1fr) minmax(0,2fr) minmax(220px,1fr);grid-template-areas:'links news servers';align-items:start}
-    #links-panel{grid-area:links}
-    #news-panel{grid-area:news}
-    #servers-panel{grid-area:servers}
-
+    #links-panel{grid-area:links} #news-panel{grid-area:news} #servers-panel{grid-area:servers}
     .links-grid{display:flex;flex-direction:column;gap:12px}
-    .quick-link{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;background:rgba(148,163,184,.08);color:var(--text);text-decoration:none;font-weight:500;transition:background .2s ease}
+    .quick-link{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;background:rgba(148,163,184,.08);color:var(--text);text-decoration:none;font-weight:500}
     .quick-link:hover{background:rgba(56,189,248,.16);color:var(--accent)}
-
     .news-list{display:grid;gap:16px}
     .news-item{display:grid;gap:8px;padding-bottom:12px;border-bottom:1px solid rgba(148,163,184,.1)}
     .news-item:last-child{border-bottom:none;padding-bottom:0}
@@ -62,20 +48,12 @@
     .news-item a:hover{color:var(--accent)}
     .news-meta{font-size:13px;color:var(--text-muted)}
     .news-summary{font-size:14px;color:var(--text-muted)}
-
     .server-list{display:grid;gap:16px}
     .server-item{padding:16px;border-radius:12px;background:rgba(148,163,184,.08);display:grid;gap:8px}
     .server-header{display:flex;align-items:center;gap:12px}
     .server-header i{font-size:20px}
-
-    @media (max-width:1024px){
-      body{padding:24px}
-      .main-layout{grid-template-columns:1fr;grid-template-areas:'links' 'news' 'servers'}
-    }
-    @media (max-width:640px){
-      body{padding:16px}
-      .panel{padding:16px}
-    }
+    @media (max-width:1024px){body{padding:24px}.main-layout{grid-template-columns:1fr;grid-template-areas:'links' 'news' 'servers'}}
+    @media (max-width:640px){body{padding:16px}.panel{padding:16px}}
   </style>
 </head>
 <body>
@@ -86,28 +64,22 @@
     </header>
 
     <div class="top-grid">
-      <!-- Počasí -->
       <section class="panel" id="weather-panel">
         <div class="panel-header"><i class="fa-solid fa-cloud-sun"></i><span>Počasí</span></div>
         <div id="weather-content"><p>Načítám aktuální počasí…</p></div>
       </section>
 
-      <!-- Odjezdy MHD -->
       <section class="panel" id="departures-panel">
         <div class="panel-header"><i class="fa-solid fa-train-tram"></i><span>Odjezdy MHD</span></div>
         <div id="departures-content"><p>Načítám nejbližší odjezdy…</p></div>
         <div class="panel-actions">
           <button type="button" class="ghost-button" id="departures-direction">Směr: A (Koh-i-noor)</button>
-          <button type="button" class="ghost-button" id="departures-set-key">
-            <i class="fa-solid fa-key"></i><span id="departures-key-label">Nastavit API klíč</span>
-          </button>
           <button type="button" class="ghost-button" id="departures-set-proxy">
-            <i class="fa-solid fa-shuffle"></i><span id="departures-proxy-label">Nastavit proxy</span>
+            <i class="fa-solid fa-shuffle"></i><span id="departures-proxy-label">Změnit proxy</span>
           </button>
         </div>
       </section>
 
-      <!-- Internet -->
       <section class="panel" id="internet-panel">
         <div class="panel-header"><i class="fa-solid fa-wifi"></i><span>Domácí internet</span></div>
         <div id="internet-status" class="status">
@@ -121,7 +93,6 @@
       </section>
     </div>
 
-    <!-- Spodní část -->
     <div class="main-layout">
       <aside class="panel" id="links-panel">
         <div class="panel-header"><i class="fa-solid fa-bookmark"></i><span>Rychlé odkazy</span></div>
@@ -130,7 +101,7 @@
 
       <section class="panel" id="news-panel">
         <div class="panel-header"><i class="fa-solid fa-newspaper"></i><span>iRozhlas.cz – nejnovější zprávy</span></div>
-        <div id="news-content"><p>Stahuji aktuální články…</p></div>
+        <div id="news-content"><p class="timestamp">Na HTTPS doméně může být RSS blokováno CORS. Použij RSS proxy nebo běž lokálně.</p></div>
       </section>
 
       <aside class="panel" id="servers-panel">
@@ -141,231 +112,117 @@
   </div>
 
   <script>
-    // ========== KONFIG ==========
     const CONFIG = {
-      weather: { latitude: 50.0704, longitude: 14.4709, timezone: 'Europe/Prague' },
-      departures: {
-        stopLabel: 'Slavia – nádraží Eden',
-        proxyUrl: 'https://golemio.m88wqgcdpd.workers.dev/', // můžeš změnit tlačítkem
-        apiKey: '',                 // když proxy není k dispozici a běžíš lokálně
-        limit: 12,
-        minutesBefore: 0,
-        minutesAfter: 45,
-        timezone: 'Europe/Prague'
-      },
-      connectivity: { url: 'http://192.168.1.1/status', method: 'GET', timeoutMs: 4000, mode: 'no-cors' },
-      news: { feedUrl: 'https://www.irozhlas.cz/rss/irozhlas', limit: 8 },
-      links: [
-        { label: 'E-mail', url: 'https://mail.google.com', icon: 'fa-envelope' },
-        { label: 'Kalendář', url: 'https://calendar.google.com', icon: 'fa-calendar-days' },
-        { label: 'Nextcloud', url: 'https://cloud.example.com', icon: 'fa-cloud' },
-        { label: 'Home Assistant', url: 'https://ha.example.com', icon: 'fa-house-signal' },
-        { label: 'Plex', url: 'https://plex.tv/web', icon: 'fa-clapperboard-play' },
-        { label: 'Bankovnictví', url: 'https://ib.examplebank.cz', icon: 'fa-piggy-bank' }
-      ],
-      servers: [
-        { name: 'Plex (Mac mini M4)', icon: 'fa-clapperboard-play', url: 'http://192.168.1.50:32400/web/index.html', method: 'GET', mode: 'no-cors' },
-        { name: 'Nextcloud (Mac mini 2012)', icon: 'fa-cloud', url: 'http://192.168.1.60/status.php', method: 'GET', mode: 'no-cors' },
-        { name: 'Home Assistant', icon: 'fa-house-signal', url: 'http://192.168.1.60:8123/', method: 'GET', mode: 'no-cors' }
-      ]
+      weather:{ latitude:50.0704, longitude:14.4709, timezone:'Europe/Prague' },
+      departures:{
+        stopLabel:'Slavia – nádraží Eden',
+        proxyUrl:'https://golemio.m88wqgcdpd.workers.dev', // <<< TVŮJ WORKER
+        limit:12, minutesBefore:0, minutesAfter:45, timezone:'Europe/Prague'
+      }
     };
 
-    // ========== ELEMENTY ==========
-    const weatherContent = document.getElementById('weather-content');
-    const departuresContent = document.getElementById('departures-content');
-    const directionBtn = document.getElementById('departures-direction');
-    const departuresSetKeyButton = document.getElementById('departures-set-key');
-    const departuresKeyLabel = document.getElementById('departures-key-label');
-    const departuresSetProxyButton = document.getElementById('departures-set-proxy');
-    const departuresProxyLabel = document.getElementById('departures-proxy-label');
+    const departuresContent=document.getElementById('departures-content');
+    const directionBtn=document.getElementById('departures-direction');
+    const setProxyBtn=document.getElementById('departures-set-proxy');
+    const setProxyLbl=document.getElementById('departures-proxy-label');
 
-    const newsContent = document.getElementById('news-content');
-    const linksGrid = document.getElementById('links-grid');
-    const serverList = document.getElementById('server-list');
+    const TRAM_STOP_A='U680Z1P';
+    const TRAM_STOP_B='U680Z2P';
+    const TRAIN_STOP_S='U680Z301';
 
-    // ========== UTIL ==========
-    function safeArray(v){ if(Array.isArray(v)) return v; if(typeof v==='string') return v.split(',').map(s=>s.trim()).filter(Boolean); return []; }
+    const PROXY_STORAGE_KEY='golemio_proxy_url';
+    const PLATFORM_STORAGE_KEY='departures_platform';
+
+    function getPlatform(){ const v=(localStorage.getItem(PLATFORM_STORAGE_KEY)||'A').toUpperCase(); return v==='B'?'B':'A'; }
+    function setPlatform(v){ localStorage.setItem(PLATFORM_STORAGE_KEY,v); }
+    function labelFor(p){ return p==='B'?'Směr: B (Kubánské nám.)':'Směr: A (Koh-i-noor)'; }
+    function buildIds(){ const p=getPlatform(); const tram=(p==='B')?TRAM_STOP_B:TRAM_STOP_A; return [tram, TRAIN_STOP_S]; }
+    function getProxy(){ return localStorage.getItem(PROXY_STORAGE_KEY) || CONFIG.departures.proxyUrl || ''; }
+    function setProxy(v){ if(v) localStorage.setItem(PROXY_STORAGE_KEY,v); else localStorage.removeItem(PROXY_STORAGE_KEY); }
     function formatDate(d){ return new Intl.DateTimeFormat('cs-CZ',{hour:'2-digit',minute:'2-digit'}).format(d); }
-    function toDate(v){ return v ? new Date(v) : null; }
-    function minutesUntil(d){ if(!d) return null; const diff = Math.ceil((d.getTime()-Date.now())/60000); return diff<0?0:diff; }
-    function createBadge(label, extra=''){ const cls=['badge']; if(extra) cls.push(extra); return `<span class="${cls.join(' ')}">${label}</span>`; }
+    function toDate(v){ return v?new Date(v):null; }
+    function minutesUntil(d){ if(!d) return null; const diff=Math.ceil((d.getTime()-Date.now())/60000); return diff<0?0:diff; }
+    function createBadge(t,c=''){ const cls=['badge']; if(c) cls.push(c); return `<span class="${cls.join(' ')}">${t}</span>`; }
     const ROUTE_TYPE_ICONS={0:'🚋',1:'Ⓜ️',2:'🚆',3:'🚌',11:'🚎'};
 
-    // ========== STORAGE KEYS ==========
-    const GOLEMIO_STORAGE_KEY='golemio_api_key';
-    const PROXY_STORAGE_KEY='golemio_proxy_url';
-    const PLATFORM_STORAGE_KEY='departures_platform'; // 'A' | 'B'
-
-    // ========== CIS ID pro Slavia – Nádraží Eden ==========
-    const TRAM_STOP_A  = 'U680Z1P';  // směr Koh-i-noor (A)
-    const TRAM_STOP_B  = 'U680Z2P';  // směr Kubánské náměstí (B)
-    const TRAIN_STOP_S = 'U680Z301'; // Praha-Eden (S9) – vždy
-
-    function getPlatformState(){
-      const val=(localStorage.getItem(PLATFORM_STORAGE_KEY)||'A').toUpperCase();
-      return (val==='B') ? 'B' : 'A';
-    }
-    function setPlatformState(v){ localStorage.setItem(PLATFORM_STORAGE_KEY,v); }
-    function labelForPlatform(p){ return p==='B'?'Směr: B (Kubánské nám.)':'Směr: A (Koh-i-noor)'; }
-
-    function buildIdsForFetch(){
-      const p = getPlatformState(); // 'A' nebo 'B'
-      const tramId = (p === 'B') ? TRAM_STOP_B : TRAM_STOP_A;
-      return [tramId, TRAIN_STOP_S];
-    }
-
-    // ========== KEY & PROXY ==========
-    function readStored(k){ try{const v=localStorage.getItem(k); return v? v.trim():'';}catch{return '';} }
-    function persist(k,v){ try{ v? localStorage.setItem(k,v.trim()) : localStorage.removeItem(k);}catch{} }
-    function getApiKey(){ return readStored(GOLEMIO_STORAGE_KEY) || (CONFIG.departures.apiKey||'').trim(); }
-    function getProxyUrl(){ return readStored(PROXY_STORAGE_KEY) || (CONFIG.departures.proxyUrl||'').trim(); }
-    function updateButtons(){
-      const hasKey=!!getApiKey(); const hasProxy=!!getProxyUrl();
-      if(departuresKeyLabel) departuresKeyLabel.textContent = hasKey ? 'Změnit API klíč' : 'Nastavit API klíč';
-      if(departuresProxyLabel) departuresProxyLabel.textContent = hasProxy ? 'Změnit proxy' : 'Nastavit proxy';
-    }
-    if(departuresSetKeyButton){
-      departuresSetKeyButton.addEventListener('click',()=>{
-        const cur=readStored(GOLEMIO_STORAGE_KEY);
-        const next=window.prompt('Zadej Golemio API klíč (X-Access-Token).\nPrázdný vstup klíč odstraní.',cur||'');
-        if(next===null) return;
-        persist(GOLEMIO_STORAGE_KEY,next.trim());
-        updateButtons(); loadDepartures();
-      });
-    }
-    if(departuresSetProxyButton){
-      departuresSetProxyButton.addEventListener('click',()=>{
-        const cur=readStored(PROXY_STORAGE_KEY) || (CONFIG.departures.proxyUrl||'');
-        const next=window.prompt('Zadej URL proxy (Cloudflare Worker).',cur||'');
-        if(next===null) return;
-        persist(PROXY_STORAGE_KEY,next.trim().replace(/\s+/g,''));
-        updateButtons(); loadDepartures();
-      });
-    }
-
-    // Tlačítko směr
-    const directionBtnEl = document.getElementById('departures-direction');
-    if (directionBtnEl) {
-      directionBtnEl.textContent = labelForPlatform(getPlatformState());
-      directionBtnEl.onclick = () => {
-        const cur = getPlatformState();
-        const next = (cur === 'A') ? 'B' : 'A';
-        setPlatformState(next);
-        directionBtnEl.textContent = labelForPlatform(next);
-        loadDepartures();
-      };
-    }
-
-    function buildGolemioQuery(idsList){
-      const ids = safeArray(idsList).join(',');
+    function buildQuery(ids){
       return new URLSearchParams({
-        ids,
+        ids: ids.join(','),
         minutesBefore:String(CONFIG.departures.minutesBefore??0),
-        minutesAfter:String(CONFIG.departures.minutesAfter??30),
-        limit:String(Math.max(CONFIG.departures.limit??6,1)),
+        minutesAfter:String(CONFIG.departures.minutesAfter??45),
+        limit:String(CONFIG.departures.limit??12),
         preferredTimezone:CONFIG.departures.timezone||'Europe/Prague',
         includeMetroTrains:'true'
       }).toString();
     }
 
-    // --- Fallback fetch pro různé typy Workerů ---
-    async function tryProxyVariants(proxyBase, query, headers){
-      const base = proxyBase.replace(/\/+$/,''); // bez trailing /
+    async function tryProxy(proxyBase, query) {
+      const base = proxyBase.replace(/\/+$/,'');
       const variants = [
-        `${base}/v2/pid/departureboards?${query}`, // Worker očekává plnou cestu
-        `${base}/?${query}`,                        // Worker očekává jen query na /
-        `${base}?${query}`                          // pro jistotu i bez lomítka
+        `${base}/v2/pid/departureboards?${query}`,
+        `${base}/pid/departureboards?${query}`,
+        `${base}/?${query}`
       ];
-
       let lastErr;
-      for (const url of variants){
-        try{
-          const r = await fetch(url, { headers });
+      for (const u of variants) {
+        try {
+          const r = await fetch(u, { headers:{ 'Accept':'application/json' }});
           if (r.ok) return r;
-          // když 404, zkus další variantu
-          if (r.status === 404) { lastErr = new Error('HTTP 404'); continue; }
-          // jiný kód -> vrať rovnou (a nech zpracovat volajícího)
+          if (r.status === 404) { lastErr = new Error('404'); continue; }
+          // jiný kód než 404 – vrať ho
           return r;
-        }catch(e){
-          lastErr = e;
-        }
+        } catch(e){ lastErr=e; }
       }
-      throw lastErr || new Error('Nepodařilo se kontaktovat proxy');
+      throw lastErr || new Error('Proxy unreachable');
     }
 
     async function loadDepartures(){
-      updateButtons();
-      const proxyUrl = getProxyUrl();
-      const apiKey   = getApiKey();
-      const idsArr   = buildIdsForFetch();
+      const ids = buildIds();
+      const q = buildQuery(ids);
+      const proxy = getProxy();
 
-      if(!idsArr.length){
-        departuresContent.innerHTML = '<p class="error-message">Chybí ID zastávek.</p>'; return;
-      }
-      if(!proxyUrl && !apiKey){
-        departuresContent.innerHTML = `
-          <p class="error-message">Na veřejné doméně nelze Golemio volat přímo (CORS).</p>
-          <p class="timestamp">Nastav proxy (Cloudflare Worker) v tlačítku „Nastavit proxy“ nebo spusť lokálně (http://localhost).</p>
-        `;
+      if(!proxy){
+        departuresContent.innerHTML = `<p class="error-message">Není nastavena proxy URL.</p>`;
         return;
       }
 
       try{
-        const q = buildGolemioQuery(idsArr);
-
-        // 1) Přes proxy (pokud je nastavena)
-        let res;
-        if (proxyUrl) {
-          res = await tryProxyVariants(proxyUrl, q, { 'Accept':'application/json' });
-          if(!res.ok) throw new Error(`HTTP ${res.status}`);
-        } else {
-          // 2) Přímé API (funguje typicky jen z http://localhost)
-          const direct = `https://api.golemio.cz/v2/pid/departureboards?${q}`;
-          res = await fetch(direct, { headers: { 'Accept':'application/json', 'X-Access-Token': apiKey }});
-          if(!res.ok) throw new Error(`HTTP ${res.status}`);
-        }
-
+        const res = await tryProxy(proxy, q);
+        if(!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
-        const departuresRaw = Array.isArray(data.departures) ? data.departures : [];
-        const departures = departuresRaw.slice(0, CONFIG.departures.limit ?? 6);
+        const deps = Array.isArray(data.departures) ? data.departures.slice(0, CONFIG.departures.limit) : [];
 
-        if(!departures.length){
+        if(!deps.length){
           departuresContent.innerHTML = `
-            <p>Nebyly nalezeny žádné odjezdy pro zadaný směr (${labelForPlatform(getPlatformState()).replace('Směr: ','')}).</p>
-            <p class="timestamp">${CONFIG.departures.stopLabel} · Poslední kontrola ${formatDate(new Date())}</p>
-          `;
+            <p>Nebyly nalezeny žádné odjezdy pro zadaný směr (${labelFor(getPlatform()).replace('Směr: ','')}).</p>
+            <p class="timestamp">${CONFIG.departures.stopLabel} · Poslední kontrola ${formatDate(new Date())}</p>`;
           return;
         }
 
-        const list = departures.map(dep=>{
-          const sched=toDate(dep.departure_timestamp?.scheduled);
-          const pred =toDate(dep.departure_timestamp?.predicted);
+        const list = deps.map(d=>{
+          const sched=toDate(d.departure_timestamp?.scheduled);
+          const pred =toDate(d.departure_timestamp?.predicted);
           const show = pred || sched;
-          const abs  = show ? formatDate(show) : '—';
+          const abs = show ? formatDate(show) : '—';
           const mins = minutesUntil(show);
           const countdown = mins===null ? '—' : (mins===0 ? 'odjíždí' : `${mins} min`);
           const countdownClass = (mins!==null && mins<=1) ? 'success' : '';
-
           let delay=null;
           if(sched && pred){ delay=Math.round((pred.getTime()-sched.getTime())/60000); }
-          else if(typeof dep.departure_delay==='number'){ delay=Math.round(dep.departure_delay/60); }
-
+          else if(typeof d.departure_delay==='number'){ delay=Math.round(d.departure_delay/60); }
           let delayBadge='';
           if(delay!==null){
             if(delay===0) delayBadge=createBadge('Včas','success');
             else if(delay>0) delayBadge=createBadge(`+${delay} min`,'danger');
             else delayBadge=createBadge(`${delay} min`,'success');
           }
-
-          const line = dep.route?.short_name || dep.route?.long_name || 'Linka';
-          const type = Number(dep.route?.type);
-          const icon = Number.isFinite(type) ? (ROUTE_TYPE_ICONS[type]||'') : '';
-          const platform = dep.stop?.platform_code || dep.stop?.platform_name;
-          const headsignBase = dep.trip?.headsign || dep.trip?.direction || dep.last_stop?.name || '—';
+          const line = d.route?.short_name || d.route?.long_name || 'Linka';
+          const type = Number(d.route?.type);
+          const icon = Number.isFinite(type)?(ROUTE_TYPE_ICONS[type]||''):'';
+          const platform = d.stop?.platform_code || d.stop?.platform_name;
+          const headsignBase = d.trip?.headsign || d.trip?.direction || d.last_stop?.name || '—';
           const headsign = platform ? `${headsignBase} · st. ${platform}` : headsignBase;
-
           const badges=[createBadge(countdown,countdownClass),delayBadge].filter(Boolean).join('');
-
           return `
             <div class="departure-item">
               <div>
@@ -374,118 +231,57 @@
               </div>
               <div class="departure-time">${abs}</div>
               <div class="departure-meta">${badges}</div>
-            </div>
-          `;
+            </div>`;
         }).join('');
 
         departuresContent.innerHTML = `
           <div class="departure-list">${list}</div>
-          <div class="timestamp">${CONFIG.departures.stopLabel} · ${labelForPlatform(getPlatformState())} · Poslední kontrola ${formatDate(new Date())}</div>
-        `;
-      }catch(err){
-        departuresContent.innerHTML = `<p class="error-message">Chyba: ${err.message || err}</p>
-        <p class="timestamp">Tip: Klikni na „Nastavit proxy“ a zkus jinou adresu. Tvůj Worker může očekávat jiný tvar URL.</p>`;
+          <div class="timestamp">${CONFIG.departures.stopLabel} · ${labelFor(getPlatform())} · Poslední kontrola ${formatDate(new Date())}</div>`;
+      }catch(e){
+        departuresContent.innerHTML = `<p class="error-message">Chyba proxy: ${e.message||e}</p>
+        <p class="timestamp">Zkontroluj kód Workeru (cesty /v2/pid/departureboards, /pid/departureboards, /) a že máš nastavený GOLEMIO_TOKEN.</p>`;
       }
     }
 
-    // ========== Počasí ==========
-    const weatherCodeLabels={0:'Jasno',1:'Převážně jasno',2:'Oblačno',3:'Zataženo',45:'Mlha',48:'Mrznoucí mlha',51:'Mírné mrholení',53:'Mrholení',55:'Intenzivní mrholení',56:'Mrznoucí mrholení',57:'Mrznoucí mrholení',61:'Slabý déšť',63:'Déšť',65:'Silný déšť',66:'Mrznoucí déšť',67:'Mrznoucí déšť',71:'Slabé sněžení',73:'Sněžení',75:'Silné sněžení',77:'Kroupy',80:'Přeháňky',81:'Déšť',82:'Silný déšť',85:'Sněhové přeháňky',86:'Silné sněhové přeháňky',95:'Bouřka',96:'Bouřka s krupobitím',99:'Silná bouřka'};
-    async function loadWeather(){
+    // Přepínání směru
+    directionBtn.textContent = labelFor(getPlatform());
+    directionBtn.onclick = () => { const cur=getPlatform(); const next=(cur==='A')?'B':'A'; setPlatform(next); directionBtn.textContent=labelFor(next); loadDepartures(); };
+
+    // Nastavení proxy
+    setProxyLbl.textContent = getProxy() ? 'Změnit proxy' : 'Nastavit proxy';
+    setProxyBtn.onclick = () => {
+      const cur=getProxy();
+      const next=prompt('Zadej adresu svého Cloudflare Workeru', cur||'https://golemio.m88wqgcdpd.workers.dev');
+      if(next===null) return;
+      setProxy((next||'').trim());
+      setProxyLbl.textContent = getProxy() ? 'Změnit proxy' : 'Nastavit proxy';
+      loadDepartures();
+    };
+
+    // Počasí (beze změn, volitelně)
+    (async function loadWeather(){
       try{
-        const {latitude,longitude,timezone}=CONFIG.weather;
-        const url=`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,apparent_temperature,relative_humidity_2m,wind_speed_10m,weather_code&timezone=${timezone}`;
-        const res=await fetch(url); if(!res.ok) throw new Error('Nepodařilo se načíst počasí.');
-        const data=await res.json(); const c=data.current; const label=weatherCodeLabels[c.weather_code]||'Počasí neznámé'; const updated=new Date(c.time);
-        weatherContent.innerHTML=`
+        const url=`https://api.open-meteo.com/v1/forecast?latitude=${CONFIG.weather.latitude}&longitude=${CONFIG.weather.longitude}&current=temperature_2m,apparent_temperature,relative_humidity_2m,wind_speed_10m,weather_code&timezone=${CONFIG.weather.timezone}`;
+        const r=await fetch(url); if(!r.ok) throw new Error('Nepodařilo se načíst počasí.');
+        const d=await r.json(); const c=d.current; const labels={0:'Jasno',1:'Převážně jasno',2:'Oblačno',3:'Zataženo',45:'Mlha',48:'Mrznoucí mlha',51:'Mírné mrholení',53:'Mrholení',55:'Intenzivní mrholení',56:'Mrznoucí mrholení',57:'Mrznoucí mrholení',61:'Slabý déšť',63:'Déšť',65:'Silný déšť',66:'Mrznoucí déšť',67:'Mrznoucí déšť',71:'Slabé sněžení',73:'Sněžení',75:'Silné sněžení',77:'Kroupy',80:'Přeháňky',81:'Déšť',82:'Silný déšť',85:'Sněhové přeháňky',86:'Silné sněhové přeháňky',95:'Bouřka',96:'Bouřka s krupobitím',99:'Silná bouřka'};
+        document.getElementById('weather-content').innerHTML=`
           <div class="weather-main" style="display:flex;align-items:center;justify-content:space-between;gap:12px">
-            <div><div class="weather-temp" style="font-size:56px;font-weight:700">${Math.round(c.temperature_2m)}°C</div><div>${label}</div></div>
+            <div><div class="weather-temp" style="font-size:56px;font-weight:700">${Math.round(c.temperature_2m)}°C</div><div>${labels[c.weather_code]||'Počasí neznámé'}</div></div>
             <div class="weather-meta" style="display:grid;gap:6px;font-size:14px;color:var(--text-muted)">
               <span>Pocitově ${Math.round(c.apparent_temperature)}°C</span>
               <span>Vlhkost ${c.relative_humidity_2m}%</span>
               <span>Vítr ${Math.round(c.wind_speed_10m)} km/h</span>
-              <span class="timestamp">Aktualizováno ${formatDate(updated)}</span>
+              <span class="timestamp">Aktualizováno ${formatDate(new Date(c.time))}</span>
             </div>
-          </div>`; 
-      }catch(e){ weatherContent.innerHTML=`<p class="error-message">${e.message}</p>`; }
-    }
+          </div>`;
+      }catch(e){ document.getElementById('weather-content').innerHTML=`<p class="error-message">${e.message}</p>`; }
+      setTimeout(loadWeather, 20*60*1000);
+    })();
 
-    // ========== Rychlé odkazy ==========
-    function renderLinks(){
-      linksGrid.innerHTML = CONFIG.links.map(link => `
-        <a class="quick-link" href="${link.url}" target="_blank" rel="noopener">
-          <i class="fa-solid ${link.icon}"></i>
-          <span>${link.label}</span>
-        </a>
-      `).join('');
-    }
-
-    // ========== RSS (na HTTPS ukáže návod kvůli CORS) ==========
-    async function loadNews(){
-      newsContent.innerHTML = `
-        <p class="timestamp">Na veřejné doméně (HTTPS) je RSS často blokováno CORS.</p>
-        <p class="timestamp">Řešení: přidej RSS proxy (Cloudflare Worker) nebo spusť lokálně (http://localhost).</p>
-      `;
-    }
-
-    // ========== Monitoring (vyhne se Mixed Content) ==========
-    async function checkServers(){
-      serverList.innerHTML = '';
-      const isHttps = location.protocol === 'https:';
-      const now = formatDate(new Date());
-
-      for (const server of CONFIG.servers) {
-        const item = document.createElement('div');
-        item.className = 'server-item';
-        item.innerHTML = `
-          <div class="server-header">
-            <i class="fa-solid ${server.icon}"></i>
-            <div>
-              <div>${server.name}</div>
-              <div class="timestamp">Kontroluji…</div>
-            </div>
-          </div>
-        `;
-        serverList.appendChild(item);
-
-        if (isHttps && server.url.startsWith('http://')) {
-          item.innerHTML = `
-            <div class="server-header">
-              <i class="fa-solid ${server.icon}"></i>
-              <div>
-                <div>${server.name}</div>
-                <div class="timestamp">Nelze ověřit přes HTTPS (Mixed Content).</div>
-              </div>
-            </div>
-            <p class="timestamp">Spusť stránku lokálně (http://localhost) nebo použij interní HTTPS reverse proxy.</p>
-          `;
-          continue;
-        }
-
-        item.innerHTML = `
-          <div class="server-header">
-            <i class="fa-solid ${server.icon}"></i>
-            <div>
-              <div>${server.name}</div>
-              <div class="timestamp">Kontrola vypnuta na HTTPS</div>
-            </div>
-          </div>
-          <p class="timestamp">Důvod: Mixed Content / CORS. Použij lokální běh nebo HTTPS proxy.</p>
-        `;
-      }
-    }
-
-    // ========== INIT ==========
+    // Init
     function init(){
-      renderLinks();
-      loadWeather();
       loadDepartures();
-      loadNews();
-      checkServers();
-
-      setInterval(loadWeather, 20*60*1000);
       setInterval(loadDepartures, 60*1000);
-      setInterval(loadNews, 30*60*1000);
-      setInterval(checkServers, 5*60*1000);
     }
     document.addEventListener('DOMContentLoaded', init);
   </script>
