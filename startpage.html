@@ -4,9 +4,7 @@
   <meta charset="utf-8" />
   <title>Domácí start</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <!-- Fix: žádný 404 na favicon -->
   <link rel="icon" href="data:," />
-
   <style>
     :root{
       --bg:#0f1720; --panel:#14212b; --border:#1e2c37; --text:#dbe6ef; --muted:#9bb3c6;
@@ -120,6 +118,7 @@
   CONFIG.departures.title = "Slavia – nádraží Eden";
   CONFIG.departures.limit = 12;
   CONFIG.departures.mode = "mins"; // "mins" | "time"
+  CONFIG.departures.minMinutes = 5; // <<< NOVĚ: zobrazit až od 5 minut do odjezdu
 
   const LINKS = [
     { label: "E-mail", url: "https://mail.google.com" },
@@ -213,21 +212,32 @@
   function renderDepartures(data){
     const listEl = $("#mhdList");
     listEl.innerHTML = "";
-    const deps = Array.isArray(data.departures) ? data.departures.slice(0, CONFIG.departures.limit*2) : [];
 
-    const filtered = deps.filter(d => {
+    const deps = Array.isArray(data.departures) ? data.departures.slice(0, CONFIG.departures.limit*3) : [];
+
+    // 1) směr A/B jen pro MHD (tram/bus/trolej), vlaky (type===2) vždy
+    const byPlatform = deps.filter(d => {
       const type = d?.route?.type;
-      if (type === 2) return true; // S-linky (vlaky) zobrazit vždy
+      if (type === 2) return true; // S-linky vždy
       const plat = (d?.stop?.platform_code || "").toUpperCase();
       return plat === currentDir;
     });
 
-    if(filtered.length === 0){
-      listEl.innerHTML = `<div class="error">Nebyly nalezeny žádné odjezdy pro zadaný směr (${currentDir}).</div>`;
+    // 2) prahování na minMinutes (počítáno z predicted || scheduled)
+    const minM = Number(CONFIG.departures.minMinutes ?? 0);
+    const afterThreshold = byPlatform.filter(d => {
+      const shownISO = d?.departure_timestamp?.predicted || d?.departure_timestamp?.scheduled;
+      if (!shownISO) return false;
+      const m = minsTo(shownISO);
+      return m >= minM;
+    });
+
+    if(afterThreshold.length === 0){
+      listEl.innerHTML = `<div class="error">Žádné odjezdy ≥ ${minM} min pro směr ${currentDir}.</div>`;
       return;
     }
 
-    const take = filtered.slice(0, CONFIG.departures.limit);
+    const take = afterThreshold.slice(0, CONFIG.departures.limit);
     for(const d of take){
       const row = document.createElement("div");
       row.className = "dep";
@@ -250,7 +260,7 @@
       timeBox.className = "time";
       const shownISO = d?.departure_timestamp?.predicted || d?.departure_timestamp?.scheduled;
       const mins = minsTo(shownISO);
-      timeBox.textContent = (CONFIG.departures.mode === "time") ? fmtHHMM(shownISO) : (mins <= 0 ? "odjíždí" : `${mins} min`);
+      timeBox.textContent = (CONFIG.departures.mode === "time") ? fmtHHMM(shownISO) : `${mins} min`;
 
       const del = delayMin(d?.departure_timestamp?.scheduled, d?.departure_timestamp?.predicted);
       if(del){
@@ -276,7 +286,8 @@
       });
       renderDepartures(data);
       const ts = new Date();
-      document.getElementById("mhdFoot").textContent = `${CONFIG.departures.title} · Poslední kontrola ${fmtHM(ts)}`;
+      document.getElementById("mhdFoot").textContent =
+        `${CONFIG.departures.title} · Poslední kontrola ${fmtHM(ts)} · filtr ≥ ${CONFIG.departures.minMinutes} min`;
     }catch(err){
       document.getElementById("mhdList").innerHTML = `<div class="error">${(err?.message || err)}</div>`;
       document.getElementById("mhdFoot").textContent = CONFIG.departures.title;
@@ -289,7 +300,7 @@
     box.innerHTML = LINKS.map(l => `<a class="btn" href="${l.url}" target="_blank" rel="noopener">${l.label}</a>`).join("");
   }
 
-  // ---------- NEWS (rss2json, CORS-safe) ----------
+  // ---------- NEWS (rss2json) ----------
   async function loadNews(){
     const feed = "https://www.irozhlas.cz/rss/irozhlas";
     const api = new URL("https://api.rss2json.com/v1/api.json");
