@@ -253,6 +253,9 @@
       });
     }
 
+    // >>> Přidané: volba formátu popisků času v minigrafu
+    const TIME_LABEL_STYLE = 'colon'; // 'colon' => "HH:00", 'h' => "HH h"
+
     function renderMiniChart(canvas, hours){
       const ctx = canvas.getContext('2d');
       const DPR = window.devicePixelRatio||1;
@@ -302,24 +305,54 @@
       ctx.fillText(`${Math.round(tMax)}°C`, pad.l+w-34, pad.t+12);
       ctx.fillText(`${Math.round(tMin)}°C`, pad.l+w-34, pad.t+h-6);
 
-      // časové značky
+      // časové značky (HH:00 nebo HH h)
       ctx.fillStyle = 'rgba(148,163,184,0.9)';
       const step = Math.ceil(hours.length/6);
       labels.forEach((lab,i)=>{
         if (i%step===0 || i===hours.length-1){
-          ctx.fillText(lab, x(i)-10, pad.t+h+16);
+          const pretty = (TIME_LABEL_STYLE === 'h') ? `${lab} h` : `${lab}:00`;
+          ctx.fillText(pretty, x(i)-12, pad.t+h+16);
         }
       });
     }
 
-    function fadeIn(el){
-      el.classList.remove('is-in'); // reset
-      // force reflow
-      void el.offsetWidth;
-      el.classList.add('is-in');
+    const toISODate = s => s ? new Date(s) : null; // (duplicitní helpers nevadí při minifikaci)
+    const fmtH = d => new Intl.DateTimeFormat('cs-CZ',{hour:'2-digit'}).format(d);
+
+    function selectHoursForDay(data, day){
+      const H = data.hourly || {};
+      const times = (H.time||[]).map(toISODate);
+      if (!times.length) return [];
+
+      const today = new Date(); today.setHours(0,0,0,0);
+      const startDay = new Date(today);
+      if(day==='tomorrow') startDay.setDate(startDay.getDate()+1);
+      const endDay = new Date(startDay); endDay.setDate(endDay.getDate()+1);
+
+      const hours = [];
+      for(let i=0;i<times.length;i++){
+        const t = times[i];
+        if (!t || t < startDay || t >= endDay) continue;
+        hours.push({
+          label: fmtH(t),
+          t: H.temperature_2m?.[i] ?? null,
+          p: H.precipitation?.[i] ?? 0,
+          prob: H.precipitation_probability?.[i] ?? 0,
+          gust: H.wind_gusts_10m?.[i] ?? 0,
+          showers: H.showers?.[i] ?? 0
+        });
+      }
+      if(day==='today'){
+        const nowH = new Date().getHours();
+        const fromNow = Math.max(0, hours.findIndex((_,k)=> k >= nowH));
+        return hours.slice(fromNow, fromNow + WX.hoursAhead);
+      } else {
+        return hours.slice(0, WX.hoursAhead);
+      }
     }
 
-    let WX_CACHE = null; // naposledy stažená data
+    let WX_CACHE = null;
+
     async function fetchWeather(){
       const url = new URL('https://api.open-meteo.com/v1/forecast');
       url.searchParams.set('latitude', WX.lat);
@@ -346,41 +379,6 @@
       return WX_CACHE;
     }
 
-    function selectHoursForDay(data, day){
-      const H = data.hourly || {};
-      const times = (H.time||[]).map(toISODate);
-      if (!times.length) return [];
-
-      const today = new Date(); today.setHours(0,0,0,0);
-      const startDay = new Date(today);
-      if(day==='tomorrow') startDay.setDate(startDay.getDate()+1);
-      const endDay = new Date(startDay); endDay.setDate(endDay.getDate()+1);
-
-      const hours = [];
-      for(let i=0;i<times.length;i++){
-        const t = times[i];
-        if (!t || t < startDay || t >= endDay) continue;
-        hours.push({
-          label: fmtH(t),
-          t: H.temperature_2m?.[i] ?? null,
-          p: H.precipitation?.[i] ?? 0,
-          prob: H.precipitation_probability?.[i] ?? 0,
-          gust: H.wind_gusts_10m?.[i] ?? 0,
-          showers: H.showers?.[i] ?? 0
-        });
-      }
-      // ořízni na nejbližších N hodin (pro „Dnes“ od aktuálního času; pro „Zítra“ od 00:00)
-      if(day==='today'){
-        const fromNow = Math.max(0, hours.findIndex((_,k)=>{
-          const now = new Date();
-          return k >= now.getHours(); // hrubé zarovnání
-        }));
-        return hours.slice(fromNow, fromNow + WX.hoursAhead);
-      } else {
-        return hours.slice(0, WX.hoursAhead);
-      }
-    }
-
     function renderWeather(data){
       const el = document.getElementById('weather-content');
       const dayIdx = (WX.day === 'today') ? 0 : 1;
@@ -394,18 +392,24 @@
       const pSum = daily.precipitation_sum?.[dayIdx] ?? 0;
       const pHours = daily.precipitation_hours?.[dayIdx] ?? 0;
 
-      // tip vyrobíme z první hodiny daného dne (nebo z current pro dnes)
       const near = hours[0] || {t: cur.apparent_temperature, p:0, prob:0, gust: cur.wind_gusts_10m};
-      const tip = clothingTip(
-        Math.round((WX.day==='today' ? (cur.apparent_temperature ?? near.t) : near.t) ?? 0),
-        Math.round((WX.day==='today' ? (cur.wind_gusts_10m ?? near.gust) : near.gust) ?? 0),
-        near.prob ?? 0,
-        near.p ?? 0
-      );
+      const tip = (function(){
+        const apparent = Math.round((WX.day==='today' ? (cur.apparent_temperature ?? near.t) : near.t) ?? 0);
+        const gust = Math.round((WX.day==='today' ? (cur.wind_gusts_10m ?? near.gust) : near.gust) ?? 0);
+        const prob = near.prob ?? 0;
+        const pmm = near.p ?? 0;
+        const pieces = [];
+        if (apparent < 0) pieces.push('Velmi chladno – teplá bunda, čepice, rukavice.');
+        else if (apparent < 8) pieces.push('Chladno – bunda/světřík.');
+        else if (apparent < 16) pieces.push('Lehčí vrstva – mikina/bunda.');
+        else if (apparent < 24) pieces.push('Pohodové teploty – lehká vrstva.');
+        else pieces.push('Teplo – tričko/šortky, dodrž pitný režim.');
+        if ((pmm >= 0.2) || (prob >= 40)) pieces.push('Vezmi deštník/pláštěnku.');
+        if (gust >= 12) pieces.push('Větrno – počítej s nárazy větru.');
+        return pieces.join(' ');
+      })();
 
       const hasShowers = hours.some(h => (h.showers ?? 0) > 0);
-
-      // Nowcast jen pro „Dnes“, pro „Zítra“ je skrytý (není k dispozici)
       const nowcast = (WX.day==='today') ? analyzeNowcast(data.minutely_15 || null) : null;
       const nowcastBlock = (WX.day==='today') ? `
         <div class="nowcast">
@@ -453,19 +457,16 @@
         </div>
       `;
 
-      // animace
       requestAnimationFrame(()=>{
         el.classList.add('is-in');
         el.querySelectorAll('.fade').forEach(n=>n.classList.add('is-in'));
       });
 
-      // nowcast viz (jen Dnes)
       if (WX.day==='today' && nowcast){
         const container = el.querySelector('.nowcast');
         renderNowcastBar(container, nowcast.blocks, 120, 15);
       }
 
-      // mini-graf
       const chart = document.getElementById('wx-chart');
       renderMiniChart(chart, hours.length ? hours : [{label:'',t:0,p:0}]);
     }
@@ -503,7 +504,6 @@
       const day = btn.getAttribute('data-day');
       if (day !== WX.day){
         WX.day = day;
-        // UI active state
         document.querySelectorAll('#wx-day-toggle button').forEach(b=>b.classList.toggle('active', b===btn));
         loadWeather();
       }
