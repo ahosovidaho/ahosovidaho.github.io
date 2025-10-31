@@ -1,0 +1,16 @@
+{
+  "name": "Domácí start",
+  "short_name": "Start",
+  "start_url": "/startpage.html",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 128 128'><circle cx='64' cy='64' r='60' fill='%231e293b'/><text x='50%' y='54%' text-anchor='middle' font-size='68' fill='%23e2e8f0' font-family='Arial'>☀️</text></svg>",
+      "sizes": "128x128",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
