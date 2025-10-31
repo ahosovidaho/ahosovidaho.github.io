@@ -112,13 +112,12 @@
   window.CONFIG = window.CONFIG || {};
   CONFIG.weather = { lat:50.0704, lon:14.4709, tz:"Europe/Prague" };
   CONFIG.departures = CONFIG.departures || {};
-  CONFIG.departures.proxyUrl = "https://golemioproxy.m88wqgcdpd.workers.dev"; // Worker proxy
-  CONFIG.departures.ids = "U680Z1P,U680Z301";  // tram A peron + vlak S9 (oba směry vlaků)
+  CONFIG.departures.proxyUrl = "https://golemioproxy.m88wqgcdpd.workers.dev"; // Worker proxy (bez koncové /)
+  // Přidej oba tram perony + vlakovou zastávku:
+  CONFIG.departures.ids = "U680Z1P,U680Z2P,U680Z301";
   CONFIG.departures.title = "Slavia – nádraží Eden";
   CONFIG.departures.limit = 12;
   CONFIG.departures.mode = "mins"; // "mins" | "time"
-  CONFIG.departures.dirA = ["koh-i-noor","kooh-i-noor"];       // směrové fráze pro A
-  CONFIG.departures.dirB = ["kubanske namesti","kubanske náměstí","kubanske"]; // směrové fráze pro B
 
   const LINKS = [
     { label: "E-mail", url: "https://mail.google.com" },
@@ -137,13 +136,11 @@
 
   // ---------- UTIL ----------
   const $ = s => document.querySelector(s);
-  const textN = (el, t) => { el.textContent = t; };
   const fmtHM = d => `${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`;
   const fmtHHMM = iso => { const d = new Date(iso); return fmtHM(d); };
   const minsTo = iso => { const d=new Date(iso); return Math.max(0, Math.ceil((d-Date.now())/60000)); };
   const delayMin = (sched, pred) => (!sched||!pred)?0:Math.round((new Date(pred)-new Date(sched))/60000);
   const iconByType = t => (t===0?"🚋":t===2?"🚆":t===3?"🚌":t===11?"🚎":"🧭");
-  const norm = s => (s||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().trim();
 
   // ---------- API KEY storage ----------
   const KEY_NAME = "golemio_api_key";
@@ -186,6 +183,8 @@
   }
 
   // ---------- DEPARTURES (přes Worker) ----------
+  let currentDir = "A"; // A = peron A (směr Koh-i-noor), B = peron B (směr Kubánské náměstí)
+
   async function fetchDepartures({ids, limit, minutesBefore=0, minutesAfter=45}) {
     const base = CONFIG.departures.proxyUrl.replace(/\/+$/,'') + "/v2/pid/departureboards";
     const url = new URL(base);
@@ -209,30 +208,28 @@
     return res.json();
   }
 
-  let currentDir = "A"; // A = Koh-i-noor, B = Kubánské náměstí (vlaky vždy oběma směry)
-
-  function matchDirectionForTram(item){
-    // pro tram: filtruj podle cíle (headsign/last_stop) na základě frází
-    const isTrain = (item?.route?.type === 2);
-    if (isTrain) return true; // vlaky S9 zobrazujeme obousměrně
-    const head = norm(item?.trip?.headsign) || norm(item?.last_stop?.name);
-    if (!head) return false;
-    const terms = currentDir === "A" ? CONFIG.departures.dirA : CONFIG.departures.dirB;
-    return terms.some(t => head.includes(norm(t)));
-  }
-
   function renderDepartures(data){
     const listEl = $("#mhdList");
     listEl.innerHTML = "";
-    const deps = Array.isArray(data.departures) ? data.departures.slice(0, CONFIG.departures.limit) : [];
+    const deps = Array.isArray(data.departures) ? data.departures.slice(0, CONFIG.departures.limit*2) : [];
 
-    const filtered = deps.filter(matchDirectionForTram);
+    // Filtr: tramvaje podle platform_code A/B; vlaky (type===2) vždy zobrazit
+    const filtered = deps.filter(d => {
+      const type = d?.route?.type;
+      if (type === 2) return true; // S-linka vlaky – obousměrně
+      const plat = (d?.stop?.platform_code || "").toUpperCase();
+      return plat === currentDir;
+    });
+
     if(filtered.length === 0){
-      listEl.innerHTML = `<div class="error">Nebyly nalezeny žádné odjezdy pro zadaný směr (${currentDir === "A" ? "Koh-i-noor" : "Kubánské náměstí"}).</div>`;
+      listEl.innerHTML = `<div class="error">Nebyly nalezeny žádné odjezdy pro zadaný směr (${currentDir}).</div>`;
       return;
     }
 
-    for(const d of filtered){
+    // omez na vizuální limit
+    const take = filtered.slice(0, CONFIG.departures.limit);
+
+    for(const d of take){
       const row = document.createElement("div");
       row.className = "dep";
 
@@ -242,7 +239,7 @@
 
       const line = document.createElement("div");
       line.className = "line";
-      line.textContent = (d?.route?.short_name ?? "?");
+      line.textContent = (d?.route?.short_name ?? d?.route?.long_name ?? "?");
 
       const where = document.createElement("div");
       where.className = "where";
@@ -280,34 +277,32 @@
       });
       renderDepartures(data);
       const ts = new Date();
-      $("#mhdFoot").textContent = `${CONFIG.departures.title} · Poslední kontrola ${fmtHM(ts)}`;
+      document.getElementById("mhdFoot").textContent = `${CONFIG.departures.title} · Poslední kontrola ${fmtHM(ts)}`;
     }catch(err){
-      $("#mhdList").innerHTML = `<div class="error">${(err?.message || err)}</div>`;
-      $("#mhdFoot").textContent = CONFIG.departures.title;
+      document.getElementById("mhdList").innerHTML = `<div class="error">${(err?.message || err)}</div>`;
+      document.getElementById("mhdFoot").textContent = CONFIG.departures.title;
     }
   }
 
   // ---------- LINKS ----------
   function renderLinks(){
-    const box = $("#linksBox");
+    const box = document.getElementById("linksBox");
     box.innerHTML = LINKS.map(l => `<a class="btn" href="${l.url}" target="_blank" rel="noopener">${l.label}</a>`).join("");
   }
 
-  // ---------- NEWS (přes r.jina.ai) ----------
+  // ---------- NEWS (CORS-safe) ----------
   async function loadNews(){
     try{
-      // r.jina.ai vrací čitelný text stránky; použijeme jednoduchý extraktor <item><title/link>
-      const rssUrl = "http://www.irozhlas.cz/rss/irozhlas";
-      const url = `https://r.jina.ai/http://${encodeURIComponent("www.irozhlas.cz/rss/irozhlas")}`;
+      // OPRAVA: nepoužívat encodeURIComponent na celou URL – r.jina.ai chce čistou adresu za /http://
+      const url = "https://r.jina.ai/http://www.irozhlas.cz/rss/irozhlas";
       const res = await fetch(url, { cache:"no-store" });
-      if(!res.ok) throw new Error("RSS nelze načíst.");
+      if(!res.ok) throw new Error(`RSS nelze načíst (HTTP ${res.status}).`);
       const txt = await res.text();
 
-      // Hrubý extraktor odkazů (jina.ai text obsahuje řádky "title: ..." a "link: ...")
+      // Hrubý extraktor titulků/odkazů z textového výstupu
       const items = [];
       const titleRe = /^title:\s*(.+)$/gmi;
       const linkRe  = /^link:\s*(https?:\/\/[^\s]+)$/gmi;
-
       const titles = [...txt.matchAll(titleRe)].map(m=>m[1]).filter(Boolean);
       const links  = [...txt.matchAll(linkRe)].map(m=>m[1]).filter(Boolean);
 
@@ -315,22 +310,18 @@
         items.push({ title: titles[i], link: links[i] });
       }
 
-      if(items.length===0){
-        $("#newsBox").innerHTML = `<div class="muted">Žádné položky RSS.</div>`;
-        return;
-      }
-
-      $("#newsBox").innerHTML = items.map(it =>
-        `<div class="row"><a class="btn" href="${it.link}" target="_blank" rel="noopener" style="text-decoration:none">${it.title}</a></div>`
-      ).join("");
+      document.getElementById("newsBox").innerHTML =
+        items.length
+          ? items.map(it => `<div class="row"><a class="btn" href="${it.link}" target="_blank" rel="noopener" style="text-decoration:none">${it.title}</a></div>`).join("")
+          : `<div class="muted">Žádné položky RSS.</div>`;
     }catch(e){
-      $("#newsBox").innerHTML = `<div class="error">${e.message||e}</div>`;
+      document.getElementById("newsBox").innerHTML = `<div class="error">${e.message||e}</div>`;
     }
   }
 
   // ---------- SERVICES / CONNECTIVITY ----------
   function renderServices(){
-    const box = $("#svcBox");
+    const box = document.getElementById("svcBox");
     const https = location.protocol === "https:";
     const rows = SERVICES.map(s => {
       const blocked = https && s.url.startsWith("http://");
@@ -343,8 +334,7 @@
     }).join("");
     box.innerHTML = rows || `<div class="muted">Žádné služby.</div>`;
 
-    // Internet box (gateway)
-    const nb = $("#netBox");
+    const nb = document.getElementById("netBox");
     const gw = "http://192.168.1.1/status";
     if (location.protocol === "https:" && gw.startsWith("http://")) {
       nb.innerHTML = `Nelze ověřit z HTTPS (prohlížeč blokuje HTTP). Ověř lokálně z <code>http://</code> nebo povol HTTPS na bráně.`;
@@ -354,19 +344,19 @@
   }
 
   // ---------- UI ----------
-  const apiDlg = $("#apiDlg");
-  const apiInput = $("#apiInput");
-  $("#apiBtn").addEventListener("click", ()=>{ apiInput.value = getToken(); apiDlg.showModal(); });
+  const apiDlg = document.getElementById("apiDlg");
+  const apiInput = document.getElementById("apiInput");
+  document.getElementById("apiBtn").addEventListener("click", ()=>{ apiInput.value = getToken(); apiDlg.showModal(); });
   apiDlg.addEventListener("close", () => { if(apiDlg.returnValue==="ok"){ setToken(apiInput.value.trim()); refreshDepartures(); }});
 
-  const dirBtn = $("#dirBtn");
+  const dirBtn = document.getElementById("dirBtn");
   dirBtn.addEventListener("click", ()=>{
     currentDir = currentDir === "A" ? "B" : "A";
     dirBtn.textContent = `Směr: ${currentDir === "A" ? "Koh-i-noor" : "Kubánské náměstí"}`;
     refreshDepartures();
   });
 
-  $("#titlePill").textContent = CONFIG.departures.title;
+  document.getElementById("titlePill").textContent = CONFIG.departures.title;
 
   // ---------- INIT ----------
   (async function init(){
