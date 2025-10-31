@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="cs">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Domácí start</title>
 
-  <!-- Inter font + Font Awesome (bez SRI, ať se neblokuje) -->
+  <!-- Bez SRI, ať se nic neblokuje -->
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet"/>
@@ -14,164 +14,66 @@
   <style>
     :root{
       color-scheme:dark;
-      --bg:#0f172a;
-      --panel:rgba(15,23,42,.8);
-      --panel-solid:#111a33;
-      --border:rgba(148,163,184,.2);
-      --text:#e2e8f0;
-      --muted:#94a3b8;
-      --accent:#38bdf8;
-      --danger:#ef4444;
-      --warn:#f59e0b;
-      --ok:#10b981;
-      --chip:#1f2a44;
+      --bg:#0f172a; --panel:rgba(15,23,42,.8); --border:rgba(148,163,184,.2);
+      --text:#e2e8f0; --muted:#94a3b8; --accent:#38bdf8;
+      --ok:#10b981; --late:#ef4444; --chip:#1f2a44;
     }
     *{box-sizing:border-box}
-    body{
-      margin:0; padding:32px; min-height:100vh;
-      background: radial-gradient(circle at top,#1e293b,#0f172a 45%);
-      font-family:Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
-      color:var(--text); display:flex; justify-content:center;
-    }
-    .app{ width:min(1200px,100%); display:flex; flex-direction:column; gap:24px; }
-    header h1{ margin:0 0 8px; font-size:clamp(28px,4.5vw,42px); font-weight:700}
-    header p{ margin:0; color:var(--muted)}
+    body{margin:0; padding:32px; min-height:100vh; background:radial-gradient(circle at top,#1e293b,#0f172a 45%);
+         color:var(--text); font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif; display:flex; justify-content:center}
+    .app{width:min(1100px,100%); display:flex; flex-direction:column; gap:24px}
+    header h1{margin:0 0 8px; font-size:clamp(28px,4.5vw,40px)}
+    header p{margin:0; color:var(--muted)}
+    .grid{display:grid; gap:24px; grid-template-columns:repeat(auto-fit,minmax(320px,1fr))}
+    .panel{background:var(--panel); border:1px solid var(--border); border-radius:16px; padding:18px; backdrop-filter:blur(16px)}
+    .ph{display:flex; gap:10px; align-items:center; text-transform:uppercase; letter-spacing:.08em; font-size:12px; color:var(--muted); font-weight:600; margin-bottom:10px}
 
-    .grid{ display:grid; gap:24px; grid-template-columns: repeat(auto-fit,minmax(280px,1fr)); }
-    .panel{
-      background:var(--panel);
-      border:1px solid var(--border);
-      border-radius:16px; padding:18px 18px 16px;
-      backdrop-filter: blur(16px);
-      box-shadow:0 20px 40px -24px rgba(15,23,42,.65);
-    }
-    .panel:hover{ border-color:rgba(56,189,248,.35) }
-    .ph{ display:flex; align-items:center; gap:10px; text-transform:uppercase; font-size:12px; color:var(--muted); letter-spacing:.08em; font-weight:600; margin-bottom:12px}
-    .ph i{ font-size:14px }
-
-    /* Weather */
-    .wx-wrap{ display:grid; gap:12px }
-    .wx-top{ display:flex; align-items:center; justify-content:space-between; gap:12px }
-    .wx-now{ display:flex; align-items:baseline; gap:10px }
-    .wx-temp{ font-size:48px; font-weight:700 }
-    .wx-feels{ color:var(--muted) }
-    .wx-chips{ display:flex; flex-wrap:wrap; gap:8px }
-    .chip{ background:var(--chip); border:1px solid var(--border); border-radius:999px; padding:6px 10px; font-size:12px; display:flex; align-items:center; gap:8px }
-    .chip.ok{ border-color:rgba(16,185,129,.4); color:#8ef5ce }
-    .chip.warn{ border-color:rgba(245,158,11,.4); color:#ffd699 }
-    .chip.danger{ border-color:rgba(239,68,68,.4); color:#ffb3b3 }
-
-    .wx-sub{ display:grid; gap:8px; color:var(--muted); font-size:14px }
-    .wx-ctl{ display:flex; align-items:center; gap:8px; justify-content:space-between; margin-top:4px }
-    .seg{ background:#0c1327; border:1px solid var(--border); border-radius:10px; padding:3px; display:inline-flex; gap:3px }
-    .seg button{
-      border:0; background:transparent; color:var(--text); padding:6px 10px; border-radius:8px; cursor:pointer; font-weight:600; font-size:12px
-    }
-    .seg button.active{ background:rgba(56,189,248,.15); color:#8bdcff }
-
-    .wx-bars{ display:grid; grid-template-columns: repeat(8,1fr); gap:8px; margin-top:6px }
-    .bar{ display:flex; flex-direction:column; gap:6px; align-items:center }
-    .bar .stick{ width:8px; height:64px; border-radius:6px; background:linear-gradient(180deg, rgba(56,189,248,.9), rgba(56,189,248,.2)); transform-origin:bottom; }
-    .bar .lbl{ font-size:12px; color:var(--muted) }
-
-    .row{ display:flex; gap:10px; align-items:center; color:var(--muted); font-size:14px }
-    .row strong{ color:var(--text) }
-
-    .btn{
-      display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border-radius:10px;
-      border:1px solid var(--border); background:transparent; color:var(--text);
-      cursor:pointer; font-weight:600;
-    }
-    .btn:hover{ border-color:rgba(56,189,248,.5); color:#8bdcff }
-    .timestamp{ color:var(--muted); font-size:12px }
-
-    /* Departures */
-    .dep-ctl{ display:flex; gap:8px; align-items:center; justify-content:space-between; margin-bottom:10px }
-    .dep-seg{ background:#0c1327; border:1px solid var(--border); border-radius:10px; padding:3px; display:inline-flex; gap:3px }
-    .dep-seg button{ border:0; background:transparent; color:var(--text); padding:6px 10px; border-radius:8px; cursor:pointer; font-weight:600; font-size:12px }
-    .dep-seg button.active{ background:rgba(56,189,248,.15); color:#8bdcff }
-
-    .dep-list{ display:grid; gap:10px }
-    .dep-item{ display:grid; grid-template-columns: 1fr auto auto; gap:10px; align-items:center; padding:10px 12px; border-radius:12px; background:rgba(148,163,184,.08) }
-    .badge{ padding:4px 10px; border-radius:999px; font-size:12px; font-weight:700; background:rgba(148,163,184,.16); color:var(--text) }
-    .badge.ok{ background:rgba(16,185,129,.15); color:#8ef5ce }
-    .badge.late{ background:rgba(239,68,68,.15); color:#ffb3b3 }
-    .dep-dest{ color:var(--muted); font-size:14px }
-    .dep-time{ font-weight:700; font-size:20px }
-    .dep-meta{ display:flex; flex-direction:column; align-items:flex-end; gap:6px }
-
-    /* News */
-    .news-list{ display:grid; gap:14px }
-    .news-item{ border-bottom:1px solid rgba(148,163,184,.1); padding-bottom:12px }
-    .news-item:last-child{ border-bottom:0; padding-bottom:0 }
-    .news-item a{ color:var(--text); font-weight:600; text-decoration:none; font-size:16px }
-    .news-item a:hover{ color:var(--accent) }
-    .news-meta{ color:var(--muted); font-size:12px }
-
-    @media (max-width:700px){ body{ padding:16px } }
+    /* MHD */
+    .dep-ctl{display:flex; gap:8px; align-items:center; justify-content:space-between; margin-bottom:10px}
+    .seg{background:#0c1327; border:1px solid var(--border); border-radius:10px; padding:3px; display:inline-flex; gap:3px}
+    .seg button{border:0; background:transparent; color:var(--text); padding:6px 10px; border-radius:8px; cursor:pointer; font-weight:600; font-size:12px}
+    .seg button.active{background:rgba(56,189,248,.15); color:#8bdcff}
+    .timestamp{color:var(--muted); font-size:12px}
+    .dep-list{display:grid; gap:10px}
+    .dep-item{display:grid; grid-template-columns:1fr auto auto; gap:10px; align-items:center;
+              padding:10px 12px; border-radius:12px; background:rgba(148,163,184,.08)}
+    .badge{padding:4px 10px; border-radius:999px; font-size:12px; font-weight:700; background:rgba(148,163,184,.16)}
+    .badge.ok{background:rgba(16,185,129,.15); color:#8ef5ce}
+    .badge.late{background:rgba(239,68,68,.15); color:#ffb3b3}
+    .dep-dest{color:var(--muted); font-size:14px}
+    .dep-time{font-weight:700; font-size:20px}
+    .dep-meta{display:flex; flex-direction:column; gap:6px; align-items:flex-end}
+    .error{color:#ffb3b3}
   </style>
 </head>
 <body>
   <div class="app">
     <header>
       <h1>Domácí start</h1>
-      <p>Ranní a večerní přehled: počasí, odjezdy MHD a zprávy.</p>
+      <p>Rychlý přehled: MHD odjezdy, počasí a zprávy.</p>
     </header>
 
     <section class="grid">
-      <!-- WEATHER -->
-      <section class="panel" id="weather-panel">
-        <div class="ph"><i class="fa-solid fa-cloud-sun"></i> Počasí – Vršovice</div>
-
-        <div class="wx-wrap">
-          <div class="wx-ctl">
-            <div class="seg" id="wx-day-toggle">
-              <button data-day="today" class="active">Dnes</button>
-              <button data-day="tomorrow">Zítra</button>
-            </div>
-            <div class="wx-chips" id="wx-chips">
-              <!-- dynamické chipy: ☔️ deštník, 🧣 vrstvy, 💨 vítr -->
-            </div>
-          </div>
-
-          <div class="wx-top">
-            <div class="wx-now">
-              <div class="wx-temp" id="wx-temp">—°C</div>
-              <div class="wx-feels" id="wx-feels">pocitově —°C</div>
-            </div>
-            <button class="btn" id="wx-radar"><i class="fa-solid fa-radar"></i> Radar</button>
-          </div>
-
-          <div class="wx-sub">
-            <div class="row"><i class="fa-regular fa-clock"></i> <span id="wx-precip-when">Srážky: —</span></div>
-            <div class="row"><i class="fa-solid fa-temperature-half"></i> <span>Min/Max: <strong id="wx-minmax">—/—°C</strong> · včera <span id="wx-vs-yday">—</span></span></div>
-            <div class="row"><i class="fa-solid fa-wind"></i> <span>Vítr: <strong id="wx-wind">— km/h</strong> (nárazy <strong id="wx-gusts">— km/h</strong>)</span></div>
-            <div class="timestamp" id="wx-updated">Aktualizuji…</div>
-          </div>
-
-          <div>
-            <div class="row"><i class="fa-solid fa-droplet"></i> Nejbližších 8 hodin (intenzita srážek):</div>
-            <div class="wx-bars" id="wx-bars">
-              <!-- 8 barů -->
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- DEPARTURES -->
+      <!-- MHD – ponechána poslední funkční varianta -->
       <section class="panel" id="departures-panel">
         <div class="ph"><i class="fa-solid fa-train-tram"></i> Odjezdy MHD – Slavia / Praha-Eden (S9)</div>
         <div class="dep-ctl">
-          <div class="dep-seg" id="dep-dir-toggle">
+          <div class="seg" id="dep-dir-toggle">
             <button data-platform="A" class="active">Směr A</button>
             <button data-platform="B">Směr B</button>
           </div>
-          <div class="timestamp" id="dep-stamp"></div>
+          <div class="timestamp" id="dep-stamp">Načítám…</div>
         </div>
         <div id="dep-content"><p>Načítám nejbližší odjezdy…</p></div>
       </section>
 
-      <!-- NEWS -->
+      <!-- Počasí (jednoduché, abychom teď nezasahovali do funkčního MHD) -->
+      <section class="panel" id="weather-panel">
+        <div class="ph"><i class="fa-solid fa-cloud-sun"></i> Počasí – Vršovice</div>
+        <div id="weather-content"><p>Načítám…</p></div>
+      </section>
+
+      <!-- Zprávy (bez CORS problémů: rss2json) -->
       <section class="panel" id="news-panel">
         <div class="ph"><i class="fa-solid fa-newspaper"></i> iRozhlas.cz – nejnovější</div>
         <div id="news-content"><p>Stahuji aktuální články…</p></div>
@@ -181,240 +83,36 @@
 
 <script>
 /* =========================
-   KONFIGURACE
+   KONFIG
 ========================= */
 const CONFIG = {
   tz: 'Europe/Prague',
-  // Vršovice (cca u Edenu)
-  lat: 50.0704,
-  lon: 14.4709,
 
-  // Golemio proxy (Cloudflare Worker) – zachováno tak, jak ti to fungovalo
+  // Cloudflare Worker – pouze ROOT varianta, která ti fungovala
+  // ⚠️ NEMĚNIT na /v2/... ani /pid/... – tvůj Worker vrací 404!
   golemioProxy: 'https://golemio.m88wqgcdpd.workers.dev',
 
-  // Zastávky
-  cisTram: 'U680Z1P',   // Slavia – Nádraží Eden (TRAM)
-  cisTrain: 'U680Z301', // Praha – Eden (S9)
+  // CIS ID: TRAM Slavia – Nádraží Eden a železniční Praha-Eden (S9)
+  cisTram: 'U680Z1P',
+  cisTrain: 'U680Z301',
 
-  // Filtr: zobrazit jen spoje, které odjíždějí za ≥ N minut
+  // Zobrazit jen spoje s odjezdem >= N minut
   minOffsetMins: 5,
 
-  // RSS (CORS safe)
+  // Open-Meteo + RSS
+  lat: 50.0704, lon: 14.4709,
   rssUrl: 'https://www.irozhlas.cz/rss/irozhlas'
 };
 
-/* =========================
-   POMOCNÉ FUNKCE
-========================= */
-const $ = sel => document.querySelector(sel);
-const $$ = sel => Array.from(document.querySelectorAll(sel));
-
-function z(num, n=2){ return String(num).padStart(n,'0') }
-function fmtHM(d){
-  if(!d) return '—';
-  return `${z(d.getHours())}:${z(d.getMinutes())}`;
-}
-function fmtHMh(d){
-  if(!d) return '—';
-  const h=z(d.getHours());
-  return `${h}:00`; // podle přání HH:00
-}
-function toDate(iso){ return iso ? new Date(iso) : null }
-function minutesUntil(d){ if(!d) return null; return Math.max(0, Math.ceil((d.getTime()-Date.now())/60000))}
+const $ = s=>document.querySelector(s);
+const $$ = s=>Array.from(document.querySelectorAll(s));
+function z(n){return String(n).padStart(2,'0')}
+function fmtHM(d){return `${z(d.getHours())}:${z(d.getMinutes())}`}
+function toDate(x){return x?new Date(x):null}
+function minutesUntil(d){ if(!d) return null; return Math.max(0,Math.ceil((d.getTime()-Date.now())/60000)); }
 
 /* =========================
-   POČASÍ – Open-Meteo
-========================= */
-const wx = {
-  state: { day:'today', raw:null },
-
-  async load(){
-    const { lat, lon, tz } = CONFIG;
-    const url = new URL('https://api.open-meteo.com/v1/forecast');
-    url.searchParams.set('latitude', lat);
-    url.searchParams.set('longitude', lon);
-    url.searchParams.set('timezone', tz);
-    url.searchParams.set('current', 'temperature_2m,apparent_temperature,weather_code,wind_speed_10m,wind_gusts_10m');
-    url.searchParams.set('hourly', 'temperature_2m,apparent_temperature,precipitation,precipitation_probability,weather_code,wind_speed_10m,wind_gusts_10m');
-    url.searchParams.set('minutely_15', 'precipitation');
-    url.searchParams.set('daily','temperature_2m_max,temperature_2m_min,precipitation_sum,wind_speed_10m_max,apparent_temperature_max,apparent_temperature_min');
-    url.searchParams.set('past_days','1');
-    url.searchParams.set('forecast_days','2');
-
-    const res = await fetch(url.toString());
-    if(!res.ok) throw new Error('Nepodařilo se načíst počasí.');
-    this.state.raw = await res.json();
-    this.render();
-  },
-
-  // najdi začátek srážek (minutely 15 → 2h; jinak hourly → 24h)
-  nextRainInfo(){
-    const R = this.state.raw;
-    if(!R) return {label:'Žádné srážky v dohlednu', soon:false, eta:null, intensity:0};
-    const now = Date.now();
-
-    // zkus minutely_15 (jemnější)
-    if(R.minutely_15 && R.minutely_15.time){
-      for(let i=0;i<R.minutely_15.time.length;i++){
-        const t = new Date(R.minutely_15.time[i]).getTime();
-        const p = Number(R.minutely_15.precipitation[i] ?? 0);
-        if(t >= now && p > 0.05){
-          const mins = Math.round((t-now)/60000);
-          return {label: mins<=0?'prší teď':`za ${mins} min`, soon: mins<=120, eta:new Date(t), intensity:p};
-        }
-      }
-    }
-
-    // fallback: hourly
-    if(R.hourly && R.hourly.time){
-      for(let i=0;i<R.hourly.time.length;i++){
-        const t = new Date(R.hourly.time[i]).getTime();
-        const p = Number(R.hourly.precipitation[i] ?? 0);
-        const prob = Number(R.hourly.precipitation_probability?.[i] ?? 0);
-        if(t >= now && (p>0.05 || prob>=50)){
-          const mins = Math.round((t-now)/60000);
-          return {label: mins<60?`za ${mins} min`:`za ${Math.round(mins/60)} h`, soon: mins<=360, eta:new Date(t), intensity:p};
-        }
-      }
-    }
-    return {label:'Žádné srážky v dohlednu', soon:false, eta:null, intensity:0};
-  },
-
-  // připrav 8 barů srážek pro vybraný den (dnes/zítra) – hodinový krok
-  barsData(){
-    const R=this.state.raw; if(!R) return [];
-    const wantTomorrow = this.state.day==='tomorrow';
-    const ref = new Date(); if(wantTomorrow){ ref.setDate(ref.getDate()+1); ref.setHours(0,0,0,0) }
-
-    const hours = [];
-    for(let i=0;i<R.hourly.time.length;i++){
-      const t=new Date(R.hourly.time[i]);
-      if( (this.state.day==='today' && t.getDate()===new Date().getDate()) ||
-          (this.state.day==='tomorrow' && t.toDateString()===ref.toDateString()) ){
-        hours.push({
-          time:t,
-          precip:Number(R.hourly.precipitation[i]??0),
-          prob:Number(R.hourly.precipitation_probability?.[i]??0)
-        });
-      }
-    }
-    // vyber nejbližších 8 (od “teď” u dnes, od 06:00 u zítra aby dávaly smysl)
-    if(this.state.day==='today'){
-      const now=Date.now();
-      const next = hours.filter(h=>h.time.getTime()>=now).slice(0,8);
-      return next.length?next:hours.slice(0,8);
-    }else{
-      const idx = hours.findIndex(h=>h.time.getHours()>=6);
-      const start = idx===-1?0:idx;
-      return hours.slice(start,start+8);
-    }
-  },
-
-  ydayCompare(){
-    const R=this.state.raw; if(!R) return '—';
-    const dMin=R.daily.temperature_2m_min?.[0], dMax=R.daily.temperature_2m_max?.[0]; // dnes
-    const yMin=R.daily.temperature_2m_min?.[0+1], yMax=R.daily.temperature_2m_max?.[0+1]; // včera (past_days=1 ⇒ index posunutý o 1)
-    // Pozn.: Pořadí u Open-Meteo: minulé dny jsou před dneškem. Najdeme dnešní index dynamicky:
-    const todayStr = new Date().toISOString().slice(0,10);
-    const idxToday = R.daily.time.indexOf(todayStr);
-    if(idxToday===-1) return '—';
-    const idxYday = idxToday-1;
-    const tMin = R.daily.temperature_2m_min[idxToday];
-    const tMax = R.daily.temperature_2m_max[idxToday];
-    const yMinV = R.daily.temperature_2m_min[idxYday];
-    const yMaxV = R.daily.temperature_2m_max[idxYday];
-    if(yMinV==null || yMaxV==null) return '—';
-    const d = Math.round(((tMax+tMin)/2 - (yMaxV+yMinV)/2));
-    return d===0?'stejně jako včera':(d>0?`o ${d}°C tepleji než včera`:`o ${Math.abs(d)}°C chladněji než včera`);
-  },
-
-  recommend(){
-    const R=this.state.raw; if(!R) return [];
-    const c=R.current;
-    const feels = Number(c.apparent_temperature ?? c.temperature_2m ?? 0);
-    const wind = Number(c.wind_speed_10m ?? 0);
-    const gusts = Number(c.wind_gusts_10m ?? wind);
-    const rain = this.nextRainInfo();
-
-    const chips=[];
-    if(rain.soon){ chips.push({cls:'warn', txt:'☔️ Deštník se hodí', title:`Srážky ${rain.label}`}); }
-    else { chips.push({cls:'ok', txt:'Bez deštníku', title:'Žádné srážky v dohlednu'}); }
-
-    if(feels<=2 || (feels<=6 && wind>=25)){
-      chips.push({cls:'danger', txt:'🧣 Vrstvy / termoprádlo', title:`Pocitově ${Math.round(feels)}°C`});
-    }else if(feels<=10){
-      chips.push({cls:'warn', txt:'Lehké vrstvy', title:`Pocitově ${Math.round(feels)}°C`});
-    }else{
-      chips.push({cls:'ok', txt:'Lehké oblečení', title:`Pocitově ${Math.round(feels)}°C`});
-    }
-
-    if(gusts>=50){ chips.push({cls:'danger', txt:'💨 Silný vítr', title:`Nárazy až ${Math.round(gusts)} km/h`}); }
-    else if(wind>=30){ chips.push({cls:'warn', txt:'Větrno', title:`Vítr ${Math.round(wind)} km/h`}); }
-
-    return chips;
-  },
-
-  minmaxFor(day){
-    const R=this.state.raw; if(!R) return {min:'—',max:'—'};
-    // najdi index dne (dnes/zítra) podle daily.time
-    const base = new Date(); if(day==='tomorrow') base.setDate(base.getDate()+1);
-    const key = base.toISOString().slice(0,10);
-    const idx = R.daily.time.indexOf(key);
-    if(idx===-1) return {min:'—',max:'—'};
-    return {
-      min: Math.round(R.daily.temperature_2m_min[idx]),
-      max: Math.round(R.daily.temperature_2m_max[idx])
-    };
-  },
-
-  render(){
-    const R=this.state.raw; if(!R) return;
-    // horní čísla
-    $('#wx-temp').textContent = `${Math.round(R.current.temperature_2m)}°C`;
-    $('#wx-feels').textContent = `pocitově ${Math.round(R.current.apparent_temperature)}°C`;
-    $('#wx-wind').textContent = `${Math.round(R.current.wind_speed_10m)} km/h`;
-    $('#wx-gusts').textContent = `${Math.round(R.current.wind_gusts_10m)} km/h`;
-    $('#wx-updated').textContent = `Aktualizováno ${fmtHM(new Date())}`;
-
-    const rain = this.nextRainInfo();
-    $('#wx-precip-when').textContent = `Srážky: ${rain.label}`;
-
-    const mm = this.minmaxFor(this.state.day);
-    $('#wx-minmax').textContent = `${mm.min} / ${mm.max}°C`;
-    $('#wx-vs-yday').textContent = this.ydayCompare();
-
-    // chipy
-    const chips = this.recommend();
-    $('#wx-chips').innerHTML = chips.map(c => `<span class="chip ${c.cls}" title="${c.title}">${c.txt}</span>`).join('');
-
-    // bary
-    const bars = this.barsData();
-    const maxP = Math.max(0.2, ...bars.map(b=>b.precip));
-    $('#wx-bars').innerHTML = bars.map(b=>{
-      const h = Math.round((b.precip/maxP)*64);
-      return `<div class="bar">
-        <div class="stick" style="height:${Math.max(4,h)}px"></div>
-        <div class="lbl">${fmtHMh(b.time)}</div>
-      </div>`;
-    }).join('');
-  }
-};
-
-$('#wx-day-toggle').addEventListener('click', (e)=>{
-  const b = e.target.closest('button'); if(!b) return;
-  $$('#wx-day-toggle button').forEach(x=>x.classList.toggle('active', x===b));
-  wx.state.day = b.dataset.day;
-  wx.render();
-});
-$('#wx-radar').addEventListener('click', ()=>{
-  const {lat,lon} = CONFIG;
-  window.open(`https://www.windy.com/?rain,${lat.toFixed(3)},${lon.toFixed(3)},12`, '_blank');
-});
-
-/* =========================
-   ODJEZDY – Golemio (přes Worker)
-   Zachováno volání, které ti fungovalo:
-   ➜ GET {proxy}/?ids=U680Z1P,U680Z301&... (bez /v2/…)
+   MHD – pouze ROOT proxy
 ========================= */
 const DEP = {
   platform:'A',
@@ -427,34 +125,37 @@ const DEP = {
       preferredTimezone: CONFIG.tz,
       includeMetroTrains: 'true'
     });
-    // Použij jen kořenovou variantu – vyhne se 404
-    const url = `${CONFIG.golemioProxy}/?${p.toString()}`;
+    const url = `${CONFIG.golemioProxy}/?${p.toString()}`; // ← JEN ROOT!
     const res = await fetch(url);
     if(!res.ok) throw new Error(`Chyba proxy: ${res.status}`);
     const data = await res.json();
     this.render(data);
   },
-  pickTime(dep){
-    const s = toDate(dep?.departure_timestamp?.scheduled);
-    const p = toDate(dep?.departure_timestamp?.predicted);
-    return p || s || null;
+  pickTime(d){
+    const s=toDate(d?.departure_timestamp?.scheduled);
+    const p=toDate(d?.departure_timestamp?.predicted);
+    return p||s||null;
   },
   render(data){
-    const stamp = $('#dep-stamp');
     const cont = $('#dep-content');
+    const stamp = $('#dep-stamp');
+    const iconMap = {0:'🚋',1:'Ⓜ️',2:'🚆',3:'🚌',11:'🚎'};
 
     const list = (Array.isArray(data.departures)?data.departures:[])
       .filter(d=>{
-        // jen odjezdy za >= minOffsetMins
-        const t=this.pickTime(d); const mins = minutesUntil(t);
+        // min offset
+        const t=this.pickTime(d), mins=minutesUntil(t);
         if(mins===null || mins<CONFIG.minOffsetMins) return false;
-        // TRAM: respektovat platformu
+
+        // TRAM – respektovat platformu A/B na U680Z1P
         if(d?.route?.type===0 && d?.stop?.id===CONFIG.cisTram){
-          const plat = (d?.stop?.platform_code||'').toUpperCase();
+          const plat=(d?.stop?.platform_code||'').toUpperCase();
           return plat===this.platform;
         }
-        // VLAKY (S9) – zobraz obě strany
+
+        // VLAKY (S9) – zobraz vždy (oba směry), pouze na stanici U680Z301
         if(d?.route?.type===2 && d?.stop?.id===CONFIG.cisTrain) return true;
+
         return false;
       })
       .sort((a,b)=> (this.pickTime(a)?.getTime()||0) - (this.pickTime(b)?.getTime()||0))
@@ -466,24 +167,23 @@ const DEP = {
       return;
     }
 
-    const iconMap = {0:'🚋',1:'Ⓜ️',2:'🚆',3:'🚌',11:'🚎'};
     const rows = list.map(dep=>{
       const t = this.pickTime(dep);
       const mins = minutesUntil(t);
-      const badge = mins<=1?`<span class="badge ok">odjíždí</span>`:`<span class="badge">${mins} min</span>`;
+      const timeBadge = mins<=1 ? `<span class="badge ok">odjíždí</span>` : `<span class="badge">${mins} min</span>`;
 
       // zpoždění
       let delayBadge='';
       const s=toDate(dep?.departure_timestamp?.scheduled), p=toDate(dep?.departure_timestamp?.predicted);
       if(s&&p){
-        const d = Math.round((p.getTime()-s.getTime())/60000);
-        if(d>0) delayBadge = `<span class="badge late">+${d} min</span>`;
-        else if(d===0) delayBadge = `<span class="badge ok">včas</span>`;
+        const d=Math.round((p.getTime()-s.getTime())/60000);
+        if(d>0) delayBadge=`<span class="badge late">+${d} min</span>`;
+        else if(d===0) delayBadge=`<span class="badge ok">včas</span>`;
       }
 
       const line = dep?.route?.short_name || dep?.route?.long_name || '—';
       const rt = Number(dep?.route?.type ?? 0);
-      const ic = iconMap[rt]||'';
+      const ic = iconMap[rt] || '';
       const plat = dep?.stop?.platform_code ? ` · st. ${dep.stop.platform_code}` : '';
       const head = dep?.trip?.headsign || dep?.last_stop?.name || '—';
 
@@ -494,7 +194,7 @@ const DEP = {
             <div class="dep-dest">${head}${plat}</div>
           </div>
           <div class="dep-time">${fmtHM(t)}</div>
-          <div class="dep-meta">${badge}${delayBadge}</div>
+          <div class="dep-meta">${timeBadge}${delayBadge}</div>
         </div>`;
     }).join('');
 
@@ -507,34 +207,62 @@ $('#dep-dir-toggle').addEventListener('click', (e)=>{
   const b=e.target.closest('button'); if(!b) return;
   $$('#dep-dir-toggle button').forEach(x=>x.classList.toggle('active', x===b));
   DEP.platform = b.dataset.platform.toUpperCase();
-  // přenačti odjezdy s novým filtrem
   DEP.load().catch(err=>{
-    $('#dep-content').innerHTML = `<p class="error">${String(err.message||err)}</p>`;
+    $('#dep-content').innerHTML = `<p class="error">Odjezdy: ${String(err.message||err)}</p>`;
   });
 });
 
 /* =========================
-   RSS – iRozhlas (rss2json)
+   Počasí – jednoduché info
+========================= */
+async function loadWeather(){
+  const url = new URL('https://api.open-meteo.com/v1/forecast');
+  url.searchParams.set('latitude', CONFIG.lat);
+  url.searchParams.set('longitude', CONFIG.lon);
+  url.searchParams.set('timezone', CONFIG.tz);
+  url.searchParams.set('current', 'temperature_2m,apparent_temperature,weather_code,wind_speed_10m');
+  url.searchParams.set('daily', 'temperature_2m_min,temperature_2m_max');
+  url.searchParams.set('forecast_days', '1');
+
+  const wrap = $('#weather-content');
+  try{
+    const r = await fetch(url);
+    if(!r.ok) throw new Error('Počasí nelze načíst');
+    const d = await r.json();
+    const c = d.current;
+    const min = Math.round(d.daily.temperature_2m_min?.[0] ?? NaN);
+    const max = Math.round(d.daily.temperature_2m_max?.[0] ?? NaN);
+    wrap.innerHTML = `
+      <p><strong>${Math.round(c.temperature_2m)}°C</strong> (pocitově ${Math.round(c.apparent_temperature)}°C)</p>
+      <p>Min/Max dnes: ${isFinite(min)?min:'—'} / ${isFinite(max)?max:'—'}°C</p>
+      <p class="timestamp">Aktualizováno ${fmtHM(new Date())}</p>
+    `;
+  }catch(err){
+    wrap.innerHTML = `<p class="error">Počasí: ${String(err.message||err)}</p>`;
+  }
+}
+
+/* =========================
+   Zprávy – rss2json
 ========================= */
 async function loadNews(){
-  const url = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(CONFIG.rssUrl)}`;
   const wrap = $('#news-content');
   try{
-    const res = await fetch(url);
-    if(!res.ok) throw new Error('RSS nelze načíst');
-    const json = await res.json();
-    const items = (json.items||[]).slice(0,8);
+    const r = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(CONFIG.rssUrl)}`);
+    if(!r.ok) throw new Error('RSS nelze načíst');
+    const j = await r.json();
+    const items = (j.items||[]).slice(0,8);
     if(!items.length){ wrap.innerHTML='<p>Žádné články.</p>'; return; }
     wrap.innerHTML = `<div class="news-list">
       ${items.map(it=>`
         <article class="news-item">
           <a href="${it.link}" target="_blank" rel="noopener">${it.title}</a>
-          <div class="news-meta">${new Date(it.pubDate).toLocaleString('cs-CZ',{hour:'2-digit',minute:'2-digit',day:'2-digit',month:'2-digit'})}</div>
+          <div class="timestamp">${new Date(it.pubDate).toLocaleString('cs-CZ',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</div>
         </article>
       `).join('')}
     </div>`;
   }catch(err){
-    wrap.innerHTML = `<p class="error">RSS chyba: ${String(err.message||err)}</p>`;
+    wrap.innerHTML = `<p class="error">RSS: ${String(err.message||err)}</p>`;
   }
 }
 
@@ -542,23 +270,18 @@ async function loadNews(){
    INIT
 ========================= */
 async function init(){
-  // Počasí
-  wx.load().catch(err=>{
-    const p=$('#weather-panel');
-    p.insertAdjacentHTML('beforeend', `<p class="error">Počasí: ${String(err.message||err)}</p>`);
-  });
-
-  // Odjezdy
+  // MHD (klíčová část – poslední funkční varianta)
   DEP.load().catch(err=>{
     $('#dep-content').innerHTML = `<p class="error">Odjezdy: ${String(err.message||err)}</p>`;
   });
 
-  // Zprávy
+  // Ostatní – jen lehké, ať neruší MHD
+  loadWeather();
   loadNews();
 
-  // Auto-refresh
-  setInterval(()=>wx.load().catch(()=>{}), 20*60*1000);
+  // refreshy
   setInterval(()=>DEP.load().catch(()=>{}), 60*1000);
+  setInterval(()=>loadWeather().catch(()=>{}), 20*60*1000);
   setInterval(()=>loadNews().catch(()=>{}), 30*60*1000);
 }
 
