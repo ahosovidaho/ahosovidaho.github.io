@@ -289,37 +289,37 @@
     box.innerHTML = LINKS.map(l => `<a class="btn" href="${l.url}" target="_blank" rel="noopener">${l.label}</a>`).join("");
   }
 
-  // ---------- NEWS (CORS-safe) ----------
+  // ---------- NEWS (rss2json, CORS-safe) ----------
   async function loadNews(){
-    const feedHttps = "https://r.jina.ai/https://www.irozhlas.cz/rss/irozhlas";
-    const feedHttp  = "https://r.jina.ai/http://www.irozhlas.cz/rss/irozhlas";
+    const feed = "https://www.irozhlas.cz/rss/irozhlas";
+    const api = new URL("https://api.rss2json.com/v1/api.json");
+    api.searchParams.set("rss_url", feed);
+
     try{
-      // Fix: používej https variantu; pokud selže (422), spadni na http
-      let res = await fetch(feedHttps, { cache:"no-store" });
-      if(!res.ok) {
-        // fallback
-        res = await fetch(feedHttp, { cache:"no-store" });
-      }
+      const res = await fetch(api.toString(), { cache:"no-store" });
       if(!res.ok) throw new Error(`RSS nelze načíst (HTTP ${res.status}).`);
-      const txt = await res.text();
+      const json = await res.json();
 
-      // jednoduchý extraktor (Jina převádí XML na plain text)
-      const items = [];
-      const titleRe = /^title:\s*(.+)$/gmi;
-      const linkRe  = /^link:\s*(https?:\/\/[^\s]+)$/gmi;
-      const titles = [...txt.matchAll(titleRe)].map(m=>m[1]).filter(Boolean);
-      const links  = [...txt.matchAll(linkRe)].map(m=>m[1]).filter(Boolean);
-
-      for(let i=0;i<Math.min(8, Math.min(titles.length, links.length));i++){
-        items.push({ title: titles[i], link: links[i] });
+      if(json.status !== "ok" || !Array.isArray(json.items)){
+        throw new Error("RSS ve formátu, který neznám.");
       }
 
+      const items = json.items.slice(0,8);
       document.getElementById("newsBox").innerHTML =
-        items.length
-          ? items.map(it => `<div class="row"><a class="btn" href="${it.link}" target="_blank" rel="noopener" style="text-decoration:none">${it.title}</a></div>`).join("")
-          : `<div class="muted">Žádné položky RSS.</div>`;
+        items.map(it => `
+          <div class="row" style="justify-content:space-between;gap:12px">
+            <a class="btn" href="${it.link}" target="_blank" rel="noopener" style="text-decoration:none;flex:1">
+              ${it.title}
+            </a>
+            <span class="muted" style="white-space:nowrap">${new Date(it.pubDate).toLocaleTimeString('cs-CZ',{hour:'2-digit',minute:'2-digit'})}</span>
+          </div>
+        `).join("");
     }catch(e){
-      document.getElementById("newsBox").innerHTML = `<div class="error">${e.message||e}</div>`;
+      document.getElementById("newsBox").innerHTML =
+        `<div class="error">${e.message||e}</div>
+         <div class="muted" style="margin-top:6px">
+           Zdroj: <a class="btn" href="${feed}" target="_blank" rel="noopener">RSS iRozhlas</a>
+         </div>`;
     }
   }
 
