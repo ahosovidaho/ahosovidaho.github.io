@@ -137,7 +137,7 @@
     function setPlatform(v){ localStorage.setItem(PLATFORM_STORAGE_KEY,v); }
     function labelFor(p){ return p==='B'?'Směr: B (Kubánské nám.)':'Směr: A (Koh-i-noor)'; }
     function buildIds(){ const p=getPlatform(); const tram=(p==='B')?TRAM_STOP_B:TRAM_STOP_A; return [tram, TRAIN_STOP_S]; }
-    function getProxy(){ return localStorage.getItem(PROXY_STORAGE_KEY) || CONFIG.departures.proxyUrl || ''; }
+    function getProxy(){ return localStorage.getItem(PROXY_STORAGE_KEY) || CONFIG.departures.proxyUrl = "https://golemioproxy.m88wqgcdpd.workers.dev"; }
     function setProxy(v){ if(v) localStorage.setItem(PROXY_STORAGE_KEY,v); else localStorage.removeItem(PROXY_STORAGE_KEY); }
     function formatDate(d){ return new Intl.DateTimeFormat('cs-CZ',{hour:'2-digit',minute:'2-digit'}).format(d); }
     function toDate(v){ return v?new Date(v):null; }
