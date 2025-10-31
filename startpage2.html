@@ -97,7 +97,7 @@
     </header>
 
     <div class="top-grid">
-      <!-- === POČASÍ (Vršovice) – UPGRADE === -->
+      <!-- === POČASÍ (Vršovice) === -->
       <section class="panel" id="weather-panel">
         <div class="panel-header">
           <i class="fa-solid fa-cloud-sun"></i>
@@ -122,7 +122,7 @@
         </div>
       </section>
 
-      <!-- OSTATNÍ PANELY ponechány (placeholdery; neměním logiku) -->
+      <!-- Ostatní panely jen jako placeholdery -->
       <section class="panel" id="departures-panel">
         <div class="panel-header"><i class="fa-solid fa-train-tram"></i><span>Odjezdy MHD</span></div>
         <div id="departures-content"><p>(Tvůj existující modul MHD)</p></div>
@@ -187,18 +187,6 @@
     const toISODate = s => s ? new Date(s) : null;
     const clamp = (n,min,max)=> Math.max(min,Math.min(max,n));
 
-    function clothingTip(apparent, gust, precipProbNear, precipMmNear){
-      const pieces = [];
-      if (apparent < 0) pieces.push('Velmi chladno – teplá bunda, čepice, rukavice.');
-      else if (apparent < 8) pieces.push('Chladno – bunda/světřík.');
-      else if (apparent < 16) pieces.push('Lehčí vrstva – mikina/bunda.');
-      else if (apparent < 24) pieces.push('Pohodové teploty – lehká vrstva.');
-      else pieces.push('Teplo – tričko/šortky, dodrž pitný režim.');
-      if ((precipMmNear >= 0.2) || (precipProbNear >= 40)) pieces.push('Vezmi deštník/pláštěnku.');
-      if (gust >= 12) pieces.push('Větrno – počítej s nárazy větru.');
-      return pieces.join(' ');
-    }
-
     function analyzeNowcast(minutely){
       if (!minutely || !minutely.time) return {text:'Beze srážek v nejbližších 2 hodinách.', blocks:[], showers:false};
       const times = minutely.time.map(toISODate);
@@ -220,8 +208,8 @@
       }
 
       const blocks = [];
-      const stepMin = 15;
-      const segCount = Math.min(8, prec.length);
+      const total = 120, stepMin = 15;
+      const segCount = Math.min(Math.floor(total/stepMin), prec.length);
       for (let i=0;i<segCount;i++){
         const mm = prec[i] ?? 0;
         if (mm <= 0) continue;
@@ -253,7 +241,7 @@
       });
     }
 
-    // >>> Přidané: volba formátu popisků času v minigrafu
+    // >>> Formát popisků času v minigrafu
     const TIME_LABEL_STYLE = 'colon'; // 'colon' => "HH:00", 'h' => "HH h"
 
     function renderMiniChart(canvas, hours){
@@ -316,9 +304,6 @@
       });
     }
 
-    const toISODate = s => s ? new Date(s) : null; // (duplicitní helpers nevadí při minifikaci)
-    const fmtH = d => new Intl.DateTimeFormat('cs-CZ',{hour:'2-digit'}).format(d);
-
     function selectHoursForDay(data, day){
       const H = data.hourly || {};
       const times = (H.time||[]).map(toISODate);
@@ -343,9 +328,10 @@
         });
       }
       if(day==='today'){
-        const nowH = new Date().getHours();
-        const fromNow = Math.max(0, hours.findIndex((_,k)=> k >= nowH));
-        return hours.slice(fromNow, fromNow + WX.hoursAhead);
+        const now = new Date();
+        const fromIdx = hours.findIndex(h => Number(h.label) >= now.getHours());
+        const start = Math.max(0, fromIdx === -1 ? 0 : fromIdx);
+        return hours.slice(start, start + WX.hoursAhead);
       } else {
         return hours.slice(0, WX.hoursAhead);
       }
@@ -393,20 +379,20 @@
       const pHours = daily.precipitation_hours?.[dayIdx] ?? 0;
 
       const near = hours[0] || {t: cur.apparent_temperature, p:0, prob:0, gust: cur.wind_gusts_10m};
-      const tip = (function(){
+      const tip = (() => {
         const apparent = Math.round((WX.day==='today' ? (cur.apparent_temperature ?? near.t) : near.t) ?? 0);
         const gust = Math.round((WX.day==='today' ? (cur.wind_gusts_10m ?? near.gust) : near.gust) ?? 0);
         const prob = near.prob ?? 0;
         const pmm = near.p ?? 0;
-        const pieces = [];
-        if (apparent < 0) pieces.push('Velmi chladno – teplá bunda, čepice, rukavice.');
-        else if (apparent < 8) pieces.push('Chladno – bunda/světřík.');
-        else if (apparent < 16) pieces.push('Lehčí vrstva – mikina/bunda.');
-        else if (apparent < 24) pieces.push('Pohodové teploty – lehká vrstva.');
-        else pieces.push('Teplo – tričko/šortky, dodrž pitný režim.');
-        if ((pmm >= 0.2) || (prob >= 40)) pieces.push('Vezmi deštník/pláštěnku.');
-        if (gust >= 12) pieces.push('Větrno – počítej s nárazy větru.');
-        return pieces.join(' ');
+        const parts = [];
+        if (apparent < 0) parts.push('Velmi chladno – teplá bunda, čepice, rukavice.');
+        else if (apparent < 8) parts.push('Chladno – bunda/světřík.');
+        else if (apparent < 16) parts.push('Lehčí vrstva – mikina/bunda.');
+        else if (apparent < 24) parts.push('Pohodové teploty – lehká vrstva.');
+        else parts.push('Teplo – tričko/šortky, dodrž pitný režim.');
+        if ((pmm >= 0.2) || (prob >= 40)) parts.push('Vezmi deštník/pláštěnku.');
+        if (gust >= 12) parts.push('Větrno – počítej s nárazy větru.');
+        return parts.join(' ');
       })();
 
       const hasShowers = hours.some(h => (h.showers ?? 0) > 0);
