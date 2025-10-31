@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <title>Domácí start</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <!-- Ikony bez SRI (minule padalo na integrity) -->
+  <!-- Font Awesome bez integrity (aby nepadalo na SRI) -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
   <style>
     :root{
@@ -29,8 +29,6 @@
     .badge.warn{background:rgba(250,204,21,.15);color:var(--warn)}
     .badge.danger{background:rgba(248,113,113,.15);color:var(--danger)}
     .muted{color:var(--muted)}
-    .row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
-    .col{display:flex;flex-direction:column;gap:6px}
     .big{font-size:clamp(40px,5vw,56px);font-weight:800}
     .mono{font-variant-numeric:tabular-nums}
     .divider{height:1px;background:var(--border);margin:4px 0}
@@ -45,16 +43,7 @@
     .links-grid{display:flex;flex-direction:column;gap:12px}
     .quick-link{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;background:rgba(148,163,184,.08);color:var(--text);text-decoration:none;font-weight:500}
     .quick-link:hover{background:rgba(56,189,248,.16);color:var(--accent)}
-    .news-list{display:grid;gap:16px}
-    .news-item{display:grid;gap:8px;padding-bottom:12px;border-bottom:1px solid rgba(148,163,184,.1)}
-    .news-item:last-child{border-bottom:none;padding-bottom:0}
-    .news-item a{color:var(--text);font-weight:600;text-decoration:none;font-size:18px}
-    .news-item a:hover{color:var(--accent)}
     .timestamp{font-size:12px;color:var(--muted)}
-    .status{display:flex;align-items:center;gap:12px}
-    .status .indicator{width:10px;height:10px;border-radius:999px;background:var(--warn);box-shadow:0 0 0 4px rgba(250,204,21,.16)}
-    .status.online .indicator{background:var(--good);box-shadow:0 0 0 4px rgba(52,211,153,.16)}
-    .status.offline .indicator{background:var(--danger);box-shadow:0 0 0 4px rgba(248,113,113,.16)}
     @media (max-width:1024px){.main-layout{grid-template-columns:1fr;grid-template-areas:'links' 'news' 'servers'}}
   </style>
 </head>
@@ -66,7 +55,7 @@
     </header>
 
     <div class="top-grid">
-      <!-- POČASÍ (ponecháno z poslední verze) -->
+      <!-- POČASÍ ponechávám (zde jen placeholder, ať neháže chyby) -->
       <section class="panel" id="weather-panel">
         <div class="panel-header">
           <i class="fa-solid fa-cloud-sun"></i><span>Počasí – Vršovice</span>
@@ -74,7 +63,7 @@
         <div id="weather-content"><p class="muted">Načítám aktuální počasí…</p></div>
       </section>
 
-      <!-- ODJEZDY MHD – VRÁCENÁ PŮVODNÍ LOGIKA (worker jen na /?...) -->
+      <!-- ODJEZDY MHD – PEVNĚ NA KOŘEN WORKERU -->
       <section class="panel" id="departures-panel">
         <div class="panel-header">
           <i class="fa-solid fa-train-tram"></i><span>Odjezdy MHD</span>
@@ -86,11 +75,10 @@
         </div>
       </section>
 
-      <!-- INTERNET (pozn.: zvenku HTTP lokály blokuje https prohlížeče) -->
+      <!-- INTERNET pozn.: HTTP lokály z HTTPS domény prohlížeč blokuje (mixed content) -->
       <section class="panel" id="internet-panel">
         <div class="panel-header"><i class="fa-solid fa-wifi"></i><span>Domácí internet</span></div>
-        <div id="internet-status" class="status"><div class="indicator"></div><div><div class="status-text">Kontroluji dostupnost…</div><div class="timestamp" id="internet-timestamp"></div></div></div>
-        <p class="timestamp muted">Kontrola domácích IP zůstává lokální – pro HTTPS doménu zvenku prohlížeč blokuje HTTP (mixed content).</p>
+        <div class="timestamp muted">Kontrola domácích IP je vypnutá z HTTPS (mixed content). Funguje jen z lokální sítě/HTTP.</div>
       </section>
     </div>
 
@@ -102,12 +90,12 @@
 
       <section class="panel" id="news-panel">
         <div class="panel-header"><i class="fa-solid fa-newspaper"></i><span>iRozhlas.cz – nejnovější</span></div>
-        <div id="news-content"><p class="muted">Stahuji aktuální články…</p></div>
+        <div id="news-content"><p class="muted">Zprávy dočasně vypnuté (CORS 403) – nechám bez volání, ať to nešpiní konzoli.</p></div>
       </section>
 
       <aside class="panel" id="servers-panel">
         <div class="panel-header"><i class="fa-solid fa-server"></i><span>Domácí služby</span></div>
-        <div class="status"><div class="indicator"></div><div>Lokální ping skryt – viz poznámku u „Domácí internet“</div></div>
+        <div class="timestamp muted">Lokální ping skryt – z HTTPS domény by se HTTP lokály stejně blokovaly.</div>
       </aside>
     </div>
   </div>
@@ -115,12 +103,12 @@
   <script>
     // ===== KONFIG =====
     const CONFIG = {
-      weather: { latitude: 50.0699, longitude: 14.4712, timezone: 'Europe/Prague' },
+      // jen to, co potřebujeme v tomto fixu
       departures: {
-        // !!! PONECHÁNO NA KOŘENU WORKERU (to byla verze, která fungovala)
+        // TVŮJ WORKER – KOŘENOVÁ URL (musí končit lomítkem!)
         proxyBase: 'https://golemio.m88wqgcdpd.workers.dev/',
 
-        // A/B tram + S9 vlak:
+        // A/B tram + S9:
         stopIdsTram_A: ['U680Z1P'],   // platforma A (Koh-i-noor)
         stopIdsTram_B: ['U680Z2P'],   // platforma B (Kubánské nám.)
         stopIdsTrain:  ['U680Z301'],  // Praha-Eden (S9)
@@ -128,11 +116,7 @@
         minutesBefore: 0,
         minutesAfter: 45,
         timezone: 'Europe/Prague',
-        minLeadMinutes: 5   // zobraz jen odjezdy nejdříve za 5 min (to jsme ladili)
-      },
-      news: {
-        feedUrl: 'https://www.irozhlas.cz/rss/irozhlas',
-        limit: 8
+        minLeadMinutes: 5   // odjezdy nejdřív za 5 minut
       },
       links: [
         { label: 'E-mail', url: 'https://mail.google.com', icon: 'fa-envelope' },
@@ -145,146 +129,24 @@
     };
 
     // ===== UTILS =====
-    const weatherContent = document.getElementById('weather-content');
     const departuresContent = document.getElementById('departures-content');
-    const newsContent = document.getElementById('news-content');
     const linksGrid = document.getElementById('links-grid');
-
     const ROUTE_TYPE_ICONS = {0:'🚋',1:'Ⓜ️',2:'🚆',3:'🚌',11:'🚎'};
-
-    const WMO = {
-      0:'Jasno',1:'Převážně jasno',2:'Oblačno',3:'Zataženo',
-      45:'Mlha',48:'Mrznoucí mlha',
-      51:'Mírné mrholení',53:'Mrholení',55:'Intenzivní mrholení',
-      56:'Mrznoucí mrholení',57:'Mrznoucí mrholení',
-      61:'Slabý déšť',63:'Déšť',65:'Silný déšť',
-      66:'Mrznoucí déšť',67:'Mrznoucí déšť',
-      71:'Slabé sněžení',73:'Sněžení',75:'Silné sněžení',
-      77:'Kroupy',
-      80:'Přeháňky',81:'Přeháňky',82:'Silné přeháňky',
-      85:'Sněhové přeháňky',86:'Silné sněhové přeháňky',
-      95:'Bouřka',96:'Bouřka s krupobitím',99:'Silná bouřka'
-    };
-
     const dd = n => String(n).padStart(2,'0');
     const fmtTime = d => new Intl.DateTimeFormat('cs-CZ',{hour:'2-digit',minute:'2-digit'}).format(d);
-    const dateKey = d => `${d.getFullYear()}-${dd(d.getMonth()+1)}-${dd(d.getDate())}`;
     const chip = (label, cls='') => `<span class="badge ${cls}">${label}</span>`;
+    function minutesUntil(iso){ if(!iso) return null; const t = new Date(iso).getTime() - Date.now(); return Math.max(0, Math.ceil(t/60000)); }
 
-    function minutesUntil(tsISO){
-      if(!tsISO) return null;
-      const t = new Date(tsISO).getTime() - Date.now();
-      return Math.max(0, Math.ceil(t/60000));
-    }
-
-    // ===== POČASÍ (poslední verze) =====
-    async function loadWeather(){
-      const { latitude, longitude, timezone } = CONFIG.weather;
-      const url = new URL('https://api.open-meteo.com/v1/forecast');
-      const params = {
-        latitude, longitude, timezone,
-        past_days: 1, forecast_days: 1,
-        current: 'temperature_2m,apparent_temperature,precipitation,wind_speed_10m,wind_gusts_10m,weather_code,is_day',
-        daily: 'temperature_2m_max,temperature_2m_min,precipitation_sum,wind_speed_10m_max'
-      };
-      Object.entries(params).forEach(([k,v]) => url.searchParams.set(k, String(v)));
-
-      try{
-        const res = await fetch(url);
-        if(!res.ok) throw new Error('Nepodařilo se načíst počasí.');
-        const data = await res.json();
-
-        const cur = data.current;
-        const now = new Date(cur.time);
-        const t = Math.round(cur.temperature_2m);
-        const feels = Math.round(cur.apparent_temperature);
-        const wLabel = WMO[cur.weather_code] || 'Počasí neznámé';
-        const wind = Math.round(cur.wind_speed_10m || 0);
-        const gust = Math.round(cur.wind_gusts_10m || 0);
-        const precipNow = Number(cur.precipitation || 0);
-
-        const idxToday = data.daily.time.findIndex(s => s === dateKey(new Date()));
-        const idxYday  = data.daily.time.findIndex(s => s === dateKey(new Date(Date.now()-86400000)));
-
-        const tMaxToday = idxToday>=0 ? Math.round(data.daily.temperature_2m_max[idxToday]) : null;
-        const tMinToday = idxToday>=0 ? Math.round(data.daily.temperature_2m_min[idxToday]) : null;
-        const tMaxYday  = idxYday>=0  ? Math.round(data.daily.temperature_2m_max[idxYday])  : null;
-        const deltaVsY  = (tMaxToday!=null && tMaxYday!=null) ? (tMaxToday - tMaxYday) : null;
-
-        const precipSumToday = idxToday>=0 ? (data.daily.precipitation_sum[idxToday] || 0) : 0;
-
-        const needUmbrella = precipNow > 0 || precipSumToday >= 0.3;
-        const strongWind = gust >= 45;
-        const icingRisk = (t <= 2 && t >= -2 && (precipNow > 0 || precipSumToday > 0));
-
-        const verdict = [
-          `Teď pocitově ${feels}°C (${wLabel})`,
-          needUmbrella ? '☔ vhodný deštník' : 'bez deštníku',
-          strongWind ? `💨 poryvy až ${gust} km/h` : `vítr ${wind} km/h`
-        ].join(' · ');
-
-        const outfit = buildClothingAdvice(feels, strongWind, needUmbrella);
-        const deltaTxt = (deltaVsY==null) ? '' :
-          (deltaVsY>0 ? `Dnes tepleji o +${deltaVsY}°C vs. včera` :
-           deltaVsY<0 ? `Dnes chladněji o ${deltaVsY}°C vs. včera` : 'Stejně jako včera');
-
-        const badges = [
-          needUmbrella ? chip('Přeháňky', 'warn') : '',
-          strongWind ? chip(`Silný vítr · ${gust} km/h`, 'danger') : '',
-          icingRisk ? chip('Náledí', 'danger') : ''
-        ].filter(Boolean).join(' ');
-
-        weatherContent.innerHTML = `
-          <div class="col">
-            <div class="row">
-              <div class="big mono">${feels}°C</div>
-              <div class="col">
-                <div>${verdict}</div>
-                <div class="row">${badges || chip('Bez varování','success')}</div>
-              </div>
-            </div>
-            <div class="divider"></div>
-            <div class="grid2">
-              <div class="row">
-                <span class="badge">Min ${tMinToday ?? '—'}°</span>
-                <span class="badge">Max ${tMaxToday ?? '—'}°</span>
-                ${deltaTxt ? `<span class="badge">${deltaTxt}</span>` : ''}
-              </div>
-              <div class="timestamp">Aktualizováno ${fmtTime(now)}</div>
-            </div>
-            <div class="row">
-              <i class="fa-solid fa-shirt"></i>
-              <div>${outfit}</div>
-            </div>
-          </div>
-        `;
-      }catch(err){
-        weatherContent.innerHTML = `<p class="badge danger">Počasí: ${err.message || err}</p>`;
-      }
-    }
-
-    function buildClothingAdvice(feels, strongWind, needUmbrella){
-      let base;
-      if (feels <= -5) base = 'zimní bunda, čepice a rukavice';
-      else if (feels <= 3) base = 'teplá bunda, čepice';
-      else if (feels <= 10) base = 'bunda + teplejší spodní prádlo';
-      else if (feels <= 18) base = 'mikina / lehká bunda';
-      else if (feels <= 24) base = 'tričko + lehká vrstva';
-      else base = 'velmi lehké oblečení';
-      const extras = [];
-      if (needUmbrella) extras.push('deštník');
-      if (strongWind) extras.push('nefoukavá vrstva');
-      return extras.length ? `${base} (+ ${extras.join(', ')})` : base;
-    }
-
-    // ===== MHD – VRÁCENÝ PŮVODNÍ FETCH (pouze root /?...) =====
-    let currentDir = 'A'; // A = Koh-i-noor, B = Kubánské náměstí
+    // ===== MHD: POUZE KOŘEN WORKERU (/?...) – ŽÁDNÉ /v2, /pid, ani fallbacky =====
+    let currentDir = 'A';
     document.getElementById('dir-a').addEventListener('click', ()=>{ currentDir='A'; loadDepartures(); });
     document.getElementById('dir-b').addEventListener('click', ()=>{ currentDir='B'; loadDepartures(); });
 
     async function fetchDepartures(idsArr){
       const { proxyBase, minutesBefore, minutesAfter, limit, timezone } = CONFIG.departures;
-      const url = new URL(proxyBase); // DŮLEŽITÉ: jen kořen, žádná cesta
+
+      // DŮLEŽITÉ: Jen kořen proxyBase a query parametry
+      const url = new URL(proxyBase);
       url.searchParams.set('ids', idsArr.join(','));
       url.searchParams.set('minutesBefore', String(minutesBefore||0));
       url.searchParams.set('minutesAfter',  String(minutesAfter||30));
@@ -336,7 +198,7 @@
             (x.delayMin===0 ? chip('Včas','success') :
              x.delayMin>0   ? chip(`+${x.delayMin} min`,'danger') :
                               chip(`${x.delayMin} min`,'success'));
-        const speedBadge = x.mins!=null && x.mins<=1 ? chip(mins,'success') : chip(mins);
+        const soonBadge = x.mins!=null && x.mins<=1 ? chip(mins,'success') : chip(mins);
         return `
           <div class="departure-item">
             <div>
@@ -344,7 +206,7 @@
               <div class="departure-destination">${x.headsign}</div>
             </div>
             <div class="departure-time mono">${when}</div>
-            <div class="departure-meta">${speedBadge}${delayBadge}</div>
+            <div class="departure-meta">${soonBadge}${delayBadge}</div>
           </div>
         `;
       }).join('');
@@ -360,16 +222,16 @@
         const idsAll = [...idsTram, ...CONFIG.departures.stopIdsTrain]; // tram dle směru + vlaky S9
         const data = await fetchDepartures(idsAll);
 
-        // vyber jen odjezdy pro dané platformy + vlak
+        // ponecháme jen stanice, které chceme (tram směr + vlak)
         const allow = new Set(idsTram.concat(CONFIG.departures.stopIdsTrain));
         const byStop = (data.departures||[]).filter(d => allow.has(d?.stop?.id));
         let list = normalizeDepartures(byStop);
 
-        // jen odjezdy nejdříve za N minut (zachovávám vyladění)
+        // filtr „nejdřív za N minut“
         const minLead = Number(CONFIG.departures.minLeadMinutes||0);
-        if (minLead>0) list = list.filter(x => x.mins==null ? false : x.mins >= minLead);
+        if (minLead>0) list = list.filter(x => x.mins!=null && x.mins>=minLead);
 
-        // fallback: když by filtr vyprázdnil, zobraz aspoň něco
+        // kdyby filtr vyprázdnil, ukaž aspoň něco z celé odpovědi
         if (!list.length){
           let all = normalizeDepartures(data.departures||[]);
           if (minLead>0) all = all.filter(x => x.mins!=null && x.mins>=minLead);
@@ -382,59 +244,17 @@
       }
     }
 
-    // ===== NEWS (tichý fallback) =====
-    async function loadNews(){
-      const tryFetch = async (u) => {
-        try{
-          const r = await fetch(u);
-          if(!r.ok) return null;
-          const text = await r.text();
-          const xml = new DOMParser().parseFromString(text,'application/xml');
-          const items = Array.from(xml.querySelectorAll('item'));
-          return items.length ? items : null;
-        }catch{ return null; }
-      };
-      const urls = [
-        `https://r.jina.ai/https://www.irozhlas.cz/rss/irozhlas`,
-        `https://r.jina.ai/http://www.irozhlas.cz/rss/irozhlas`
-      ];
-      let items = null;
-      for (const u of urls){ items = await tryFetch(u); if(items) break; }
-      if(!items){ newsContent.innerHTML = `<p class="muted">Zprávy: dočasně nedostupné.</p>`; return; }
-
-      const list = items.slice(0, CONFIG.news.limit).map(item=>{
-        const title = item.querySelector('title')?.textContent || 'Bez názvu';
-        const link = item.querySelector('link')?.textContent || '#';
-        const pub = item.querySelector('pubDate') ? new Date(item.querySelector('pubDate').textContent) : null;
-        const descrRaw = item.querySelector('description')?.textContent || '';
-        const descr = descrRaw.replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim();
-        return `
-          <article class="news-item">
-            <a href="${link}" target="_blank" rel="noopener">${title}</a>
-            <div class="timestamp">${pub ? fmtTime(pub) : ''}</div>
-            <p class="muted">${descr}</p>
-          </article>
-        `;
-      }).join('');
-      newsContent.innerHTML = `<div class="news-list">${list}</div>`;
-    }
-
     function renderLinks(){
-      document.getElementById('links-grid').innerHTML = CONFIG.links.map(l => `
+      linksGrid.innerHTML = CONFIG.links.map(l => `
         <a class="quick-link" href="${l.url}" target="_blank" rel="noopener">
           <i class="fa-solid ${l.icon}"></i><span>${l.label}</span>
         </a>
       `).join('');
     }
 
-    // ===== INIT =====
     (async function init(){
       renderLinks();
-      await loadWeather();
-      await loadNews();
       await loadDepartures();
-      setInterval(loadWeather, 20*60*1000);
-      setInterval(loadNews, 30*60*1000);
       setInterval(loadDepartures, 60*1000);
     })();
   </script>
