@@ -21,6 +21,9 @@
     .spacer{flex:1}
     .btn{background:var(--chip);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:10px;cursor:pointer}
     .btn:hover{filter:brightness(1.08)}
+    .switch{display:inline-flex;background:var(--chip);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+    .switch button{border:0;background:transparent;color:var(--muted);padding:8px 12px;cursor:pointer}
+    .switch button.active{color:var(--text);background:#0f2530}
     .pill{font-size:12px;border-radius:999px;padding:3px 8px;background:#113244;border:1px solid #214457;color:#a7c5d9}
     .list{margin-top:12px;display:flex;flex-direction:column;gap:10px}
     .dep{display:flex;align-items:center;gap:10px;background:#10202b;border:1px solid var(--border);border-radius:12px;padding:10px 12px}
@@ -36,6 +39,10 @@
     dialog::backdrop{background:rgba(0,0,0,.5)}
     input[type=text]{width:100%;box-sizing:border-box;background:#0e1a23;border:1px solid #22313d;border-radius:10px;color:var(--text);padding:10px 12px}
     small{color:var(--muted)}
+    .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+    .chip{background:#0e1f29;border:1px solid #22313d;border-radius:999px;padding:6px 10px;font-size:13px}
+    .bigtemp{font-size:38px;font-weight:800}
+    .delta{font-weight:700}
     @media (max-width:1024px){.grid{grid-template-columns:1fr}}
   </style>
 </head>
@@ -48,6 +55,14 @@
       <!-- POČASÍ -->
       <section class="card" id="weatherCard">
         <div class="title">Počasí (Vršovice)</div>
+        <div class="row" style="margin-top:10px;gap:10px">
+          <div class="switch" id="daySwitch" role="tablist" aria-label="Zvol den">
+            <button id="dayToday" class="active" role="tab" aria-selected="true">Dnes</button>
+            <button id="dayTomorrow" role="tab" aria-selected="false">Zítra</button>
+          </div>
+          <div class="spacer"></div>
+          <div class="pill" id="weatherBadge">Načítám…</div>
+        </div>
         <div id="weatherBox" style="margin-top:14px" class="muted">Načítám aktuální počasí…</div>
       </section>
 
@@ -113,14 +128,14 @@
   window.CONFIG = window.CONFIG || {};
   CONFIG.weather = { lat:50.0704, lon:14.4709, tz:"Europe/Prague" };
 
-  // DŮLEŽITÉ: používej *golemioproxy*, ne golemio.
+  // MHD přes *golemioproxy*
   CONFIG.departures = {
-    proxyUrl: "https://golemioproxy.m88wqgcdpd.workers.dev", // bez trailing /
-    ids: "U680Z1P,U680Z2P,U680Z301", // A + B + vlak
+    proxyUrl: "https://golemioproxy.m88wqgcdpd.workers.dev",
+    ids: "U680Z1P,U680Z2P,U680Z301",
     title: "Slavia – nádraží Eden",
     limit: 20,
-    mode: "mins",      // "mins" | "time"
-    minMinutes: 5      // zobraz až od 5 min do odjezdu
+    mode: "mins",
+    minMinutes: 5
   };
 
   const LINKS = [
@@ -144,6 +159,7 @@
   const minsTo = iso => { const d=new Date(iso); return Math.max(0, Math.ceil((d-Date.now())/60000)); };
   const delayMin = (sched, pred) => (!sched||!pred)?0:Math.round((new Date(pred)-new Date(sched))/60000);
   const iconByType = t => (t===0?"🚋":t===2?"🚆":t===3?"🚌":t===11?"🚎":"🧭");
+  const round = n => Math.round(Number(n));
 
   // ---------- API KEY storage ----------
   const KEY_NAME = "golemio_api_key";
@@ -151,70 +167,179 @@
   const setToken = v => localStorage.setItem(KEY_NAME, v||"");
 
   // ---------- WEATHER ----------
-  async function loadWeather(){
-    try{
-      const u = new URL("https://api.open-meteo.com/v1/forecast");
-      u.searchParams.set("latitude", CONFIG.weather.lat);
-      u.searchParams.set("longitude", CONFIG.weather.lon);
-      u.searchParams.set("timezone", CONFIG.weather.tz);
-      u.searchParams.set("current","temperature_2m,apparent_temperature,relative_humidity_2m,wind_speed_10m,weather_code");
-      u.searchParams.set("minutely_15","precipitation");
-      u.searchParams.set("hourly","temperature_2m,precipitation,precipitation_probability,weather_code");
-      u.searchParams.set("daily","temperature_2m_max,temperature_2m_min,precipitation_probability_mean");
+  let dayIndex = 0; // 0 dnes, 1 zítra
+  let weatherCache = null;
 
-      const r = await fetch(u); if(!r.ok) throw new Error("Počasí nelze načíst.");
-      const j = await r.json();
+  function clothingAdvice(apparent){
+    if (apparent <= -5) return "🧥🧣🧤 velmi teplé oblečení, klidně termoprádlo";
+    if (apparent <= 3)  return "🧥🧣 teplá bunda, zvaž spodní vrstvu navíc";
+    if (apparent <= 10) return "🧥 lehká bunda/světřík";
+    if (apparent <= 18) return "🧥 ráno lehká vrstva, přes den v pohodě";
+    if (apparent <= 24) return "👕 tričko, lehká bunda do větru";
+    return "👕🧢 lehké oblečení";
+  }
 
-      const c = j.current;
-      const labels = {0:"Jasno",1:"Převážně jasno",2:"Oblačno",3:"Zataženo",45:"Mlha",48:"Mrznoucí mlha",
-        51:"Mírné mrholení",53:"Mrholení",55:"Intenzivní mrholení",56:"Mrznoucí mrholení",57:"Mrznoucí mrholení",
-        61:"Slabý déšť",63:"Déšť",65:"Silný déšť",66:"Mrznoucí déšť",67:"Mrznoucí déšť",
-        71:"Slabé sněžení",73:"Sněžení",75:"Silné sněžení",77:"Kroupy",
-        80:"Přeháňky",81:"Déšť",82:"Silný déšť",
-        85:"Sněhové přeháňky",86:"Silné sněhové přeháňky",
-        95:"Bouřka",96:"Bouřka s krupobitím",99:"Silná bouřka" };
-
-      // dnešní min/max
-      const tMin = Math.round(j?.daily?.temperature_2m_min?.[0] ?? c.temperature_2m);
-      const tMax = Math.round(j?.daily?.temperature_2m_max?.[0] ?? c.temperature_2m);
-
-      // kdy začne pršet (z minutely_15 v násl. 3h)
-      let rainMsg = "Srážky se nečekají v nejbližších 3 hodinách.";
+  function umbrellaNote(minutely, dailyProb, whichDay){
+    // Dnes: minutely_15 → do 3h
+    if (whichDay===0 && Array.isArray(minutely?.time)) {
       const now = Date.now();
-      const minTimes = j.minutely_15?.time || [];
-      const minPrec = j.minutely_15?.precipitation || [];
-      for (let i=0;i<minTimes.length;i++){
-        const ts = new Date(minTimes[i]).getTime();
-        if (ts < now) continue;
-        if (ts - now > 3*60*60*1000) break; // do tří hodin
-        if ((minPrec[i] ?? 0) > 0.05){ // >0.05 mm
-          const mins = Math.round((ts - now)/60000);
-          rainMsg = `Začne pršet zhruba za ${mins} min.`;
-          break;
+      for (let i=0;i<minutely.time.length;i++){
+        const ts = new Date(minutely.time[i]).getTime();
+        const mm = minutely.precipitation?.[i] ?? 0;
+        if (ts>=now && ts-now <= 3*60*60*1000 && mm>0.05){
+          const mins = Math.round((ts-now)/60000);
+          return `☔️ Deštník se hodí — za ${mins} min začne pršet`;
         }
       }
+    }
+    // Zítra: použij denní pravděpodobnost
+    if ((dailyProb ?? 0) >= 60) return `☔️ Deštník se může hodit (pravděpodobnost srážek ${dailyProb}%)`;
+    if ((dailyProb ?? 0) >= 30) return `🌦 Přeháňky možné (${dailyProb}%)`;
+    return "🌂 Bez deštníku";
+  }
 
-      $("#weatherBox").innerHTML = `
-        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
-          <div>
-            <div style="font-size:38px;font-weight:800">${Math.round(c.temperature_2m)}°C</div>
-            <div>${labels[c.weather_code]||"Počasí"}</div>
-            <div class="muted" style="margin-top:6px">Dnes: min ${tMin}° / max ${tMax}°</div>
+  async function fetchWeather(){
+    const u = new URL("https://api.open-meteo.com/v1/forecast");
+    u.searchParams.set("latitude", CONFIG.weather.lat);
+    u.searchParams.set("longitude", CONFIG.weather.lon);
+    u.searchParams.set("timezone", CONFIG.weather.tz);
+
+    u.searchParams.set("current","temperature_2m,apparent_temperature,relative_humidity_2m,wind_speed_10m,wind_gusts_10m,weather_code");
+    u.searchParams.set("minutely_15","precipitation");
+    u.searchParams.set("hourly","temperature_2m,precipitation,precipitation_probability,weather_code");
+    u.searchParams.set("daily","temperature_2m_max,temperature_2m_min,apparent_temperature_max,apparent_temperature_min,precipitation_probability_mean,wind_speed_10m_max");
+    u.searchParams.set("forecast_days","2");
+    u.searchParams.set("past_days","1");
+
+    const r = await fetch(u, {cache:"no-store"});
+    if(!r.ok) throw new Error("Počasí nelze načíst.");
+    return r.json();
+  }
+
+  function renderWeather(){
+    const j = weatherCache;
+    if(!j){ $("#weatherBox").textContent = "Počasí nedostupné."; return; }
+
+    const c = j.current;
+    const labels = {0:"Jasno",1:"Převážně jasno",2:"Oblačno",3:"Zataženo",45:"Mlha",48:"Mrznoucí mlha",
+      51:"Mírné mrholení",53:"Mrholení",55:"Intenzivní mrholení",56:"Mrznoucí mrholení",57:"Mrznoucí mrholení",
+      61:"Slabý déšť",63:"Déšť",65:"Silný déšť",66:"Mrznoucí déšť",67:"Mrznoucí déšť",
+      71:"Slabé sněžení",73:"Sněžení",75:"Silné sněžení",77:"Kroupy",
+      80:"Přeháňky",81:"Déšť",82:"Silný déšť",
+      85:"Sněhové přeháňky",86:"Silné sněhové přeháňky",
+      95:"Bouřka",96:"Bouřka s krupobitím",99:"Silná bouřka" };
+
+    // denní pole: index 0 = dnes, 1 = zítra; past_days nám přidá v poli index -1 „včera“, ale open-meteo ho dá na pozici 0 a posune dnešek na 1 atd.
+    // Najdeme indexy tak, aby dayIndex 0/1 seděl na dnešek/zítřek:
+    // Pokud je past_days=1, bývá pořadí: [včera, dnes, zítra]
+    const isPast1 = (j.daily?.time?.length || 0) >= 2;
+    const base = isPast1 ? 1 : 0; // dnešek
+    const idxToday = base;
+    const idxTomorrow = base+1;
+    const idxYesterday = base-1; // existuje jen když isPast1==true
+
+    const idx = (dayIndex===0)?idxToday:idxTomorrow;
+
+    const tMin = round(j.daily.temperature_2m_min?.[idx] ?? c.temperature_2m);
+    const tMax = round(j.daily.temperature_2m_max?.[idx] ?? c.temperature_2m);
+    const appMax = round(j.daily.apparent_temperature_max?.[idx] ?? c.apparent_temperature);
+    const appNow = round(c.apparent_temperature);
+    const windNow = round(c.wind_speed_10m);
+    const windGust = round(c.wind_gusts_10m ?? windNow);
+    const prob = round(j.daily.precipitation_probability_mean?.[idx] ?? 0);
+
+    // delta vs včera (pro "Dnes") nebo vs dnes (pro "Zítra")
+    let deltaTxt = "";
+    if(dayIndex===0 && idxYesterday>=0){
+      const yApp = round(j.daily.apparent_temperature_max?.[idxYesterday] ?? j.daily.temperature_2m_max?.[idxYesterday]);
+      const diff = appMax - yApp;
+      deltaTxt = diff===0 ? "stejně jako včera" : (diff>0?`o +${diff}° tepleji než včera`:`o ${diff}° chladněji než včera`);
+    } else if(dayIndex===1){
+      const tApp = round(j.daily.apparent_temperature_max?.[idxToday] ?? j.daily.temperature_2m_max?.[idxToday]);
+      const diff = appMax - tApp;
+      deltaTxt = diff===0 ? "stejně jako dnes" : (diff>0?`o +${diff}° tepleji než dnes`:`o ${diff}° chladněji než dnes`);
+    }
+
+    const umbrella = umbrellaNote(j.minutely_15, prob, dayIndex);
+    const windBadge = windGust >= 45 ? `<span class="chip warn">💨 Silný vítr (${windGust} km/h)</span>` : `<span class="chip ok">💨 Vítr v normě (${windGust} km/h)</span>`;
+    const feelFocus = dayIndex===0 ? appNow : appMax;
+    const wear = clothingAdvice(feelFocus);
+
+    $("#weatherBadge").textContent = labels[c.weather_code] || "Počasí";
+
+    $("#weatherBox").innerHTML = `
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
+        <div>
+          <div class="bigtemp">${dayIndex===0?appNow:appMax}°C</div>
+          <div class="muted">${dayIndex===0?"pocitově teď":"pocitově max"} · Dnes min ${tMin}° / max ${tMax}°</div>
+          <div style="margin-top:6px">
+            <span class="delta">${deltaTxt}</span>
           </div>
-          <div style="color:var(--muted);font-size:14px;display:grid;gap:6px">
-            <span>Pocitově ${Math.round(c.apparent_temperature)}°C</span>
-            <span>Vlhkost ${c.relative_humidity_2m}%</span>
-            <span>Vítr ${Math.round(c.wind_speed_10m)} km/h</span>
-            <span>Odhad srážek: ${rainMsg}</span>
+          <div class="chips">
+            <span class="chip">${umbrella}</span>
+            ${windBadge}
+            <span class="chip">🧭 ${labels[c.weather_code]||"Počasí"}</span>
           </div>
-        </div>`;
+        </div>
+        <div style="color:var(--muted);font-size:14px;display:grid;gap:6px;min-width:240px">
+          <span>Vlhkost ${round(c.relative_humidity_2m)}%</span>
+          <span>Vítr ${windNow} km/h (nárazy až ${windGust} km/h)</span>
+          <span>Oblečení: ${wear}</span>
+          ${dayIndex===0 ? rainStartDetail(j) : rainTomorrowHint(j)}
+        </div>
+      </div>
+    `;
+  }
+
+  function rainStartDetail(j){
+    // Použij minutely_15 do 3h
+    const now = Date.now();
+    const times = j.minutely_15?.time || [];
+    const prec = j.minutely_15?.precipitation || [];
+    for (let i=0;i<times.length;i++){
+      const ts = new Date(times[i]).getTime();
+      const mm = prec[i] ?? 0;
+      if (ts>=now && ts-now <= 3*60*60*1000 && mm>0.05){
+        const mins = Math.round((ts-now)/60000);
+        return `<span>🌧 Začne pršet cca za ${mins} min</span>`;
+      }
+    }
+    return `<span>🌧 Srážky v nejbližších 3 hodinách nehrozí</span>`;
+  }
+
+  function rainTomorrowHint(j){
+    // Hrubý odhad: první hodina zítřka s srážkami >0.1 mm
+    const hours = j.hourly?.time || [];
+    const pr = j.hourly?.precipitation || [];
+    // najdi index začátku zítřka
+    const todayDate = new Date().toISOString().slice(0,10);
+    const tomorrowDate = new Date(Date.now()+24*60*60*1000).toISOString().slice(0,10);
+    let first = -1;
+    for (let i=0;i<hours.length;i++){
+      if (hours[i].startsWith(tomorrowDate)){ first=i; break; }
+    }
+    if (first>=0){
+      for (let i=first;i<Math.min(first+24, hours.length);i++){
+        if ((pr[i]??0) > 0.1){
+          const t = new Date(hours[i]);
+          return `<span>🌧 Zítra pršet od cca ${String(t.getHours()).padStart(2,"0")}:00</span>`;
+        }
+      }
+    }
+    return `<span>🌧 Zítra srážky spíš ne</span>`;
+  }
+
+  async function loadWeather(){
+    try{
+      weatherCache = await fetchWeather();
+      renderWeather();
     }catch(e){
       $("#weatherBox").innerHTML = `<div class="error">${e.message||e}</div>`;
     }
   }
 
-  // ---------- DEPARTURES (přes Worker) ----------
-  let currentDir = "A"; // A = Koh-i-noor, B = Kubánské náměstí
+  // ---------- DEPARTURES ----------
+  let currentDir = "A";
 
   async function fetchDepartures({ids, limit, minutesBefore=0, minutesAfter=45}) {
     const base = CONFIG.departures.proxyUrl.replace(/\/+$/,'') + "/v2/pid/departureboards";
@@ -232,10 +357,8 @@
     const res = await fetch(url.toString(), {
       headers: { "X-Access-Token": token, "Accept": "application/json" }
     });
-
     if(!res.ok){
       const txt = await res.text().catch(()=>String(res.status));
-      // typicky 404 = špatná URL workeru (golemio místo golemioproxy)
       throw new Error(`Chyba proxy: ${res.status}\n\n${txt}`);
     }
     return res.json();
@@ -246,16 +369,13 @@
     listEl.innerHTML = "";
 
     const deps = Array.isArray(data.departures) ? data.departures.slice(0, CONFIG.departures.limit*3) : [];
-
-    // 1) směr A/B jen pro MHD (tram/bus/trolej), vlaky (type===2) vždy
     const byPlatform = deps.filter(d => {
       const type = d?.route?.type;
-      if (type === 2) return true; // S-linky vždy
+      if (type === 2) return true; // vlaky vždy
       const plat = (d?.stop?.platform_code || "").toUpperCase();
       return plat === currentDir;
     });
 
-    // 2) prahování na minMinutes
     const minM = Number(CONFIG.departures.minMinutes ?? 0);
     const afterThreshold = byPlatform.filter(d => {
       const shownISO = d?.departure_timestamp?.predicted || d?.departure_timestamp?.scheduled;
@@ -328,8 +448,7 @@
 
   // ---------- LINKS ----------
   function renderLinks(){
-    const box = $("#linksBox");
-    box.innerHTML = LINKS.map(l => `<a class="btn" href="${l.url}" target="_blank" rel="noopener">${l.label}</a>`).join("");
+    $("#linksBox").innerHTML = LINKS.map(l => `<a class="btn" href="${l.url}" target="_blank" rel="noopener">${l.label}</a>`).join("");
   }
 
   // ---------- NEWS (rss2json) ----------
@@ -342,11 +461,9 @@
       const res = await fetch(api.toString(), { cache:"no-store" });
       if(!res.ok) throw new Error(`RSS nelze načíst (HTTP ${res.status}).`);
       const json = await res.json();
-
       if(json.status !== "ok" || !Array.isArray(json.items)){
         throw new Error("RSS ve formátu, který neznám.");
       }
-
       const items = json.items.slice(0,8);
       $("#newsBox").innerHTML =
         items.map(it => `
@@ -402,8 +519,13 @@
     dirBtn.textContent = `Směr: ${currentDir === "A" ? "Koh-i-noor" : "Kubánské náměstí"}`;
     refreshDepartures();
   });
-
   document.getElementById("titlePill").textContent = CONFIG.departures.title;
+
+  // Weather day switch
+  const dayTodayBtn = document.getElementById("dayToday");
+  const dayTomorrowBtn = document.getElementById("dayTomorrow");
+  dayTodayBtn.addEventListener("click", ()=>{ if(dayIndex!==0){ dayIndex=0; dayTodayBtn.classList.add("active"); dayTomorrowBtn.classList.remove("active"); renderWeather(); }});
+  dayTomorrowBtn.addEventListener("click", ()=>{ if(dayIndex!==1){ dayIndex=1; dayTomorrowBtn.classList.add("active"); dayTodayBtn.classList.remove("active"); renderWeather(); }});
 
   // ---------- INIT ----------
   (async function init(){
