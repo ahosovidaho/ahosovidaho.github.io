@@ -4,259 +4,389 @@
   <meta charset="utf-8" />
   <title>Domácí start</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <!-- Font Awesome bez integrity (aby nepadalo na SRI) -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="icon" href="data:," />
   <style>
     :root{
-      color-scheme: dark;
-      --bg:#0f172a; --panel:rgba(15,23,42,.8); --border:rgba(148,163,184,.2);
-      --text:#e2e8f0; --muted:#94a3b8; --accent:#38bdf8; --danger:#f87171; --good:#34d399; --warn:#facc15;
-      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      --bg:#0f1720; --panel:#14212b; --border:#1e2c37; --text:#dbe6ef; --muted:#9bb3c6;
+      --good:#1fb974; --warn:#efb33f; --bad:#ff6b6b; --chip:#1b2b38;
     }
-    html,body{margin:0;padding:0;background:radial-gradient(circle at top, #1e293b, #0f172a 45%);color:var(--text)}
-    .app{max-width:1200px;margin:32px auto;padding:0 16px;display:flex;flex-direction:column;gap:24px}
-    header{display:flex;flex-direction:column;gap:8px}
-    header h1{font-size:clamp(32px,5vw,44px);font-weight:700}
-    header p{color:var(--muted);max-width:600px}
-    .top-grid{display:grid;gap:24px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
-    .panel{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:20px;backdrop-filter:blur(16px);box-shadow:0 20px 40px -24px rgba(15,23,42,.65);display:flex;flex-direction:column;gap:16px}
-    .panel-header{display:flex;align-items:center;gap:12px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;font-size:12px;color:var(--muted)}
-    .panel-actions{display:flex;gap:12px;flex-wrap:wrap}
-    .ghost-button{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:12px;border:1px solid rgba(148,163,184,.3);background:transparent;color:var(--text);font-weight:500;cursor:pointer}
-    .ghost-button:hover{border-color:rgba(56,189,248,.6);color:var(--accent);background:rgba(56,189,248,.1)}
-    .badge{padding:4px 10px;border-radius:999px;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;background:rgba(148,163,184,.16);color:var(--text);display:inline-flex;align-items:center;gap:.5em}
-    .badge.success{background:rgba(52,211,153,.15);color:var(--good)}
-    .badge.warn{background:rgba(250,204,21,.15);color:var(--warn)}
-    .badge.danger{background:rgba(248,113,113,.15);color:var(--danger)}
+    html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font:16px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Arial}
+    .wrap{max-width:1160px;margin:32px auto;padding:0 16px}
+    h1{margin:0 0 8px 0;font-weight:800;letter-spacing:.3px}
+    .sub{color:var(--muted);margin-bottom:22px}
+    .grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px}
+    .card{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:18px}
+    .title{font-size:13px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);display:flex;align-items:center;gap:8px}
+    .row{display:flex;align-items:center;gap:8px}
+    .spacer{flex:1}
+    .btn{background:var(--chip);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:10px;cursor:pointer}
+    .btn:hover{filter:brightness(1.08)}
+    .pill{font-size:12px;border-radius:999px;padding:3px 8px;background:#113244;border:1px solid #214457;color:#a7c5d9}
+    .list{margin-top:12px;display:flex;flex-direction:column;gap:10px}
+    .dep{display:flex;align-items:center;gap:10px;background:#10202b;border:1px solid var(--border);border-radius:12px;padding:10px 12px}
+    .line{min-width:44px;text-align:center;font-weight:700;background:#0e1a23;border:1px solid #22313d;border-radius:10px;padding:6px 8px}
+    .where{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .time{font-variant-numeric:tabular-nums}
+    .delay{font-size:12px;margin-left:8px}
+    .ok{color:var(--good)} .warn{color:var(--warn)} .bad{color:var(--bad)}
+    .foot{margin-top:10px;color:var(--muted);font-size:12px}
     .muted{color:var(--muted)}
-    .big{font-size:clamp(40px,5vw,56px);font-weight:800}
-    .mono{font-variant-numeric:tabular-nums}
-    .divider{height:1px;background:var(--border);margin:4px 0}
-    .grid2{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center}
-    .departure-list{display:grid;gap:12px}
-    .departure-item{display:grid;grid-template-columns:1fr auto auto;gap:12px;align-items:center;padding:12px 14px;border-radius:12px;background:rgba(148,163,184,.08)}
-    .departure-time{font-size:20px;font-weight:700}
-    .departure-destination{margin-top:6px;color:var(--muted);font-size:14px}
-    .departure-meta{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
-    .main-layout{display:grid;gap:24px;grid-template-columns:minmax(220px,1fr) minmax(0,2fr) minmax(220px,1fr);grid-template-areas:'links news servers';align-items:start}
-    #links-panel{grid-area:links} #news-panel{grid-area:news} #servers-panel{grid-area:servers}
-    .links-grid{display:flex;flex-direction:column;gap:12px}
-    .quick-link{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;background:rgba(148,163,184,.08);color:var(--text);text-decoration:none;font-weight:500}
-    .quick-link:hover{background:rgba(56,189,248,.16);color:var(--accent)}
-    .timestamp{font-size:12px;color:var(--muted)}
-    @media (max-width:1024px){.main-layout{grid-template-columns:1fr;grid-template-areas:'links' 'news' 'servers'}}
+    .error{color:var(--bad);white-space:pre-wrap}
+    dialog{border:1px solid var(--border);border-radius:14px;background:var(--panel);color:var(--text);padding:20px}
+    dialog::backdrop{background:rgba(0,0,0,.5)}
+    input[type=text]{width:100%;box-sizing:border-box;background:#0e1a23;border:1px solid #22313d;border-radius:10px;color:var(--text);padding:10px 12px}
+    small{color:var(--muted)}
+    @media (max-width:1024px){.grid{grid-template-columns:1fr}}
   </style>
 </head>
 <body>
-  <div class="app">
-    <header>
-      <h1>Domácí start</h1>
-      <p class="muted">Ranní/večerní přehled – počasí, MHD, dostupnost domácí sítě a rychlé odkazy.</p>
-    </header>
+  <div class="wrap">
+    <h1>Domácí start</h1>
+    <div class="sub">Soukromá nástěnka – počasí, MHD, dostupnost sítě a rychlé odkazy.</div>
 
-    <div class="top-grid">
-      <!-- POČASÍ ponechávám (zde jen placeholder, ať neháže chyby) -->
-      <section class="panel" id="weather-panel">
-        <div class="panel-header">
-          <i class="fa-solid fa-cloud-sun"></i><span>Počasí – Vršovice</span>
+    <div class="grid">
+      <!-- POČASÍ -->
+      <section class="card" id="weatherCard">
+        <div class="title">Počasí</div>
+        <div id="weatherBox" style="margin-top:14px" class="muted">Načítám aktuální počasí…</div>
+      </section>
+
+      <!-- ODJEZDY MHD -->
+      <section class="card" id="mhdCard">
+        <div class="title">Odjezdy MHD</div>
+        <div class="row" style="margin-top:10px;gap:10px">
+          <button class="btn" id="dirBtn">Směr: Koh-i-noor</button>
+          <div class="pill" id="titlePill">Slavia – nádraží Eden</div>
+          <div class="spacer"></div>
+          <button class="btn" id="apiBtn">Změnit API klíč</button>
         </div>
-        <div id="weather-content"><p class="muted">Načítám aktuální počasí…</p></div>
-      </section>
-
-      <!-- ODJEZDY MHD – PEVNĚ NA KOŘEN WORKERU -->
-      <section class="panel" id="departures-panel">
-        <div class="panel-header">
-          <i class="fa-solid fa-train-tram"></i><span>Odjezdy MHD</span>
+        <div id="mhdList" class="list" aria-live="polite" style="min-height:48px;margin-top:14px">
+          <div class="muted">Načítám nejbližší odjezdy…</div>
         </div>
-        <div id="departures-content"><p class="muted">Načítám nejbližší odjezdy…</p></div>
-        <div class="panel-actions">
-          <button type="button" class="ghost-button" id="dir-a"><i class="fa-solid fa-arrow-right"></i> směr A (Koh-i-noor)</button>
-          <button type="button" class="ghost-button" id="dir-b"><i class="fa-solid fa-arrow-left"></i> směr B (Kubánské nám.)</button>
+        <div class="foot" id="mhdFoot"></div>
+      </section>
+
+      <!-- DOMÁCÍ INTERNET -->
+      <section class="card" id="netCard">
+        <div class="title">Domácí internet</div>
+        <div id="netBox" style="margin-top:14px" class="muted"></div>
+      </section>
+
+      <!-- RYCHLÉ ODKAZY -->
+      <section class="card" id="linksCard">
+        <div class="title">Rychlé odkazy</div>
+        <div id="linksBox" class="list" style="margin-top:14px"></div>
+      </section>
+
+      <!-- ZPRÁVY -->
+      <section class="card" id="newsCard">
+        <div class="title">iRozhlas.cz – nejnovější zprávy</div>
+        <div id="newsBox" class="list" style="margin-top:14px">
+          <div class="muted">Stahuji články…</div>
         </div>
       </section>
 
-      <!-- INTERNET pozn.: HTTP lokály z HTTPS domény prohlížeč blokuje (mixed content) -->
-      <section class="panel" id="internet-panel">
-        <div class="panel-header"><i class="fa-solid fa-wifi"></i><span>Domácí internet</span></div>
-        <div class="timestamp muted">Kontrola domácích IP je vypnutá z HTTPS (mixed content). Funguje jen z lokální sítě/HTTP.</div>
+      <!-- SLUŽBY -->
+      <section class="card" id="svcCard">
+        <div class="title">Domácí služby</div>
+        <div id="svcBox" class="list" style="margin-top:14px"></div>
       </section>
-    </div>
-
-    <div class="main-layout">
-      <aside class="panel" id="links-panel">
-        <div class="panel-header"><i class="fa-solid fa-bookmark"></i><span>Rychlé odkazy</span></div>
-        <div class="links-grid" id="links-grid"></div>
-      </aside>
-
-      <section class="panel" id="news-panel">
-        <div class="panel-header"><i class="fa-solid fa-newspaper"></i><span>iRozhlas.cz – nejnovější</span></div>
-        <div id="news-content"><p class="muted">Zprávy dočasně vypnuté (CORS 403) – nechám bez volání, ať to nešpiní konzoli.</p></div>
-      </section>
-
-      <aside class="panel" id="servers-panel">
-        <div class="panel-header"><i class="fa-solid fa-server"></i><span>Domácí služby</span></div>
-        <div class="timestamp muted">Lokální ping skryt – z HTTPS domény by se HTTP lokály stejně blokovaly.</div>
-      </aside>
     </div>
   </div>
 
+  <!-- Modal API key -->
+  <dialog id="apiDlg">
+    <form method="dialog">
+      <h3 style="margin:0 0 8px 0">Golemio API klíč</h3>
+      <p class="muted" style="margin:0 0 10px 0">Vlož svůj <em>X-Access-Token</em> (uloží se jen v tomto prohlížeči).</p>
+      <input type="text" id="apiInput" autocomplete="off" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9…" />
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
+        <button class="btn" value="cancel">Zrušit</button>
+        <button class="btn" value="ok">Uložit</button>
+      </div>
+      <small>Token můžeš kdykoli změnit.</small>
+    </form>
+  </dialog>
+
   <script>
-    // ===== KONFIG =====
-    const CONFIG = {
-      // jen to, co potřebujeme v tomto fixu
-      departures: {
-        // TVŮJ WORKER – KOŘENOVÁ URL (musí končit lomítkem!)
-        proxyBase: 'https://golemio.m88wqgcdpd.workers.dev/',
+  // ---------- KONFIG ----------
+  window.CONFIG = window.CONFIG || {};
+  CONFIG.weather = { lat:50.0704, lon:14.4709, tz:"Europe/Prague" };
 
-        // A/B tram + S9:
-        stopIdsTram_A: ['U680Z1P'],   // platforma A (Koh-i-noor)
-        stopIdsTram_B: ['U680Z2P'],   // platforma B (Kubánské nám.)
-        stopIdsTrain:  ['U680Z301'],  // Praha-Eden (S9)
-        limit: 12,
-        minutesBefore: 0,
-        minutesAfter: 45,
-        timezone: 'Europe/Prague',
-        minLeadMinutes: 5   // odjezdy nejdřív za 5 minut
-      },
-      links: [
-        { label: 'E-mail', url: 'https://mail.google.com', icon: 'fa-envelope' },
-        { label: 'Kalendář', url: 'https://calendar.google.com', icon: 'fa-calendar-days' },
-        { label: 'Nextcloud', url: 'https://cloud.example.com', icon: 'fa-cloud' },
-        { label: 'Home Assistant', url: 'https://ha.example.com', icon: 'fa-house-signal' },
-        { label: 'Plex', url: 'https://plex.tv/web', icon: 'fa-clapperboard-play' },
-        { label: 'Bankovnictví', url: 'https://ib.examplebank.cz', icon: 'fa-piggy-bank' }
-      ]
-    };
+  // DŮLEŽITÉ: nastav na svůj Worker hostname (bez koncové /)
+  CONFIG.departures = CONFIG.departures || {};
+  CONFIG.departures.proxyUrl = "https://golemioproxy.m88wqgcdpd.workers.dev";
+  CONFIG.departures.ids = "U680Z1P,U680Z2P,U680Z301"; // A + B + vlak
+  CONFIG.departures.title = "Slavia – nádraží Eden";
+  CONFIG.departures.limit = 20;
+  CONFIG.departures.mode = "mins"; // "mins" | "time"
+  CONFIG.departures.minMinutes = 5; // zobrazit až od 5 minut do odjezdu
 
-    // ===== UTILS =====
-    const departuresContent = document.getElementById('departures-content');
-    const linksGrid = document.getElementById('links-grid');
-    const ROUTE_TYPE_ICONS = {0:'🚋',1:'Ⓜ️',2:'🚆',3:'🚌',11:'🚎'};
-    const dd = n => String(n).padStart(2,'0');
-    const fmtTime = d => new Intl.DateTimeFormat('cs-CZ',{hour:'2-digit',minute:'2-digit'}).format(d);
-    const chip = (label, cls='') => `<span class="badge ${cls}">${label}</span>`;
-    function minutesUntil(iso){ if(!iso) return null; const t = new Date(iso).getTime() - Date.now(); return Math.max(0, Math.ceil(t/60000)); }
+  const LINKS = [
+    { label: "E-mail", url: "https://mail.google.com" },
+    { label: "Kalendář", url: "https://calendar.google.com" },
+    { label: "Nextcloud", url: "https://cloud.example.com" },
+    { label: "Home Assistant", url: "https://ha.example.com" },
+    { label: "Plex", url: "https://plex.tv/web" },
+    { label: "Bankovnictví", url: "https://ib.examplebank.cz" },
+  ];
 
-    // ===== MHD: POUZE KOŘEN WORKERU (/?...) – ŽÁDNÉ /v2, /pid, ani fallbacky =====
-    let currentDir = 'A';
-    document.getElementById('dir-a').addEventListener('click', ()=>{ currentDir='A'; loadDepartures(); });
-    document.getElementById('dir-b').addEventListener('click', ()=>{ currentDir='B'; loadDepartures(); });
+  const SERVICES = [
+    { name:"Plex (Mac mini M4)", url:"http://192.168.1.50:32400/web/index.html" },
+    { name:"Nextcloud (Mac mini 2012)", url:"http://192.168.1.60/status.php" },
+    { name:"Home Assistant", url:"http://192.168.1.60:8123/" },
+  ];
 
-    async function fetchDepartures(idsArr){
-      const { proxyBase, minutesBefore, minutesAfter, limit, timezone } = CONFIG.departures;
+  // ---------- UTIL ----------
+  const $ = s => document.querySelector(s);
+  const fmtHM = d => `${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`;
+  const fmtHHMM = iso => { const d = new Date(iso); return fmtHM(d); };
+  const minsTo = iso => { const d=new Date(iso); return Math.max(0, Math.ceil((d-Date.now())/60000)); };
+  const delayMin = (sched, pred) => (!sched||!pred)?0:Math.round((new Date(pred)-new Date(sched))/60000);
+  const iconByType = t => (t===0?"🚋":t===2?"🚆":t===3?"🚌":t===11?"🚎":"🧭");
 
-      // DŮLEŽITÉ: Jen kořen proxyBase a query parametry
-      const url = new URL(proxyBase);
-      url.searchParams.set('ids', idsArr.join(','));
-      url.searchParams.set('minutesBefore', String(minutesBefore||0));
-      url.searchParams.set('minutesAfter',  String(minutesAfter||30));
-      url.searchParams.set('limit',         String(limit||12));
-      url.searchParams.set('preferredTimezone', timezone || 'Europe/Prague');
-      url.searchParams.set('includeMetroTrains', 'true');
+  // ---------- API KEY storage ----------
+  const KEY_NAME = "golemio_api_key";
+  const getToken = () => localStorage.getItem(KEY_NAME) || "";
+  const setToken = v => localStorage.setItem(KEY_NAME, v||"");
 
-      const res = await fetch(url.toString(), { headers: { 'Accept':'application/json' }});
-      if(!res.ok) throw new Error(`Chyba proxy: ${res.status}`);
-      return await res.json();
-    }
-
-    function normalizeDepartures(list){
-      return (Array.isArray(list)?list:[]).map(d => {
-        const scheduled = d?.departure_timestamp?.scheduled || null;
-        const predicted = d?.departure_timestamp?.predicted || null;
-        const iso = predicted || scheduled;
-        const mins = minutesUntil(iso);
-        const line = d?.route?.short_name || d?.route?.long_name || 'Linka';
-        const type = Number(d?.route?.type);
-        const icon = Number.isFinite(type) ? (ROUTE_TYPE_ICONS[type]||'') : '';
-        const platform = d?.stop?.platform_code || d?.stop?.platform_name || '';
-        const headsignBase = d?.trip?.headsign || d?.last_stop?.name || '—';
-        const headsign = platform ? `${headsignBase} · st. ${platform}` : headsignBase;
-
-        // zpoždění
-        let delayMin = null;
-        const s = scheduled ? new Date(scheduled) : null;
-        const p = predicted ? new Date(predicted) : null;
-        if (s && p) delayMin = Math.round((p.getTime()-s.getTime())/60000);
-        else if (typeof d?.departure_delay === 'number') delayMin = Math.round(d.departure_delay/60);
-
-        return { iso, mins, line, icon, headsign, delayMin, stopId: d?.stop?.id || null };
-      }).filter(x => x.iso);
-    }
-
-    function renderDepartures(list, label){
-      if (!list.length){
-        departuresContent.innerHTML = `
-          <p>Nebyly nalezeny žádné odjezdy pro zadaný filtr (${label}).</p>
-          <div class="timestamp">Poslední kontrola ${fmtTime(new Date())}</div>
-        `;
-        return;
-      }
-      const items = list.map(x=>{
-        const when = fmtTime(new Date(x.iso));
-        const mins = x.mins==null ? '—' : (x.mins===0 ? 'odjíždí' : `${x.mins} min`);
-        const delayBadge = x.delayMin==null ? '' :
-            (x.delayMin===0 ? chip('Včas','success') :
-             x.delayMin>0   ? chip(`+${x.delayMin} min`,'danger') :
-                              chip(`${x.delayMin} min`,'success'));
-        const soonBadge = x.mins!=null && x.mins<=1 ? chip(mins,'success') : chip(mins);
-        return `
-          <div class="departure-item">
-            <div>
-              <div class="badge">${x.icon?`${x.icon} `:''}${x.line}</div>
-              <div class="departure-destination">${x.headsign}</div>
-            </div>
-            <div class="departure-time mono">${when}</div>
-            <div class="departure-meta">${soonBadge}${delayBadge}</div>
+  // ---------- WEATHER (jednoduchý aktuál) ----------
+  async function loadWeather(){
+    try{
+      const u = new URL("https://api.open-meteo.com/v1/forecast");
+      u.searchParams.set("latitude", CONFIG.weather.lat);
+      u.searchParams.set("longitude", CONFIG.weather.lon);
+      u.searchParams.set("current","temperature_2m,apparent_temperature,relative_humidity_2m,wind_speed_10m,weather_code");
+      u.searchParams.set("timezone", CONFIG.weather.tz);
+      const r = await fetch(u); if(!r.ok) throw new Error("Počasí nelze načíst.");
+      const j = await r.json();
+      const c = j.current;
+      const labels = {0:"Jasno",1:"Převážně jasno",2:"Oblačno",3:"Zataženo",45:"Mlha",48:"Mrznoucí mlha",
+        51:"Mírné mrholení",53:"Mrholení",55:"Intenzivní mrholení",56:"Mrznoucí mrholení",57:"Mrznoucí mrholení",
+        61:"Slabý déšť",63:"Déšť",65:"Silný déšť",66:"Mrznoucí déšť",67:"Mrznoucí déšť",
+        71:"Slabé sněžení",73:"Sněžení",75:"Silné sněžení",77:"Kroupy",
+        80:"Přeháňky",81:"Déšť",82:"Silný déšť",
+        85:"Sněhové přeháňky",86:"Silné sněhové přeháňky",
+        95:"Bouřka",96:"Bouřka s krupobitím",99:"Silná bouřka" };
+      $("#weatherBox").innerHTML = `
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+          <div>
+            <div style="font-size:38px;font-weight:800">${Math.round(c.temperature_2m)}°C</div>
+            <div>${labels[c.weather_code]||"Počasí"}</div>
           </div>
-        `;
-      }).join('');
-      departuresContent.innerHTML = `
-        <div class="departure-list">${items}</div>
-        <div class="timestamp">Slavia – nádraží Eden · směr ${label==='A'?'Koh-i-noor':'Kubánské náměstí'} · Aktualizováno ${fmtTime(new Date())}</div>
-      `;
+          <div style="color:var(--muted);font-size:14px;display:grid;gap:6px">
+            <span>Pocitově ${Math.round(c.apparent_temperature)}°C</span>
+            <span>Vlhkost ${c.relative_humidity_2m}%</span>
+            <span>Vítr ${Math.round(c.wind_speed_10m)} km/h</span>
+          </div>
+        </div>`;
+    }catch(e){
+      $("#weatherBox").innerHTML = `<div class="error">${e.message||e}</div>`;
+    }
+  }
+
+  // ---------- DEPARTURES (přes Worker) ----------
+  let currentDir = "A"; // A = Koh-i-noor, B = Kubánské náměstí
+
+  async function fetchDepartures({ids, limit, minutesBefore=0, minutesAfter=45}) {
+    const base = CONFIG.departures.proxyUrl.replace(/\/+$/,'') + "/v2/pid/departureboards";
+    const url = new URL(base);
+    url.searchParams.set("ids", ids);
+    url.searchParams.set("minutesBefore", String(minutesBefore));
+    url.searchParams.set("minutesAfter", String(minutesAfter));
+    url.searchParams.set("limit", String(limit));
+    url.searchParams.set("preferredTimezone", "Europe/Prague");
+    url.searchParams.set("includeMetroTrains", "true");
+
+    const token = getToken();
+    if(!token) throw new Error("Chybí API klíč. Klikni na „Změnit API klíč“ a vlož X-Access-Token.");
+
+    const res = await fetch(url.toString(), {
+      headers: { "X-Access-Token": token, "Accept": "application/json" }
+    });
+    if(!res.ok){
+      const txt = await res.text().catch(()=>String(res.status));
+      throw new Error(`Chyba proxy: ${res.status}\n\n${txt}`);
+    }
+    return res.json();
+  }
+
+  function renderDepartures(data){
+    const listEl = $("#mhdList");
+    listEl.innerHTML = "";
+
+    const deps = Array.isArray(data.departures) ? data.departures.slice(0, CONFIG.departures.limit*3) : [];
+
+    // 1) směr A/B jen pro MHD (tram/bus/trolej), vlaky (type===2) vždy
+    const byPlatform = deps.filter(d => {
+      const type = d?.route?.type;
+      if (type === 2) return true; // S-linky vždy
+      const plat = (d?.stop?.platform_code || "").toUpperCase();
+      return plat === currentDir;
+    });
+
+    // 2) prahování na minMinutes
+    const minM = Number(CONFIG.departures.minMinutes ?? 0);
+    const afterThreshold = byPlatform.filter(d => {
+      const shownISO = d?.departure_timestamp?.predicted || d?.departure_timestamp?.scheduled;
+      if (!shownISO) return false;
+      const m = minsTo(shownISO);
+      return m >= minM;
+    });
+
+    if(afterThreshold.length === 0){
+      listEl.innerHTML = `<div class="error">Žádné odjezdy ≥ ${minM} min pro směr ${currentDir}.</div>`;
+      return;
     }
 
-    async function loadDepartures(){
-      try{
-        const idsTram = (currentDir==='A') ? CONFIG.departures.stopIdsTram_A : CONFIG.departures.stopIdsTram_B;
-        const idsAll = [...idsTram, ...CONFIG.departures.stopIdsTrain]; // tram dle směru + vlaky S9
-        const data = await fetchDepartures(idsAll);
+    const take = afterThreshold.slice(0, CONFIG.departures.limit);
+    for(const d of take){
+      const row = document.createElement("div");
+      row.className = "dep";
 
-        // ponecháme jen stanice, které chceme (tram směr + vlak)
-        const allow = new Set(idsTram.concat(CONFIG.departures.stopIdsTrain));
-        const byStop = (data.departures||[]).filter(d => allow.has(d?.stop?.id));
-        let list = normalizeDepartures(byStop);
+      const ico = document.createElement("div");
+      ico.textContent = iconByType(d?.route?.type);
+      ico.style.opacity = .85;
 
-        // filtr „nejdřív za N minut“
-        const minLead = Number(CONFIG.departures.minLeadMinutes||0);
-        if (minLead>0) list = list.filter(x => x.mins!=null && x.mins>=minLead);
+      const line = document.createElement("div");
+      line.className = "line";
+      line.textContent = (d?.route?.short_name ?? d?.route?.long_name ?? "?");
 
-        // kdyby filtr vyprázdnil, ukaž aspoň něco z celé odpovědi
-        if (!list.length){
-          let all = normalizeDepartures(data.departures||[]);
-          if (minLead>0) all = all.filter(x => x.mins!=null && x.mins>=minLead);
-          list = all;
-        }
+      const where = document.createElement("div");
+      where.className = "where";
+      const head = d?.trip?.headsign ?? d?.last_stop?.name ?? "";
+      const plat = d?.stop?.platform_code ? ` · st. ${d.stop.platform_code}` : "";
+      where.textContent = `${head}${plat}`;
 
-        renderDepartures(list, currentDir);
-      }catch(err){
-        departuresContent.innerHTML = `<p class="badge danger">Odjezdy MHD: ${err.message || err}</p>`;
+      const timeBox = document.createElement("div");
+      timeBox.className = "time";
+      const shownISO = d?.departure_timestamp?.predicted || d?.departure_timestamp?.scheduled;
+      const mins = minsTo(shownISO);
+      timeBox.textContent = (CONFIG.departures.mode === "time") ? fmtHHMM(shownISO) : `${mins} min`;
+
+      const del = delayMin(d?.departure_timestamp?.scheduled, d?.departure_timestamp?.predicted);
+      if(del){
+        const span = document.createElement("span");
+        span.className = "delay " + (del>0?"warn":"ok");
+        span.textContent = (del>0?` +${del}`:` ${del}`);
+        timeBox.appendChild(span);
       }
-    }
 
-    function renderLinks(){
-      linksGrid.innerHTML = CONFIG.links.map(l => `
-        <a class="quick-link" href="${l.url}" target="_blank" rel="noopener">
-          <i class="fa-solid ${l.icon}"></i><span>${l.label}</span>
-        </a>
-      `).join('');
+      row.appendChild(ico);
+      row.appendChild(line);
+      row.appendChild(where);
+      row.appendChild(timeBox);
+      listEl.appendChild(row);
     }
+  }
 
-    (async function init(){
-      renderLinks();
-      await loadDepartures();
-      setInterval(loadDepartures, 60*1000);
-    })();
+  async function refreshDepartures(){
+    try{
+      const data = await fetchDepartures({
+        ids: CONFIG.departures.ids,
+        limit: CONFIG.departures.limit
+      });
+      renderDepartures(data);
+      const ts = new Date();
+      document.getElementById("mhdFoot").textContent =
+        `${CONFIG.departures.title} · Poslední kontrola ${fmtHM(ts)} · filtr ≥ ${CONFIG.departures.minMinutes} min`;
+    }catch(err){
+      document.getElementById("mhdList").innerHTML = `<div class="error">${(err?.message || err)}</div>`;
+      document.getElementById("mhdFoot").textContent = CONFIG.departures.title;
+    }
+  }
+
+  // ---------- LINKS ----------
+  function renderLinks(){
+    const box = document.getElementById("linksBox");
+    box.innerHTML = LINKS.map(l => `<a class="btn" href="${l.url}" target="_blank" rel="noopener">${l.label}</a>`).join("");
+  }
+
+  // ---------- NEWS (rss2json bez CORS) ----------
+  async function loadNews(){
+    const feed = "https://www.irozhlas.cz/rss/irozhlas";
+    const api = new URL("https://api.rss2json.com/v1/api.json");
+    api.searchParams.set("rss_url", feed);
+
+    try{
+      const res = await fetch(api.toString(), { cache:"no-store" });
+      if(!res.ok) throw new Error(`RSS nelze načíst (HTTP ${res.status}).`);
+      const json = await res.json();
+
+      if(json.status !== "ok" || !Array.isArray(json.items)){
+        throw new Error("RSS ve formátu, který neznám.");
+      }
+
+      const items = json.items.slice(0,8);
+      document.getElementById("newsBox").innerHTML =
+        items.map(it => `
+          <div class="row" style="justify-content:space-between;gap:12px">
+            <a class="btn" href="${it.link}" target="_blank" rel="noopener" style="text-decoration:none;flex:1">
+              ${it.title}
+            </a>
+            <span class="muted" style="white-space:nowrap">${new Date(it.pubDate).toLocaleTimeString('cs-CZ',{hour:'2-digit',minute:'2-digit'})}</span>
+          </div>
+        `).join("");
+    }catch(e){
+      document.getElementById("newsBox").innerHTML =
+        `<div class="error">${e.message||e}</div>
+         <div class="muted" style="margin-top:6px">
+           Zdroj: <a class="btn" href="${feed}" target="_blank" rel="noopener">RSS iRozhlas</a>
+         </div>`;
+    }
+  }
+
+  // ---------- SERVICES / CONNECTIVITY ----------
+  function renderServices(){
+    const box = document.getElementById("svcBox");
+    const https = location.protocol === "https:";
+    const rows = SERVICES.map(s => {
+      const blocked = https && s.url.startsWith("http://");
+      const status = blocked ? `<span class="warn">Nedostupné z HTTPS (mixed content)</span>` : `<span class="muted">Klikni pro otevření</span>`;
+      const open = blocked ? "#" : s.url;
+      return `<div class="row" style="justify-content:space-between">
+        <a class="btn" href="${open}" target="_blank" rel="noopener">${s.name}</a>
+        <span>${status}</span>
+      </div>`;
+    }).join("");
+    box.innerHTML = rows || `<div class="muted">Žádné služby.</div>`;
+
+    const nb = document.getElementById("netBox");
+    const gw = "http://192.168.1.1/status";
+    if (location.protocol === "https:" && gw.startsWith("http://")) {
+      nb.innerHTML = `Nelze ověřit z HTTPS (prohlížeč blokuje HTTP). Ověř lokálně z <code>http://</code> nebo povol HTTPS na bráně.`;
+    } else {
+      nb.innerHTML = `Klikni pro ruční ověření: <a class="btn" href="${gw}" target="_blank" rel="noopener">Gateway status</a>`;
+    }
+  }
+
+  // ---------- UI ----------
+  const apiDlg = document.getElementById("apiDlg");
+  const apiInput = document.getElementById("apiInput");
+  document.getElementById("apiBtn").addEventListener("click", ()=>{ apiInput.value = getToken(); apiDlg.showModal(); });
+  apiDlg.addEventListener("close", () => { if(apiDlg.returnValue==="ok"){ setToken(apiInput.value.trim()); refreshDepartures(); }});
+
+  const dirBtn = document.getElementById("dirBtn");
+  dirBtn.addEventListener("click", ()=>{
+    currentDir = currentDir === "A" ? "B" : "A";
+    dirBtn.textContent = `Směr: ${currentDir === "A" ? "Koh-i-noor" : "Kubánské náměstí"}`;
+    refreshDepartures();
+  });
+
+  document.getElementById("titlePill").textContent = CONFIG.departures.title;
+
+  // ---------- INIT ----------
+  (async function init(){
+    if(!getToken()) apiDlg.showModal();
+    renderLinks();
+    renderServices();
+    await loadWeather();
+    await loadNews();
+    await refreshDepartures();
+    setInterval(refreshDepartures, 60*1000);
+    setInterval(loadWeather, 20*60*1000);
+    setInterval(loadNews, 30*60*1000);
+  })();
   </script>
 </body>
 </html>
