@@ -4,12 +4,12 @@
   <meta charset="utf-8" />
   <title>Domácí start</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <!-- drobná jistota, ať nám nic neblokuje načtení ikon -->
+  <!-- Ikony bez SRI (minule padalo na integrity) -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
   <style>
     :root{
       color-scheme: dark;
-      --bg:#0f172a; --panel:rgba(15,23,42,.8); --panel-solid:#111a33; --border:rgba(148,163,184,.2);
+      --bg:#0f172a; --panel:rgba(15,23,42,.8); --border:rgba(148,163,184,.2);
       --text:#e2e8f0; --muted:#94a3b8; --accent:#38bdf8; --danger:#f87171; --good:#34d399; --warn:#facc15;
       font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
     }
@@ -66,7 +66,7 @@
     </header>
 
     <div class="top-grid">
-      <!-- POČASÍ -->
+      <!-- POČASÍ (ponecháno z poslední verze) -->
       <section class="panel" id="weather-panel">
         <div class="panel-header">
           <i class="fa-solid fa-cloud-sun"></i><span>Počasí – Vršovice</span>
@@ -74,7 +74,7 @@
         <div id="weather-content"><p class="muted">Načítám aktuální počasí…</p></div>
       </section>
 
-      <!-- ODJEZDY -->
+      <!-- ODJEZDY MHD – VRÁCENÁ PŮVODNÍ LOGIKA (worker jen na /?...) -->
       <section class="panel" id="departures-panel">
         <div class="panel-header">
           <i class="fa-solid fa-train-tram"></i><span>Odjezdy MHD</span>
@@ -86,7 +86,7 @@
         </div>
       </section>
 
-      <!-- INTERNET -->
+      <!-- INTERNET (pozn.: zvenku HTTP lokály blokuje https prohlížeče) -->
       <section class="panel" id="internet-panel">
         <div class="panel-header"><i class="fa-solid fa-wifi"></i><span>Domácí internet</span></div>
         <div id="internet-status" class="status"><div class="indicator"></div><div><div class="status-text">Kontroluji dostupnost…</div><div class="timestamp" id="internet-timestamp"></div></div></div>
@@ -113,26 +113,22 @@
   </div>
 
   <script>
-    // ==== KONFIG ====
+    // ===== KONFIG =====
     const CONFIG = {
-      weather: {
-        latitude: 50.0699,  // Vršovice/Slavia okruh
-        longitude: 14.4712,
-        timezone: 'Europe/Prague'
-      },
+      weather: { latitude: 50.0699, longitude: 14.4712, timezone: 'Europe/Prague' },
       departures: {
-        // tvoje Cloudflare Worker PROXY – používej KOŘENOVOU cestu (/?...),
-        // tvůj worker řeší token i správnou URL na Golemio
+        // !!! PONECHÁNO NA KOŘENU WORKERU (to byla verze, která fungovala)
         proxyBase: 'https://golemio.m88wqgcdpd.workers.dev/',
 
-        // MHD (tram) + vlak S9 z Edenu:
+        // A/B tram + S9 vlak:
         stopIdsTram_A: ['U680Z1P'],   // platforma A (Koh-i-noor)
         stopIdsTram_B: ['U680Z2P'],   // platforma B (Kubánské nám.)
         stopIdsTrain:  ['U680Z301'],  // Praha-Eden (S9)
         limit: 12,
         minutesBefore: 0,
         minutesAfter: 45,
-        timezone: 'Europe/Prague'
+        timezone: 'Europe/Prague',
+        minLeadMinutes: 5   // zobraz jen odjezdy nejdříve za 5 min (to jsme ladili)
       },
       news: {
         feedUrl: 'https://www.irozhlas.cz/rss/irozhlas',
@@ -148,7 +144,7 @@
       ]
     };
 
-    // ==== UTILS ====
+    // ===== UTILS =====
     const weatherContent = document.getElementById('weather-content');
     const departuresContent = document.getElementById('departures-content');
     const newsContent = document.getElementById('news-content');
@@ -171,11 +167,8 @@
     };
 
     const dd = n => String(n).padStart(2,'0');
-    const fmtHM = d => `${dd(d.getHours())}:${dd(d.getMinutes())}`;
     const fmtTime = d => new Intl.DateTimeFormat('cs-CZ',{hour:'2-digit',minute:'2-digit'}).format(d);
-    const fmtDate = d => new Intl.DateTimeFormat('cs-CZ',{hour:'2-digit',minute:'2-digit'}).format(d);
     const dateKey = d => `${d.getFullYear()}-${dd(d.getMonth()+1)}-${dd(d.getDate())}`;
-
     const chip = (label, cls='') => `<span class="badge ${cls}">${label}</span>`;
 
     function minutesUntil(tsISO){
@@ -184,7 +177,7 @@
       return Math.max(0, Math.ceil(t/60000));
     }
 
-    // ==== POČASÍ – “ranní asistent” ====
+    // ===== POČASÍ (poslední verze) =====
     async function loadWeather(){
       const { latitude, longitude, timezone } = CONFIG.weather;
       const url = new URL('https://api.open-meteo.com/v1/forecast');
@@ -210,7 +203,6 @@
         const gust = Math.round(cur.wind_gusts_10m || 0);
         const precipNow = Number(cur.precipitation || 0);
 
-        // denní hodnoty pro dnes vs včera
         const idxToday = data.daily.time.findIndex(s => s === dateKey(new Date()));
         const idxYday  = data.daily.time.findIndex(s => s === dateKey(new Date(Date.now()-86400000)));
 
@@ -221,12 +213,10 @@
 
         const precipSumToday = idxToday>=0 ? (data.daily.precipitation_sum[idxToday] || 0) : 0;
 
-        // Badges
         const needUmbrella = precipNow > 0 || precipSumToday >= 0.3;
-        const strongWind = gust >= 45; // km/h ~ “čerstvý až silný vítr”
+        const strongWind = gust >= 45;
         const icingRisk = (t <= 2 && t >= -2 && (precipNow > 0 || precipSumToday > 0));
 
-        // Verdikt + doporučení oblečení
         const verdict = [
           `Teď pocitově ${feels}°C (${wLabel})`,
           needUmbrella ? '☔ vhodný deštník' : 'bez deštníku',
@@ -234,7 +224,6 @@
         ].join(' · ');
 
         const outfit = buildClothingAdvice(feels, strongWind, needUmbrella);
-
         const deltaTxt = (deltaVsY==null) ? '' :
           (deltaVsY>0 ? `Dnes tepleji o +${deltaVsY}°C vs. včera` :
            deltaVsY<0 ? `Dnes chladněji o ${deltaVsY}°C vs. včera` : 'Stejně jako včera');
@@ -254,18 +243,15 @@
                 <div class="row">${badges || chip('Bez varování','success')}</div>
               </div>
             </div>
-
             <div class="divider"></div>
-
             <div class="grid2">
               <div class="row">
                 <span class="badge">Min ${tMinToday ?? '—'}°</span>
                 <span class="badge">Max ${tMaxToday ?? '—'}°</span>
                 ${deltaTxt ? `<span class="badge">${deltaTxt}</span>` : ''}
               </div>
-              <div class="timestamp">Aktualizováno ${fmtDate(now)}</div>
+              <div class="timestamp">Aktualizováno ${fmtTime(now)}</div>
             </div>
-
             <div class="row">
               <i class="fa-solid fa-shirt"></i>
               <div>${outfit}</div>
@@ -291,15 +277,14 @@
       return extras.length ? `${base} (+ ${extras.join(', ')})` : base;
     }
 
-    // ==== MHD (přes Cloudflare Worker – KOŘENOVÁ URL) ====
+    // ===== MHD – VRÁCENÝ PŮVODNÍ FETCH (pouze root /?...) =====
     let currentDir = 'A'; // A = Koh-i-noor, B = Kubánské náměstí
-
     document.getElementById('dir-a').addEventListener('click', ()=>{ currentDir='A'; loadDepartures(); });
     document.getElementById('dir-b').addEventListener('click', ()=>{ currentDir='B'; loadDepartures(); });
 
     async function fetchDepartures(idsArr){
       const { proxyBase, minutesBefore, minutesAfter, limit, timezone } = CONFIG.departures;
-      const url = new URL(proxyBase);         // DŮLEŽITÉ: žádná cesta, jen /?...
+      const url = new URL(proxyBase); // DŮLEŽITÉ: jen kořen, žádná cesta
       url.searchParams.set('ids', idsArr.join(','));
       url.searchParams.set('minutesBefore', String(minutesBefore||0));
       url.searchParams.set('minutesAfter',  String(minutesAfter||30));
@@ -332,7 +317,7 @@
         if (s && p) delayMin = Math.round((p.getTime()-s.getTime())/60000);
         else if (typeof d?.departure_delay === 'number') delayMin = Math.round(d.departure_delay/60);
 
-        return { iso, mins, line, icon, headsign, delayMin };
+        return { iso, mins, line, icon, headsign, delayMin, stopId: d?.stop?.id || null };
       }).filter(x => x.iso);
     }
 
@@ -340,7 +325,7 @@
       if (!list.length){
         departuresContent.innerHTML = `
           <p>Nebyly nalezeny žádné odjezdy pro zadaný filtr (${label}).</p>
-          <div class="timestamp">Poslední kontrola ${fmtDate(new Date())}</div>
+          <div class="timestamp">Poslední kontrola ${fmtTime(new Date())}</div>
         `;
         return;
       }
@@ -365,30 +350,39 @@
       }).join('');
       departuresContent.innerHTML = `
         <div class="departure-list">${items}</div>
-        <div class="timestamp">Slavia – nádraží Eden · směr ${currentDir==='A'?'Koh-i-noor':'Kubánské náměstí'} · Aktualizováno ${fmtDate(new Date())}</div>
+        <div class="timestamp">Slavia – nádraží Eden · směr ${label==='A'?'Koh-i-noor':'Kubánské náměstí'} · Aktualizováno ${fmtTime(new Date())}</div>
       `;
     }
 
     async function loadDepartures(){
       try{
         const idsTram = (currentDir==='A') ? CONFIG.departures.stopIdsTram_A : CONFIG.departures.stopIdsTram_B;
-        const idsAll = [...idsTram, ...CONFIG.departures.stopIdsTrain]; // zobrazíme tram dle směru + vlaky S9
-
+        const idsAll = [...idsTram, ...CONFIG.departures.stopIdsTrain]; // tram dle směru + vlaky S9
         const data = await fetchDepartures(idsAll);
-        const list = normalizeDepartures(data.departures || []);
-        // filtr na tramvaje dle směru: platforma A/B mají jiné headsigny, ale jistíme se přes přítomné ID
-        const allow = new Set(idsTram.concat(CONFIG.departures.stopIdsTrain));
-        const filtered = (data.departures||[]).filter(d => allow.has(d?.stop?.id));
-        const shown = normalizeDepartures(filtered);
 
-        // bezpečnost: když by filtr nic nenašel (např. dočasně), spadni na “list”
-        renderDepartures(shown.length?shown:list, currentDir);
+        // vyber jen odjezdy pro dané platformy + vlak
+        const allow = new Set(idsTram.concat(CONFIG.departures.stopIdsTrain));
+        const byStop = (data.departures||[]).filter(d => allow.has(d?.stop?.id));
+        let list = normalizeDepartures(byStop);
+
+        // jen odjezdy nejdříve za N minut (zachovávám vyladění)
+        const minLead = Number(CONFIG.departures.minLeadMinutes||0);
+        if (minLead>0) list = list.filter(x => x.mins==null ? false : x.mins >= minLead);
+
+        // fallback: když by filtr vyprázdnil, zobraz aspoň něco
+        if (!list.length){
+          let all = normalizeDepartures(data.departures||[]);
+          if (minLead>0) all = all.filter(x => x.mins!=null && x.mins>=minLead);
+          list = all;
+        }
+
+        renderDepartures(list, currentDir);
       }catch(err){
         departuresContent.innerHTML = `<p class="badge danger">Odjezdy MHD: ${err.message || err}</p>`;
       }
     }
 
-    // ==== NEWS (tiché selhání => žádné console error) ====
+    // ===== NEWS (tichý fallback) =====
     async function loadNews(){
       const tryFetch = async (u) => {
         try{
@@ -417,7 +411,7 @@
         return `
           <article class="news-item">
             <a href="${link}" target="_blank" rel="noopener">${title}</a>
-            <div class="timestamp">${pub ? fmtDate(pub) : ''}</div>
+            <div class="timestamp">${pub ? fmtTime(pub) : ''}</div>
             <p class="muted">${descr}</p>
           </article>
         `;
@@ -426,20 +420,19 @@
     }
 
     function renderLinks(){
-      linksGrid.innerHTML = CONFIG.links.map(l => `
+      document.getElementById('links-grid').innerHTML = CONFIG.links.map(l => `
         <a class="quick-link" href="${l.url}" target="_blank" rel="noopener">
           <i class="fa-solid ${l.icon}"></i><span>${l.label}</span>
         </a>
       `).join('');
     }
 
-    // ==== INIT ====
+    // ===== INIT =====
     (async function init(){
       renderLinks();
       await loadWeather();
       await loadNews();
       await loadDepartures();
-      // refreshe
       setInterval(loadWeather, 20*60*1000);
       setInterval(loadNews, 30*60*1000);
       setInterval(loadDepartures, 60*1000);
