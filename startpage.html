@@ -63,7 +63,10 @@
 
     /* --- Weather: graf s Y osou a ikonky --- */
     .wx-svg{width:100%;height:170px;display:block}
-    .wx-axis text{font-size:10px;fill:#9bb3c6}
+    /* stejný vzhled pro Y (text uvnitř .wx-axis) i X (text.wx-axis) */
+    .wx-axis text,
+    text.wx-axis { font-size:10px; fill:#9bb3c6 }
+    /* konec úpravy stejný vzhled pro Y (text uvnitř .wx-axis) i X (text.wx-axis) */
     .wx-axis line{stroke:#294050;stroke-width:1}
     .wx-ygrid line{stroke:#1a2a36;stroke-width:1;opacity:.5}
     .wx-arrow-up{color:#21c07a}      /* tepleji než včera */
