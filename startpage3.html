@@ -81,7 +81,6 @@
     <div class="sub">Soukromá nástěnka – počasí, MHD, dostupnost sítě a rychlé odkazy.</div>
 
     <div class="grid">
-      <!-- POČASÍ (Vršovice) -->
       <section class="card" id="weatherCard">
         <div class="title row" style="align-items:center;gap:10px">
           <span>Počasí – Vršovice</span>
@@ -95,7 +94,6 @@
         </div>
       </section>
 
-      <!-- ODJEZDY MHD -->
       <section class="card" id="mhdCard">
         <div class="title">Odjezdy MHD</div>
         <div class="row" style="margin-top:10px;gap:10px">
@@ -110,19 +108,16 @@
         <div class="foot" id="mhdFoot"></div>
       </section>
 
-      <!-- DOMÁCÍ INTERNET -->
       <section class="card" id="netCard">
         <div class="title">Domácí internet</div>
         <div id="netBox" style="margin-top:14px" class="muted"></div>
       </section>
 
-      <!-- RYCHLÉ ODKAZY -->
       <section class="card" id="linksCard">
         <div class="title">Rychlé odkazy</div>
         <div id="linksBox" class="list" style="margin-top:14px"></div>
       </section>
 
-      <!-- ZPRÁVY -->
       <section class="card" id="newsCard">
         <div class="title">iRozhlas.cz – nejnovější zprávy</div>
         <div id="newsBox" class="list" style="margin-top:14px">
@@ -130,7 +125,6 @@
         </div>
       </section>
 
-      <!-- SLUŽBY -->
       <section class="card" id="svcCard">
         <div class="title">Domácí služby</div>
         <div id="svcBox" class="list" style="margin-top:14px"></div>
@@ -138,7 +132,6 @@
     </div>
   </div>
 
-  <!-- Modal API key -->
   <dialog id="apiDlg">
     <form method="dialog">
       <h3 style="margin:0 0 8px 0">Golemio API klíč</h3>
@@ -176,7 +169,8 @@
     ]
   };
 
-  const LINKS = [
+  // Rychlé odkazy
+  CONFIG.links = [
     { label: "E-mail", url: "https://mail.google.com" },
     { label: "Kalendář", url: "https://calendar.google.com" },
     { label: "Nextcloud", url: "http://192.168.1.60/status.php" },
@@ -184,7 +178,8 @@
     { label: "Plex", url: "http://192.168.1.50:32400/web/index.html" }
   ];
 
-  const SERVICES = [
+  // Domácí služby
+  CONFIG.services = [
     { name:"Home Assistant (MM 2012)", url:"http://192.168.1.60:8123/" },
     { name:"Nextcloud (MM 2012)",     url:"http://192.168.1.60/status.php" },
     { name:"Plex (jiný stroj)",       url:"http://192.168.1.50:32400/web/index.html" }
@@ -252,6 +247,23 @@
       95:'Bouřka',96:'Bouřka s krupobitím',99:'Silná bouřka'
     };
 
+    const CLOTHING_HINTS = [
+      { minFeel: 24, hint: 'Lehké oblečení (tričko).' },
+      { minFeel: 15, hint: 'Lehká bunda / mikina.' },
+      { minFeel: 8,  hint: 'Mikina, případně tenčí bunda.' },
+      { minFeel: 1,  hint: 'Teplá bunda, dlouhé kalhoty.' },
+      { minFeel: -5, hint: 'Teplá bunda + čepice, rukavice.' },
+      { minFeel: -Infinity, hint: 'Velká zima – přidej termoprádlo.' }
+    ];
+
+    const CLOTHING_ICONS = [
+      { minFeel: 24, icon: '🩳' },
+      { minFeel: 17, icon: '👕' }, // Rozdělil jsem to pro víc ikon
+      { minFeel: 11, icon: '🦺' },
+      { minFeel: 4,  icon: '🧥' },
+      { minFeel: -Infinity, icon: '🧣🧤🧥' }
+    ];
+
     const pad2 = n => String(n).padStart(2,'0');
     const fmtHourLabel = d => (wxState.timeLabel==='h') ? `${pad2(d.getHours())} h` : `${pad2(d.getHours())}:00`;
 
@@ -293,15 +305,6 @@
         if(wet && startsInHours!==null) durationH++; if(!wet && startsInHours!==null && durationH>0) break;
       }
       return { umbrella, startsInHours, durationH };
-    }
-
-    function wx_clothingHint(feels){
-      if (feels >= 24) return 'Lehké oblečení (tričko).';
-      if (feels >= 15) return 'Lehká bunda / mikina.';
-      if (feels >= 8)  return 'Mikina, případně tenčí bunda.';
-      if (feels >= 1)  return 'Teplá bunda, dlouhé kalhoty.';
-      if (feels >= -5) return 'Teplá bunda + čepice, rukavice.';
-      return 'Velká zima – přidej termoprádlo.';
     }
 
     function wx_vsYesterday(daily){
@@ -369,12 +372,14 @@
       `;
     }
 
+    function wx_clothingHint(feels){
+      const found = CLOTHING_HINTS.find(item => feels >= item.minFeel);
+      return found ? found.hint : 'Počasí si dělá, co chce.'; // Fallback
+    }
+
     function wx_clothingIcon(feels){
-      if (feels <= 3)  return '🧣🧤🧥';
-      if (feels <= 10) return '🧥';
-      if (feels <= 16) return '🦺';
-      if (feels <= 23) return '👕';
-      return '🩳';
+      const found = CLOTHING_ICONS.find(item => feels >= item.minFeel);
+      return found ? found.icon : '🤷';
     }
 
     function wx_vsYesterdayArrow(daily){
@@ -507,11 +512,15 @@
     }
 
     // Internet (nejrychlejší cíl)
-    let best = null;
-    for (const u of CONFIG.network.internetTargets){
-      const r = await ping(u, {timeout:3500}).catch(()=>({ok:false}));
-      if (r.ok && (!best || r.ms < best.ms)) best = {host:u, ms:r.ms};
-    }
+    const targets = CONFIG.network.internetTargets || [];
+    const promises = targets.map(u => ping(u, {timeout:3500}));
+    const results = await Promise.all(promises);
+
+    // Najdeme nejlepší (úspěšný) výsledek
+    const best = results
+      .filter(r => r.ok) // Jen úspěšné pingy
+      .sort((a, b) => a.ms - b.ms)[0]; // Seřadit a vzít ten první (nejrychlejší)
+
     const inetRow = best
       ? `<div class="svc-row"><div class="svc-left"><span class="dot ok"></span><strong>Internet OK</strong></div><span class="svc-hint">~${best.ms} ms</span></div>`
       : `<div class="svc-row"><div class="svc-left"><span class="dot bad"></span><strong>Internet nedostupný</strong></div></div>`;
@@ -522,6 +531,7 @@
   // ---------- SLUŽBY (HA/Nextcloud/Plex) ----------
   async function renderServices(){
     const box = document.getElementById("svcBox");
+    const services = CONFIG.services || []; // Načítáme z CONFIGu
 
     if (NETSTATE.gateway && !NETSTATE.gateway.ok && !NETSTATE.gateway.blocked){
       box.innerHTML = `<div class="svc-row">
@@ -531,21 +541,27 @@
       return;
     }
 
-    if (!SERVICES?.length){ box.innerHTML = `<div class="muted">Žádné služby.</div>`; return; }
+    if (!services?.length){ box.innerHTML = `<div class="muted">Žádné služby.</div>`; return; }
 
-    const rows = [];
-    for (const s of SERVICES){
-      const r = await ping(s.url, {timeout:3500});
+    // Spustíme všechny pingy paralelně
+    const promises = services.map(s => ping(s.url, {timeout:3500}));
+    const results = await Promise.all(promises);
+
+    // Teď projdeme výsledky a vygenerujeme HTML
+    const rows = services.map((s, i) => {
+      const r = results[i]; // Vezmeme odpovídající výsledek
       let dot='bad', hint='Nedostupné', href='#', attrs='';
+
       if (r.blocked){ dot='block'; hint='Blokováno v HTTPS (mixed content)'; }
       else if (r.ok){ dot='ok'; hint=`Online · ~${r.ms} ms`; href=s.url; attrs='target="_blank" rel="noopener"'; }
-      rows.push(`<div class="svc-row">
+
+      return `<div class="svc-row">
         <div class="svc-left"><span class="dot ${dot}"></span><a class="btn" href="${href}" ${attrs}>${s.name}</a></div>
         <span class="svc-hint">${hint}</span>
-      </div>`);
-    }
+      </div>`;
+    });
 
-    const anyBlocked = rows.join('').includes('dot block');
+    const anyBlocked = results.some(r => r.blocked);
     const tip = (location.protocol === 'https:' && anyBlocked)
       ? `<div class="svc-hint" style="margin-top:8px">Tip: zvaž reverzní proxy (Caddy/NGINX) a vystavení pod HTTPS jednou doménou.</div>`
       : '';
@@ -556,7 +572,8 @@
   // ---------- LINKS ----------
   function renderLinks(){
     const box = document.getElementById("linksBox");
-    box.innerHTML = LINKS.map(l => {
+    const links = CONFIG.links || []; // Načítáme z CONFIGu
+    box.innerHTML = links.map(l => {
       const blocked = (location.protocol === 'https:' && l.url.startsWith('http://'));
       const href = blocked ? '#' : l.url;
       const attrs = blocked ? '' : 'target="_blank" rel="noopener"';
@@ -642,12 +659,22 @@
       return m >= minM;
     });
 
-    if(afterThreshold.length === 0){
-      listEl.innerHTML = `<div class="error">Žádné odjezdy ≥ ${minM} min pro směr ${currentDir}.</div>`;
-      return;
-    }
+    // ----- ZMĚNA LOGIKY ZDE -----
+    let take = afterThreshold.slice(0, CONFIG.departures.limit);
+    let note = ""; // Poznámka, pokud jsme museli vzít spoje < minM
 
-    const take = afterThreshold.slice(0, CONFIG.departures.limit);
+    if(take.length === 0 && byPlatform.length > 0){
+      // Nemáme žádné spoje > minM, ale MÁME nějaké spoje.
+      // Vezmeme 2 nejbližší, i když nesplňují limit.
+      take = byPlatform.slice(0, 2); 
+      note = `<div class="muted" style="margin-top:8px">Zobrazeny nejbližší spoje (i &lt; ${minM} min).</div>`;
+    } else if (take.length === 0 && byPlatform.length === 0) {
+      // Opravdu nic nejede
+       listEl.innerHTML = `<div class="error">Žádné odjezdy pro směr ${currentDir}.</div>`;
+       return;
+    }
+    // ----- KONEC ZMĚNY LOGIKY -----
+
     for(const d of take){
       const row = document.createElement("div");
       row.className = "dep";
@@ -686,6 +713,9 @@
       row.appendChild(timeBox);
       listEl.appendChild(row);
     }
+    
+    // Přidáme poznámku, pokud nějaká vznikla
+    if (note) listEl.insertAdjacentHTML('beforeend', note);
   }
 
   async function refreshDepartures(){
