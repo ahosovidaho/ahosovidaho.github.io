@@ -45,11 +45,22 @@
     <div class="sub">Soukromá nástěnka – počasí, MHD, dostupnost sítě a rychlé odkazy.</div>
 
     <div class="grid">
-      <!-- POČASÍ -->
-      <section class="card" id="weatherCard">
-        <div class="title">Počasí</div>
-        <div id="weatherBox" style="margin-top:14px" class="muted">Načítám aktuální počasí…</div>
-      </section>
+      
+      <!-- POČASÍ (Vršovice) -->
+<section class="card" id="weatherCard">
+  <div class="title row" style="align-items:center;gap:10px">
+    <span>Počasí – Vršovice</span>
+    <div class="spacer"></div>
+    <button class="btn wx-btn" id="wxDayToggle" title="Přepnout Dnes/Zítra">Dnes</button>
+    <button class="btn wx-btn" id="wxTimeFmt" title="Přepnout formát času">22&nbsp;h</button>
+    <a class="btn wx-btn" id="wxRadarBtn" href="https://www.chmi.cz/files/portal/docs/meteo/rad/inca-cz/" target="_blank" rel="noopener">Radar</a>
+  </div>
+
+  <div id="weatherBox" class="wx-box" style="margin-top:14px">
+    <div class="muted">Načítám předpověď…</div>
+  </div>
+</section>
+
 
       <!-- ODJEZDY MHD -->
       <section class="card" id="mhdCard">
@@ -150,40 +161,305 @@
   const getToken = () => localStorage.getItem(KEY_NAME) || "";
   const setToken = v => localStorage.setItem(KEY_NAME, v||"");
 
-  // ---------- WEATHER (jednoduchý aktuál) ----------
-  async function loadWeather(){
+  // ===== Weather (Vršovice) =====
+(function(){
+  const wxEl = {
+    box: document.getElementById('weatherBox'),
+    dayToggle: document.getElementById('wxDayToggle'),
+    timeFmtBtn: document.getElementById('wxTimeFmt'),
+    radarBtn: document.getElementById('wxRadarBtn'),
+  };
+
+  // Konfigurace (Vršovice)
+  const wxCfg = {
+    lat: 50.067, lon: 14.468, tz: 'Europe/Prague',
+    hoursAhead: 18,            // kolik hodin kreslit do grafu
+    rainProbWarn: 60,          // % pravděpodobnosti deště = „deštník se hodí“
+    rainRateWarn: 0.2,         // mm/h od kdy brát déšť jako „reálný“
+    windWarn: 12,              // m/s = cca 43 km/h silný vítr
+    windGustWarn: 17,          // m/s poryvy
+  };
+
+  // Stav
+  const wxState = {
+    day: 'today',                 // 'today' | 'tomorrow'
+    timeLabel: 'h',               // 'h' | ':00'
+    data: null,                   // odpověď z API
+  };
+
+  // Mapy kódů počasí
+  const wxCodes = {
+    0:'Jasno', 1:'Převážně jasno', 2:'Oblačno', 3:'Zataženo',
+    45:'Mlha', 48:'Mrznoucí mlha',
+    51:'Mírné mrholení', 53:'Mrholení', 55:'Intenzivní mrholení',
+    56:'Mrznoucí mrholení', 57:'Mrznoucí mrholení',
+    61:'Slabý déšť', 63:'Déšť', 65:'Silný déšť',
+    66:'Mrznoucí déšť', 67:'Mrznoucí déšť',
+    71:'Slabé sněžení', 73:'Sněžení', 75:'Silné sněžení',
+    77:'Kroupy',
+    80:'Přeháňky', 81:'Déšť', 82:'Silný déšť',
+    85:'Sněhové přeháňky', 86:'Silné sněhové přeháňky',
+    95:'Bouřka', 96:'Bouřka s krupobitím', 99:'Silná bouřka'
+  };
+
+  // Pomocné
+  const wx_pad2 = n => String(n).padStart(2,'0');
+  const wx_fmtHM = d => `${wx_pad2(d.getHours())}:${wx_pad2(d.getMinutes())}`;
+  const wx_fmtHourLabel = (d) => (wxState.timeLabel === 'h')
+      ? `${wx_pad2(d.getHours())} h`
+      : `${wx_pad2(d.getHours())}:00`;
+
+  // Fetch z Open-Meteo
+  async function wx_fetch(){
+    const u = new URL('https://api.open-meteo.com/v1/forecast');
+    u.searchParams.set('latitude', wxCfg.lat);
+    u.searchParams.set('longitude', wxCfg.lon);
+    u.searchParams.set('timezone', wxCfg.tz);
+
+    // Aktuál, hodinová a denní data + včerejšek kvůli porovnání
+    u.searchParams.set('current', [
+      'temperature_2m','apparent_temperature','relative_humidity_2m',
+      'wind_speed_10m','wind_gusts_10m','weather_code','precipitation'
+    ].join(','));
+
+    u.searchParams.set('hourly', [
+      'temperature_2m','apparent_temperature','precipitation_probability',
+      'rain','showers','snowfall','weather_code','wind_speed_10m','wind_gusts_10m'
+    ].join(','));
+
+    u.searchParams.set('daily', [
+      'temperature_2m_max','temperature_2m_min','precipitation_sum'
+    ].join(','));
+
+    u.searchParams.set('past_days', '1');   // včerejšek
+    u.searchParams.set('forecast_days', '2'); // dnes + zítra
+
+    const r = await fetch(u.toString(), { cache: 'no-store' });
+    if (!r.ok) throw new Error('Počasí nelze načíst.');
+    return r.json();
+  }
+
+  // Najdi index dne (0 = včera, 1 = dnes, 2 = zítra)
+  function wx_dayIndex(){
+    // daily.time je ISO začátků dnů (00:00)
+    // Vybereme 1 (dnes) nebo 2 (zítra)
+    return (wxState.day === 'today') ? 1 : 2;
+  }
+
+  // Deštník a „kdy začne pršet“ z hodinových dat
+  function wx_rainAnalysis(hourly){
+    const now = Date.now();
+    const idxStart = hourly.time.findIndex(t => new Date(t).getTime() >= now);
+    const start = idxStart < 0 ? 0 : idxStart;
+
+    let umbrella = false;
+    let startsInHours = null;
+    let durationH = 0;
+
+    for (let i = start; i < Math.min(start + 24, hourly.time.length); i++){
+      const prob = hourly.precipitation_probability?.[i] ?? 0;
+      const rate = (hourly.rain?.[i] ?? 0) + (hourly.showers?.[i] ?? 0) + (hourly.snowfall?.[i] ?? 0);
+      const wet = (prob >= wxCfg.rainProbWarn) || (rate >= wxCfg.rainRateWarn);
+      if (wet && startsInHours === null){
+        const t0 = new Date(hourly.time[i]).getTime();
+        startsInHours = Math.max(0, Math.round((t0 - now) / 3600000));
+        umbrella = true;
+      }
+      if (wet && startsInHours !== null) durationH++;
+      if (!wet && startsInHours !== null && durationH>0) break;
+    }
+    return { umbrella, startsInHours, durationH };
+  }
+
+  // Doporučení oblečení z pocitové teploty
+  function wx_clothingHint(feels){
+    if (feels >= 24) return 'Lehké oblečení (tričko).';
+    if (feels >= 15) return 'Lehká bunda / mikina.';
+    if (feels >= 8)  return 'Mikina, případně tenčí bunda.';
+    if (feels >= 1)  return 'Teplá bunda, dlouhé kalhoty.';
+    if (feels >= -5) return 'Teplá bunda + čepice, rukavice.';
+    return 'Velká zima – přidej termoprádlo.';
+  }
+
+  // Porovnání s včerejškem (max teplota)
+  function wx_vsYesterday(daily){
+    const y = daily.temperature_2m_max?.[0];
+    const t = daily.temperature_2m_max?.[1];
+    if (y==null || t==null) return null;
+    const diff = Math.round((t - y)*10)/10;
+    if (diff > 0) return `Dnes tepleji než včera o ${diff}°C.`;
+    if (diff < 0) return `Dnes chladněji než včera o ${Math.abs(diff)}°C.`;
+    return 'Dnes podobně teplo jako včera.';
+  }
+
+  // Vykreslení malého SVG grafu (apparent temperature)
+  function wx_renderChart(container, hourly){
+    const now = Date.now();
+    // start na nejbližší celé hodině >= now
+    const fromIdx = hourly.time.findIndex(t => new Date(t).getTime() >= now);
+    const start = fromIdx < 0 ? 0 : fromIdx;
+    const end = Math.min(start + wxCfg.hoursAhead, hourly.time.length);
+    const times = hourly.time.slice(start, end).map(t=>new Date(t));
+    const vals = hourly.apparent_temperature.slice(start, end).map(Number);
+
+    if (!times.length){ container.innerHTML = '<div class="muted">Bez dat…</div>'; return; }
+
+    const w = container.clientWidth || 600;
+    const h = 140;
+    const pad = { l: 30, r: 10, t: 10, b: 24 };
+
+    const vmin = Math.min(...vals);
+    const vmax = Math.max(...vals);
+    const y = v => {
+      if (vmax===vmin) return pad.t + (h-pad.t-pad.b)/2;
+      return pad.t + (vmax - v) * (h - pad.t - pad.b) / (vmax - vmin);
+    };
+    const x = (i) => pad.l + i * ( (w - pad.l - pad.r) / (vals.length - 1 || 1) );
+
+    // Path
+    let d = '';
+    vals.forEach((v,i)=>{
+      const cx = x(i), cy = y(v);
+      d += (i===0 ? `M ${cx} ${cy}` : ` L ${cx} ${cy}`);
+    });
+
+    // Osy + popisky hodin
+    const labels = times.map((t,i)=>({
+      x: x(i),
+      text: wx_fmtHourLabel(t)
+    }));
+
+    container.innerHTML = `
+      <div class="wx-graphHead">
+        <div class="wx-legend"><span class="wx-dot" style="color:var(--accent)"></span> Pocitová teplota</div>
+        <div>${Math.round(vmin)}–${Math.round(vmax)}°C</div>
+      </div>
+      <svg class="wx-svg" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" role="img" aria-label="Pocitová teplota v čase">
+        <defs>
+          <linearGradient id="wxfill" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="rgba(56,189,248,0.35)"/>
+            <stop offset="100%" stop-color="rgba(56,189,248,0.02)"/>
+          </linearGradient>
+        </defs>
+        <path d="${d}" stroke="rgb(56,189,248)" stroke-width="2" fill="none"/>
+        <path d="${d} L ${x(vals.length-1)} ${h-pad.b} L ${x(0)} ${h-pad.b} Z" fill="url(#wxfill)"/>
+        ${labels.map((lb,i)=> i%2===0 ? `
+          <text x="${lb.x}" y="${h-8}" text-anchor="middle" font-size="10" fill="#9bb3c6">${lb.text}</text>` : ''
+        ).join('')}
+      </svg>
+    `;
+  }
+
+  function wx_render(){
+    const j = wxState.data;
+    if (!j){ wxEl.box.innerHTML = '<div class="muted">Načítám…</div>'; return; }
+
+    const dIdx = wx_dayIndex();
+
+    // Aktuální hodnoty
+    const cur = j.current;
+    const curTemp = Math.round(cur.temperature_2m);
+    const curFeel = Math.round(cur.apparent_temperature);
+    const curHum  = cur.relative_humidity_2m;
+    const curWind = Math.round(cur.wind_speed_10m);
+    const curGust = Math.round(cur.wind_gusts_10m || cur.wind_speed_10m);
+    const curCode = wxCodes[cur.weather_code] || 'Počasí';
+
+    // Denní min/max pro zvolený den
+    const tMin = Math.round(j.daily.temperature_2m_min?.[dIdx] ?? curTemp);
+    const tMax = Math.round(j.daily.temperature_2m_max?.[dIdx] ?? curTemp);
+    const rainSum = j.daily.precipitation_sum?.[dIdx] ?? 0;
+
+    // Deštník, kdy a jak dlouho
+    const rain = wx_rainAnalysis(j.hourly);
+
+    // Větrné varování
+    const windWarn = (curWind >= wxCfg.windWarn) || (curGust >= wxCfg.windGustWarn);
+
+    // Oblečení a porovnání s včerejškem
+    const cloth = wx_clothingHint(curFeel);
+    const vsY = wx_vsYesterday(j.daily);
+
+    // Sestavení HTML
+    const chips = [];
+    chips.push(`<span class="wx-chip">${rain.umbrella ? '☔️ Deštník se hodí' : '🌂 Bez deštníku'}</span>`);
+    if (rain.umbrella){
+      const when = (rain.startsInHours===0) ? 'brzy' : `za ~${rain.startsInHours} h`;
+      const dur = rain.durationH ? ` · trvání ~${rain.durationH} h` : '';
+      chips.push(`<span class="wx-chip">Přeháňky ${when}${dur}</span>`);
+    }
+    if (windWarn){
+      chips.push(`<span class="wx-chip wx-warn">💨 Silný vítr (${curWind}–${curGust} km/h)</span>`);
+    }
+    chips.push(`<span class="wx-chip">Min ${tMin}°C · Max ${tMax}°C</span>`);
+
+    wxEl.box.innerHTML = `
+      <div class="wx-top">
+        <div class="wx-main">
+          <div class="wx-temp">${curTemp}°C</div>
+          <div class="wx-feel">Pocitově ${curFeel}°C</div>
+        </div>
+        <div class="wx-meta">
+          <span>${curCode}</span>
+          <span>Vlhkost ${curHum}%</span>
+          <span>Vítr ${curWind} km/h (nárazy ${curGust} km/h)</span>
+          <span>Srážky dnes ${Math.round(rainSum*10)/10} mm</span>
+        </div>
+      </div>
+
+      <div class="wx-chips">
+        ${chips.join('')}
+      </div>
+
+      <div class="wx-graphWrap">
+        <div class="wx-graphHead">
+          <div>Výhled ${wxCfg.hoursAhead} h (pocitová teplota)</div>
+          <div class="wx-mini">
+            <span>Oblečení: ${cloth}</span>
+            ${vsY ? `<span>${vsY}</span>` : ''}
+          </div>
+        </div>
+        <div id="wxChart"></div>
+      </div>
+    `;
+
+    // vykresli graf z „apparent_temperature“
+    wx_renderChart(document.getElementById('wxChart'), j.hourly);
+  }
+
+  async function wx_refresh(){
     try{
-      const u = new URL("https://api.open-meteo.com/v1/forecast");
-      u.searchParams.set("latitude", CONFIG.weather.lat);
-      u.searchParams.set("longitude", CONFIG.weather.lon);
-      u.searchParams.set("current","temperature_2m,apparent_temperature,relative_humidity_2m,wind_speed_10m,weather_code");
-      u.searchParams.set("timezone", CONFIG.weather.tz);
-      const r = await fetch(u); if(!r.ok) throw new Error("Počasí nelze načíst.");
-      const j = await r.json();
-      const c = j.current;
-      const labels = {0:"Jasno",1:"Převážně jasno",2:"Oblačno",3:"Zataženo",45:"Mlha",48:"Mrznoucí mlha",
-        51:"Mírné mrholení",53:"Mrholení",55:"Intenzivní mrholení",56:"Mrznoucí mrholení",57:"Mrznoucí mrholení",
-        61:"Slabý déšť",63:"Déšť",65:"Silný déšť",66:"Mrznoucí déšť",67:"Mrznoucí déšť",
-        71:"Slabé sněžení",73:"Sněžení",75:"Silné sněžení",77:"Kroupy",
-        80:"Přeháňky",81:"Déšť",82:"Silný déšť",
-        85:"Sněhové přeháňky",86:"Silné sněhové přeháňky",
-        95:"Bouřka",96:"Bouřka s krupobitím",99:"Silná bouřka" };
-      $("#weatherBox").innerHTML = `
-        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
-          <div>
-            <div style="font-size:38px;font-weight:800">${Math.round(c.temperature_2m)}°C</div>
-            <div>${labels[c.weather_code]||"Počasí"}</div>
-          </div>
-          <div style="color:var(--muted);font-size:14px;display:grid;gap:6px">
-            <span>Pocitově ${Math.round(c.apparent_temperature)}°C</span>
-            <span>Vlhkost ${c.relative_humidity_2m}%</span>
-            <span>Vítr ${Math.round(c.wind_speed_10m)} km/h</span>
-          </div>
-        </div>`;
+      wxEl.box.innerHTML = '<div class="muted">Načítám…</div>';
+      if (!wxState.data) wxState.data = await wx_fetch();
+      wx_render();
     }catch(e){
-      $("#weatherBox").innerHTML = `<div class="error">${e.message||e}</div>`;
+      wxEl.box.innerHTML = `<div class="error">${e.message || e}</div>`;
     }
   }
+
+  // Toggle Dnes/Zítra
+  wxEl.dayToggle.addEventListener('click', ()=>{
+    wxState.day = (wxState.day === 'today') ? 'tomorrow' : 'today';
+    wxEl.dayToggle.textContent = (wxState.day === 'today') ? 'Dnes' : 'Zítra';
+    wx_render();
+  });
+
+  // Toggle formátu času v grafu
+  wxEl.timeFmtBtn.addEventListener('click', ()=>{
+    wxState.timeLabel = (wxState.timeLabel === 'h') ? ':00' : 'h';
+    wxEl.timeFmtBtn.textContent = (wxState.timeLabel === 'h') ? '22 h' : '22:00';
+    // překreslit graf jen (data už máme)
+    if (wxState.data){
+      wx_renderChart(document.getElementById('wxChart'), wxState.data.hourly);
+    }
+  });
+
+  // Init
+  wx_refresh();
+  // průběžný refresh: aktuál po 20 min
+  setInterval(()=>{ wxState.data = null; wx_refresh(); }, 20*60*1000);
+})();
+
 
   // ---------- DEPARTURES (přes Worker) ----------
   let currentDir = "A"; // A = Koh-i-noor, B = Kubánské náměstí
@@ -380,7 +656,7 @@
     if(!getToken()) apiDlg.showModal();
     renderLinks();
     renderServices();
-    await loadWeather();
+    await initWeather();
     await loadNews();
     await refreshDepartures();
     setInterval(refreshDepartures, 60*1000);
