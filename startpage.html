@@ -37,6 +37,24 @@
     input[type=text]{width:100%;box-sizing:border-box;background:#0e1a23;border:1px solid #22313d;border-radius:10px;color:var(--text);padding:10px 12px}
     small{color:var(--muted)}
     @media (max-width:1024px){.grid{grid-template-columns:1fr}}
+
+    /* --- Weather styles --- */
+.wx-box{display:flex;flex-direction:column;gap:14px}
+.wx-top{display:flex;align-items:flex-start;justify-content:space-between;gap:14px}
+.wx-main{display:flex;flex-direction:column}
+.wx-temp{font-size:38px;font-weight:800}
+.wx-feel{color:var(--muted)}
+.wx-meta{display:grid;gap:6px;color:var(--muted);font-size:14px}
+.wx-chips{display:flex;flex-wrap:wrap;gap:8px}
+.wx-chip{font-size:12px;border-radius:999px;padding:4px 8px;background:#113244;border:1px solid #214457;color:#a7c5d9}
+.wx-chip.wx-warn{background:#3a2a12;border-color:#6a5123;color:#f0c36b}
+.wx-graphWrap{margin-top:4px}
+.wx-graphHead{display:flex;align-items:center;justify-content:space-between;color:var(--muted);font-size:13px;margin-bottom:6px}
+.wx-mini{display:flex;gap:12px;color:var(--muted)}
+.wx-svg{width:100%;height:160px;display:block}
+.wx-btn{padding:6px 10px}
+
+    
   </style>
 </head>
 <body>
@@ -656,12 +674,10 @@
     if(!getToken()) apiDlg.showModal();
     renderLinks();
     renderServices();
-    await initWeather();
-    await loadNews();
-    await refreshDepartures();
-    setInterval(refreshDepartures, 60*1000);
-    setInterval(loadWeather, 20*60*1000);
-    setInterval(loadNews, 30*60*1000);
+  await loadNews();
+  await refreshDepartures();
+  setInterval(refreshDepartures, 60*1000);
+  setInterval(loadNews, 30*60*1000);
   })();
   </script>
 </body>
