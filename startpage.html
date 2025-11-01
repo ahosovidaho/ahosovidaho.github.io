@@ -54,6 +54,14 @@
 .wx-svg{width:100%;height:160px;display:block}
 .wx-btn{padding:6px 10px}
 
+    .wx-legend::before{
+  content:"";
+  display:inline-block;
+  width:8px; height:8px; border-radius:999px;
+  background:rgb(56,189,248);
+  margin-right:6px; vertical-align:middle;
+}
+
     
   </style>
 </head>
@@ -349,7 +357,7 @@
 
     container.innerHTML = `
       <div class="wx-graphHead">
-        <div class="wx-legend"><span class="wx-dot" style="color:var(--accent)"></span> Pocitová teplota</div>
+        <div class="wx-legend"><span class="wx-dot"></span> Pocitová teplota</div>
         <div>${Math.round(vmin)}–${Math.round(vmax)}°C</div>
       </div>
       <svg class="wx-svg" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" role="img" aria-label="Pocitová teplota v čase">
