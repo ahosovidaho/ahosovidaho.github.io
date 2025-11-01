@@ -62,6 +62,15 @@
   margin-right:6px; vertical-align:middle;
 }
 
+    /* --- Weather: graf s Y osou a ikonky --- */
+.wx-svg{width:100%;height:170px;display:block}
+.wx-axis text{font-size:10px;fill:#9bb3c6}
+.wx-axis line{stroke:#294050;stroke-width:1}
+.wx-ygrid line{stroke:#1a2a36;stroke-width:1;opacity:.5}
+.wx-arrow-up{color:#21c07a}      /* tepleji než včera */
+.wx-arrow-same{color:#9bb3c6}    /* podobně jako včera */
+.wx-arrow-down{color:#5ab0ff}    /* chladněji než včera */
+
     
   </style>
 </head>
@@ -319,28 +328,88 @@
   }
 
   // Vykreslení malého SVG grafu (apparent temperature)
-  function wx_renderChart(container, hourly){
-    const now = Date.now();
-    // start na nejbližší celé hodině >= now
-    const fromIdx = hourly.time.findIndex(t => new Date(t).getTime() >= now);
-    const start = fromIdx < 0 ? 0 : fromIdx;
-    const end = Math.min(start + wxCfg.hoursAhead, hourly.time.length);
-    const times = hourly.time.slice(start, end).map(t=>new Date(t));
-    const vals = hourly.apparent_temperature.slice(start, end).map(Number);
+ function wx_renderChart(container, hourly){
+  const now = Date.now();
+  const fromIdx = hourly.time.findIndex(t => new Date(t).getTime() >= now);
+  const start = fromIdx < 0 ? 0 : fromIdx;
+  const end = Math.min(start + wxCfg.hoursAhead, hourly.time.length);
 
-    if (!times.length){ container.innerHTML = '<div class="muted">Bez dat…</div>'; return; }
+  const times = hourly.time.slice(start, end).map(t=>new Date(t));
+  const vals = hourly.apparent_temperature.slice(start, end).map(Number);
 
-    const w = container.clientWidth || 600;
-    const h = 140;
-    const pad = { l: 30, r: 10, t: 10, b: 24 };
+  if (!times.length){ container.innerHTML = '<div class="muted">Bez dat…</div>'; return; }
 
-    const vmin = Math.min(...vals);
-    const vmax = Math.max(...vals);
-    const y = v => {
-      if (vmax===vmin) return pad.t + (h-pad.t-pad.b)/2;
-      return pad.t + (vmax - v) * (h - pad.t - pad.b) / (vmax - vmin);
-    };
-    const x = (i) => pad.l + i * ( (w - pad.l - pad.r) / (vals.length - 1 || 1) );
+  const w = container.clientWidth || 640;
+  const h = 170;
+  const pad = { l: 44, r: 14, t: 12, b: 26 };
+
+  const vmin = Math.min(...vals);
+  const vmax = Math.max(...vals);
+
+  // hezké zaokrouhlení rozsahu Y
+  const niceStep = (range)=>{
+    const raw = range/4;
+    const p10 = Math.pow(10, Math.floor(Math.log10(Math.max(1,Math.abs(raw)))));
+    const cand = [1,2,2.5,5,10].map(x=>x*p10);
+    return cand.reduce((a,b)=> Math.abs(b-raw)<Math.abs(a-raw)?b:a, cand[0]);
+  };
+  const ymin = Math.floor(vmin / niceStep(vmax-vmin)) * niceStep(vmax-vmin);
+  const ymax = Math.ceil (vmax / niceStep(vmax-vmin)) * niceStep(vmax-vmin);
+  const step = niceStep(ymax - ymin);
+
+  const y = v => pad.t + (ymax - v) * (h - pad.t - pad.b) / (ymax - ymin || 1);
+  const x = i => pad.l + i * ((w - pad.l - pad.r) / (vals.length - 1 || 1));
+
+  // hlavní křivka
+  let d = '';
+  vals.forEach((v,i)=>{ const cx=x(i), cy=y(v); d += (i?` L ${cx} ${cy}`:`M ${cx} ${cy}`); });
+
+  // Y-ticky
+  const yTicks = [];
+  for(let v=ymin; v<=ymax+1e-6; v+=step){ yTicks.push(Math.round(v)); }
+
+  const labels = times.map((t,i)=>({ x:x(i), text: wx_fmtHourLabel(t) }));
+
+  container.innerHTML = `
+    <div class="wx-graphHead">
+      <div>Pocitová teplota</div>
+      <div>${Math.round(vmin)}–${Math.round(vmax)}°C</div>
+    </div>
+    <svg class="wx-svg" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" role="img"
+         aria-label="Pocitová teplota v čase">
+      <defs>
+        <linearGradient id="wxfill" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="rgba(56,189,248,0.35)"/>
+          <stop offset="100%" stop-color="rgba(56,189,248,0.02)"/>
+        </linearGradient>
+      </defs>
+
+      <!-- Y grid -->
+      <g class="wx-ygrid">
+        ${yTicks.map(v => `
+          <line x1="${pad.l}" y1="${y(v)}" x2="${w-pad.r}" y2="${y(v)}"></line>
+        `).join('')}
+      </g>
+
+      <!-- osa Y -->
+      <g class="wx-axis">
+        <line x1="${pad.l}" y1="${pad.t}" x2="${pad.l}" y2="${h-pad.b}"></line>
+        ${yTicks.map(v => `
+          <text x="${pad.l-6}" y="${y(v)+3}" text-anchor="end">${v}°</text>
+        `).join('')}
+      </g>
+
+      <!-- křivka -->
+      <path d="${d}" stroke="rgb(56,189,248)" stroke-width="2" fill="none"/>
+      <path d="${d} L ${x(vals.length-1)} ${h-pad.b} L ${x(0)} ${h-pad.b} Z" fill="url(#wxfill)"/>
+
+      <!-- X popisky (každou druhou hodinu) -->
+      ${labels.map((lb,i)=> i%2===0 ? `
+        <text x="${lb.x}" y="${h-8}" text-anchor="middle" class="wx-axis">${lb.text}</text>
+      ` : '').join('')}
+    </svg>
+  `;
+}
 
     // Path
     let d = '';
@@ -376,6 +445,25 @@
     `;
   }
 
+function wx_clothingIcon(feels){
+  if (feels <= 3)  return '🧣🧤🧥';         // velmi teplé
+  if (feels <= 10) return '🧥';             // teplé
+  if (feels <= 16) return '🦺';             // střední
+  if (feels <= 23) return '👕';             // lehké
+  return '🩳';                               // horko
+}
+
+function wx_vsYesterdayArrow(daily){
+  const y = daily.temperature_2m_max?.[0];
+  const t = daily.temperature_2m_max?.[1];
+  if (y==null || t==null) return {arrow:'→', cls:'wx-arrow-same', text:'Podobně jako včera.'};
+  const diff = Math.round((t - y)*10)/10;
+  if (diff > 0) return {arrow:'▲', cls:'wx-arrow-up',   text:`Tepleji o ${diff}°C`};
+  if (diff < 0) return {arrow:'▼', cls:'wx-arrow-down', text:`Chladněji o ${Math.abs(diff)}°C`};
+  return {arrow:'→', cls:'wx-arrow-same', text:'Podobně jako včera.'};
+}
+
+ 
   function wx_render(){
     const j = wxState.data;
     if (!j){ wxEl.box.innerHTML = '<div class="muted">Načítám…</div>'; return; }
@@ -404,6 +492,8 @@
 
     // Oblečení a porovnání s včerejškem
     const cloth = wx_clothingHint(curFeel);
+    const clothIcon = wx_clothingIcon(curFeel);
+    const vs = wx_vsYesterdayArrow(j.daily);
     const vsY = wx_vsYesterday(j.daily);
 
     // Sestavení HTML
@@ -441,14 +531,18 @@
         <div class="wx-graphHead">
           <div>Výhled ${wxCfg.hoursAhead} h (pocitová teplota)</div>
           <div class="wx-mini">
-            <span>Oblečení: ${cloth}</span>
-            ${vsY ? `<span>${vsY}</span>` : ''}
+          <span>Oblečení: ${clothIcon} ${cloth}</span>
+          <span class="${vs.cls}">${vs.arrow} ${vs.text}</span>
           </div>
         </div>
         <div id="wxChart"></div>
       </div>
     `;
 
+    if (tMin <= 0){
+    chips.push(`<span class="wx-chip">❄️ Mráz ráno možný</span>`);
+  }
+    
     // vykresli graf z „apparent_temperature“
     wx_renderChart(document.getElementById('wxChart'), j.hourly);
   }
