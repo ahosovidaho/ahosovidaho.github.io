@@ -177,6 +177,13 @@
       color:#7a4b00;
     }
     
+
+    /* Light theme: lighter chart axis & grid */
+    :root[data-theme="light"] .wx-axis text,
+    :root[data-theme="light"] text.wx-axis { fill: var(--muted); }
+    :root[data-theme="light"] .wx-axis line { stroke: rgba(17,25,40,.28); }
+    :root[data-theme="light"] .wx-ygrid line { stroke: rgba(17,25,40,.18); opacity:1; }
+
   </style>
 
   <script>
@@ -196,7 +203,7 @@
 </head>
 <body>
   <div class="wrap">
-    <h1>Domácí start</h1>
+    <div class="row" id="greetRow" style="align-items:baseline;gap:12px"><h1 id="greetTitle">Domácí start</h1><div id="clock" class="muted" style="font-variant-numeric:tabular-nums"></div></div>
     <div class="sub">Soukromá nástěnka – počasí, MHD, dostupnost sítě a rychlé odkazy.</div>
 
     <div class="grid">
@@ -798,6 +805,30 @@
 
   document.getElementById("titlePill").textContent = CONFIG.departures.title;
 
+
+  // ---------- HEADER: greeting + clock ----------
+  function computeGreeting(d){
+    const mins = d.getHours()*60 + d.getMinutes();
+    const t = (h,m)=>h*60+m;
+    if (mins>=t(5,30) && mins<=t(9,0))   return "Dobré ráno";
+    if (mins>=t(9,1) && mins<=t(11,30))  return "Hezké dopoledne";
+    if (mins>=t(11,31) && mins<=t(13,0)) return "Hezké poledne";
+    if (mins>=t(13,1) && mins<=t(17,0))  return "Hezké odpoledne";
+    if (mins>=t(17,1) && mins<=t(21,59)) return "Hezký večer";
+    return "Dobrou noc";
+  }
+  function startClock(){
+    const h1 = document.getElementById('greetTitle');
+    const clk = document.getElementById('clock');
+    const tick = ()=>{
+      const d = new Date();
+      if (h1) h1.textContent = computeGreeting(d);
+      if (clk) clk.textContent = d.toLocaleTimeString('cs-CZ',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+    };
+    tick();
+    setInterval(tick, 1000);
+  }
+
   // ---------- INIT ----------
   (async function init(){
     if(!getToken()) apiDlg.showModal();
@@ -811,8 +842,9 @@
     setInterval(loadNetStatus, 60*1000);
     setInterval(refreshDepartures, 60*1000);
     setInterval(loadNews, 5*60*1000);
+    startClock();
   })();
-  </script>
+</script>
 
   <!-- Heartbeat status renderer (už nahraný na serveru) -->
   <script src="ucg-heartbeat.js?v=alert1"></script>
