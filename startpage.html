@@ -68,7 +68,7 @@
     .wx-mini{display:flex;gap:12px;color:var(--muted)}
     .wx-svg{width:100%;height:170px;display:block}
     .wx-btn{padding:6px 10px}
-    .wx-axis text, text.wx-axis { font-size:10px; fill:#9bb3c6 }
+    .wx-axis text, text.wx-axis { font-size:10px; fill: var(--muted) }
     .wx-legend::before{content:"";display:inline-block;width:8px;height:8px;border-radius:999px;background:rgb(56,189,248);margin-right:6px;vertical-align:middle}
     .wx-axis line{stroke:#294050;stroke-width:1}
     .wx-ygrid line{stroke:#1a2a36;stroke-width:1;opacity:.5}
@@ -165,6 +165,11 @@
     }
     .btn:hover{ filter:brightness(1.06) }
   
+    
+    /* Light theme: unify chart axis & grid colors with muted text */
+    :root[data-theme="light"] .wx-axis line{ stroke: rgba(17,25,40,.28); }
+    :root[data-theme="light"] .wx-ygrid line{ stroke: rgba(17,25,40,.18); opacity:.75; }
+
     /* Light theme specific pills/dep tiles */
     :root[data-theme="light"] .wx-chip{
       background:rgba(255,255,255,.78);
@@ -193,10 +198,46 @@
       setInterval(setTheme, 15*60*1000);
     })();
   </script>
+
+  <script>
+    // Greeting + live clock
+    (function headerGreeting(){
+      const elGreeting = document.getElementById('greetText');
+      const elClock = document.getElementById('clock');
+      function minutesNow(){
+        const d = new Date();
+        return d.getHours()*60 + d.getMinutes();
+      }
+      function pickGreeting(m){
+        // Ranges (inclusive):
+        // 05:30–09:00 Dobré ráno
+        // 09:01–11:30 Hezké dopoledne
+        // 11:31–13:00 Hezké poledne
+        // 13:01–17:00 Hezké odpoledne
+        // 17:01–21:59 Hezký večer
+        // 22:00–05:29 Dobrou noc
+        const toMin = (h,mi)=>h*60+mi;
+        if(m>=toMin(5,30) && m<=toMin(9,0))  return "Dobré ráno";
+        if(m>=toMin(9,1) && m<=toMin(11,30)) return "Hezké dopoledne";
+        if(m>=toMin(11,31) && m<=toMin(13,0))return "Hezké poledne";
+        if(m>=toMin(13,1) && m<=toMin(17,0)) return "Hezké odpoledne";
+        if(m>=toMin(17,1) && m<=toMin(21,59))return "Hezký večer";
+        return "Dobrou noc";
+      }
+      function pad2(n){ return String(n).padStart(2,'0'); }
+      function tick(){
+        const d = new Date();
+        elGreeting.textContent = pickGreeting(minutesNow());
+        elClock.textContent = pad2(d.getHours())+":"+pad2(d.getMinutes())+":"+pad2(d.getSeconds());
+      }
+      tick();
+      setInterval(tick, 1000);
+    })();
+  </script>
 </head>
 <body>
   <div class="wrap">
-    <h1>Domácí start</h1>
+    <h1 id="hdr"><span id="greetText">Domácí start</span> · <span id="clock" class="muted">--:--:--</span></h1>
     <div class="sub">Soukromá nástěnka – počasí, MHD, dostupnost sítě a rychlé odkazy.</div>
 
     <div class="grid">
