@@ -22,12 +22,13 @@
       --bg:#0f1720; --panel:#14212b; --border:#1e2c37; --text:#dbe6ef; --muted:#9bb3c6;
       --good:#1fb974; --warn:#efb33f; --bad:#ff6b6b; --chip:#1b2b38;
       --wallpaper:none;
+      --h1-size: clamp(26px, 3.2vw, 34px);
     
       --tile:#10202b; --tile-badge:#0e1a23; --tile-border:var(--border);
     }
     html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font:16px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Arial}
     .wrap{max-width:1160px;margin:32px auto;padding:0 16px}
-    h1{margin:0 0 8px 0;font-weight:800;letter-spacing:.3px}
+    h1{margin:0 0 8px 0;font-weight:800;letter-spacing:.3px;font-size:var(--h1-size)}
     .sub{color:var(--muted);margin-bottom:22px}
     .grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px}
     .card{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:18px}
@@ -100,6 +101,7 @@
       white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
       text-align:right; opacity:.85;
     }
+  #clock{font-size:var(--h1-size);font-weight:800;letter-spacing:.3px;color:var(--text);}
   </style>
   <style>
     @media (min-width:1025px){
@@ -203,7 +205,7 @@
 </head>
 <body>
   <div class="wrap">
-    <div class="row" id="greetRow" style="align-items:baseline;gap:12px"><h1 id="greetTitle">Domácí start</h1><div id="clock" class="muted" style="font-variant-numeric:tabular-nums"></div></div>
+    <div class="row" id="greetRow" style="align-items:baseline;gap:12px"><h1 id="greetTitle">Domácí start</h1><div id="clock" style="font-variant-numeric:tabular-nums"></div></div>
     <div class="sub">Soukromá nástěnka – počasí, MHD, dostupnost sítě a rychlé odkazy.</div>
 
     <div class="grid">
