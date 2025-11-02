@@ -20,7 +20,7 @@
     if (!row){
       row = document.createElement('div');
       row.id = 'svc-'+id;
-      row.className = 'svc-row';
+      row.className = 'svc-row ucg';
       row.innerHTML = `
         <div class="svc-left"><span class="dot"></span><strong>${label}</strong></div>
         <span class="svc-hint">Načítám…</span>
@@ -48,6 +48,7 @@
     const hintEl = row.querySelector('.svc-hint');
     if (dot) dot.className = 'dot ' + state; // ok | bad | warn
     if (hintEl) hintEl.textContent = hint;
+    hintEl.title = hint;
   }
 
   // Jemný úklid: odstraní jen starý červený řádek „Gateway nedostupná“
