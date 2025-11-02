@@ -1,14 +1,29 @@
 <!doctype html>
-<html lang="cs">
+<html lang="cs" data-theme="dark">
 <head>
   <meta charset="utf-8" />
   <title>Domácí start</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="icon" href="data:," />
+
+  <script>
+    // Nastavíme téma co nejdřív (před vykreslením), aby nebyl blik
+    (function(){
+      try{
+        var h = (new Date()).getHours();
+        var mode = (h >= 6 && h < 19) ? 'light' : 'dark';
+        document.documentElement.dataset.theme = mode;
+      }catch(_){ /* ignore */ }
+    })();
+  </script>
+
   <style>
     :root{
       --bg:#0f1720; --panel:#14212b; --border:#1e2c37; --text:#dbe6ef; --muted:#9bb3c6;
       --good:#1fb974; --warn:#efb33f; --bad:#ff6b6b; --chip:#1b2b38;
+      --wallpaper:none;
+    
+      --tile:#10202b; --tile-badge:#0e1a23; --tile-border:var(--border);
     }
     html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font:16px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Arial}
     .wrap{max-width:1160px;margin:32px auto;padding:0 16px}
@@ -23,8 +38,8 @@
     .btn:hover{filter:brightness(1.08)}
     .pill{font-size:12px;border-radius:999px;padding:3px 8px;background:#113244;border:1px solid #214457;color:#a7c5d9}
     .list{margin-top:12px;display:flex;flex-direction:column;gap:10px}
-    .dep{display:flex;align-items:center;gap:10px;background:#10202b;border:1px solid var(--border);border-radius:12px;padding:10px 12px}
-    .line{min-width:44px;text-align:center;font-weight:700;background:#0e1a23;border:1px solid #22313d;border-radius:10px;padding:6px 8px}
+    .dep{display:flex;align-items:center;gap:10px;background:var(--tile);border:1px solid var(--tile-border);border-radius:12px;padding:10px 12px}
+    .line{min-width:44px;text-align:center;font-weight:700;background:var(--tile-badge);border:1px solid var(--tile-border);border-radius:10px;padding:6px 8px}
     .where{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .time{font-variant-numeric:tabular-nums}
     .delay{font-size:12px;margin-left:8px}
@@ -53,10 +68,7 @@
     .wx-mini{display:flex;gap:12px;color:var(--muted)}
     .wx-svg{width:100%;height:170px;display:block}
     .wx-btn{padding:6px 10px}
-    /* stejný vzhled pro Y (text uvnitř .wx-axis) i X (text.wx-axis) */
-    .wx-axis text,
-    text.wx-axis { font-size:10px; fill:#9bb3c6 }
-    /* konec úpravy pro stejný vzhled pro Y (text uvnitř .wx-axis) i X (text.wx-axis) */
+    .wx-axis text, text.wx-axis { font-size:10px; fill: var(--muted) }
     .wx-legend::before{content:"";display:inline-block;width:8px;height:8px;border-radius:999px;background:rgb(56,189,248);margin-right:6px;vertical-align:middle}
     .wx-axis line{stroke:#294050;stroke-width:1}
     .wx-ygrid line{stroke:#1a2a36;stroke-width:1;opacity:.5}
@@ -75,30 +87,136 @@
     .svc-hint{color:var(--muted);font-size:12px}
 
     /* --- UCG řádky: dvousloupec + pravý hint zarovnaný doprava --- */
-  #netBox .svc-row.ucg{
-  display:grid;
-  grid-template-columns: 1fr auto;  /* vlevo label, vpravo hint */
-  align-items:center;
-  gap:12px;
-  }
-  #netBox .svc-row.ucg .svc-left{
-  display:flex; align-items:center; gap:8px; min-width:0;
-  }
-  #netBox .svc-row.ucg .svc-hint{
-  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-  text-align:right; opacity:.85;
-  }
+    #netBox .svc-row.ucg{
+      display:grid;
+      grid-template-columns: 1fr auto;  /* vlevo label, vpravo hint */
+      align-items:center;
+      gap:12px;
+    }
+    #netBox .svc-row.ucg .svc-left{
+      display:flex; align-items:center; gap:8px; min-width:0;
+    }
+    #netBox .svc-row.ucg .svc-hint{
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+      text-align:right; opacity:.85;
+    }
+  </style>
+  <style>
+    @media (min-width:1025px){
+      #newsCard{ grid-column: span 2; }
+    }
+  </style>
+
+
+  <!-- iOS glass + wallpaper per theme -->
+  <style id="ios-glass">
+    :root[data-theme="dark"]{
+      --bg:#0b1220;
+      --panel:rgba(18,28,45,.46);
+      --border:rgba(255,255,255,.08);
+      --text:#e6eef7;
+      --muted:#9fb3c6;
+      --chip:rgba(255,255,255,.08);
+      --wallpaper:url('ios-glass-dark.jpg');
+      --tile:rgba(16,32,43,.95);
+      --tile-badge:rgba(14,26,35,.98);
+      --tile-border:rgba(255,255,255,.08);
+    }
+    :root[data-theme="light"]{
+      --bg:#eef3f9;
+      --panel:rgba(255,255,255,.55);
+      --border:rgba(17,25,40,.12);
+      --text:#0e1320;
+      --muted:#46586e;
+      --chip:rgba(255,255,255,.85);
+      --wallpaper:url('ios-glass-light.jpg');
+      --tile:rgba(255,255,255,.78);
+      --tile-badge:rgba(255,255,255,.92);
+      --tile-border:rgba(17,25,40,.12);
+    }
+    html,body{
+      background-color: var(--bg);
+      background-image:
+        var(--wallpaper),
+        radial-gradient(900px 900px at 15% 0%, rgba(56,189,248,.16), transparent 60%),
+        radial-gradient(900px 900px at 95% -10%, rgba(124,58,237,.14), transparent 55%),
+        radial-gradient(1100px 900px at 50% 120%, rgba(16,185,129,.12), transparent 60%);
+      background-size: cover, auto, auto, auto;
+      background-position: center, center, center, center;
+      background-attachment: fixed, fixed, fixed, fixed;
+      background-repeat: no-repeat, no-repeat, no-repeat, no-repeat;
+      color: var(--text);
+    }
+    .card{
+      background: var(--panel);
+      border:1px solid var(--border);
+      border-radius:20px;
+      padding:20px;
+      backdrop-filter: blur(16px) saturate(160%);
+      -webkit-backdrop-filter: blur(16px) saturate(160%);
+      box-shadow: 0 12px 30px rgba(0,0,0,.25);
+    }
+    .btn{
+      background: var(--chip);
+      border:1px solid var(--border);
+      color:var(--text);
+      padding:10px 14px;
+      border-radius:14px;
+    }
+    .btn:hover{ filter:brightness(1.06) }
+  
+    
+    /* Light theme: unify chart axis & grid colors with muted text */
+    :root[data-theme="light"] .wx-axis line{ stroke: rgba(17,25,40,.28); }
+    :root[data-theme="light"] .wx-ygrid line{ stroke: rgba(17,25,40,.18); opacity:.75; }
+
+    /* Light theme specific pills/dep tiles */
+    :root[data-theme="light"] .wx-chip{
+      background:rgba(255,255,255,.78);
+      border:1px solid var(--tile-border);
+      color:var(--text);
+    }
+    :root[data-theme="light"] .wx-chip.wx-warn{
+      background:rgba(255,230,180,.65);
+      border-color:rgba(250,200,120,.7);
+      color:#7a4b00;
+    }
     
   </style>
 
   <script>
-    // Greeting + live clock (runs after DOM is ready)
-    document.addEventListener('DOMContentLoaded', function(){
+    // Auto theme re-check každých 15 minut
+    (function autoTheme(){
+      function setTheme(){
+        const h = new Date().getHours();
+        const mode = (h >= 6 && h < 19) ? 'light' : 'dark';
+        if (document.documentElement.dataset.theme !== mode){
+          document.documentElement.dataset.theme = mode;
+        }
+      }
+      setTheme();
+      setInterval(setTheme, 15*60*1000);
+    })();
+  </script>
+
+  <script>
+    // Greeting + live clock
+    (function headerGreeting(){
       const elGreeting = document.getElementById('greetText');
       const elClock = document.getElementById('clock');
-      function toMin(h,m){ return h*60+m; }
-      function pickGreeting(d){
-        const m = d.getHours()*60 + d.getMinutes();
+      function minutesNow(){
+        const d = new Date();
+        return d.getHours()*60 + d.getMinutes();
+      }
+      function pickGreeting(m){
+        // Ranges (inclusive):
+        // 05:30–09:00 Dobré ráno
+        // 09:01–11:30 Hezké dopoledne
+        // 11:31–13:00 Hezké poledne
+        // 13:01–17:00 Hezké odpoledne
+        // 17:01–21:59 Hezký večer
+        // 22:00–05:29 Dobrou noc
+        const toMin = (h,mi)=>h*60+mi;
         if(m>=toMin(5,30) && m<=toMin(9,0))  return "Dobré ráno";
         if(m>=toMin(9,1) && m<=toMin(11,30)) return "Hezké dopoledne";
         if(m>=toMin(11,31) && m<=toMin(13,0))return "Hezké poledne";
@@ -109,17 +227,17 @@
       function pad2(n){ return String(n).padStart(2,'0'); }
       function tick(){
         const d = new Date();
-        if (elGreeting) elGreeting.textContent = pickGreeting(d);
-        if (elClock) elClock.textContent = pad2(d.getHours())+":"+pad2(d.getMinutes())+":"+pad2(d.getSeconds());
+        elGreeting.textContent = pickGreeting(minutesNow());
+        elClock.textContent = pad2(d.getHours())+":"+pad2(d.getMinutes())+":"+pad2(d.getSeconds());
       }
       tick();
       setInterval(tick, 1000);
-    });
+    })();
   </script>
 </head>
 <body>
   <div class="wrap">
-    <h1>Domácí start</h1>
+    <h1 id="hdr"><span id="greetText">Domácí start</span> · <span id="clock" class="muted">--:--:--</span></h1>
     <div class="sub">Soukromá nástěnka – počasí, MHD, dostupnost sítě a rychlé odkazy.</div>
 
     <div class="grid">
@@ -146,7 +264,7 @@
           <div class="spacer"></div>
           <button class="btn" id="apiBtn">Změnit API klíč</button>
         </div>
-        <div id="mhdList" class="list" aria-live="polite" style="min-height:48px;margin-top:14px">
+        <div id="mhdList" class="list" style="min-height:48px;margin-top:14px">
           <div class="muted">Načítám nejbližší odjezdy…</div>
         </div>
         <div class="foot" id="mhdFoot"></div>
@@ -155,8 +273,7 @@
       <!-- DOMÁCÍ INTERNET -->
       <section class="card" id="netCard">
         <div class="title">Domácí internet</div>
-        <div id="netBox" style="margin-top:14px" class="muted">
-<div id="ucg-heartbeat" class="svc-row">\n  <div class="svc-left"><span class="dot"></span><strong>Gateway (veřejná)</strong></div>\n  <span class="svc-hint">Načítám…</span>\n</div>\n</div>
+        <div id="netBox" style="margin-top:14px" class="muted"></div>
       </section>
 
       <!-- RYCHLÉ ODKAZY -->
@@ -171,12 +288,6 @@
         <div id="newsBox" class="list" style="margin-top:14px">
           <div class="muted">Stahuji články…</div>
         </div>
-      </section>
-
-      <!-- SLUŽBY -->
-      <section class="card" id="svcCard">
-        <div class="title">Domácí služby</div>
-        <div id="svcBox" class="list" style="margin-top:14px"></div>
       </section>
     </div>
   </div>
@@ -211,7 +322,7 @@
 
   // Síť
   CONFIG.network = {
-    gatewayUrl: 'https://192.168.1.1/', // pokud http na https stránce → bude blokováno a označíme to
+    gatewayUrl: 'https://192.168.1.1/',
     internetTargets: [
       'https://www.gstatic.com/generate_204',
       'https://1.1.1.1/cdn-cgi/trace',
@@ -227,12 +338,6 @@
     { label: "Plex", url: "http://192.168.1.50:32400/web/index.html" }
   ];
 
-  const SERVICES = [
-    { name:"Home Assistant (MM 2012)", url:"http://192.168.1.60:8123/" },
-    { name:"Nextcloud (MM 2012)",     url:"http://192.168.1.60/status.php" },
-    { name:"Plex (jiný stroj)",       url:"http://192.168.1.50:32400/web/index.html" }
-  ];
-
   // ---------- UTIL ----------
   const $ = s => document.querySelector(s);
   const fmtHM = d => `${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`;
@@ -241,7 +346,7 @@
   const delayMin = (sched, pred) => (!sched||!pred)?0:Math.round((new Date(pred)-new Date(sched))/60000);
   const iconByType = t => (t===0?"🚋":t===2?"🚆":t===3?"🚌":t===11?"🚎":"🧭");
 
-  // Pomocníci pro síť
+  // Síť helpers
   function withTimeout(ms, p){
     return new Promise((resolve, reject)=>{
       const t = setTimeout(()=>reject(new Error('timeout')), ms);
@@ -381,7 +486,7 @@
       let d=''; vals.forEach((v,i)=>{ const cx=x(i), cy=y(v); d += (i?` L ${cx} ${cy}`:`M ${cx} ${cy}`); });
 
       const yTicks=[]; for(let v=ymin; v<=ymax+1e-6; v+=step){ yTicks.push(Math.round(v)); }
-      const labels=times.map((t,i)=>({x:x(i), text: fmtHourLabel(t)}));
+      const labels=times.map((t,i)=>({x:x(i), text: (wxState.timeLabel==='h' ? String(t.getHours()).padStart(2,'0')+' h' : String(t.getHours()).padStart(2,'0')+':00') }));
 
       container.innerHTML = `
         <div class="wx-graphHead">
@@ -488,7 +593,6 @@
             <div class="wx-mini">
               <span>Oblečení: ${clothIcon} ${cloth}</span>
               ${vs ? `<span class="${vs.cls}">${vs.arrow} ${vs.text}</span>` : ''}
-              ${vsY ? `` : ``}
             </div>
           </div>
           <div id="wxChart"></div>
@@ -562,40 +666,6 @@
     nb.innerHTML = gwRow + inetRow;
   }
 
-  // ---------- SLUŽBY (HA/Nextcloud/Plex) ----------
-  async function renderServices(){
-    const box = document.getElementById("svcBox");
-
-    if (NETSTATE.gateway && !NETSTATE.gateway.ok && !NETSTATE.gateway.blocked){
-      box.innerHTML = `<div class="svc-row">
-        <div class="svc-left"><span class="dot bad"></span><strong>Gateway offline</strong></div>
-        <span class="svc-hint">Kontrola služeb přeskočena</span>
-      </div>`;
-      return;
-    }
-
-    if (!SERVICES?.length){ box.innerHTML = `<div class="muted">Žádné služby.</div>`; return; }
-
-    const rows = [];
-    for (const s of SERVICES){
-      const r = await ping(s.url, {timeout:3500});
-      let dot='bad', hint='Nedostupné', href='#', attrs='';
-      if (r.blocked){ dot='block'; hint='Blokováno v HTTPS (mixed content)'; }
-      else if (r.ok){ dot='ok'; hint=`Online · ~${r.ms} ms`; href=s.url; attrs='target="_blank" rel="noopener"'; }
-      rows.push(`<div class="svc-row">
-        <div class="svc-left"><span class="dot ${dot}"></span><a class="btn" href="${href}" ${attrs}>${s.name}</a></div>
-        <span class="svc-hint">${hint}</span>
-      </div>`);
-    }
-
-    const anyBlocked = rows.join('').includes('dot block');
-    const tip = (location.protocol === 'https:' && anyBlocked)
-      ? `<div class="svc-hint" style="margin-top:8px">Tip: zvaž reverzní proxy (Caddy/NGINX) a vystavení pod HTTPS jednou doménou.</div>`
-      : '';
-
-    box.innerHTML = rows.join('') + tip;
-  }
-
   // ---------- LINKS ----------
   function renderLinks(){
     const box = document.getElementById("linksBox");
@@ -610,7 +680,7 @@
   // ---------- NEWS ----------
   async function loadNews(){
     const feed = "https://www.irozhlas.cz/rss/irozhlas";
-    const api = new URL("https://api.rss2json.com/v1/api.json");
+    const api = new URL("https://api.rss2json.com/v1/api.json"); api.searchParams.set("t", String(Math.floor(Date.now()/60000)));
     api.searchParams.set("rss_url", feed);
     try{
       const res = await fetch(api.toString(), { cache:"no-store" });
@@ -768,18 +838,17 @@
     renderLinks();
 
     await loadNetStatus();         // gateway + internet
-    await renderServices();        // po síti hned zkus služby
 
     await loadNews();
     await refreshDepartures();
 
     setInterval(loadNetStatus, 60*1000);
-    setInterval(renderServices, 5*60*1000);
     setInterval(refreshDepartures, 60*1000);
-    setInterval(loadNews, 30*60*1000);
+    setInterval(loadNews, 5*60*1000);
   })();
   </script>
 
-<script src="/ucg-heartbeat.js"></script>
+  <!-- Heartbeat status renderer (už nahraný na serveru) -->
+  <script src="ucg-heartbeat.js?v=alert1"></script>
 </body>
 </html>
