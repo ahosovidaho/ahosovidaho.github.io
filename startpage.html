@@ -73,6 +73,22 @@
     .dot.bad{background:#ff6b6b}
     .dot.block{background:#6b7280}
     .svc-hint{color:var(--muted);font-size:12px}
+
+    /* --- UCG řádky: dvousloupec + pravý hint zarovnaný doprava --- */
+  #netBox .svc-row.ucg{
+  display:grid;
+  grid-template-columns: 1fr auto;  /* vlevo label, vpravo hint */
+  align-items:center;
+  gap:12px;
+  }
+  #netBox .svc-row.ucg .svc-left{
+  display:flex; align-items:center; gap:8px; min-width:0;
+  }
+  #netBox .svc-row.ucg .svc-hint{
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  text-align:right; opacity:.85;
+  }
+    
   </style>
 </head>
 <body>
