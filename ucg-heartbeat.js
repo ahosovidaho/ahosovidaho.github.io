@@ -1,7 +1,6 @@
 (function(){
   const WORKER = 'https://ucg-heartbeat.m88wqgcdpd.workers.dev';
 
-  // služby pod sebou ve widgetu
   const SERVICES = [
     { id:'gateway',    label:'Gateway (veřejná)', token:'blablablaBlaBlablAbLalalalablueBlaBadeeeeeBlueisthewindowandBlueistheWorldyabadabadooooo' },
     { id:'ha',         label:'Home Assistant',    token:'ha-ucg-v1' },
@@ -12,6 +11,7 @@
 
   const NETBOX_ID = 'netBox';
   const BAD_PHRASES = ['Gateway nedostupná', 'Další testy přeskočeny'];
+  const STATE = Object.create(null); // { [id]: { state:'ok|bad|warn', hint:string } }
 
   function $(sel, root=document){ return root.querySelector(sel); }
 
@@ -28,17 +28,29 @@
         <div class="svc-left"><span class="dot"></span><strong>${label}</strong></div>
         <span class="svc-hint">Načítám…</span>
       `;
-      box.appendChild(row); // přidávej dolů pod Gateway OK / Internet OK v Chromu/Brave
+      box.appendChild(row);
+    }
+
+    // obnov poslední známý stav (když stránka řádek přepsala)
+    const st = STATE[id];
+    if (st){
+      const dot = row.querySelector('.dot');
+      const hintEl = row.querySelector('.svc-hint');
+      if (dot) dot.className = 'dot ' + st.state;
+      if (hintEl) hintEl.textContent = st.hint;
     }
     return row;
   }
 
+  function ensureAll(){ SERVICES.forEach(s=>ensureRow(s.id, s.label)); }
+
   function setRow(id, state, hint){
+    STATE[id] = { state, hint };
     const row = ensureRow(id, SERVICES.find(s=>s.id===id)?.label || id);
     if(!row) return;
     const dot = row.querySelector('.dot');
     const hintEl = row.querySelector('.svc-hint');
-    if (dot) dot.className = 'dot ' + state; // ok | bad | warn
+    if (dot) dot.className = 'dot ' + state;   // ok | bad | warn
     if (hintEl) hintEl.textContent = hint;
   }
 
@@ -46,7 +58,7 @@
     const box = $('#'+NETBOX_ID);
     if(!box) return;
 
-    // zruš červené "Gateway nedostupná" a textové uzly "Další testy…"
+    // smaž staré hlášky/červené gateway řádky
     box.querySelectorAll('*').forEach(el=>{
       const t = (el.textContent||'').trim();
       if (BAD_PHRASES.includes(t)) el.remove();
@@ -70,7 +82,8 @@
 
   async function refreshOne(svc){
     try{
-      const u = new URL(WORKER + '/status'); u.searchParams.set('token', svc.token);
+      const u = new URL(WORKER + '/status');
+      u.searchParams.set('token', svc.token);
       const r = await fetch(u.toString(), { cache:'no-store' });
       const j = await r.json();
       if (j && j.online){
@@ -87,23 +100,23 @@
     }
   }
 
-  function attachObserver(){
-    const box = $('#'+NETBOX_ID);
-    if(!box) return;
-    const ro = new MutationObserver(() => { SERVICES.forEach(s=>ensureRow(s.id, s.label)); cleanupLegacy(); });
-    ro.observe(box, { childList:true, subtree:true, characterData:true });
+  function refreshAll(){ SERVICES.forEach(refreshOne); }
+
+  function attachObservers(){
+    // 1) sleduj celé body -> když se #netBox přepíše/obnoví, hned vrať naše řádky a poslední stav
+    const bodyObs = new MutationObserver(()=>{ ensureAll(); });
+    bodyObs.observe(document.body, { childList:true, subtree:true });
+
+    // 2) pravidelná „pojistka“ – každé 2 s znovu zajisti řádky + stav
+    setInterval(ensureAll, 2000);
   }
 
   function init(){
-    SERVICES.forEach(s=>ensureRow(s.id, s.label));
-    SERVICES.forEach(refreshOne);
-    setInterval(()=>SERVICES.forEach(refreshOne), 60_000);
-    if (document.readyState === 'loading'){
-      document.addEventListener('DOMContentLoaded', attachObserver, { once:true });
-    } else {
-      attachObserver();
-    }
-    [100, 400, 1200].forEach(d => setTimeout(cleanupLegacy, d));
+    ensureAll();           // hned přidej řádky
+    refreshAll();          // načti stav
+    setInterval(refreshAll, 60_000); // aktualizuj každou minutu
+    attachObservers();     // hlídej přepisy stránky
+    [200, 800, 2000].forEach(d => setTimeout(()=>{ ensureAll(); cleanupLegacy(); }, d));
   }
 
   init();
