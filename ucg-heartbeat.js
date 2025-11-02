@@ -2,24 +2,21 @@
   const WORKER = 'https://ucg-heartbeat.m88wqgcdpd.workers.dev';
 
   const SERVICES = [
-    { id:'gateway',    label:'Gateway (veřejná)', token:'blablablaBlaBlablAbLalalalablueBlaBadeeeeeBlueisthewindowandBlueistheWorldyabadabadooooo' },
-    { id:'ha',         label:'Home Assistant',    token:'ha-ucg-v1' },
-    { id:'nextcloud',  label:'Nextcloud',         token:'nc-ucg-v1' },
-    { id:'plex',       label:'Plex server',       token:'plex-ucg-v1' },
-    { id:'portainer',  label:'Portainer (Docker)',token:'portainer-ucg-v1' },
+    { id:'gateway',   label:'Gateway (veřejná)',  token:'blablablaBlaBlablAbLalalalablueBlaBadeeeeeBlueisthewindowandBlueistheWorldyabadabadooooo' },
+    { id:'ha',        label:'Home Assistant',     token:'ha-ucg-v1' },
+    { id:'nextcloud', label:'Nextcloud',          token:'nc-ucg-v1' },
+    { id:'plex',      label:'Plex server',        token:'plex-ucg-v1' },
+    { id:'portainer', label:'Portainer (Docker)', token:'portainer-ucg-v1' },
   ];
 
   const NETBOX_ID = 'netBox';
-  const BAD_PHRASES = ['Gateway nedostupná', 'Další testy přeskočeny'];
-  const STATE = Object.create(null); // { [id]: { state:'ok|bad|warn', hint:string } }
+  const STORE = Object.create(null); // poslední známé stavy {id:{state,hint}}
 
-  function $(sel, root=document){ return root.querySelector(sel); }
+  function box(){ return document.getElementById(NETBOX_ID); }
 
   function ensureRow(id, label){
-    const box = $('#'+NETBOX_ID);
-    if(!box) return null;
-
-    let row = $('#svc-'+id);
+    const b = box(); if(!b) return null;
+    let row = document.getElementById('svc-'+id);
     if (!row){
       row = document.createElement('div');
       row.id = 'svc-'+id;
@@ -28,11 +25,10 @@
         <div class="svc-left"><span class="dot"></span><strong>${label}</strong></div>
         <span class="svc-hint">Načítám…</span>
       `;
-      box.appendChild(row);
+      b.appendChild(row);
     }
-
-    // obnov poslední známý stav (když stránka řádek přepsala)
-    const st = STATE[id];
+    // Obnov poslední známý stav (když nás někdo přepsal)
+    const st = STORE[id];
     if (st){
       const dot = row.querySelector('.dot');
       const hintEl = row.querySelector('.svc-hint');
@@ -42,41 +38,32 @@
     return row;
   }
 
-  function ensureAll(){ SERVICES.forEach(s=>ensureRow(s.id, s.label)); }
+  function ensureAll(){ SERVICES.forEach(s => ensureRow(s.id, s.label)); }
 
   function setRow(id, state, hint){
-    STATE[id] = { state, hint };
+    STORE[id] = { state, hint };
     const row = ensureRow(id, SERVICES.find(s=>s.id===id)?.label || id);
-    if(!row) return;
+    if (!row) return;
     const dot = row.querySelector('.dot');
     const hintEl = row.querySelector('.svc-hint');
-    if (dot) dot.className = 'dot ' + state;   // ok | bad | warn
+    if (dot) dot.className = 'dot ' + state; // ok | bad | warn
     if (hintEl) hintEl.textContent = hint;
   }
 
+  // Jemný úklid: odstraní jen starý červený řádek „Gateway nedostupná“
+  // a samostatný element s textem „Další testy přeskočeny.“
   function cleanupLegacy(){
-    const box = $('#'+NETBOX_ID);
-    if(!box) return;
-
-    // smaž staré hlášky/červené gateway řádky
-    box.querySelectorAll('*').forEach(el=>{
-      const t = (el.textContent||'').trim();
-      if (BAD_PHRASES.includes(t)) el.remove();
+    const b = box(); if(!b) return;
+    b.querySelectorAll('.svc-row').forEach(r=>{
+      if (r.id && r.id.startsWith('svc-')) return; // naše nechej
+      const strong = r.querySelector('.svc-left strong');
+      const dotBad = r.querySelector('.dot.bad');
+      if (dotBad && strong && /gateway/i.test(strong.textContent||'')) r.remove();
     });
-    const walker = document.createTreeWalker(box, NodeFilter.SHOW_TEXT, null);
-    const kill = [];
-    for (let n=walker.nextNode(); n; n=walker.nextNode()){
-      const txt = n.textContent||'';
-      if (BAD_PHRASES.some(p => txt.includes(p))) kill.push(n);
-    }
-    kill.forEach(n=>{
-      const cleaned = (n.textContent||'')
-        .replace('Další testy přeskočeny.', '')
-        .replace('Další testy přeskočeny', '')
-        .replace('Gateway nedostupná', '')
-        .trim();
-      if (cleaned) n.textContent = cleaned;
-      else if (n.parentNode) n.parentNode.removeChild(n);
+    Array.from(b.children).forEach(el=>{
+      if (el.id && el.id.startsWith('svc-')) return;
+      const t = (el.textContent||'').trim();
+      if (t === 'Další testy přeskočeny.' || t === 'Další testy přeskočeny') el.remove();
     });
   }
 
@@ -88,36 +75,45 @@
       const j = await r.json();
       if (j && j.online){
         const t = j.last_seen ? new Date(j.last_seen) : null;
-        const when = t ? t.toLocaleTimeString('cs-CZ',{hour:'2-digit',minute:'2-digit',second:'2-digit'}) : 'n/a';
+        const when = t ? t.toLocaleTimeString('cs-CZ', {hour:'2-digit', minute:'2-digit', second:'2-digit'}) : 'n/a';
         setRow(svc.id, 'ok', `online · poslední beat ${when} · age ${j.age_sec}s`);
       } else {
         setRow(svc.id, 'bad', 'offline · žádný beat ≤ 90 s');
       }
     } catch(e){
       setRow(svc.id, 'warn', 'heartbeat nedostupný');
-    } finally {
-      cleanupLegacy();
     }
   }
 
   function refreshAll(){ SERVICES.forEach(refreshOne); }
 
-  function attachObservers(){
-    // 1) sleduj celé body -> když se #netBox přepíše/obnoví, hned vrať naše řádky a poslední stav
-    const bodyObs = new MutationObserver(()=>{ ensureAll(); });
-    bodyObs.observe(document.body, { childList:true, subtree:true });
+  function start(){
+    ensureAll();
+    cleanupLegacy();
+    refreshAll();
+    // aktualizace jednou za minutu
+    setInterval(refreshAll, 60_000);
 
-    // 2) pravidelná „pojistka“ – každé 2 s znovu zajisti řádky + stav
-    setInterval(ensureAll, 2000);
+    // Sleduj jen #netBox a debouncuj – žádný subtree/characterData
+    const b = box();
+    if (b){
+      let scheduled = false;
+      const obs = new MutationObserver(()=>{
+        if (scheduled) return;
+        scheduled = true;
+        setTimeout(()=>{
+          scheduled = false;
+          ensureAll();
+          cleanupLegacy();
+        }, 80);
+      });
+      obs.observe(b, { childList:true });
+    }
   }
 
-  function init(){
-    ensureAll();           // hned přidej řádky
-    refreshAll();          // načti stav
-    setInterval(refreshAll, 60_000); // aktualizuj každou minutu
-    attachObservers();     // hlídej přepisy stránky
-    [200, 800, 2000].forEach(d => setTimeout(()=>{ ensureAll(); cleanupLegacy(); }, d));
+  if (document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', start, { once:true });
+  } else {
+    start();
   }
-
-  init();
 })();
