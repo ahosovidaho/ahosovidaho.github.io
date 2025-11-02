@@ -5,8 +5,10 @@
   const NETBOX_ID = 'netBox';
   const ROW_ID = 'ucg-heartbeat';
 
+  function $(sel, root=document){ return root.querySelector(sel); }
+
   function ensureRow(){
-    const box = document.getElementById(NETBOX_ID);
+    const box = $('#'+NETBOX_ID);
     if(!box) return null;
 
     let row = document.getElementById(ROW_ID);
@@ -32,18 +34,29 @@
     if (hintEl) hintEl.textContent = hint;
   }
 
-  // jemný úklid starého řádku „Gateway nedostupná“
+  // Uklidíme starý "Gateway nedostupná" a "Další testy přeskočeny." (ponecháme zelené řádky)
   function cleanupLegacy(){
-    const box = document.getElementById(NETBOX_ID);
+    const box = $('#'+NETBOX_ID);
     if(!box) return;
-    const rows = Array.from(box.querySelectorAll('.svc-row'));
-    for (const r of rows){
-      const txt = r.textContent || '';
-      if (txt.includes('Gateway nedostupná') || txt.includes('Další testy přeskočeny')){
-        // neschovávej náš heartbeat řádek
-        if (r.id !== ROW_ID) r.remove();
+
+    // smaž červený gateway řádek (kromě našeho)
+    box.querySelectorAll('.svc-row').forEach(r=>{
+      if (r.id === ROW_ID) return;
+      const strong = r.querySelector('.svc-left strong');
+      const dotBad = r.querySelector('.dot.bad');
+      if (strong && /gateway/i.test((strong.textContent||'')) && dotBad){
+        r.remove();
       }
-    }
+    });
+
+    // smaž i samostatnou hlášku "Další testy přeskočeny."
+    [...box.querySelectorAll('.svc-row, .small, span, div')].forEach(el=>{
+      if (el.closest('#'+ROW_ID)) return;
+      const t = (el.textContent||'').trim();
+      if (t === 'Další testy přeskočeny.' || t.includes('Další testy přeskočeny')){
+        el.remove();
+      }
+    });
   }
 
   async function refresh(){
@@ -62,25 +75,28 @@
     } catch(e){
       setRow('warn', 'heartbeat nedostupný');
     } finally {
-      // po každém běhu ukliď starý stav ve všech prohlížečích (Firefox included)
+      // po každém běhu vyčisti rušivé řádky (Firefox/Safari)
       cleanupLegacy();
     }
   }
 
-  // 1) hned teď
-  ensureRow();
-  refresh();
+  function attachObserver(){
+    const box = $('#'+NETBOX_ID);
+    if(!box) return;
+    // pozoruj přepisování boxu – kdykoli se změní, vrátíme náš řádek a uklidíme
+    const ro = new MutationObserver(() => { ensureRow(); cleanupLegacy(); });
+    ro.observe(box, { childList:true, subtree:true, characterData:true });
+  }
 
-  // 2) každou minutu
-  setInterval(refresh, 60_000);
+  function init(){
+    ensureRow(); cleanupLegacy(); refresh();
+    setInterval(refresh, 60_000);
+    if (document.readyState === 'loading'){
+      document.addEventListener('DOMContentLoaded', attachObserver, {once:true});
+    } else {
+      attachObserver();
+    }
+  }
 
-  // 3) když stránka přepíše #netBox, znovu vlož náš řádek a ukliď
-  const ro = new MutationObserver(() => {
-    ensureRow();
-    cleanupLegacy();
-  });
-  window.addEventListener('DOMContentLoaded', () => {
-    const box = document.getElementById(NETBOX_ID);
-    if (box) ro.observe(box, { childList:true, subtree:false });
-  });
+  init();
 })();
