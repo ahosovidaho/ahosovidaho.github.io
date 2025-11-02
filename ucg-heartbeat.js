@@ -18,7 +18,6 @@
         <div class="svc-left"><span class="dot"></span><strong>Gateway (veřejná)</strong></div>
         <span class="svc-hint">Načítám…</span>
       `;
-      // vlož na začátek boxu (ať je první)
       box.insertBefore(row, box.firstChild || null);
     }
     return row;
@@ -31,6 +30,20 @@
     const hintEl = row.querySelector('.svc-hint');
     if (dot) dot.className = 'dot ' + state; // ok | bad | warn
     if (hintEl) hintEl.textContent = hint;
+  }
+
+  // jemný úklid starého řádku „Gateway nedostupná“
+  function cleanupLegacy(){
+    const box = document.getElementById(NETBOX_ID);
+    if(!box) return;
+    const rows = Array.from(box.querySelectorAll('.svc-row'));
+    for (const r of rows){
+      const txt = r.textContent || '';
+      if (txt.includes('Gateway nedostupná') || txt.includes('Další testy přeskočeny')){
+        // neschovávej náš heartbeat řádek
+        if (r.id !== ROW_ID) r.remove();
+      }
+    }
   }
 
   async function refresh(){
@@ -48,6 +61,9 @@
       }
     } catch(e){
       setRow('warn', 'heartbeat nedostupný');
+    } finally {
+      // po každém běhu ukliď starý stav ve všech prohlížečích (Firefox included)
+      cleanupLegacy();
     }
   }
 
@@ -58,9 +74,10 @@
   // 2) každou minutu
   setInterval(refresh, 60_000);
 
-  // 3) kdykoli stránka přepíše #netBox, znovu ten náš řádek vložíme nahoru
+  // 3) když stránka přepíše #netBox, znovu vlož náš řádek a ukliď
   const ro = new MutationObserver(() => {
-    ensureRow(); // zajistí přítomnost řádku i po přepsání
+    ensureRow();
+    cleanupLegacy();
   });
   window.addEventListener('DOMContentLoaded', () => {
     const box = document.getElementById(NETBOX_ID);
