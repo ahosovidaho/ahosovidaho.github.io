@@ -1,6 +1,9 @@
 (function(){
   const WORKER = 'https://ucg-heartbeat.m88wqgcdpd.workers.dev';
 
+  // Po kolika minutách offline se má zobrazit upozornění (a žlutá tečka)
+  const OFFLINE_WARN_MIN = 5;
+
   const SERVICES = [
     { id:'gateway',   label:'Gateway (veřejná)',  token:'blablablaBlaBlablAbLalalalablueBlaBadeeeeeBlueisthewindowandBlueistheWorldyabadabadooooo' },
     { id:'ha',        label:'Home Assistant',     token:'ha-ucg-v1' },
@@ -11,6 +14,7 @@
 
   const NETBOX_ID = 'netBox';
   const STORE = Object.create(null); // poslední známé stavy {id:{state,hint}}
+  let ALERTS = [];                   // naplní se službami offline > OFFLINE_WARN_MIN
 
   function box(){ return document.getElementById(NETBOX_ID); }
 
@@ -27,17 +31,16 @@
       `;
       b.appendChild(row);
     }
-    // Obnov poslední známý stav (když nás někdo přepsal)
+    // Obnov poslední známý stav (pokud nás někdo přepsal)
     const st = STORE[id];
     if (st){
       const dot = row.querySelector('.dot');
       const hintEl = row.querySelector('.svc-hint');
       if (dot) dot.className = 'dot ' + st.state;
-      if (hintEl) hintEl.textContent = st.hint;
+      if (hintEl) { hintEl.textContent = st.hint; hintEl.title = st.hint; }
     }
     return row;
   }
-
   function ensureAll(){ SERVICES.forEach(s => ensureRow(s.id, s.label)); }
 
   function setRow(id, state, hint){
@@ -47,12 +50,10 @@
     const dot = row.querySelector('.dot');
     const hintEl = row.querySelector('.svc-hint');
     if (dot) dot.className = 'dot ' + state; // ok | bad | warn
-    if (hintEl) hintEl.textContent = hint;
-    hintEl.title = hint;
+    if (hintEl) { hintEl.textContent = hint; hintEl.title = hint; }
   }
 
-  // Jemný úklid: odstraní jen starý červený řádek „Gateway nedostupná“
-  // a samostatný element s textem „Další testy přeskočeny.“
+  // Jemný úklid starých gateway řádků (jen když tam opravdu jsou)
   function cleanupLegacy(){
     const b = box(); if(!b) return;
     b.querySelectorAll('.svc-row').forEach(r=>{
@@ -68,34 +69,70 @@
     });
   }
 
+  // Upozornění nahoře v boxu (oranžový text) – sumarizace delších výpadků
+  function updateAlertBanner(){
+    const b = box(); if(!b) return;
+    let el = document.getElementById('ucg-alert');
+    if (!el){
+      el = document.createElement('div');
+      el.id = 'ucg-alert';
+      el.className = 'svc-hint';
+      el.style.cssText = 'margin-top:6px;text-align:right;color:var(--warn)';
+      // dej na začátek boxu (pod případné "Gateway OK / Internet OK")
+      b.prepend(el);
+    }
+    if (ALERTS.length){
+      el.textContent = 'Upozornění: ' + ALERTS.join(' · ');
+      el.style.display = '';
+    } else {
+      el.textContent = '';
+      el.style.display = 'none';
+    }
+  }
+
   async function refreshOne(svc){
     try{
       const u = new URL(WORKER + '/status');
       u.searchParams.set('token', svc.token);
       const r = await fetch(u.toString(), { cache:'no-store' });
       const j = await r.json();
+
       if (j && j.online){
         const t = j.last_seen ? new Date(j.last_seen) : null;
         const when = t ? t.toLocaleTimeString('cs-CZ', {hour:'2-digit', minute:'2-digit', second:'2-digit'}) : 'n/a';
         setRow(svc.id, 'ok', `online · poslední beat ${when} · age ${j.age_sec}s`);
       } else {
-        setRow(svc.id, 'bad', 'offline · žádný beat ≤ 90 s');
+        // offline – pokud víme stáří posledního beatu, ukaž minuty/sekundy
+        const age = (j && typeof j.age_sec === 'number') ? j.age_sec : null;
+        const mins = age!=null ? Math.floor(age/60) : null;
+        const hint = (mins!=null)
+          ? (mins > 0 ? `offline · ${mins} min` : `offline · ${age}s`)
+          : 'offline';
+        const warn = mins!=null && mins >= OFFLINE_WARN_MIN;
+        setRow(svc.id, warn ? 'warn' : 'bad', hint);
+        if (warn){
+          const label = SERVICES.find(s=>s.id===svc.id)?.label || svc.id;
+          ALERTS.push(`${label} ${mins} min`);
+        }
       }
-    } catch(e){
+    } catch(_e){
       setRow(svc.id, 'warn', 'heartbeat nedostupný');
     }
   }
 
-  function refreshAll(){ SERVICES.forEach(refreshOne); }
+  async function refreshAll(){
+    ALERTS = [];
+    await Promise.all(SERVICES.map(refreshOne));
+    updateAlertBanner();
+  }
 
   function start(){
     ensureAll();
     cleanupLegacy();
-    refreshAll();
-    // aktualizace jednou za minutu
+    refreshAll();                 // první načtení
     setInterval(refreshAll, 60_000);
 
-    // Sleduj jen #netBox a debouncuj – žádný subtree/characterData
+    // Sleduj jen #netBox a po změně jemně obnov řádky + banner
     const b = box();
     if (b){
       let scheduled = false;
@@ -106,6 +143,7 @@
           scheduled = false;
           ensureAll();
           cleanupLegacy();
+          updateAlertBanner();
         }, 80);
       });
       obs.observe(b, { childList:true });
