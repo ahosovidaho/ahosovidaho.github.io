@@ -647,50 +647,54 @@
 
   
   // ---------- NEWS ----------
+// ---------- NEWS ----------
 async function loadNews(){
   const feed = "https://www.irozhlas.cz/rss/irozhlas";
 
-  // 1) tvoje původní proxy (když zrovna funguje / má CORS)
-  const mainProxy = "https://ucg-heartbeat.m88wqgcdpd.workers.dev/rss?url="
+  const primaryUrl =
+    "https://ucg-heartbeat.m88wqgcdpd.workers.dev/rss?url="
     + encodeURIComponent(feed)
     + "&t=" + Date.now();
 
-  // 2) fallback veřejná proxy – pro případ, že CF worker vrátí chybu nebo nemá CORS
-  const fallback = "https://api.allorigins.win/raw?url=" + encodeURIComponent(feed);
+  const fallbackUrl =
+    "https://api.allorigins.win/raw?url="
+    + encodeURIComponent(feed);
 
-  async function fetchXml(url) {
+  async function fetchXml(url, label){
     const res = await fetch(url, { cache: "no-store" });
-    if (!res.ok) throw new Error("RSS proxy vrací " + res.status);
+    if (!res.ok) throw new Error(label + " vrací " + res.status);
     return res.text();
   }
 
+  async function parseItems(xml) {
+    const doc = new DOMParser().parseFromString(xml, "application/xml");
+    const items = Array.from(doc.querySelectorAll("item")).map(it => ({
+      title: it.querySelector("title")?.textContent?.trim() || "Bez názvu",
+      link: it.querySelector("link")?.textContent?.trim() || "#",
+      pubDate: it.querySelector("pubDate")?.textContent?.trim() || ""
+    }));
+    return items;
+  }
+
+  const newsBox = document.getElementById("newsBox");
+
   try {
-    let xml;
-    try {
-      // nejdřív zkus tvůj worker
-      xml = await fetchXml(mainProxy);
-    } catch (e) {
-      // když to spadne (CORS / 429 / cokoliv), zkus fallback
-      xml = await fetchXml(fallback);
+    // 1) zkus primární (tvůj CF worker)
+    let xml = await fetchXml(primaryUrl, "RSS proxy");
+    let items = await parseItems(xml);
+
+    // když worker odpověděl, ale ne s RSS → zkus fallback
+    if (!items.length) {
+      xml = await fetchXml(fallbackUrl, "Fallback proxy");
+      items = await parseItems(xml);
     }
 
-    const doc = new DOMParser().parseFromString(xml, "application/xml");
-    const items = Array.from(doc.querySelectorAll("item"))
-      .slice(0, 10)
-      .map(it => ({
-        title: it.querySelector("title")?.textContent?.trim() || "Bez názvu",
-        link: it.querySelector("link")?.textContent?.trim() || "#",
-        pubDate: it.querySelector("pubDate")?.textContent?.trim() || ""
-      }));
-
-    const newsBox = document.getElementById("newsBox");
-
     if (!items.length) {
-      newsBox.innerHTML = `<div class="error">RSS je prázdné.</div>`;
+      newsBox.innerHTML = `<div class="error">RSS je prázdné (ani primary, ani fallback nic nevrátily).</div>`;
       return;
     }
 
-    newsBox.innerHTML = items.map(it => {
+    newsBox.innerHTML = items.slice(0, 10).map(it => {
       const tm = it.pubDate
         ? new Date(it.pubDate).toLocaleTimeString("cs-CZ", { hour: "2-digit", minute: "2-digit" })
         : "";
@@ -704,7 +708,7 @@ async function loadNews(){
       `;
     }).join("");
   } catch (e) {
-    document.getElementById("newsBox").innerHTML =
+    newsBox.innerHTML =
       `<div class="error">${(e && e.message) ? e.message : e}</div>
        <div class="muted" style="margin-top:6px">
          Zdroj: <a class="btn" href="${feed}" target="_blank" rel="noopener">RSS iRozhlas</a>
@@ -712,6 +716,7 @@ async function loadNews(){
   }
 }
 
+    
   // ---------- MHD ----------
   let currentDir = "A"; // A = Koh-i-noor, B = Kubánské náměstí
 
