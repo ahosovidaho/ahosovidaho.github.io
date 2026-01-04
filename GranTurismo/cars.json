@@ -573,6 +573,14 @@
   },
   {
     "brand": "Ferrari",
+    "model": "Ferrari 296 GTB '22"
+  },
+  {
+    "brand": "Ferrari",
+    "model": "Ferrari 296 GT3 '23"
+  },
+  {
+    "brand": "Ferrari",
     "model": "Ferrari 250 GT Berlinetta passo corto '61"
   },
   {
@@ -666,6 +674,10 @@
   {
     "brand": "Ferrari",
     "model": "Ferrari Vision Gran Turismo"
+  },
+  {
+    "brand": "FIAT",
+    "model": "FIAT Panda 30 CL '85"
   },
   {
     "brand": "FIAT",
@@ -794,6 +806,10 @@
   {
     "brand": "Gran Turismo",
     "model": "Gran Turismo F3500-A"
+  },
+  {
+    "brand": "Gran Turismo",
+    "model": "Gran Turismo F3500-B"
   },
   {
     "brand": "Gran Turismo",
@@ -1324,6 +1340,10 @@
     "model": "Mercedes-Benz W 196 R '55"
   },
   {
+    "brand": "Mine's",
+    "model": "Mine's BNR34 GT-R N1 base"
+  },
+  {
     "brand": "MINI",
     "model": "MINI Clubman Vision Gran Turismo"
   },
@@ -1334,6 +1354,10 @@
   {
     "brand": "MINI",
     "model": "MINI Cooper S '05"
+  },
+  {
+    "brand": "Mitsubishi",
+    "model": "FTO GP Version R '97"
   },
   {
     "brand": "Mitsubishi",
@@ -1628,6 +1652,10 @@
     "model": "Pontiac GTO 'The Judge' '69"
   },
   {
+    "brand": "Polestar",
+    "model": "Polestar 5 Performance '26"
+  },
+  {
     "brand": "Porsche",
     "model": "Porsche 356 A/1500 GS Carrera '56"
   },
@@ -1754,6 +1782,10 @@
   {
     "brand": "Renault",
     "model": "Renault Avantime 3.0 V6 24V '02"
+  },
+  {
+    "brand": "Renault",
+    "model": "Renault Espace F1 '95"
   },
   {
     "brand": "Renault",
