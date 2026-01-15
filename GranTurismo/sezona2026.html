@@ -713,7 +713,9 @@ let carsReadyResolve;
 const carsReady = new Promise(res=>carsReadyResolve=res);
 
 // --- Sezóny ---
-// (dupl. odstraněno — currentSeason/ FORCE_SEASON definováno výše)
+let currentSeason = null;
+// Když chceš sezónu vynutit ručně, nastav číslo (např. 2025). Jinak nech null = auto.
+const FORCE_SEASON = null;
 
 /* === Helpers === */
 const $ = s=>document.querySelector(s);
@@ -985,6 +987,7 @@ function renderDriverSeasonCompare(name){
 
 function renderAll(){
   populateSeasonSwitch();
+  populateSeasonSwitch();
   renderSeasonComparator();
   renderNextRace();          // (ten necháváme napříč sezónami – jde o nejbližší závod)
   renderResultsTable();
@@ -1239,7 +1242,7 @@ function renderStandingsAndChart(){
 
   // META: doplněk k nadpisu „Pořadí závodníků“
   const X = completed.length;                                   // odjeté závody
-  const Y = racesCache.filter(r=>!isCompletedRace(r)).length;   // zbývající naplánované
+  const Y = racesCache.filter(r=> inActiveSeason(r) && !isCompletedRace(r)).length;   // zbývající naplánované
   const meta = document.getElementById('standingsMeta');
   if (meta) meta.textContent = `po ${X} odjetých závodech • zbývá ${Y} naplánovaných`;
 
@@ -1403,7 +1406,7 @@ function simulateTitleOddsBT(trials = 2000, lastN = 5, decay = 0.85) {
 function renderTitleMath(){
   // 1) Completed / planned / remaining — **only active season**
   const allActive = (racesCache||[]).filter(inActiveSeason);
-  const completed = allActive.filter(isCompletedRace)
+  const completed = allActive.filter(r=> inActiveSeason(r) && isCompletedRace(r))
     .sort((a,b)=> new Date(a.datum||a.date||0) - new Date(b.datum||b.date||0));
   const plannedTotal = allActive.length;
   const remaining = Math.max(0, plannedTotal - completed.length);
@@ -2215,7 +2218,7 @@ async function installGt7CarDatalist() {
 
 /* === Car-based stats === */
 function renderCarStats(){
-  const completed = racesCache.filter(isCompletedRace);
+  const completed = racesCache.filter(r=> inActiveSeason(r) && isCompletedRace(r));
   const brandWins = new Map();               // brand -> wins
   const carPoints = new Map();               // "Brand — Model" -> {points, starts}
   const perDriverCarPoints = {};             // driver -> Map(car -> {points, starts})
