@@ -1,0 +1,403 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Za nezávislou Českou televizi</title>
+  <meta name="description" content="Společné redaktorské prohlášení a podpisy." />
+  <style>
+    :root{
+      --bg: #0b0f1a;
+      --card: rgba(255,255,255,0.08);
+      --card2: rgba(255,255,255,0.06);
+      --text: rgba(255,255,255,0.92);
+      --muted: rgba(255,255,255,0.70);
+      --line: rgba(255,255,255,0.12);
+      --red: #E3001B;   /* ČT-ish */
+      --blue:#005BBB;   /* CZ blue */
+      --shadow: 0 20px 60px rgba(0,0,0,0.45);
+      --radius: 22px;
+      --radius2: 16px;
+      --max: 980px;
+      --font: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+    }
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      font-family: var(--font);
+      color: var(--text);
+      background:
+        radial-gradient(900px 500px at 20% 0%, rgba(227,0,27,0.22), transparent 60%),
+        radial-gradient(900px 500px at 80% 0%, rgba(0,91,187,0.22), transparent 60%),
+        radial-gradient(900px 700px at 50% 120%, rgba(255,255,255,0.06), transparent 60%),
+        var(--bg);
+      min-height:100vh;
+    }
+    a{ color: inherit; }
+    .wrap{ max-width: var(--max); margin:0 auto; padding: 28px 18px 70px; }
+    header{
+      display:flex; align-items:center; justify-content:space-between;
+      padding: 6px 4px 18px;
+    }
+    .brand{
+      display:flex; align-items:center; gap:12px;
+      font-weight:650; letter-spacing:0.2px;
+    }
+    .dot{
+      width:12px; height:12px; border-radius:50%;
+      background: linear-gradient(135deg, var(--red), var(--blue));
+      box-shadow: 0 0 0 4px rgba(255,255,255,0.06);
+    }
+    .pill{
+      font-size:12px; color:var(--muted);
+      padding: 8px 10px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(255,255,255,0.03);
+      backdrop-filter: blur(14px);
+    }
+
+    .hero{
+      padding: 22px 0 12px;
+    }
+    h1{
+      margin: 10px 0 10px;
+      font-size: clamp(28px, 4.2vw, 46px);
+      line-height: 1.05;
+      letter-spacing: -0.02em;
+    }
+    .sub{
+      margin: 0;
+      font-size: 16px;
+      color: var(--muted);
+      max-width: 72ch;
+      line-height: 1.55;
+    }
+
+    .grid{
+      margin-top: 22px;
+      display:grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: 16px;
+    }
+    @media (max-width: 920px){
+      .grid{ grid-template-columns: 1fr; }
+    }
+
+    .card{
+      background: linear-gradient(180deg, var(--card), var(--card2));
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      backdrop-filter: blur(18px);
+    }
+    .card .head{
+      padding: 18px 18px 0;
+    }
+    .card h2{
+      margin:0;
+      font-size: 16px;
+      letter-spacing: 0.2px;
+      color: rgba(255,255,255,0.86);
+    }
+    .card .body{
+      padding: 16px 18px 18px;
+      color: var(--muted);
+      line-height: 1.6;
+      font-size: 14px;
+    }
+
+    .statement{
+      white-space: pre-wrap;
+      font-size: 14px;
+      color: rgba(255,255,255,0.78);
+    }
+    .accent-line{
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(227,0,27,0.65), rgba(0,91,187,0.65), transparent);
+      margin: 14px 0 0;
+    }
+
+    form{
+      display:grid;
+      gap: 10px;
+      margin-top: 6px;
+    }
+    .row{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    @media (max-width: 520px){
+      .row{ grid-template-columns: 1fr; }
+    }
+    label{
+      display:block;
+      font-size: 12px;
+      color: rgba(255,255,255,0.75);
+      margin: 0 0 6px;
+    }
+    input{
+      width:100%;
+      padding: 12px 12px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.16);
+      background: rgba(0,0,0,0.25);
+      color: var(--text);
+      outline: none;
+    }
+    input:focus{
+      border-color: rgba(0,91,187,0.7);
+      box-shadow: 0 0 0 4px rgba(0,91,187,0.18);
+    }
+    .checkbox{
+      display:flex; gap:10px; align-items:flex-start;
+      padding: 10px 10px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.03);
+    }
+    .checkbox input{ width:auto; margin-top: 3px; }
+    .checkbox p{ margin:0; font-size: 12px; color: rgba(255,255,255,0.70); line-height:1.45; }
+
+    .actions{
+      display:flex; gap: 10px; align-items:center; justify-content:space-between;
+      margin-top: 6px;
+      flex-wrap: wrap;
+    }
+    button{
+      cursor:pointer;
+      border: 0;
+      border-radius: 999px;
+      padding: 12px 16px;
+      color: white;
+      font-weight: 650;
+      letter-spacing: 0.2px;
+      background: linear-gradient(135deg, var(--red), var(--blue));
+      box-shadow: 0 14px 30px rgba(0,0,0,0.35);
+    }
+    button:disabled{
+      opacity: 0.55;
+      cursor:not-allowed;
+    }
+    .status{
+      font-size: 12px;
+      color: rgba(255,255,255,0.75);
+    }
+
+    .list{
+      max-height: 520px;
+      overflow:auto;
+      border-top: 1px solid var(--line);
+    }
+    .item{
+      display:flex; justify-content:space-between; gap: 12px;
+      padding: 12px 18px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .name{
+      font-weight: 650;
+      color: rgba(255,255,255,0.90);
+    }
+    .date{
+      font-size: 12px;
+      color: rgba(255,255,255,0.62);
+      white-space: nowrap;
+    }
+    .foot{
+      margin-top: 16px;
+      color: rgba(255,255,255,0.60);
+      font-size: 12px;
+      line-height: 1.55;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <header>
+      <div class="brand">
+        <div class="dot" aria-hidden="true"></div>
+        <div>Společné prohlášení</div>
+      </div>
+      <div class="pill">Veřejně se zobrazuje jen jméno a příjmení</div>
+    </header>
+
+    <section class="hero">
+      <h1>Nezávislá veřejná služba potřebuje nezávislé financování.</h1>
+      <p class="sub">
+        Tohle je společné redaktorské prohlášení a seznam podpisů na podporu zachování nezávislosti veřejnoprávního média.
+      </p>
+    </section>
+
+    <div class="grid">
+      <!-- Prohlášení -->
+      <section class="card">
+        <div class="head">
+          <h2>Prohlášení</h2>
+          <div class="accent-line"></div>
+        </div>
+        <div class="body">
+          <div class="statement" id="statement">
+My, níže podepsaní, považujeme nezávislé a předvídatelné financování veřejnoprávního média za základní předpoklad svobody slova a důvěryhodné veřejné služby.
+
+Odmítáme model, ve kterém by výše a podoba financování byly přímo závislé na aktuální politické většině a státním rozpočtu.
+
+Podporujeme zachování principu koncesionářského financování jako pojistky nezávislosti a vyzýváme k otevřené, věcné debatě o modernizaci systému tak, aby byl spravedlivý, stabilní a transparentní.</div>
+
+          <div class="foot">
+            <strong>Ochrana soukromí:</strong> Veřejně se zobrazuje pouze jméno a příjmení. Bydliště a datum narození se ukládají neveřejně pouze pro případné ověření podpisu.
+          </div>
+        </div>
+      </section>
+
+      <!-- Podpis -->
+      <section class="card">
+        <div class="head">
+          <h2>Přidat podpis</h2>
+          <div class="accent-line"></div>
+        </div>
+        <div class="body">
+          <form id="sigForm" autocomplete="on">
+            <div class="row">
+              <div>
+                <label for="firstName">Jméno</label>
+                <input id="firstName" name="firstName" required maxlength="60" />
+              </div>
+              <div>
+                <label for="lastName">Příjmení</label>
+                <input id="lastName" name="lastName" required maxlength="60" />
+              </div>
+            </div>
+
+            <div>
+              <label for="residence">Bydliště (město/obec)</label>
+              <input id="residence" name="residence" required maxlength="120" />
+            </div>
+
+            <div>
+              <label for="birthDate">Datum narození</label>
+              <input id="birthDate" name="birthDate" type="date" required />
+            </div>
+
+            <div class="checkbox">
+              <input id="consent" type="checkbox" required />
+              <p>
+                Souhlasím se zpracováním osobních údajů pro účely evidence podpisu a případného ověření.
+                Veřejně se zobrazí pouze jméno a příjmení. (GDPR)
+              </p>
+            </div>
+
+            <div class="actions">
+              <button id="submitBtn" type="submit">Podepsat</button>
+              <div class="status" id="status">Načítám podpisy…</div>
+            </div>
+          </form>
+        </div>
+
+        <div class="list" id="list"></div>
+      </section>
+    </div>
+  </div>
+
+  <!-- Firebase (modul) -->
+  <script type="module">
+    // 1) DOPLŇ svoje Firebase config hodnoty (viz níže v návodu)
+    const firebaseConfig = {
+      apiKey: "PASTE_HERE",
+      authDomain: "PASTE_HERE",
+      projectId: "PASTE_HERE",
+      appId: "PASTE_HERE",
+    };
+
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+    import {
+      getFirestore, collection, addDoc, serverTimestamp,
+      query, orderBy, limit, onSnapshot
+    } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const elList = document.getElementById("list");
+    const elStatus = document.getElementById("status");
+    const form = document.getElementById("sigForm");
+    const submitBtn = document.getElementById("submitBtn");
+
+    function esc(s){
+      return String(s ?? "").replace(/[&<>"']/g, m => ({
+        "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+      }[m]));
+    }
+    function formatDate(d){
+      try{
+        return new Intl.DateTimeFormat("cs-CZ", { dateStyle:"medium", timeStyle:"short" }).format(d);
+      }catch{ return ""; }
+    }
+
+    // 2) LIVE výpis veřejných podpisů
+    const q = query(collection(db, "signatures_public"), orderBy("createdAt", "desc"), limit(200));
+    onSnapshot(q, (snap) => {
+      elStatus.textContent = `Zobrazuji ${snap.size} nejnovějších podpisů`;
+      elList.innerHTML = snap.docs.map(doc => {
+        const data = doc.data();
+        const name = `${esc(data.firstName)} ${esc(data.lastName)}`.trim();
+        const dt = data.createdAt?.toDate ? data.createdAt.toDate() : null;
+        return `
+          <div class="item">
+            <div class="name">${name}</div>
+            <div class="date">${dt ? esc(formatDate(dt)) : ""}</div>
+          </div>
+        `;
+      }).join("");
+    }, (err) => {
+      elStatus.textContent = "Nepodařilo se načíst podpisy.";
+      console.error(err);
+    });
+
+    // 3) Odeslání podpisu (public + private)
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      submitBtn.disabled = true;
+      elStatus.textContent = "Odesílám…";
+
+      const firstName = document.getElementById("firstName").value.trim();
+      const lastName  = document.getElementById("lastName").value.trim();
+      const residence = document.getElementById("residence").value.trim();
+      const birthDate = document.getElementById("birthDate").value; // YYYY-MM-DD
+
+      if(!firstName || !lastName || !residence || !birthDate){
+        elStatus.textContent = "Vyplň prosím všechna pole.";
+        submitBtn.disabled = false;
+        return;
+      }
+
+      try{
+        // 3a) Vytvoř veřejný záznam
+        const pubRef = await addDoc(collection(db, "signatures_public"), {
+          firstName, lastName,
+          createdAt: serverTimestamp()
+        });
+
+        // 3b) Vytvoř neveřejný záznam (pro ověření)
+        await addDoc(collection(db, "signatures_private"), {
+          publicId: pubRef.id,
+          firstName, lastName,
+          residence,
+          birthDate,
+          createdAt: serverTimestamp()
+        });
+
+        form.reset();
+        elStatus.textContent = "Díky — podpis byl uložen.";
+      }catch(err){
+        console.error(err);
+        elStatus.textContent = "Něco se nepovedlo. Zkus to prosím znovu.";
+      }finally{
+        submitBtn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
