@@ -248,8 +248,11 @@ Odmítáme model, ve kterém by výše a podoba financování byly přímo závi
 Podporujeme zachování principu koncesionářského financování jako pojistky nezávislosti a vyzýváme k otevřené, věcné debatě o modernizaci systému tak, aby byl spravedlivý, stabilní a transparentní.</div>
 
           <div class="foot">
-            <strong>Ochrana soukromí:</strong> Veřejně se zobrazuje pouze jméno a příjmení. Bydliště a datum narození se ukládají neveřejně pouze pro případné ověření podpisu.
-          </div>
+  <strong>Ochrana soukromí (GDPR):</strong>
+  Veřejně se zobrazuje pouze jméno a příjmení. Bydliště a datum narození slouží výhradně k evidenci a případnému ověření podpisu.
+  Údaje uchováváme po dobu trvání výzvy a nejdéle 12 měsíců po jejím ukončení.
+  Pro žádost o přístup k údajům nebo výmaz pište na <a href="mailto:viktor@tamayo.cz">viktor@tamayo.cz</a>.
+</div>
         </div>
       </section>
 
@@ -317,10 +320,10 @@ Podporujeme zachování principu koncesionářského financování jako pojistky
 
 
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
-    import {
-      getFirestore, collection, addDoc, serverTimestamp,
-      query, orderBy, limit, onSnapshot
-    } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+  import {
+  getFirestore, collection, doc, setDoc, serverTimestamp,
+  query, orderBy, limit, onSnapshot
+} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
@@ -361,48 +364,106 @@ Podporujeme zachování principu koncesionářského financování jako pojistky
       console.error(err);
     });
 
+
+   async function sha256Base64Url(input) {
+  const enc = new TextEncoder().encode(input);
+  const hashBuf = await crypto.subtle.digest("SHA-256", enc);
+  const hashArr = Array.from(new Uint8Array(hashBuf));
+  const b64 = btoa(String.fromCharCode(...hashArr));
+  return b64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+}
+
+async function verifyTurnstile(token) {
+  const VERIFY_URL = "https://ct-poplatky.m88wqgcdpd.workers.dev";
+  const resp = await fetch(VERIFY_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ token })
+  });
+  const data = await resp.json().catch(() => ({}));
+  return !!data.ok;
+} 
+
     // 3) Odeslání podpisu (public + private)
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      submitBtn.disabled = true;
-      elStatus.textContent = "Odesílám…";
+  form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  submitBtn.disabled = true;
+  elStatus.textContent = "Ověřuji…";
 
-      const firstName = document.getElementById("firstName").value.trim();
-      const lastName  = document.getElementById("lastName").value.trim();
-      const residence = document.getElementById("residence").value.trim();
-      const birthDate = document.getElementById("birthDate").value; // YYYY-MM-DD
+  const firstName = document.getElementById("firstName").value.trim();
+  const lastName  = document.getElementById("lastName").value.trim();
+  const residence = document.getElementById("residence").value.trim();
+  const birthDate = document.getElementById("birthDate").value; // YYYY-MM-DD
 
-      if(!firstName || !lastName || !residence || !birthDate){
-        elStatus.textContent = "Vyplň prosím všechna pole.";
-        submitBtn.disabled = false;
-        return;
-      }
+  if(!firstName || !lastName || !residence || !birthDate){
+    elStatus.textContent = "Vyplň prosím všechna pole.";
+    submitBtn.disabled = false;
+    return;
+  }
 
-      try{
-        // 3a) Vytvoř veřejný záznam
-        const pubRef = await addDoc(collection(db, "signatures_public"), {
-          firstName, lastName,
-          createdAt: serverTimestamp()
-        });
+  // Turnstile token (musí existovat)
+  const token = window.turnstile?.getResponse?.();
+  if (!token) {
+    elStatus.textContent = "Prosím potvrďte ověření (Turnstile).";
+    submitBtn.disabled = false;
+    return;
+  }
 
-        // 3b) Vytvoř neveřejný záznam (pro ověření)
-        await addDoc(collection(db, "signatures_private"), {
-          publicId: pubRef.id,
-          firstName, lastName,
-          residence,
-          birthDate,
-          createdAt: serverTimestamp()
-        });
+  try{
+    const ok = await verifyTurnstile(token);
+    if (!ok) {
+      elStatus.textContent = "Ověření neprošlo. Zkuste to prosím znovu.";
+      window.turnstile?.reset?.();
+      submitBtn.disabled = false;
+      return;
+    }
 
-        form.reset();
-        elStatus.textContent = "Díky — podpis byl uložen.";
-      }catch(err){
-        console.error(err);
-        elStatus.textContent = "Něco se nepovedlo. Zkus to prosím znovu.";
-      }finally{
-        submitBtn.disabled = false;
-      }
+    // Dedupe klíč: jméno+příjmení+datum narození (normalizované)
+    const normalized =
+      firstName.toLowerCase().trim() + "|" +
+      lastName.toLowerCase().trim() + "|" +
+      birthDate.trim();
+
+    const sigKey = await sha256Base64Url(normalized);
+
+    // Deterministické ID dokumentu = sigKey
+    const pubRef  = doc(db, "signatures_public", sigKey);
+    const privRef = doc(db, "signatures_private", sigKey);
+
+    // setDoc bez merge => pokud by existovalo, byl by to update (a ten rules zakazují)
+    await setDoc(pubRef, {
+      firstName, lastName,
+      sigKey,
+      createdAt: serverTimestamp()
     });
+
+    await setDoc(privRef, {
+      publicId: sigKey,
+      firstName, lastName,
+      residence,
+      birthDate,
+      sigKey,
+      createdAt: serverTimestamp()
+    });
+
+    form.reset();
+    window.turnstile?.reset?.();
+    elStatus.textContent = "Díky — podpis byl uložen.";
+  }catch(err){
+    console.error(err);
+
+    const msg = String(err?.message || "").toLowerCase();
+    if (msg.includes("permission") || msg.includes("insufficient")) {
+      elStatus.textContent = "Tento podpis už evidujeme (duplicitní).";
+    } else {
+      elStatus.textContent = "Něco se nepovedlo. Zkus to prosím znovu.";
+    }
+
+    window.turnstile?.reset?.();
+  }finally{
+    submitBtn.disabled = false;
+  }
+});
   </script>
 </body>
 </html>
