@@ -1,0 +1,731 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Nezávislá veřejná služba potřebuje nezávislé financování</title>
+  <meta name="description" content="Společné redaktorské prohlášení a sběr podpisů na podporu nezávislosti veřejnoprávního média." />
+
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Nezávislá veřejná služba potřebuje nezávislé financování">
+  <meta property="og:description" content="Podepište výzvu na podporu nezávislosti veřejnoprávních médií. Nenechme si vzít svobodný prostor.">
+  <meta property="og:url" content="https://www.VASE-DOMENA.cz/"> 
+  <meta property="og:image" content="https://www.VASE-DOMENA.cz/share-image.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <style>
+    :root {
+      /* Barvy */
+      --bg: #070A12;
+      --text: #0a3d91;
+      --muted: #355d9a;
+      --line: rgba(10, 61, 145, 0.15);
+      
+      /* Změna: Výraznější bílé pozadí pro lepší kontrast textu */
+      --card: rgba(255,255,255,.80);
+      
+      --shadow: 0 18px 60px rgba(0,0,0,.25);
+      --radius: 18px;
+
+      /* ČT accents */
+      --red: #d7001e;
+      --blue: #0057b8;
+
+      --focus: 0 0 0 4px rgba(0,87,184,.28);
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      background:
+        /* Mapový podklad + ČT akcenty */
+        linear-gradient(rgba(255,255,255,.65), rgba(255,255,255,.65)),
+        url("bgr_clean.png") center / cover no-repeat,
+        radial-gradient(1200px 800px at 15% -10%, rgba(215,0,30,.22), rgba(215,0,30,0) 60%),
+        radial-gradient(1000px 700px at 85% -20%, rgba(0,87,184,.22), rgba(0,87,184,0) 60%),
+        #ffffff;
+      color: var(--text);
+      font-family: ui-sans-serif, system-ui, -apple-system, Roboto, Helvetica, Arial, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .wrap {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 42px 20px 64px;
+    }
+
+    header { margin-bottom: 28px; }
+
+    h1 {
+      font-size: clamp(32px, 4vw, 48px);
+      line-height: 1.08;
+      letter-spacing: -0.02em;
+      margin: 0 0 12px 0;
+      color: #000; /* Nadpis černý pro maximální kontrast */
+    }
+
+    .lead {
+      margin: 0;
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1.6;
+      max-width: 72ch;
+      font-weight: 500;
+    }
+
+    .section {
+      background: var(--card);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,0.6);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 22px;
+      margin-top: 18px;
+      color: var(--text);
+    }
+    
+    .section h2 {
+      margin: 0 0 14px 0;
+      font-size: 18px;
+      letter-spacing: -0.01em;
+      position: relative;
+      color: #000;
+    }
+    .section h2::after{
+      content:"";
+      position:absolute;
+      left:0;
+      bottom:-8px;
+      width:56px;
+      height:2px;
+      border-radius:999px;
+      background: linear-gradient(90deg, rgba(215,0,30,.95), rgba(0,87,184,.95));
+      opacity:.75;
+    }
+
+    .statement {
+      color: #0a3d91;
+      line-height: 1.7;
+      font-size: 17px;
+      margin: 0;
+      white-space: pre-line;
+      font-weight: 500;
+    }
+
+    /* Form Elements */
+    form { margin-top: 6px; }
+
+    .grid2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+    @media (max-width: 720px) { .grid2 { grid-template-columns: 1fr; } }
+
+    label {
+      display: block;
+      font-weight: 700;
+      font-size: 14px;
+      margin-bottom: 8px;
+      color: var(--text);
+    }
+    .req { color: var(--red); margin-left: 4px; }
+    .opt { color: var(--muted); font-weight: 400; font-size: 13px; margin-left: 6px; }
+
+    input {
+      width: 100%;
+      border: 2px solid rgba(10,61,145,.25);
+      border-radius: 12px;
+      padding: 12px 12px;
+      font-size: 16px;
+      outline: none;
+      background: rgba(255,255,255,.9);
+      color: var(--text);
+      transition: all 0.2s ease;
+    }
+    input::placeholder { color: rgba(10,61,145,.5); }
+    input:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 4px rgba(0,87,184,.15);
+      background: #fff;
+    }
+
+    .consent {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      margin: 18px 0 14px;
+      font-size: 13px;
+      line-height: 1.45;
+      color: var(--text);
+    }
+    .consent input { width: 18px; height: 18px; margin-top: 2px; accent-color: var(--blue); }
+
+    .turnstileBox {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 12px;
+      background: rgba(255,255,255,.5);
+      display: inline-block;
+      max-width: 100%;
+      margin-bottom: 14px;
+    }
+
+    .actions {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      appearance: none;
+      border: 0;
+      border-radius: 999px;
+      padding: 14px 24px;
+      font-weight: 700;
+      font-size: 16px;
+      color: white;
+      background: linear-gradient(180deg, rgba(215,0,30,1), rgba(186,0,26,1));
+      box-shadow: 0 10px 25px rgba(215,0,30,.3), 0 4px 10px rgba(0,0,0,.1);
+      cursor: pointer;
+      transition: transform .08s ease, filter .2s ease;
+    }
+    .btn:hover { filter: brightness(1.1); }
+    .btn:active { transform: translateY(1px); }
+    .btn:disabled { opacity: .55; cursor: not-allowed; }
+
+    .status {
+      font-weight: 600;
+      font-size: 14px;
+      margin-top: 8px;
+    }
+    .status.ok { color: #008000; }
+    .status.err { color: #d7001e; }
+
+    /* Share Buttons (Hidden by default) */
+    .share-section {
+      text-align: center;
+      padding: 20px 0;
+      display: none; /* Hidden until signed */
+      animation: fadeIn 0.5s ease;
+    }
+    @keyframes fadeIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+
+    .share-title { font-size: 18px; font-weight: 700; margin-bottom: 16px; color: var(--text); }
+    
+    .share-btns { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+    
+    .btn-share {
+      text-decoration: none;
+      padding: 12px 20px;
+      border-radius: 99px;
+      font-weight: 600;
+      font-size: 15px;
+      color: white;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: filter 0.2s;
+    }
+    .btn-share:hover { filter: brightness(1.1); }
+    
+    .btn-fb { background: #1877F2; }
+    .btn-x { background: #000; }
+    .btn-wa { background: #25D366; }
+
+    /* Signers List */
+    .signersHead {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+    .count {
+      color: var(--text);
+      font-weight: 600;
+      font-size: 15px;
+      background: rgba(255,255,255,0.6);
+      padding: 4px 10px;
+      border-radius: 8px;
+    }
+
+    .signersList {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px 16px;
+    }
+    @media (max-width: 720px) { .signersList { grid-template-columns: 1fr; } }
+
+    .signer {
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: rgba(255,255,255,.5);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .signer strong { font-size: 14px; color: #000; }
+    .signer time { color: var(--muted); font-size: 12px; }
+
+    .moreRow { display: flex; justify-content: center; margin-top: 18px; }
+    .linkBtn {
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.6);
+      color: var(--blue);
+      border-radius: 999px;
+      padding: 10px 18px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .linkBtn:hover { background: #fff; }
+
+    /* Floating cards */
+    .section.float {
+      transform: translateZ(0);
+      transition: transform .1s linear;
+      will-change: transform;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .section.float { transform: none !important; }
+    }
+
+    /* Footer */
+    .gdpr { font-size: 13px; line-height: 1.5; color: var(--muted); margin-top: 12px; }
+    .gdpr a { color: var(--blue); }
+    .ct-signature {
+      height: 4px;
+      background: linear-gradient(90deg, #c4001a 0%, #c4001a 45%, #0a3d91 55%, #0a3d91 100%);
+      border-radius: 2px;
+      margin-top: 24px;
+    }
+  </style>
+
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+</head>
+
+<body>
+
+  <div class="wrap">
+    <header>
+      <h1>Nezávislá veřejná služba potřebuje nezávislé financování.</h1>
+      <p class="lead">
+        Společné redaktorské prohlášení a sběr podpisů na podporu zachování nezávislosti veřejnoprávního média.
+      </p>
+    </header>
+
+    <section class="section float" id="prohlaseni">
+      <h2>Prohlášení</h2>
+      <p class="statement" id="statementText" data-full="My, níže podepsaní, považujeme nezávislé a předvídatelné financování veřejnoprávního média za základní předpoklad svobody slova a důvěryhodné veřejné služby.
+Odmítáme model, ve kterém by výše a podoba financování byly přímo závislé na aktuální politické většině a státním rozpočtu.
+Podporujeme zachování principu koncesionářského financování jako pojistky nezávislosti a vyzýváme k otevřené, věcné debatě o modernizaci systému tak, aby byl spravedlivý, stabilní a transparentní."></p>
+    </section>
+
+    <section class="section float" id="pridat-podpis">
+      <h2>Přidat podpis</h2>
+
+      <div id="formContainer">
+        <form id="signatureForm" autocomplete="on" novalidate>
+          <div class="grid2">
+            <div>
+              <label for="firstName">Jméno<span class="req">*</span></label>
+              <input id="firstName" name="firstName" type="text" placeholder="Jan" required />
+            </div>
+            <div>
+              <label for="lastName">Příjmení<span class="req">*</span></label>
+              <input id="lastName" name="lastName" type="text" placeholder="Novák" required />
+            </div>
+          </div>
+
+          <div style="margin-top:14px;">
+            <label for="email">E-mail<span class="req">*</span></label>
+            <input id="email" name="email" type="email" inputmode="email" placeholder="vas@email.cz" required />
+          </div>
+
+          <div style="margin-top:14px;">
+            <label for="city">Obec<span class="req">*</span></label>
+            <input id="city" name="city" type="text" placeholder="Praha" required />
+          </div>
+
+          <div style="margin-top:14px;">
+            <label for="psc">PSČ<span class="req">*</span></label>
+            <input id="psc" name="psc" type="text" inputmode="numeric" placeholder="110 00" required />
+          </div>
+
+          <div style="margin-top:14px;">
+            <label for="phone">Telefon <span class="opt">(nepovinné)</span></label>
+            <input id="phone" name="phone" type="tel" inputmode="tel" placeholder="+420..." />
+          </div>
+
+          <div style="margin-top:14px;">
+            <label for="profession">Povolání <span class="opt">(nepovinné)</span></label>
+            <input id="profession" name="profession" type="text" placeholder="Učitel, Lékař..." />
+          </div>
+
+          <div class="consent">
+            <input id="consent" type="checkbox" required />
+            <div>
+              Souhlasím se zpracováním osobních údajů. Veřejně se zobrazí pouze jméno a příjmení.
+            </div>
+          </div>
+
+          <div class="turnstileBox">
+            <div class="cf-turnstile" data-sitekey="0x4AAAAAACWE5X-hpbQv2lJ_"></div>
+          </div>
+
+          <div class="actions">
+            <button class="btn" id="submitBtn" type="submit">Podepsat výzvu</button>
+            <div class="status" id="status"></div>
+          </div>
+        </form>
+      </div>
+
+      <div id="successSection" class="share-section">
+        <div style="color:#008000; font-size:18px; font-weight:bold; margin-bottom:16px;">
+          ✓ Děkujeme, váš podpis byl uložen.
+        </div>
+        
+        <div class="share-title">Pomozte nám získat další podpisy:</div>
+        <div class="share-btns">
+          <a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fwww.VASE-DOMENA.cz" target="_blank" class="btn-share btn-fb">
+            Sdílet na Facebooku
+          </a>
+          <a href="https://twitter.com/intent/tweet?text=Podepsal(a)%20jsem%20v%C3%BDzvu%20za%20nez%C3%A1vislost%20ve%C5%99ejnopr%C3%A1vn%C3%ADch%20m%C3%A9di%C3%AD.%20P%C5%99idejte%20se%20taky%3A&url=https%3A%2F%2Fwww.VASE-DOMENA.cz" target="_blank" class="btn-share btn-x">
+            Sdílet na X
+          </a>
+        </div>
+      </div>
+
+    </section>
+
+    <section class="section float" id="podepsali">
+      <div class="signersHead">
+        <h2 style="margin:0;">Podepsali</h2>
+        <div class="count" id="countText">Načítám počty...</div>
+      </div>
+
+      <ul class="signersList" id="signersList"></ul>
+
+      <div class="moreRow">
+        <button class="linkBtn" id="loadMoreBtn" type="button">Načíst další</button>
+      </div>
+    </section>
+  </div>
+
+  <footer class="wrap" style="padding-top:0; padding-bottom:32px;">
+    <div class="section" style="background:transparent; box-shadow:none; border:none; padding:0;">
+      <details>
+        <summary style="cursor:pointer; font-weight:600; color:var(--text);">Ochrana soukromí (GDPR)</summary>
+        <div class="gdpr">
+          Veřejně se zobrazuje pouze jméno a příjmení. Kontaktní údaje slouží výhradně k evidenci a případnému ověření podpisu.
+          Údaje uchováváme po dobu trvání výzvy.
+          Kontakt: <a href="mailto:viktor@tamayo.cz">viktor@tamayo.cz</a>.
+        </div>
+      </details>
+      <div class="ct-signature"></div>
+    </div>
+  </footer>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+    import {
+      getFirestore, collection, doc, setDoc, serverTimestamp,
+      query, orderBy, limit, startAfter, getDocs, getCountFromServer
+    } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDG9TuTTj4zTilKC3rflnZHHCmhdUXUhaw",
+      authDomain: "ct-vyzva.firebaseapp.com",
+      projectId: "ct-vyzva",
+      storageBucket: "ct-vyzva.firebasestorage.app",
+      messagingSenderId: "850210625768",
+      appId: "1:850210625768:web:ab28a3b03353b29fd2d15d",
+      measurementId: "G-FDJN02CLRB"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // ---- Worker Verification ----
+    async function verifyTurnstile(token) {
+      const VERIFY_URL = "https://ct-poplatky.m88wqgcdpd.workers.dev";
+      try {
+        const resp = await fetch(VERIFY_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ token })
+        });
+        const data = await resp.json().catch(() => ({}));
+        return !!data.ok;
+      } catch (e) {
+        return false;
+      }
+    }
+
+    // ---- Helpers ----
+    function normalizeName(s) {
+      return (s || "").trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, " ");
+    }
+    function normalizeEmail(s) { return (s || "").trim().toLowerCase(); }
+    function normalizePSC(s) { return (s || "").replace(/\s+/g, "").trim(); }
+    
+    // Hash function for ID
+    async function sha256Base64Url(input) {
+      const enc = new TextEncoder().encode(input);
+      const hashBuf = await crypto.subtle.digest("SHA-256", enc);
+      const hashArr = Array.from(new Uint8Array(hashBuf));
+      return btoa(String.fromCharCode(...hashArr)).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+    }
+
+    // ---- UI Elements ----
+    const form = document.getElementById("signatureForm");
+    const formContainer = document.getElementById("formContainer");
+    const successSection = document.getElementById("successSection");
+    const submitBtn = document.getElementById("submitBtn");
+    const statusEl = document.getElementById("status");
+    const countTextEl = document.getElementById("countText");
+    const signersListEl = document.getElementById("signersList");
+    const loadMoreBtn = document.getElementById("loadMoreBtn");
+
+    function setStatus(msg, type="") {
+      statusEl.className = "status" + (type ? " " + type : "");
+      statusEl.textContent = msg || "";
+    }
+
+    // ---- TOTAL COUNT ----
+    async function loadTotalCount() {
+      try {
+        const coll = collection(db, "signatures_public");
+        const snapshot = await getCountFromServer(coll);
+        const count = snapshot.data().count;
+        countTextEl.innerHTML = `Celkem podepsalo: <b>${count.toLocaleString('cs-CZ')}</b>`;
+      } catch (e) {
+        console.error("Chyba počítadla", e);
+        countTextEl.textContent = "Mnoho podpisů...";
+      }
+    }
+
+    // ---- SUBMIT ----
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      setStatus("");
+
+      // Validace
+      if (!document.getElementById("consent").checked) {
+        setStatus("Je potřeba souhlasit se zpracováním údajů.", "err");
+        return;
+      }
+
+      const raw = {
+        firstName: document.getElementById("firstName").value,
+        lastName: document.getElementById("lastName").value,
+        email: document.getElementById("email").value,
+        city: document.getElementById("city").value,
+        psc: document.getElementById("psc").value,
+        phone: document.getElementById("phone").value,
+        profession: document.getElementById("profession").value
+      };
+
+      const norm = {
+        firstName: raw.firstName.trim(),
+        lastName: raw.lastName.trim(),
+        email: normalizeEmail(raw.email),
+        city: raw.city.trim(),
+        psc: normalizePSC(raw.psc),
+        phone: raw.phone.trim(),
+        profession: raw.profession.trim()
+      };
+
+      if (!norm.firstName || !norm.lastName || !norm.email || !norm.city || !norm.psc) {
+        setStatus("Vyplňte prosím povinná pole.", "err"); return;
+      }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(norm.email)) {
+        setStatus("E-mail nemá správný formát.", "err"); return;
+      }
+
+      // Turnstile
+      const token = window.turnstile?.getResponse?.();
+      if (!token) {
+        setStatus("Prosím potvrďte, že nejste robot (Turnstile).", "err");
+        return;
+      }
+
+      submitBtn.disabled = true;
+      setStatus("Ověřuji a ukládám...");
+
+      try {
+        const isHuman = await verifyTurnstile(token);
+        if (!isHuman) {
+          setStatus("Ověření se nezdařilo. Zkuste to znovu.", "err");
+          window.turnstile?.reset?.();
+          submitBtn.disabled = false;
+          return;
+        }
+
+        // Generate ID
+        const sigInput = `${normalizeName(norm.firstName)}|${normalizeName(norm.lastName)}|${norm.email}`;
+        const sigKey = await sha256Base64Url(sigInput);
+
+        // Write to Firestore
+        await setDoc(doc(db, "signatures_public", sigKey), {
+          firstName: norm.firstName,
+          lastName: norm.lastName,
+          sigKey,
+          createdAt: serverTimestamp()
+        });
+
+        await setDoc(doc(db, "signatures_private", sigKey), {
+          publicId: sigKey,
+          firstName: norm.firstName,
+          lastName: norm.lastName,
+          email: norm.email,
+          city: norm.city,
+          psc: norm.psc,
+          phone: norm.phone,
+          profession: norm.profession,
+          sigKey,
+          createdAt: serverTimestamp()
+        });
+
+        // SUCCESS STATE
+        formContainer.style.display = "none";
+        successSection.style.display = "block";
+        successSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+        // Refresh lists
+        await loadInitial();
+        await loadTotalCount();
+
+      } catch (err) {
+        console.error(err);
+        const msg = String(err?.message || "").toLowerCase();
+        if (msg.includes("permission") || msg.includes("insufficient")) {
+          setStatus("Tento podpis už evidujeme (duplicita).", "err");
+        } else {
+          setStatus("Chyba při ukládání. Zkuste to prosím znovu.", "err");
+        }
+        window.turnstile?.reset?.();
+        submitBtn.disabled = false;
+      }
+    });
+
+    // ---- LIST LOADING ----
+    let lastDoc = null;
+    const PAGE_SIZE = 20;
+
+    function renderItem(data) {
+      const li = document.createElement("li");
+      li.className = "signer";
+      
+      const name = document.createElement("strong");
+      name.textContent = `${data.firstName} ${data.lastName}`;
+      
+      const t = document.createElement("time");
+      if(data.createdAt && data.createdAt.toDate) {
+        t.textContent = data.createdAt.toDate().toLocaleString("cs-CZ", {
+          day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit"
+        });
+      }
+      
+      li.appendChild(name);
+      li.appendChild(t);
+      return li;
+    }
+
+    async function loadInitial() {
+      signersListEl.innerHTML = "";
+      lastDoc = null;
+      await loadMore();
+    }
+
+    async function loadMore() {
+      const col = collection(db, "signatures_public");
+      let q = query(col, orderBy("createdAt", "desc"), limit(PAGE_SIZE));
+      if (lastDoc) {
+        q = query(col, orderBy("createdAt", "desc"), startAfter(lastDoc), limit(PAGE_SIZE));
+      }
+
+      const snap = await getDocs(q);
+      
+      snap.forEach(d => {
+        signersListEl.appendChild(renderItem(d.data()));
+      });
+
+      lastDoc = snap.docs[snap.docs.length - 1];
+      if (snap.size < PAGE_SIZE) {
+        loadMoreBtn.style.display = "none";
+      } else {
+        loadMoreBtn.style.display = "inline-flex";
+      }
+    }
+
+    loadMoreBtn.addEventListener("click", loadMore);
+
+    // Initial calls
+    loadInitial();
+    loadTotalCount(); // Load global counter
+
+    // ---- Typewriter Effect (Desktop only) ----
+    const stEl = document.getElementById("statementText");
+    const fullStatement = stEl?.dataset?.full || "";
+    
+    if (stEl && fullStatement) {
+      // Pokud je mobil nebo vypnuté animace -> zobraz hned
+      const isMobile = window.innerWidth < 768;
+      const prefersReduced = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+
+      if (isMobile || prefersReduced) {
+        stEl.textContent = fullStatement;
+      } else {
+        stEl.textContent = "";
+        let i = 0;
+        const tick = () => {
+          i++;
+          stEl.textContent = fullStatement.slice(0, i);
+          if (i < fullStatement.length) requestAnimationFrame(tick);
+        };
+        
+        const io = new IntersectionObserver((entries) => {
+          if (entries.some(e => e.isIntersecting)) {
+            io.disconnect();
+            tick();
+          }
+        }, { threshold: 0.25 });
+        io.observe(stEl);
+      }
+    }
+
+    // ---- Parallax (Desktop Only) ----
+    const floatCards = Array.from(document.querySelectorAll(".section.float"));
+    if (window.innerWidth > 768 && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      let mouseX = 0, mouseY = 0;
+      window.addEventListener("mousemove", (e) => {
+        mouseX = (e.clientX / window.innerWidth) - 0.5;
+        mouseY = (e.clientY / window.innerHeight) - 0.5;
+      }, { passive: true });
+
+      const raf = () => {
+        floatCards.forEach((card, idx) => {
+          // Jemný efekt
+          const tx = mouseX * 8; 
+          const ty = mouseY * 8;
+          card.style.transform = `translate3d(${tx.toFixed(2)}px, ${ty.toFixed(2)}px, 0)`;
+        });
+        requestAnimationFrame(raf);
+      };
+      requestAnimationFrame(raf);
+    }
+  </script>
+</body>
+</html>
