@@ -564,7 +564,7 @@ Podporujeme zachování principu koncesionářského financování jako pojistky
       const isDomainOk = allowedDomains.some(d => norm.email.endsWith(d));
 
       if (!isDomainOk && !isAdmin) {
-        setStatus("Podepisovat mohou pouze e-maily @ceskatelevize.cz nebo @rozhlas.cz", "err");
+        setStatus("Podepisovat mohou pouze e-maily @ceskatelevize.cz nebo @rozhlas.cz. Pro přidání podpisu, prosím, pošlete požadované údaje na email: pavla.kubalkova@ceskatelevize.cz", "err");
         return;
       }
       // --------------------------------
