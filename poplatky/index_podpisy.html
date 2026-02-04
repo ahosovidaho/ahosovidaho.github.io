@@ -602,7 +602,7 @@ Podporujeme zachování principu koncesionářského financování jako pojistky
       const isDomainOk = allowedDomains.some(d => norm.email.endsWith(d));
 
       if (!isDomainOk && !isAdmin) {
-        setStatus("Podepisovat mohou pouze e-maily @ceskatelevize.cz nebo @rozhlas.cz", "err");
+        setStatus("Automaticky se mohou podepisovat pouze pracovníci ČT a ČRo s e-maily @ceskatelevize.cz nebo @rozhlas.cz. Pro přidání svého podpisu pro výzvu, prosím, pošlete své údaje na email: pavla.kubalkova@ceskatelevize.cz", "err");
         return;
       }
       // --------------------------------
