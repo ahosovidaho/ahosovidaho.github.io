@@ -36,15 +36,17 @@
 
     * { box-sizing: border-box; }
     html, body { height: 100%; }
-    body {
+   body {
       margin: 0;
       background:
-        /* Mapový podklad + ČT akcenty */
-        linear-gradient(rgba(255,255,255,.65), rgba(255,255,255,.65)),
+        /* ZMĚNA ZDE: Sníženo z .65 na .15 (jen 15% bílé mlhy) */
+        linear-gradient(rgba(255,255,255,.15), rgba(255,255,255,.15)),
+        
         url("bgr_clean.png") center / cover no-repeat,
         radial-gradient(1200px 800px at 15% -10%, rgba(215,0,30,.22), rgba(215,0,30,0) 60%),
         radial-gradient(1000px 700px at 85% -20%, rgba(0,87,184,.22), rgba(0,87,184,0) 60%),
         #ffffff;
+      
       color: var(--text);
       font-family: ui-sans-serif, system-ui, -apple-system, Roboto, Helvetica, Arial, sans-serif;
       -webkit-font-smoothing: antialiased;
