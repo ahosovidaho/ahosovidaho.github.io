@@ -6,8 +6,8 @@
 <title>Kalkulačka PHM</title>
 <style>
     body {
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-        background: #f5f5f7;
+        font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
+        background: linear-gradient(180deg, #f5f5f7 0%, #e5e5ea 100%);
         display: flex;
         justify-content: center;
         align-items: center;
@@ -16,79 +16,131 @@
     }
 
     .card {
-        background: white;
+        background: rgba(255,255,255,0.7);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
         padding: 30px;
-        border-radius: 20px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-        width: 400px;
+        border-radius: 28px;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+        width: 420px;
+        transition: all 0.3s ease;
     }
 
     h1 {
-        font-size: 22px;
+        font-size: 24px;
         margin-bottom: 20px;
+        font-weight: 600;
     }
 
     label {
         display: block;
-        margin-top: 15px;
-        font-size: 14px;
-        color: #555;
+        margin-top: 14px;
+        font-size: 13px;
+        color: #6e6e73;
     }
 
     input {
         width: 100%;
-        padding: 10px;
-        margin-top: 5px;
-        border-radius: 10px;
-        border: 1px solid #ddd;
-        font-size: 14px;
+        padding: 12px;
+        margin-top: 6px;
+        border-radius: 14px;
+        border: none;
+        background: #f2f2f7;
+        font-size: 15px;
+        outline: none;
+        transition: all 0.2s ease;
+    }
+
+    input:focus {
+        background: #fff;
+        box-shadow: 0 0 0 2px rgba(0,122,255,0.3);
     }
 
     button {
         width: 100%;
-        margin-top: 20px;
-        padding: 12px;
+        margin-top: 22px;
+        padding: 14px;
         border: none;
-        border-radius: 12px;
-        background: black;
+        border-radius: 16px;
+        background: linear-gradient(135deg, #007aff, #0051ff);
         color: white;
         font-size: 16px;
+        font-weight: 500;
         cursor: pointer;
+        transition: all 0.25s ease;
+    }
+
+    button:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 10px 20px rgba(0,122,255,0.3);
     }
 
     .results {
         margin-top: 20px;
-        background: #f5f5f7;
-        padding: 15px;
-        border-radius: 12px;
-        font-size: 14px;
+        padding: 18px;
+        border-radius: 18px;
+        background: rgba(255,255,255,0.6);
+        backdrop-filter: blur(10px);
+        opacity: 0;
+        transform: translateY(10px);
+        transition: all 0.4s ease;
     }
 
-    .highlight {
-        font-weight: bold;
+    .results.show {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .row {
+        display: flex;
+        justify-content: space-between;
+        margin: 6px 0;
+    }
+
+    .label {
+        color: #6e6e73;
+    }
+
+    .value {
+        font-weight: 600;
+    }
+
+    .difference {
+        margin-top: 10px;
+        padding-top: 10px;
+        border-top: 1px solid rgba(0,0,0,0.05);
+        font-size: 15px;
+    }
+
+    .positive {
+        color: #ff3b30;
+    }
+
+    .negative {
+        color: #34c759;
     }
 </style>
 </head>
 <body>
 
 <div class="card">
-    <h1>Kalkulačka nákladů PHM</h1>
+    <h1>Porovnání nákladů PHM</h1>
 
     <label>Cena paliva (den X) Kč/l</label>
-    <input type="number" id="priceX">
+    <input type="number" id="priceX" placeholder="např. 36.90">
 
     <label>Cena paliva (den Y) Kč/l</label>
-    <input type="number" id="priceY">
+    <input type="number" id="priceY" placeholder="např. 39.50">
 
     <label>Spotřeba (l / 100 km)</label>
-    <input type="number" id="consumption">
+    <input type="number" id="consumption" placeholder="např. 6.5">
 
     <label>Nájezd (km / den)</label>
-    <input type="number" id="kmDay">
+    <input type="number" id="kmDay" placeholder="např. 50">
 
     <button onclick="calculate()">Spočítat</button>
 
-    <div class="results" id="results" style="display:none;"></div>
+    <div class="results" id="results"></div>
 </div>
 
 <script>
@@ -112,18 +164,21 @@ function calculate() {
     const difference = dailyCostY - dailyCostX;
 
     const resultDiv = document.getElementById('results');
-    resultDiv.style.display = 'block';
+    resultDiv.classList.add('show');
+
+    const diffClass = difference > 0 ? 'positive' : 'negative';
 
     resultDiv.innerHTML = `
-        Náklady na 1 km (den X): <span class="highlight">${costPerKmX.toFixed(2)} Kč</span><br>
-        Náklady na 1 km (den Y): <span class="highlight">${costPerKmY.toFixed(2)} Kč</span><br><br>
-        Denní náklady (den X): <span class="highlight">${dailyCostX.toFixed(2)} Kč</span><br>
-        Denní náklady (den Y): <span class="highlight">${dailyCostY.toFixed(2)} Kč</span><br><br>
-        Rozdíl za den: <span class="highlight">${difference.toFixed(2)} Kč</span>
+        <div class="row"><span class="label">1 km (den X)</span><span class="value">${costPerKmX.toFixed(2)} Kč</span></div>
+        <div class="row"><span class="label">1 km (den Y)</span><span class="value">${costPerKmY.toFixed(2)} Kč</span></div>
+        <div class="row"><span class="label">Den (X)</span><span class="value">${dailyCostX.toFixed(2)} Kč</span></div>
+        <div class="row"><span class="label">Den (Y)</span><span class="value">${dailyCostY.toFixed(2)} Kč</span></div>
+        <div class="difference ${diffClass}">
+            Rozdíl za den: ${difference.toFixed(2)} Kč
+        </div>
     `;
 }
 </script>
 
 </body>
 </html>
-
