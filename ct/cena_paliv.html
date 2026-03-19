@@ -4,10 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Kalkulačka PHM</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
     body {
-        font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
-        background: linear-gradient(180deg, #f5f5f7 0%, #e5e5ea 100%);
+        font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
+        background: linear-gradient(180deg, #f5f5f7, #e5e5ea);
         display: flex;
         justify-content: center;
         align-items: center;
@@ -18,77 +19,37 @@
     .card {
         background: rgba(255,255,255,0.7);
         backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
         padding: 30px;
         border-radius: 28px;
         box-shadow: 0 20px 50px rgba(0,0,0,0.15);
-        width: 420px;
-        transition: all 0.3s ease;
+        width: 440px;
     }
 
     h1 {
         font-size: 24px;
         margin-bottom: 20px;
-        font-weight: 600;
     }
 
     label {
-        display: block;
-        margin-top: 14px;
         font-size: 13px;
         color: #6e6e73;
+        margin-top: 12px;
+        display: block;
     }
 
     input {
         width: 100%;
         padding: 12px;
-        margin-top: 6px;
         border-radius: 14px;
         border: none;
         background: #f2f2f7;
+        margin-top: 5px;
         font-size: 15px;
-        outline: none;
-        transition: all 0.2s ease;
-    }
-
-    input:focus {
-        background: #fff;
-        box-shadow: 0 0 0 2px rgba(0,122,255,0.3);
-    }
-
-    button {
-        width: 100%;
-        margin-top: 22px;
-        padding: 14px;
-        border: none;
-        border-radius: 16px;
-        background: linear-gradient(135deg, #007aff, #0051ff);
-        color: white;
-        font-size: 16px;
-        font-weight: 500;
-        cursor: pointer;
-        transition: all 0.25s ease;
-    }
-
-    button:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 10px 20px rgba(0,122,255,0.3);
     }
 
     .results {
         margin-top: 20px;
-        padding: 18px;
-        border-radius: 18px;
-        background: rgba(255,255,255,0.6);
-        backdrop-filter: blur(10px);
-        opacity: 0;
-        transform: translateY(10px);
-        transition: all 0.4s ease;
-    }
-
-    .results.show {
-        opacity: 1;
-        transform: translateY(0);
+        font-size: 14px;
     }
 
     .row {
@@ -97,27 +58,8 @@
         margin: 6px 0;
     }
 
-    .label {
-        color: #6e6e73;
-    }
-
-    .value {
-        font-weight: 600;
-    }
-
-    .difference {
-        margin-top: 10px;
-        padding-top: 10px;
-        border-top: 1px solid rgba(0,0,0,0.05);
-        font-size: 15px;
-    }
-
-    .positive {
-        color: #ff3b30;
-    }
-
-    .negative {
-        color: #34c759;
+    canvas {
+        margin-top: 20px;
     }
 </style>
 </head>
@@ -126,58 +68,82 @@
 <div class="card">
     <h1>Porovnání nákladů PHM</h1>
 
-    <label>Cena paliva (den X) Kč/l</label>
-    <input type="number" id="priceX" placeholder="např. 36.90">
+    <label>Cena paliva (den X)</label>
+    <input type="number" id="priceX">
 
-    <label>Cena paliva (den Y) Kč/l</label>
-    <input type="number" id="priceY" placeholder="např. 39.50">
+    <label>Cena paliva (den Y)</label>
+    <input type="number" id="priceY">
 
     <label>Spotřeba (l / 100 km)</label>
-    <input type="number" id="consumption" placeholder="např. 6.5">
+    <input type="number" id="consumption">
 
     <label>Nájezd (km / den)</label>
-    <input type="number" id="kmDay" placeholder="např. 50">
-
-    <button onclick="calculate()">Spočítat</button>
+    <input type="number" id="kmDay">
 
     <div class="results" id="results"></div>
+
+    <canvas id="chart"></canvas>
 </div>
 
 <script>
-function calculate() {
-    const priceX = parseFloat(document.getElementById('priceX').value);
-    const priceY = parseFloat(document.getElementById('priceY').value);
-    const consumption = parseFloat(document.getElementById('consumption').value);
-    const kmDay = parseFloat(document.getElementById('kmDay').value);
+let chart;
 
-    if (!priceX || !priceY || !consumption || !kmDay) {
-        alert('Vyplň všechna pole');
-        return;
-    }
+function calculate() {
+    const priceX = parseFloat(priceXInput.value);
+    const priceY = parseFloat(priceYInput.value);
+    const consumption = parseFloat(consumptionInput.value);
+    const kmDay = parseFloat(kmDayInput.value);
+
+    if (!priceX || !priceY || !consumption || !kmDay) return;
 
     const costPerKmX = (consumption / 100) * priceX;
     const costPerKmY = (consumption / 100) * priceY;
 
-    const dailyCostX = costPerKmX * kmDay;
-    const dailyCostY = costPerKmY * kmDay;
+    const dailyX = costPerKmX * kmDay;
+    const dailyY = costPerKmY * kmDay;
 
-    const difference = dailyCostY - dailyCostX;
+    const monthlyX = dailyX * 30;
+    const monthlyY = dailyY * 30;
 
-    const resultDiv = document.getElementById('results');
-    resultDiv.classList.add('show');
+    const yearlyX = dailyX * 365;
+    const yearlyY = dailyY * 365;
 
-    const diffClass = difference > 0 ? 'positive' : 'negative';
-
-    resultDiv.innerHTML = `
-        <div class="row"><span class="label">1 km (den X)</span><span class="value">${costPerKmX.toFixed(2)} Kč</span></div>
-        <div class="row"><span class="label">1 km (den Y)</span><span class="value">${costPerKmY.toFixed(2)} Kč</span></div>
-        <div class="row"><span class="label">Den (X)</span><span class="value">${dailyCostX.toFixed(2)} Kč</span></div>
-        <div class="row"><span class="label">Den (Y)</span><span class="value">${dailyCostY.toFixed(2)} Kč</span></div>
-        <div class="difference ${diffClass}">
-            Rozdíl za den: ${difference.toFixed(2)} Kč
-        </div>
+    results.innerHTML = `
+        <div class="row"><span>1 km X</span><span>${costPerKmX.toFixed(2)} Kč</span></div>
+        <div class="row"><span>1 km Y</span><span>${costPerKmY.toFixed(2)} Kč</span></div>
+        <div class="row"><span>Den X</span><span>${dailyX.toFixed(0)} Kč</span></div>
+        <div class="row"><span>Den Y</span><span>${dailyY.toFixed(0)} Kč</span></div>
     `;
+
+    const data = {
+        labels: ['Měsíc X','Měsíc Y','Rok X','Rok Y'],
+        datasets: [{
+            label: 'Náklady (Kč)',
+            data: [monthlyX, monthlyY, yearlyX, yearlyY]
+        }]
+    };
+
+    if (chart) chart.destroy();
+
+    chart = new Chart(document.getElementById('chart'), {
+        type: 'bar',
+        data: data,
+        options: {
+            responsive: true,
+            plugins: { legend: { display: false } }
+        }
+    });
 }
+
+const priceXInput = document.getElementById('priceX');
+const priceYInput = document.getElementById('priceY');
+const consumptionInput = document.getElementById('consumption');
+const kmDayInput = document.getElementById('kmDay');
+const results = document.getElementById('results');
+
+[priceXInput, priceYInput, consumptionInput, kmDayInput].forEach(input => {
+    input.addEventListener('input', calculate);
+});
 </script>
 
 </body>
