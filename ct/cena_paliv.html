@@ -167,10 +167,10 @@ function calculate() {
     bigDiffDetail.innerText = `+${diffMonth.toFixed(0)} Kč / měsíc · +${diffYear.toFixed(0)} Kč / rok`;
 
     results.innerHTML = `
-        <div class="row"><span>1 km X</span><span>${costPerKmX.toFixed(2)} Kč</span></div>
-        <div class="row"><span>1 km Y</span><span>${costPerKmY.toFixed(2)} Kč</span></div>
-        <div class="row"><span>Den X</span><span>${dailyX.toFixed(0)} Kč</span></div>
-        <div class="row"><span>Den Y</span><span>${dailyY.toFixed(0)} Kč</span></div>
+        <div class="row"><span>1 km při cenách v den X</span><span>${costPerKmX.toFixed(2)} Kč</span></div>
+        <div class="row"><span>1 km při cenách v den Y</span><span>${costPerKmY.toFixed(2)} Kč</span></div>
+        <div class="row"><span>Náklady na 1 den při cenách v den X</span><span>${dailyX.toFixed(0)} Kč</span></div>
+        <div class="row"><span>Náklady na 1 den při cenách v den Y</span><span>${dailyY.toFixed(0)} Kč</span></div>
     `;
 
     const data = {
