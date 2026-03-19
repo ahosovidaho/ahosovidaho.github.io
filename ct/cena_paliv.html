@@ -12,22 +12,36 @@
         display: flex;
         justify-content: center;
         align-items: center;
-        height: 100vh;
+        min-height: 100vh;
         margin: 0;
+        padding: 16px;
     }
 
     .card {
         background: rgba(255,255,255,0.7);
         backdrop-filter: blur(20px);
-        padding: 30px;
+        padding: 26px;
         border-radius: 28px;
         box-shadow: 0 20px 50px rgba(0,0,0,0.15);
         width: 440px;
+        max-width: 100%;
     }
 
     h1 {
-        font-size: 24px;
-        margin-bottom: 20px;
+        font-size: 22px;
+        margin-bottom: 10px;
+    }
+
+    .big-number {
+        font-size: 28px;
+        font-weight: 700;
+        margin-bottom: 16px;
+    }
+
+    .sub {
+        font-size: 13px;
+        color: #6e6e73;
+        margin-bottom: 10px;
     }
 
     label {
@@ -39,16 +53,16 @@
 
     input {
         width: 100%;
-        padding: 12px;
-        border-radius: 14px;
+        padding: 14px;
+        border-radius: 16px;
         border: none;
         background: #f2f2f7;
-        margin-top: 5px;
-        font-size: 15px;
+        margin-top: 6px;
+        font-size: 16px;
     }
 
     .results {
-        margin-top: 20px;
+        margin-top: 18px;
         font-size: 14px;
     }
 
@@ -61,12 +75,23 @@
     canvas {
         margin-top: 20px;
     }
+
+    /* MOBILE BOOST */
+    @media (max-width: 480px) {
+        .card { padding: 20px; border-radius: 22px; }
+        h1 { font-size: 20px; }
+        .big-number { font-size: 26px; }
+        input { font-size: 18px; padding: 16px; }
+    }
 </style>
 </head>
 <body>
 
 <div class="card">
     <h1>Porovnání nákladů PHM</h1>
+
+    <div class="big-number" id="bigDiff">—</div>
+    <div class="sub" id="bigDiffDetail">Zadej hodnoty</div>
 
     <label>Cena paliva (den X)</label>
     <input type="number" id="priceX">
@@ -88,6 +113,32 @@
 <script>
 let chart;
 
+const priceXInput = document.getElementById('priceX');
+const priceYInput = document.getElementById('priceY');
+const consumptionInput = document.getElementById('consumption');
+const kmDayInput = document.getElementById('kmDay');
+const results = document.getElementById('results');
+const bigDiff = document.getElementById('bigDiff');
+const bigDiffDetail = document.getElementById('bigDiffDetail');
+
+function saveValues() {
+    localStorage.setItem('phmCalc', JSON.stringify({
+        priceX: priceXInput.value,
+        priceY: priceYInput.value,
+        consumption: consumptionInput.value,
+        kmDay: kmDayInput.value
+    }));
+}
+
+function loadValues() {
+    const data = JSON.parse(localStorage.getItem('phmCalc'));
+    if (!data) return;
+    priceXInput.value = data.priceX || '';
+    priceYInput.value = data.priceY || '';
+    consumptionInput.value = data.consumption || '';
+    kmDayInput.value = data.kmDay || '';
+}
+
 function calculate() {
     const priceX = parseFloat(priceXInput.value);
     const priceY = parseFloat(priceYInput.value);
@@ -107,6 +158,13 @@ function calculate() {
 
     const yearlyX = dailyX * 365;
     const yearlyY = dailyY * 365;
+
+    const diffDay = dailyY - dailyX;
+    const diffMonth = monthlyY - monthlyX;
+    const diffYear = yearlyY - yearlyX;
+
+    bigDiff.innerText = `${diffDay.toFixed(0)} Kč / den`;
+    bigDiffDetail.innerText = `+${diffMonth.toFixed(0)} Kč / měsíc · +${diffYear.toFixed(0)} Kč / rok`;
 
     results.innerHTML = `
         <div class="row"><span>1 km X</span><span>${costPerKmX.toFixed(2)} Kč</span></div>
@@ -133,17 +191,16 @@ function calculate() {
             plugins: { legend: { display: false } }
         }
     });
-}
 
-const priceXInput = document.getElementById('priceX');
-const priceYInput = document.getElementById('priceY');
-const consumptionInput = document.getElementById('consumption');
-const kmDayInput = document.getElementById('kmDay');
-const results = document.getElementById('results');
+    saveValues();
+}
 
 [priceXInput, priceYInput, consumptionInput, kmDayInput].forEach(input => {
     input.addEventListener('input', calculate);
 });
+
+loadValues();
+calculate();
 </script>
 
 </body>
