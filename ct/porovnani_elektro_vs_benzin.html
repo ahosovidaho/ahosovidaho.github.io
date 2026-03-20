@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kalkulačka PHM vs EV</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+body {font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",sans-serif;background:linear-gradient(180deg,#f5f5f7,#e5e5ea);margin:0;padding:16px;display:flex;justify-content:center}
+.card{background:rgba(255,255,255,.7);backdrop-filter:blur(20px);padding:20px;border-radius:24px;max-width:520px;width:100%;box-shadow:0 20px 50px rgba(0,0,0,.15)}
+h1{font-size:20px;margin-bottom:10px}
+.big{font-size:26px;font-weight:700}
+.sub{font-size:13px;color:#6e6e73;margin-bottom:10px}
+label{font-size:12px;color:#6e6e73;margin-top:10px;display:block}
+input,select{width:100%;padding:14px;border-radius:14px;border:none;background:#f2f2f7;margin-top:5px;font-size:15px}
+.row{display:flex;justify-content:space-between;font-size:13px;margin:4px 0}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.section{background:rgba(255,255,255,.5);padding:12px;border-radius:16px}
+canvas{margin-top:20px}
+@media(max-width:480px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="card">
+<h1>Palivo vs Elektromobil</h1>
+
+<div class="big" id="mainDiff">—</div>
+<div class="sub" id="subDiff">Zadej hodnoty</div>
+
+<label>Cena paliva X</label>
+<input id="priceX" type="number">
+<label>Cena paliva Y</label>
+<input id="priceY" type="number">
+<label>Spotřeba (l/100km)</label>
+<input id="consumption" type="number">
+<label>Km/den</label>
+<input id="kmDay" type="number">
+
+<label>Scénář nabíjení</label>
+<select id="scenario">
+<option value="6">Domácí (~6 Kč)</option>
+<option value="9">AC veřejné (~9 Kč)</option>
+<option value="14">DC rychlé (~14 Kč)</option>
+</select>
+
+<label>Spotřeba EV (kWh/100km)</label>
+<input id="evConsumption" type="number">
+
+<div class="grid">
+<div class="section" id="fuel"></div>
+<div class="section" id="ev"></div>
+</div>
+
+<canvas id="chart"></canvas>
+</div>
+
+<script>
+let chart;
+const $=id=>document.getElementById(id);
+
+function save(){localStorage.setItem('calc',JSON.stringify({px:priceX.value,py:priceY.value,c:consumption.value,k:kmDay.value,evc:evConsumption.value,s:scenario.value}))}
+function load(){let d=JSON.parse(localStorage.getItem('calc')||'{}');priceX.value=d.px||'';priceY.value=d.py||'';consumption.value=d.c||'';kmDay.value=d.k||'';evConsumption.value=d.evc||'';scenario.value=d.s||6}
+
+function calc(){
+let px=+priceX.value,py=+priceY.value,c=+consumption.value,k=+kmDay.value,evc=+evConsumption.value,sc=+scenario.value;
+if(!px||!py||!c||!k||!evc)return;
+
+let kmX=(c/100)*px,kmY=(c/100)*py;
+let dX=kmX*k,dY=kmY*k;
+let evKm=(evc/100)*sc;
+let evDay=evKm*k;
+
+let diffFuel=dY-dX;
+let diffEV=dY-evDay;
+
+mainDiff.innerText=`${diffEV.toFixed(0)} Kč / den vs EV`;
+subDiff.innerText=`Palivo zdražení: +${diffFuel.toFixed(0)} Kč/den`;
+
+fuel.innerHTML=`<b>Palivo</b>
+<div class=row><span>1 km</span><span>${kmY.toFixed(2)} Kč</span></div>
+<div class=row><span>Den</span><span>${dY.toFixed(0)} Kč</span></div>`;
+
+ev.innerHTML=`<b>EV</b>
+<div class=row><span>1 km</span><span>${evKm.toFixed(2)} Kč</span></div>
+<div class=row><span>Den</span><span>${evDay.toFixed(0)} Kč</span></div>`;
+
+let monthlyY=dY*30,monthlyEV=evDay*30,yearY=dY*365,yearEV=evDay*365;
+
+let breakEven=(yearY-yearEV)>0? (yearY-yearEV).toFixed(0):0;
+
+if(chart)chart.destroy();
+chart=new Chart(chartEl,{type:'bar',data:{labels:['Měsíc palivo','Měsíc EV','Rok palivo','Rok EV'],datasets:[{data:[monthlyY,monthlyEV,yearY,yearEV]}]},options:{plugins:{legend:{display:false}}}});
+
+save();
+}
+
+let chartEl=$("chart");
+[priceX,priceY,consumption,kmDay,evConsumption,scenario].forEach(i=>i.addEventListener('input',calc));
+load();calc();
+</script>
+</body>
+</html>
