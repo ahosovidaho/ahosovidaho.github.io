@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vyplatí se zajížďka pro levnější palivo?</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f4f8;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+        }
+        h2 {
+            text-align: center;
+            color: #2c3e50;
+            margin-top: 0;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #555;
+        }
+        input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 5px rgba(52, 152, 219, 0.5);
+        }
+        .result-box {
+            margin-top: 25px;
+            padding: 20px;
+            background-color: #e8f8f5;
+            border-left: 6px solid #1abc9c;
+            border-radius: 4px;
+        }
+        .result-box.negative {
+            background-color: #fdeaea;
+            border-left: 6px solid #e74c3c;
+        }
+        .result-title {
+            font-size: 0.9em;
+            text-transform: uppercase;
+            color: #7f8c8d;
+            margin-bottom: 5px;
+            display: block;
+        }
+        .result-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .hint {
+            font-size: 0.85em;
+            color: #7f8c8d;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Vyplatí se zajížďka? ⛽</h2>
+    
+    <div class="form-group">
+        <label for="volume">Kolik litrů budete tankovat?</label>
+        <input type="number" id="volume" value="50" step="1" min="1">
+    </div>
+
+    <div class="form-group">
+        <label for="consumption">Průměrná spotřeba (l/100 km)</label>
+        <input type="number" id="consumption" value="6.5" step="0.1" min="1">
+    </div>
+
+    <div class="form-group">
+        <label for="price">Aktuální cena za litr (dražší, míjená pumpa)</label>
+        <input type="number" id="price" value="38.50" step="0.1" min="1">
+    </div>
+
+    <div class="form-group">
+        <label for="diff">O kolik Kč je litr levnější jinde?</label>
+        <input type="number" id="diff" value="1.50" step="0.1" min="0.1">
+    </div>
+
+    <div class="form-group">
+        <label for="amortization">Amortizace vozu (Kč/km) <small>(Volitelné)</small></label>
+        <input type="number" id="amortization" value="0" step="0.5" min="0">
+        <div class="hint">Pokud zadáte 0, počítá se pouze úspora za palivo. Skutečná cena za opotřebení bývá 3-8 Kč/km.</div>
+    </div>
+
+    <div id="resultBox" class="result-box">
+        <span class="result-title">Maximální zajížďka jedním směrem:</span>
+        <div class="result-value"><span id="maxDistance">0</span> km</div>
+        <div class="hint">Pokud je levnější pumpa dál, proděláte.</div>
+    </div>
+</div>
+
+<script>
+    // Funkce, která zachytí všechny vstupy a provede výpočet
+    function calculate() {
+        const volume = parseFloat(document.getElementById('volume').value) || 0;
+        const consumption = parseFloat(document.getElementById('consumption').value) || 0;
+        const price = parseFloat(document.getElementById('price').value) || 0;
+        const diff = parseFloat(document.getElementById('diff').value) || 0;
+        const amortization = parseFloat(document.getElementById('amortization').value) || 0;
+
+        const resultBox = document.getElementById('resultBox');
+        const maxDistanceEl = document.getElementById('maxDistance');
+
+        if (volume > 0 && consumption > 0 && price > 0 && diff > 0) {
+            // Celková úspora na palivu
+            const totalSavings = volume * diff;
+            
+            // Cena za 1 km jízdy (palivo + amortizace)
+            const costPerKm = ((consumption / 100) * price) + amortization;
+            
+            // Kolik km můžeme celkově ujet za ušetřené peníze (tam i zpět)
+            const maxTotalDistance = totalSavings / costPerKm;
+            
+            // Maximální vzdálenost jedním směrem (musíme to vydělit 2)
+            const maxOneWayDistance = maxTotalDistance / 2;
+
+            maxDistanceEl.innerText = maxOneWayDistance.toFixed(1).replace('.', ',');
+            resultBox.classList.remove('negative');
+        } else {
+            maxDistanceEl.innerText = "0";
+            resultBox.classList.add('negative');
+        }
+    }
+
+    // Nastavíme posluchače událostí, aby se to počítalo hned při psaní
+    const inputs = document.querySelectorAll('input');
+    inputs.forEach(input => {
+        input.addEventListener('input', calculate);
+    });
+
+    // Prvotní výpočet při načtení stránky
+    calculate();
+</script>
+
+</body>
+</html>
