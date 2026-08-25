@@ -367,6 +367,10 @@
     "brand": "BVLGARI",
     "model": "BVLGARI Aluminium Vision Gran Turismo"
   },
+   {
+    "brand": "CATERHAM",
+    "model": "CATERHAM Seven Superlight R500 '08"
+  },
   {
     "brand": "Chaparral",
     "model": "Chaparral 2J '70"
@@ -614,6 +618,10 @@
   {
     "brand": "Ferrari",
     "model": "Ferrari 458 Italia GT3 '13"
+  },
+    {
+    "brand": "Ferrari",
+    "model": "Ferrari 499P '23"
   },
   {
     "brand": "Ferrari",
@@ -1730,6 +1738,10 @@
   {
     "brand": "Porsche",
     "model": "Porsche 919 Hybrid '16"
+  },
+    {
+    "brand": "Porsche",
+    "model": "Porsche 963 '24"
   },
   {
     "brand": "Porsche",
