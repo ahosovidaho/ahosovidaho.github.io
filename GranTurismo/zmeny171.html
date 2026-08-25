@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gran Turismo 7 – Analýza Update 1.71</title>
+    <style>
+        :root {
+            --bg-color: #0b0f19;
+            --card-bg: #161f30;
+            --card-border: #23324d;
+            --accent-blue: #38bdf8;
+            --accent-red: #ef4444;
+            --accent-green: #22c55e;
+            --accent-amber: #f59e0b;
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.6;
+            padding: 24px 16px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 20px 0;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        .badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            font-size: 0.8rem;
+            font-weight: 700;
+            padding: 4px 12px;
+            border-radius: 9999px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 12px;
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            margin-bottom: 8px;
+            background: linear-gradient(to right, #ffffff, var(--accent-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        header p {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+
+        h2 {
+            font-size: 1.4rem;
+            margin-top: 36px;
+            margin-bottom: 16px;
+            color: var(--accent-blue);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        h3 {
+            font-size: 1.1rem;
+            color: #ffffff;
+            margin-bottom: 8px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+        }
+
+        .card ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+
+        .card ul li {
+            position: relative;
+            padding-left: 20px;
+            margin-bottom: 10px;
+            font-size: 0.95rem;
+            color: #cbd5e1;
+        }
+
+        .card ul li::before {
+            content: "•";
+            position: absolute;
+            left: 4px;
+            color: var(--accent-blue);
+            font-weight: bold;
+            font-size: 1.2rem;
+            line-height: 1;
+        }
+
+        .card strong {
+            color: #ffffff;
+        }
+
+        /* Table Styling */
+        .table-container {
+            overflow-x: auto;
+            background-color: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            margin-bottom: 30px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.95rem;
+        }
+
+        th, td {
+            padding: 14px 18px;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        th {
+            background-color: rgba(35, 50, 77, 0.5);
+            color: var(--text-main);
+            font-weight: 700;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        td.highlight {
+            color: var(--accent-blue);
+            font-weight: 600;
+        }
+
+        /* Action list styling */
+        .actions-list {
+            display: grid;
+            gap: 12px;
+        }
+
+        .action-item {
+            background-color: var(--card-bg);
+            border-left: 4px solid var(--accent-green);
+            padding: 14px 18px;
+            border-radius: 0 8px 8px 0;
+            border-top: 1px solid var(--card-border);
+            border-right: 1px solid var(--card-border);
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        .action-item strong {
+            color: #ffffff;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .action-item p {
+            font-size: 0.92rem;
+            color: #94a3b8;
+            margin: 0;
+        }
+
+        footer {
+            margin-top: 50px;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            border-top: 1px solid var(--card-border);
+            padding-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <div class="badge">Gran Turismo 7</div>
+        <h1>Velký souhrn aktualizace 1.71</h1>
+        <p>Analýza fyzikálního modelu, změny herní mety a tipy na adaptaci pro jezdce</p>
+    </header>
+
+    <main>
+        <!-- 1. ZÁKLADNÍ PŘEHLED ZMĚN -->
+        <section>
+            <h2>🏎️ Zásadní změny v aktualizaci 1.71</h2>
+            
+            <div class="grid">
+                <div class="card">
+                    <h3>Fyzika pneumatik a dynamika</h3>
+                    <ul>
+                        <li><strong>Kratší brzdná dráha:</strong> Zkrácení brzdné zóny, méně agresivní zásah ABS a možnost brzdit podstatně později.</li>
+                        <li><strong>Větší Slip Angle:</strong> Pneumatiky nemají ostrý pád gripu na limitu; model odpouští mírný smyk.</li>
+                        <li><strong>Masivní trakce vzadu:</strong> Závodní pneu (Racing Soft) neztrácejí stabilitu; z apexu lze jít agresivně plným plynem.</li>
+                        <li><strong>Zvýšená nedotáčivost:</strong> Hra paradoxně odměňuje otočení volantu do ještě většího úhlu (nad 90°).</li>
+                        <li><strong>Zrádné obrubníky &amp; tráva:</strong> Výjezd mimo trať znamená okamžitou ztrátu gripu; obrubníky mohou auto nepředvídatelně roztočit.</li>
+                    </ul>
+                </div>
+
+                <div class="card">
+                    <h3>BoP, Vyvážení a Tuning</h3>
+                    <ul>
+                        <li><strong>Pád MR vozů a Porsche:</strong> Dříve dominantní vozy s motorem uprostřed/vzadu ztratily výhodu v rotaci a trakci.</li>
+                        <li><strong>Vzestup FR vozů &amp; Hyundai:</strong> Vpřed se dostala koncepce motoru vpředu a značka Hyundai (Genesis v Gr.3, Elantra v Gr.4).</li>
+                        <li><strong>Skrytý tovární tuning:</strong> Změněna výchozí geometrie (sbíhavost/toe) a nastavení diferenciálu (LSD) u BoP aut.</li>
+                    </ul>
+                </div>
+
+                <div class="card">
+                    <h3>Herní režimy, HW a Obsah</h3>
+                    <ul>
+                        <li><strong>Reset žebříčků:</strong> Kompletní vymazání dosavadních časů v licencích, misích i okruhových zkušenostech.</li>
+                        <li><strong>Snadnější grind (Tokyo 600):</strong> Spotřeba paliva snížena z 3× na 1×, což umožňuje jet se silnými vozy (např. RAV4 swap) bez tankování.</li>
+                        <li><strong>Hardware &amp; Volanty:</strong> Plynulejší ovládání na gamepadu; u Direct Drive základen (Logitech/Fanatec) se objevují stížnosti na přetížení točivého momentu a výpadky FFB.</li>
+                        <li><strong>4 nová auta:</strong> Caterham Seven Superlight R500, Hyundai Ioniq 5/6 N, Toyota Chaser '96, Toyota Mark II '98.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. SHODY VS NESHODY RECENZÍ -->
+        <section>
+            <h2>⚖️ Srovnání recenzí: V čem se shodují a neshodují</h2>
+            
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Oblast</th>
+                            <th>V čem se recenze shodují (Konsensus)</th>
+                            <th>V čem se rozcházejí</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Brzdný systém</strong></td>
+                            <td class="highlight">Dramaticky kratší brzdná dráha a možnost posunout brzdné body hlouběji do zatáček.</td>
+                            <td>Zda brzdění vyžaduje méně skillu, nebo je technika trail-brakingu stejná, jen efektivnější.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Výjezdy ze zatáček</strong></td>
+                            <td class="highlight">Zadní náprava má masivní grip; plyn lze z apexu zašlápnout téměř jako spínač On/Off.</td>
+                            <td>—</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Zatáčení a rotace</strong></td>
+                            <td class="highlight">Pro vyvolání rotace je nutné točit volantem do podstatně větších úhlů (více locku).</td>
+                            <td>—</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Mimo trať a obrubníky</strong></td>
+                            <td class="highlight">Tráva extrémně klouže; vyvýšené obrubníky auto nebezpečně destabilizují a tahají.</td>
+                            <td>—</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Celkový dojem z jízdy</strong></td>
+                            <td class="highlight">Závodní GT3 vozy na měkkých pneu působí otupěleji a „arkádověji“.</td>
+                            <td>Část recenzentů novou fyziku kritizuje, jiní chválí silniční auta na tvrdších pneu za lepší čitelnost práce podvozku.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Force Feedback (FFB)</strong></td>
+                            <td>—</td>
+                            <td>Pochvaly za jemnější detaily vs. hlášené technické výpadky, torque spiky a přehřívání DD základen.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Vliv na úroveň hráčů</strong></td>
+                            <td>—</td>
+                            <td>Rozpor v tom, zda update smazal rozdíly mezi profíky a začátečníky, nebo zda pomalejší jezdce zmate nejasný limit pneumatiky.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- 3. JAK SE ADAPTOVAT -->
+        <section>
+            <h2>🛠️ Jak se adaptovat na změny (Tipy pro jezdce)</h2>
+            
+            <div class="actions-list">
+                <div class="action-item">
+                    <strong>1. Posuňte brzdné body dopředu</strong>
+                    <p>Začněte brzdit o 10 až 20 metrů později než dříve. Auto zastaví rychleji a dovolí vám přenést více rychlosti do nájezdu.</p>
+                </div>
+                <div class="action-item">
+                    <strong>2. Nebojte se agresivnějšího úhlu volantu</strong>
+                    <p>Pokud auto v zatáčce nedotáčí, přidejte úhel natočení volantu – nový model pneumatik vás překvapivě odmění dodatečnou rotací.</p>
+                </div>
+                <div class="action-item">
+                    <strong>3. Jděte tvrdě na plyn z apexu</strong>
+                    <p>U GT3 vozů nemusíte plyn dávkovat s chirurgickou opatrností; zadní náprava má vysokou trakci a nesklouzává tak snadno do přetáčivého smyku.</p>
+                </div>
+                <div class="action-item">
+                    <strong>4. Vyhýbejte se agresivním obrubníkům a trávě</strong>
+                    <p>Omezte hluboké řezání přes vysoké obrubníky a striktně se držte na asfaltu kvůli brutální penalizaci přilnavosti na trávě.</p>
+                </div>
+                <div class="action-item">
+                    <strong>5. Upravte výběr auta a setup</strong>
+                    <p>V BoP závodech volte spíše vozy s koncepcí FR nebo značku Hyundai. V otevřeném tuningu uvolněte diferenciál (LSD) a snižte přední sbíhavost.</p>
+                </div>
+                <div class="action-item">
+                    <strong>6. Snižte celkovou sílu FFB na Direct Drive volantech</strong>
+                    <p>Pokud používáte Logitech G Pro nebo Fanatec DD a zaznamenáte přehřívání či výpadky, snižte točivý moment o 10–20 %.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>Gran Turismo 7 • Přehled a analýza komunitních recenzí k aktualizaci 1.71</p>
+    </footer>
+</div>
+
+</body>
+</html>
