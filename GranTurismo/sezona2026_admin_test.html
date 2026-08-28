@@ -1923,11 +1923,18 @@ function renderPenaltiesEditor(container, pens){
 
 async function loadAudit(raceId){
   try{
-    const snap = await db.collection('zavody').doc(raceId).collection('audit').orderBy('ts','desc').limit(20).get();
-    if(snap.empty){ $('#auditList').textContent='Žádné záznamy.'; return; }
+    // Nové záznamy jsou centrální, aby zůstaly zachované i po smazání závodu.
+    // Staré záznamy načítáme také, aby se historie neztratila.
+    const [centralSnap, legacySnap] = await Promise.all([
+      db.collection('audit_logs').where('raceId','==',raceId).get(),
+      db.collection('zavody').doc(raceId).collection('audit').get()
+    ]);
+    const entries = [...centralSnap.docs, ...legacySnap.docs].map(d=>d.data())
+      .sort((a,b)=>String(b.ts||'').localeCompare(String(a.ts||'')))
+      .slice(0,20);
+    if(!entries.length){ $('#auditList').textContent='Žádné záznamy.'; return; }
     const list = [];
-    snap.forEach(d=>{
-      const a=d.data();
+    entries.forEach(a=>{
       const when = a.ts ? new Date(a.ts).toLocaleString() : '';
       list.push(`<div>- <span class="pill">${escapeHtml(a.by||'neznámý')}</span> • ${when} • ${escapeHtml(a.summary||a.action||'')}</div>`);
     });
@@ -1937,11 +1944,13 @@ async function loadAudit(raceId){
     $('#auditList').textContent='Chyba načtení auditu.';
   }
 }
-async function addAudit(raceId, {action, summary}){
+function makeAuditEntry(raceId, {action, summary}){
+  const by = (auth.currentUser && (auth.currentUser.displayName||auth.currentUser.email)) || 'anonymous';
+  return {raceId, action, summary, by, ts: new Date().toISOString()};
+}
+async function addAudit(raceId, details){
   try{
-    const by = (auth.currentUser && (auth.currentUser.displayName||auth.currentUser.email)) || 'anonymous';
-    const ts = new Date().toISOString();
-    await db.collection('zavody').doc(raceId).collection('audit').add({action, summary, by, ts});
+    await db.collection('audit_logs').add(makeAuditEntry(raceId, details));
   }catch(e){ console.error('Audit write error', e); }
 }
 
@@ -1951,8 +1960,12 @@ $('#edit_delete').addEventListener('click', async ()=>{
   const id=$('#edit_id').value; if(!id) return;
   if(!confirm('Smazat závod? Tuto akci nelze vrátit.')) return;
   try{
-    await db.collection('zavody').doc(id).delete();
-    await addAudit(id, {action:'delete', summary:'Závod smazán'});
+    // Audit a smazání jsou jedna atomická operace: buď se provedou oba zápisy,
+    // nebo žádný z nich.
+    const batch = db.batch();
+    batch.set(db.collection('audit_logs').doc(), makeAuditEntry(id, {action:'delete', summary:'Závod smazán'}));
+    batch.delete(db.collection('zavody').doc(id));
+    await batch.commit();
     $('#edit_select').value=''; $('#editRaceForm').style.display='none';
   }catch(e){ console.error(e); alert('Chyba mazání: '+e.message); }
 });
