@@ -252,7 +252,8 @@ tbody tr:hover{ background: rgba(255,255,255,0.04); }
         <th>Jezdec</th>
         <th>Body</th>
         <th>Max. možné</th>
-        <th>Potřeba na titul</th>
+        <th>Do vedení nyní</th>
+        <th>Jistota titulu (lídr)</th>
         <th>Ve hře o titul</th>
         <th>Ve hře o pódium</th>
         <th>Odhad titulu podle aktuální formy</th>
@@ -261,7 +262,7 @@ tbody tr:hover{ background: rgba(255,255,255,0.04); }
     <tbody></tbody>
   </table>
   <div class="small" style="margin-top:6px;color:#9aa0a6">
-    Pozn.: Orientační výpočet – neřeší tie-break (výhry) při rovnosti bodů.
+    Pozn.: Jistota titulu pracuje s body; při jejich rovnosti rozhoduje pořadí podle výher a pódií.
   </div>
 </div>
 
@@ -393,7 +394,8 @@ tbody tr:hover{ background: rgba(255,255,255,0.04); }
       <th>Jezdec</th>
       <th>Body</th>
       <th>Max. možné</th>
-      <th>Potřeba na titul</th>
+      <th>Do vedení nyní</th>
+      <th>Jistota titulu (lídr)</th>
       <th>Ve hře o titul</th>
       <th>Ve hře o pódium</th>
       <th>Odhad podle formy</th>
@@ -1481,7 +1483,7 @@ function renderTitleMath(){
           <th>Body</th>
           <th>Max. možné</th>
           <th>Δ na lídra</th>
-          <th>Potřeba na titul*</th>
+          <th>Do vedení nyní</th>
           <th>Jistota titulu (lídr)</th>
           <th>Odhad podle formy</th>
           <th>Ve hře o titul</th>
@@ -1502,10 +1504,10 @@ function renderTitleMath(){
       const podiumPts = order[2]? stats[order[2]].pts : 0;
       const canPodium = maxPossible[name] >= podiumPts;
 
-      const needToTitle = !leader ? 0
-        : (name===leader
-            ? Math.max(0, (secondPts + remaining*maxPerRace + 1) - s.pts)
-            : Math.max(0, leaderPts + 1 - s.pts));
+      const pointsToLead = name===leader ? '—' : `${deficit + 1}`;
+      const clinchText = name===leader
+        ? (remaining===0 ? 'Mistr' : (magicLeader===0 ? 'Jisté' : String(magicLeader)))
+        : '—';
 
       const prob = titleProbVsLeader(name);
       const tr = document.createElement('tr');
@@ -1514,8 +1516,8 @@ function renderTitleMath(){
         <td>${s.pts}</td>
         <td>${maxPossible[name]}</td>
         <td>${name===leader? '—' : ('-'+deficit)}</td>
-        <td>${needToTitle>0? needToTitle : (name===leader?'—':'0')}</td>
-        <td>${name===leader ? (remaining===0?'—':magicLeader) : '—'}</td>
+        <td>${pointsToLead}</td>
+        <td>${clinchText}</td>
         <td>${prob}%</td>
         <td>${canTitle? 'Ano':'Ne'}</td>
         <td>${canPodium? 'Ano':'Ne'}</td>`;
