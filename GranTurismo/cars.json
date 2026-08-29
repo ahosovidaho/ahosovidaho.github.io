@@ -281,6 +281,10 @@
   },
   {
     "brand": "BMW",
+    "model": "BMW M Hybrid V8 '25"
+  },
+  {
+    "brand": "BMW",
     "model": "BMW M3 '89"
   },
   {
@@ -382,6 +386,10 @@
   {
     "brand": "Chevrolet",
     "model": "Chevrolet Camaro Z28 '69"
+  },
+  {
+    "brand": "Chevrolet",
+    "model": "Chevrolet Camaro 1969 Race-Mod"
   },
   {
     "brand": "Chevrolet",
@@ -969,6 +977,10 @@
   },
   {
     "brand": "Hyundai",
+    "model": "Hyundai ELANTRA N TC '24"
+  },
+  {
+    "brand": "Hyundai",
     "model": "Hyundai Genesis Coupe 3.8 Track '13"
   },
   {
@@ -986,6 +998,10 @@
   {
     "brand": "Hyundai",
     "model": "Hyundai IONIQ 5 N '24"
+  },
+  {
+    "brand": "Hyundai",
+    "model": "Hyundai IONIQ 6 N '25"
   },
   {
     "brand": "Hyundai",
@@ -1609,6 +1625,10 @@
   },
   {
     "brand": "Peugeot",
+    "model": "Peugeot 9X8 '25"
+  },
+  {
+    "brand": "Peugeot",
     "model": "Peugeot L500R HYbrid Vision Gran Turismo, 2017"
   },
   {
@@ -1685,6 +1705,10 @@
   },
   {
     "brand": "Porsche",
+    "model": "Porsche 911 Turbo S Leichtbau (964) '93"
+  },
+  {
+    "brand": "Porsche",
     "model": "Porsche 911 Carrera RS (964) '92"
   },
   {
@@ -1714,6 +1738,10 @@
   {
     "brand": "Porsche",
     "model": "Porsche 911 Turbo S (992) '20"
+  },
+  {
+    "brand": "Porsche",
+    "model": "Porsche 911 Turbo S Safety Car (992)"
   },
   {
     "brand": "Porsche",
@@ -1805,6 +1833,10 @@
   },
   {
     "brand": "Renault",
+    "model": "Renault Captur S Edition '21"
+  },
+  {
+    "brand": "Renault",
     "model": "Renault Espace F1 '95"
   },
   {
@@ -1850,6 +1882,10 @@
   {
     "brand": "Renault",
     "model": "Renault R8 Gordini '66"
+  },
+  {
+    "brand": "Renault",
+    "model": "Renault Twingo '93"
   },
   {
     "brand": "Renault",
@@ -2069,6 +2105,10 @@
   },
   {
     "brand": "Toyota",
+    "model": "Toyota Chaser Tourer V '97"
+  },
+  {
+    "brand": "Toyota",
     "model": "Toyota Corolla Levin 3door 1600GT APEX (AE86) '83"
   },
   {
@@ -2078,6 +2118,10 @@
   {
     "brand": "Toyota",
     "model": "Toyota Crown Athlete G Safety Car"
+  },
+  {
+    "brand": "Toyota",
+    "model": "Toyota Mark II Tourer V '97"
   },
   {
     "brand": "Toyota",
@@ -2250,6 +2294,14 @@
   {
     "brand": "Wicked Fabrication",
     "model": "Wicked Fabrication GT 51"
+  },
+  {
+    "brand": "Xiaomi",
+    "model": "Xiaomi SU7 Ultra '25"
+  },
+  {
+    "brand": "Yangwang",
+    "model": "Yangwang U9 '24"
   },
   {
     "brand": "Zagato",
