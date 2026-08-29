@@ -241,7 +241,7 @@ tbody tr:hover{ background: rgba(255,255,255,0.04); }
 
     <div class="card">
   <strong>Pořadí závodníků <span id="standingsMeta" class="small muted"></span></strong>
-      <table id="standings"><thead><tr><th>Závodník</th><th>Body</th><th>Vítězství</th><th>Pódiová umístění</th><th>DNS</th></tr></thead><tbody></tbody></table>
+      <table id="standings"><thead><tr><th>Závodník</th><th>Body</th><th>Vítězství</th><th>Pódiová umístění</th><th>DNS / neúčast</th></tr></thead><tbody></tbody></table>
     </div>
 
     <div class="card">
@@ -255,7 +255,7 @@ tbody tr:hover{ background: rgba(255,255,255,0.04); }
         <th>Potřeba na titul</th>
         <th>Ve hře o titul</th>
         <th>Ve hře o pódium</th>
-        <th>Pravděpodobnost zisku titulu (dle akt. formy)</th>
+        <th>Odhad titulu podle aktuální formy</th>
       </tr>
     </thead>
     <tbody></tbody>
@@ -320,7 +320,7 @@ tbody tr:hover{ background: rgba(255,255,255,0.04); }
   </table>
 </div>
 <div class="card">
-      <strong>H2H porovnání</strong>
+      <strong>H2H porovnání napříč všemi sezónami</strong>
       <div class="row" style="margin-top:8px">
         <div class="col">
           <label for="h2hA">Jezdec A</label>
@@ -338,7 +338,7 @@ tbody tr:hover{ background: rgba(255,255,255,0.04); }
       <canvas id="h2hChart" style="max-height:300px;margin-top:10px"></canvas>
 
       <div class="card" style="margin-top:12px">
-        <strong>Společné závody (H2H)</strong>
+        <strong>Společné závody (H2H, všechny sezóny)</strong>
         <table id="h2hTable">
           <thead>
             <tr>
@@ -369,7 +369,7 @@ tbody tr:hover{ background: rgba(255,255,255,0.04); }
         </div>
         <div class="col">
           <div class="small"><strong>Nejúspěšnější auta (body celkem)</strong></div>
-          <table id="carBestTable"><thead><tr><th>Auto</th><th>Body</th><th>Startů</th></tr></thead><tbody></tbody></table>
+          <table id="carBestTable"><thead><tr><th>Auto</th><th>Body</th><th>Startů</th><th>Ø body / start</th></tr></thead><tbody></tbody></table>
         </div>
       </div>
       <div class="row" style="margin-top:10px">
@@ -396,7 +396,7 @@ tbody tr:hover{ background: rgba(255,255,255,0.04); }
       <th>Potřeba na titul</th>
       <th>Ve hře o titul</th>
       <th>Ve hře o pódium</th>
-      <th>Pravděpodobnost podle formy</th>
+      <th>Odhad podle formy</th>
     </tr>
   </thead>
   <tbody></tbody>
@@ -426,15 +426,15 @@ tbody tr:hover{ background: rgba(255,255,255,0.04); }
     <div class="card">
       <strong>Kvalifikace vs. závod</strong>
       <table id="qualiRaceTable">
-        <thead><tr><th>Jezdec</th><th>Pole</th><th>Front row</th><th>Pole→výhra</th><th>Ø získané pozice</th></tr></thead>
+        <thead><tr><th>Jezdec</th><th>Kvalifikací</th><th>Pole</th><th>Front row</th><th>Pole→výhra</th><th>Ø získané pozice</th></tr></thead>
         <tbody></tbody>
       </table>
     </div>
 
     <div class="card">
-      <strong>Forma (poslední 3 / 5 závodů)</strong>
+      <strong>Forma (poslední 3 / 5 dokončených závodů)</strong>
       <table id="formTable">
-        <thead><tr><th>Jezdec</th><th>Posl. 3 (Ø umístění)</th><th>Posl. 5 (Ø umístění)</th></tr></thead>
+        <thead><tr><th>Jezdec</th><th>Posl. 3 dokončené (Ø umístění)</th><th>Posl. 5 dokončených (Ø umístění)</th></tr></thead>
         <tbody></tbody>
       </table>
     </div>
@@ -466,7 +466,7 @@ tbody tr:hover{ background: rgba(255,255,255,0.04); }
   <strong>Mezisezónní srovnání</strong>
   <div class="small muted" style="margin-top:6px">Souhrnné statistiky za jednotlivé sezóny pro vybraného jezdce.</div>
   <table id="driverSeasonCompareTable" style="margin-top:8px">
-    <thead><tr><th>Sezóna</th><th>Starty</th><th>Body</th><th>Výhry</th><th>Pódia</th><th>Ø pozice</th><th>Docházka</th></tr></thead>
+    <thead><tr><th>Sezóna</th><th>Starty</th><th>DNS / neúčast</th><th>Body</th><th>Výhry</th><th>Pódia</th><th>Ø pozice</th><th>Docházka</th></tr></thead>
     <tbody></tbody>
   </table>
 </div>
@@ -946,7 +946,9 @@ function renderSeasonComparator(){
   }
   const xRounds = (inpX && inpX.value) ? parseInt(inpX.value,10) : null;
   const rr = xRounds ? `po ${xRounds} záv.` : `v celé sezóně`;
-  summary.textContent = `Sezóna ${seasonA}: ${leader(compA)}  •  Sezóna ${seasonB}: ${leader(compB)} (${rr})`;
+  const comparedA = xRounds ? Math.min(xRounds, lenA) : lenA;
+  const comparedB = xRounds ? Math.min(xRounds, lenB) : lenB;
+  summary.textContent = `Sezóna ${seasonA}: ${leader(compA)}  •  Sezóna ${seasonB}: ${leader(compB)} (${rr}; A: ${comparedA} záv., B: ${comparedB} záv.)`;
 
   // union jezdců
   const names = new Set([...compA.keys(), ...compB.keys()]);
@@ -998,13 +1000,12 @@ function renderDriverSeasonCompare(name){
     const attendance = (races.length>0) ? Math.round((starts/races.length)*100) + '%' : '—';
 
     const tr=document.createElement('tr');
-    tr.innerHTML = `<td>${y}</td><td>${starts}</td><td>${points}</td><td>${wins}</td><td>${podiums}</td><td>${avgPos==null?'—':avgPos.toFixed(2)}</td><td>${attendance}</td>`;
+    tr.innerHTML = `<td>${y}</td><td>${starts}</td><td>${dns}</td><td>${points}</td><td>${wins}</td><td>${podiums}</td><td>${avgPos==null?'—':avgPos.toFixed(2)}</td><td>${attendance}</td>`;
     tbody.appendChild(tr);
   });
 }
 
 function renderAll(){
-  populateSeasonSwitch();
   populateSeasonSwitch();
   renderSeasonComparator();
   renderNextRace();          // (ten necháváme napříč sezónami – jde o nejbližší závod)
@@ -1500,7 +1501,7 @@ function renderTitleMath(){
           <th>Δ na lídra</th>
           <th>Potřeba na titul*</th>
           <th>Jistota titulu (lídr)</th>
-          <th>Pravděpodobnost podle formy</th>
+          <th>Odhad podle formy</th>
           <th>Ve hře o titul</th>
           <th>Ve hře o pódium</th>
         </tr>`;
@@ -2303,7 +2304,7 @@ function renderCarStats(){
 
   const bestT = $('#carBestTable tbody'); bestT.innerHTML='';
   Array.from(carPoints.entries()).sort((a,b)=>b[1].points - a[1].points).slice(0,10).forEach(([car, obj])=>{
-    const tr=document.createElement('tr'); tr.innerHTML=`<td>${escapeHtml(car)}</td><td>${obj.points}</td><td>${obj.starts}</td>`; bestT.appendChild(tr);
+    const tr=document.createElement('tr'); tr.innerHTML=`<td>${escapeHtml(car)}</td><td>${obj.points}</td><td>${obj.starts}</td><td>${(obj.points/obj.starts).toFixed(2)}</td>`; bestT.appendChild(tr);
   });
 
   const personalT = $('#driverTopCarTable tbody'); personalT.innerHTML='';
@@ -2347,7 +2348,7 @@ function renderAdvancedStats(){
 
   // Per-driver aggregates
   const agg = {};
-  drivers.forEach(d=> agg[d]={points:0, finishes:[], quali:[], starts:0, dns:0, wins:0, podiums:0, ptsTimeline:[], gained:[]});
+  drivers.forEach(d=> agg[d]={points:0, finishes:[], finishTimeline:[], quali:[], starts:0, dns:0, wins:0, podiums:0, ptsTimeline:[], gained:[]});
 
   completed.forEach((r, idxRace)=>{
     const base = getResultsArray(r);
@@ -2360,12 +2361,14 @@ function renderAdvancedStats(){
       const isDNS = (fIdx===-1) || arr[fIdx]==='DNS' || arr[fIdx]==='—';
       if(isDNS){
         agg[d].dns++;
+        agg[d].finishTimeline.push(null);
         agg[d].ptsTimeline.push(agg[d].points);
         return;
       }
       const pos = fIdx+1;
       agg[d].starts++;
       agg[d].finishes.push(pos);
+      agg[d].finishTimeline.push(pos);
       agg[d].points += (pointsMap[fIdx]||0);
       agg[d].ptsTimeline.push(agg[d].points);
       if(pos===1) agg[d].wins++;
@@ -2413,12 +2416,13 @@ function renderAdvancedStats(){
 
     // Naplnění hodnot a držitelů
     drivers.forEach(d=>{
-      const f = agg[d].finishes; // pouze dokončené závody (pozice 1..5)
+      // Časová osa obsahuje každý odjetý závod; DNS proto sérii přeruší.
+      const f = agg[d].finishTimeline;
       const vals = {
         'Nejvíc výher v sezóně'        : agg[d].wins,
         'Nejdelší série výher v sezóně': longestStreak(f, x=>x===1),
-        'Nejdelší série pódií'         : longestStreak(f, x=>x<=3),
-        'Nejdelší série bodů'          : longestStreak(f, x=>x>=1 && x<=5),
+        'Nejdelší série pódií'         : longestStreak(f, x=>Number.isInteger(x) && x<=3),
+        'Nejdelší série bodů'          : longestStreak(f, x=>Number.isInteger(x) && x>=1 && x<=5),
         'Nejdelší série DNS'           : longestDnsStreakFor(d)
       };
       Object.entries(vals).forEach(([cat,v])=>{
@@ -2485,15 +2489,15 @@ function renderAdvancedStats(){
       if(qi===0 && fi===0) poleToWin++;
     });
     const gainedAvg = a.gained.length? (a.gained.reduce((s,x)=>s+x,0)/a.gained.length) : 0;
-    return {d,poles,front,p2w:poleToWin,gain:gainedAvg};
+    return {d, qualiCount:a.quali.length, poles,front,p2w:poleToWin,gain:gainedAvg};
   }).sort((x,y)=> y.poles - x.poles || y.p2w - x.p2w || y.front - x.front);
   linesQR.forEach(o=>{
     const tr=document.createElement('tr');
-    tr.innerHTML=`<td>${o.d}</td><td>${o.poles}</td><td>${o.front}</td><td>${o.p2w}</td><td>${o.gain>=0?'+':''}${o.gain.toFixed(2)}</td>`;
+    tr.innerHTML=`<td>${o.d}</td><td>${o.qualiCount}</td><td>${o.poles}</td><td>${o.front}</td><td>${o.p2w}</td><td>${o.gain>=0?'+':''}${o.gain.toFixed(2)}</td>`;
     qTB.appendChild(tr);
   });
 
-  // Forma (posl. 3 / 5) – umístění
+  // Forma z posledních dokončených závodů – umístění
   const fTB=$('#formTable tbody'); fTB.innerHTML='';
   const linesForm = drivers.map(d=>{
     const a=agg[d];
@@ -2686,7 +2690,7 @@ function renderDriverProfile(name){
   `).join('');
   const allResultsHTML = `
     <div class="card" style="margin-top:10px">
-      <strong>Výsledky v sezóně</strong>
+      <strong>Historie výsledků (všechny sezóny)</strong>
       <table>
         <thead>
           <tr><th>Datum</th><th>Závod / Trať</th><th>Q</th><th>Výsledek</th><th>Body</th><th>Auto</th></tr>
