@@ -385,6 +385,21 @@ tbody tr:hover{ background: rgba(255,255,255,0.04); }
       </div>
     </div>
 
+    <div class="card" id="miniChampionshipsCard">
+      <strong>Vložené šampionáty <span class="small muted">• bodování 10–8–6–4–2</span></strong>
+      <div class="row" style="margin-top:10px">
+        <div class="col"><strong>NASCAR</strong><div id="miniMeta-nascar" class="small muted"></div><table id="miniTable-nascar"><thead><tr><th>Jezdec</th><th>Body</th><th>Výhry</th><th>Pódia</th><th>DNS / neúčast</th></tr></thead><tbody></tbody></table></div>
+        <div class="col"><strong>Formule 1</strong><div id="miniMeta-f1" class="small muted"></div><table id="miniTable-f1"><thead><tr><th>Jezdec</th><th>Body</th><th>Výhry</th><th>Pódia</th><th>DNS / neúčast</th></tr></thead><tbody></tbody></table></div>
+      </div>
+      <div class="row" style="margin-top:10px">
+        <div class="col"><strong>IMSA</strong><div id="miniMeta-imsa" class="small muted"></div><table id="miniTable-imsa"><thead><tr><th>Jezdec</th><th>Body</th><th>Výhry</th><th>Pódia</th><th>DNS / neúčast</th></tr></thead><tbody></tbody></table></div>
+        <div class="col"><strong>Bazarovky</strong><div id="miniMeta-bazarovky" class="small muted"></div><table id="miniTable-bazarovky"><thead><tr><th>Jezdec</th><th>Body</th><th>Výhry</th><th>Pódia</th><th>DNS / neúčast</th></tr></thead><tbody></tbody></table></div>
+      </div>
+      <div class="row" style="margin-top:10px">
+        <div class="col"><strong>Individuální závody</strong><div id="miniMeta-individual" class="small muted"></div><table id="miniTable-individual"><thead><tr><th>Jezdec</th><th>Body</th><th>Výhry</th><th>Pódia</th><th>DNS / neúčast</th></tr></thead><tbody></tbody></table></div>
+      </div>
+    </div>
+
 <div class="card">
   <strong>Titulová matematika <span class="small" id="tmMeta"></span></strong>
 
@@ -524,6 +539,15 @@ tbody tr:hover{ background: rgba(255,255,255,0.04); }
               <option>Gr.B</option><option>VGT</option><option>Open</option>
             </select>
           </div>
+          <div class="col">
+            <label for="add_miniChampionship">Vložený šampionát</label>
+            <select id="add_miniChampionship">
+              <option value="">Bez zařazení</option>
+              <option value="nascar">NASCAR</option><option value="f1">Formule 1</option>
+              <option value="imsa">IMSA</option><option value="bazarovky">Bazarovky</option>
+              <option value="individual">Individuální závody</option>
+            </select>
+          </div>
         </div>
 
         <div class="row">
@@ -575,6 +599,12 @@ tbody tr:hover{ background: rgba(255,255,255,0.04); }
       </form>
     </div>
 
+    <div class="card admin-only">
+      <strong>Doplnit vložené šampionáty pro stávající závody</strong>
+      <div class="small" style="margin-top:8px">Doplní pole podle názvu závodu pouze tam, kde zatím chybí. Před uložením uvidíš počet změn.</div>
+      <button id="migrateMiniChampionships" type="button" class="btn-ghost" style="margin-top:10px">Doplnit zařazení automaticky</button>
+    </div>
+
     <!-- Upravit existující závod -->
     <div class="card admin-only" id="adminEditCard">
       <strong>Upravit existující závod</strong>
@@ -609,6 +639,15 @@ tbody tr:hover{ background: rgba(255,255,255,0.04); }
               <select id="edit_category">
                 <option>Gr.1</option><option>Gr.2</option><option>Gr.3</option><option>Gr.4</option>
                 <option>Gr.B</option><option>VGT</option><option>Open</option>
+              </select>
+            </div>
+            <div class="col">
+              <label for="edit_miniChampionship">Vložený šampionát</label>
+              <select id="edit_miniChampionship">
+                <option value="">Bez zařazení</option>
+                <option value="nascar">NASCAR</option><option value="f1">Formule 1</option>
+                <option value="imsa">IMSA</option><option value="bazarovky">Bazarovky</option>
+                <option value="individual">Individuální závody</option>
               </select>
             </div>
           </div>
@@ -719,6 +758,14 @@ let currentSeason = null;
 // Když chceš sezónu vynutit ručně, nastav číslo (např. 2025). Jinak nech null = auto.
 const FORCE_SEASON = null;
 
+const MINI_CHAMPIONSHIPS = [
+  { id:'nascar', label:'NASCAR' },
+  { id:'f1', label:'Formule 1' },
+  { id:'imsa', label:'IMSA' },
+  { id:'bazarovky', label:'Bazarovky' },
+  { id:'individual', label:'Individuální závody' }
+];
+
 /* === Helpers === */
 const $ = s=>document.querySelector(s);
 const $$ = s=>Array.from(document.querySelectorAll(s));
@@ -738,6 +785,20 @@ function getSeason(r){
   if (r.season != null) return Number(r.season);
   const d = r.datum || r.date;
   return d ? new Date(d).getFullYear() : null;
+}
+
+function inferMiniChampionship(r){
+  const title = String(r.nazev || r.name || '').toLowerCase();
+  if(title.includes('nascar')) return 'nascar';
+  if(title.includes('formule 1') || /\bf1\b/.test(title)) return 'f1';
+  if(title.includes('imsa')) return 'imsa';
+  if(title.includes('bazarov')) return 'bazarovky';
+  if(/(ondrův|hardyho|matyho|márův|vikiho)\s+závod/.test(title)) return 'individual';
+  return '';
+}
+function getMiniChampionship(r){
+  const saved = r.miniChampionship || r.mini_championship || '';
+  return MINI_CHAMPIONSHIPS.some(s=>s.id===saved) ? saved : inferMiniChampionship(r);
 }
 
 // Aktivní sezóna podle dat (nebo FORCE_SEASON)
@@ -1000,6 +1061,7 @@ function renderAll(){
   populateH2HDropdowns();
   renderDriverLegend();
   renderCarStats();
+  renderMiniChampionships();
   renderAdvancedStats();
   renderTitleMath();
   renderProfileInit();
@@ -1715,6 +1777,7 @@ $('#addRaceForm').addEventListener('submit', async (e)=>{
     pocet_kol: $('#add_laps').value.trim(),
     vozidla: $('#add_vehicles').value.trim(),
     kategorie: $('#add_category').value,
+    miniChampionship: $('#add_miniChampionship').value,
     tuning: $('#add_tuning').value,
     bop: $('#add_bop').value,
     pneumatiky: $('#add_tyres').value,
@@ -1736,6 +1799,27 @@ $('#addRaceForm').addEventListener('submit', async (e)=>{
     $('#addRaceForm').reset();
     alert('Závod přidán.');
   }catch(e){ console.error(e); alert('Chyba ukládání závodu: '+e.message); }
+});
+
+$('#migrateMiniChampionships').addEventListener('click', async ()=>{
+  const candidates = racesCache.filter(r=>{
+    const hasSavedValue = Boolean(r.miniChampionship || r.mini_championship);
+    return inActiveSeason(r) && !hasSavedValue && Boolean(inferMiniChampionship(r));
+  });
+  if(!candidates.length){ alert('Pro aktivní sezónu není co doplnit.'); return; }
+  if(!confirm(`Doplnit vložený šampionát u ${candidates.length} závodů aktivní sezóny?`)) return;
+  try{
+    const batch = db.batch();
+    candidates.forEach(r=>{
+      batch.set(db.collection('zavody').doc(r.id), {miniChampionship:inferMiniChampionship(r)}, {merge:true});
+    });
+    await batch.commit();
+    await Promise.all(candidates.map(r=>{
+      const series = inferMiniChampionship(r);
+      return addAudit(r.id, {action:'update', summary:`Doplněn vložený šampionát: ${MINI_CHAMPIONSHIPS.find(s=>s.id===series)?.label||series}`});
+    }));
+    alert(`Zařazení doplněno u ${candidates.length} závodů.`);
+  }catch(e){ console.error(e); alert('Chyba při doplňování zařazení: '+e.message); }
 });
 
 /* === Admin: Edit === */
@@ -1766,6 +1850,7 @@ $('#edit_select').addEventListener('change', async ()=>{
   $('#edit_laps').value=r.pocet_kol||r.laps||'';
   $('#edit_vehicles').value=r.vozidla||r.vehicles||'';
   $('#edit_category').value=r.kategorie||r.category||'Open';
+  $('#edit_miniChampionship').value=r.miniChampionship||r.mini_championship||inferMiniChampionship(r);
   $('#edit_tuning').value=r.tuning||'NE';
   $('#edit_bop').value=r.bop||'NE';
   $('#edit_tyres').value=r.pneumatiky||r.tyres||'Závodní';
@@ -1963,6 +2048,7 @@ $('#editRaceForm').addEventListener('submit', async (e)=>{
     pocet_kol: $('#edit_laps').value.trim(),
     vozidla: $('#edit_vehicles').value.trim(),
     kategorie: $('#edit_category').value,
+    miniChampionship: $('#edit_miniChampionship').value,
     tuning: $('#edit_tuning').value,
     bop: $('#edit_bop').value,
     pneumatiky: $('#edit_tyres').value,
@@ -2301,6 +2387,44 @@ function renderCarStats(){
     const tr=document.createElement('tr');
     tr.innerHTML=`<td>${escapeHtml(o.car)}</td><td>${o.avg.toFixed(2)}</td><td>${o.starts}</td>`;
     worstT.appendChild(tr);
+  });
+}
+
+function renderMiniChampionships(){
+  MINI_CHAMPIONSHIPS.forEach(series=>{
+    const tbody = $(`#miniTable-${series.id} tbody`);
+    const meta = $(`#miniMeta-${series.id}`);
+    if(!tbody || !meta) return;
+    const races = racesCache.filter(r=>inActiveSeason(r) && getMiniChampionship(r)===series.id)
+      .sort((a,b)=>new Date(a.datum||a.date||0)-new Date(b.datum||b.date||0));
+    const completed = races.filter(isCompletedRace);
+    const stats = {};
+    drivers.forEach(d=>stats[d]={points:0,wins:0,podiums:0,dns:0});
+    completed.forEach(r=>{
+      const arr = applyPenalties(getResultsArray(r), Array.isArray(r.penalties)?r.penalties:[]);
+      for(let i=0;i<5;i++){
+        const raw = arr[i];
+        if(!raw || raw==='DNS' || raw==='—') continue;
+        const d = normName(raw);
+        if(!stats[d]) stats[d]={points:0,wins:0,podiums:0,dns:0};
+        stats[d].points += pointsMap[i]||0;
+        if(i===0) stats[d].wins++;
+        if(i<3) stats[d].podiums++;
+      }
+      drivers.forEach(d=>{
+        const idx = arr.findIndex(x=>normName(x)===d);
+        if(idx===-1 || arr[idx]==='DNS' || arr[idx]==='—') stats[d].dns++;
+      });
+    });
+    meta.textContent = `Odjeto ${completed.length} / ${races.length} závodů`;
+    tbody.innerHTML = '';
+    Object.keys(stats).sort((a,b)=>stats[b].points-stats[a].points || stats[b].wins-stats[a].wins || stats[b].podiums-stats[a].podiums)
+      .forEach(name=>{
+        const s=stats[name];
+        const tr=document.createElement('tr');
+        tr.innerHTML=`<td>${escapeHtml(name)}</td><td>${s.points}</td><td>${s.wins}</td><td>${s.podiums}</td><td>${s.dns}</td>`;
+        tbody.appendChild(tr);
+      });
   });
 }
 
