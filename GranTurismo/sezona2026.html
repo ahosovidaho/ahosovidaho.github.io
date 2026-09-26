@@ -509,6 +509,7 @@ tbody tr:hover{ background: rgba(255,255,255,0.04); }
     <!-- Přidat nový závod -->
     <div class="card admin-only" id="adminAddCard">
       <strong>Přidat nový závod</strong>
+      <div id="catalogFallbackNotice" class="small muted" role="status" hidden style="margin-top:6px"></div>
       <form id="addRaceForm" autocomplete="off">
         <div class="row">
           <div class="col">
@@ -2185,10 +2186,10 @@ const GT7_TRACKS_FALLBACK = [
   "Autódromo José Carlos Pace (Interlagos)", "Autopolis", "Bathurst (Mount Panorama)", "Brands Hatch", "Circuit de Barcelona-Catalunya", "Circuit de la Sarthe (Le Mans)",
   "Daytona International Speedway", "Fuji Speedway", "Goodwood Motor Circuit", "WeatherTech Raceway Laguna Seca", "Autodromo Nazionale Monza", "Nürburgring",
   "Michelin Raceway Road Atlanta", "Red Bull Ring", "Spa-Francorchamps", "Suzuka Circuit", "Tsukuba Circuit", "Watkins Glen International",
-  "Willow Springs International Raceway", "Alsace", "Autodrome Lago Maggiore", "Blue Moon Bay Speedway", "Broad Bean Raceway", "Deep Forest Raceway",
+  "Willow Springs International Raceway", "Alsace", "Autodrome Lago Maggiore", "Blue Moon Bay Speedway", "BB Raceway", "Deep Forest Raceway",
   "Dragon Trail", "Eiger Nordwand", "Grand Valley - Highway 1", "High Speed Ring", "Kyoto Driving Park", "Northern Isle Speedway",
-  "Circuit de Sainte-Croix", "Sardegna - Road Track", "Special Stage Route X", "Tokyo Expressway", "Trial Mountain Circuit", "Barcelona-Catalunya Rallycross",
-  "Colorado Springs", "Fishermans Ranch", "Lake Louise (Snow)", "Sardegna - Windmills (Dirt)", "Circuit Gilles-Villeneuve", "Yas Marina Circuit"
+  "Circuit de Sainte-Croix", "Sardegna - Road Track", "Special Stage Route X", "Tokyo Expressway", "Trial Mountain Circuit", "Circuit de Barcelona-Catalunya - rozvržení Rallycross",
+  "Colorado Springs", "Fishermans Ranch", "Lake Louise (Snow)", "Sardegna - Windmills (Dirt)", "Okruh Gilles Villeneuve", "Okruh Yas Marina"
 ];
 async function installGt7TrackDatalist() {
   let tracks = null;
@@ -2234,7 +2235,14 @@ async function installGt7CarDatalist() {
     const res = await fetch('./cars.json', { cache: 'no-store' });
     if (res.ok) carsRaw = await res.json();
   } catch {}
-  if (!carsRaw) carsRaw = GT7_CARS_FALLBACK.slice();
+  if (!Array.isArray(carsRaw) || !carsRaw.length) {
+    carsRaw = GT7_CARS_FALLBACK.slice();
+    const notice = document.getElementById('catalogFallbackNotice');
+    if (notice) {
+      notice.textContent = 'Úplný katalog vozů se nepodařilo načíst; našeptávač nabízí jen základní seznam. Vůz můžeš zadat ručně.';
+      notice.hidden = false;
+    }
+  }
 
   // Normalizace do {brand, model, label}
   CAR_LIST = [];
