@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="dark">
+  <meta name="description" content="Praktická analýza fyziky Gran Turismo 7 po aktualizaci 1.71 a doporučení pro Logitech RS50, Thrustmaster T300, DualSense a DualShock 4.">
+  <title>Gran Turismo 7 – fyzika po aktualizaci 1.71</title>
+
+  <style>
+    :root {
+      --bg: #080c14;
+      --bg-soft: #0e1522;
+      --panel: rgba(20, 29, 45, 0.92);
+      --panel-2: #182337;
+      --line: #2b3a55;
+      --text: #eef4ff;
+      --muted: #a7b4c9;
+      --blue: #53c7ff;
+      --blue-2: #218bff;
+      --green: #48d597;
+      --amber: #ffbf5a;
+      --red: #ff6b74;
+      --violet: #b59cff;
+      --shadow: 0 18px 55px rgba(0, 0, 0, 0.28);
+      --radius: 18px;
+      --max: 1120px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html {
+      scroll-behavior: smooth;
+      scroll-padding-top: 88px;
+    }
+
+    body {
+      margin: 0;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 15% -10%, rgba(33, 139, 255, 0.20), transparent 34rem),
+        radial-gradient(circle at 90% 18%, rgba(181, 156, 255, 0.13), transparent 30rem),
+        var(--bg);
+      font: 16px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    a { color: var(--blue); text-underline-offset: 3px; }
+    a:hover { color: #91dcff; }
+    strong { color: #fff; }
+
+    .wrap {
+      width: min(calc(100% - 32px), var(--max));
+      margin-inline: auto;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      border-bottom: 1px solid rgba(83, 199, 255, 0.18);
+      background: rgba(8, 12, 20, 0.86);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+    }
+
+    .topbar-inner {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      min-height: 62px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+
+    .topbar-inner::-webkit-scrollbar { display: none; }
+
+    .brand {
+      flex: 0 0 auto;
+      color: #fff;
+      font-weight: 850;
+      letter-spacing: -0.02em;
+      text-decoration: none;
+    }
+
+    nav {
+      display: flex;
+      gap: 6px;
+      white-space: nowrap;
+    }
+
+    nav a {
+      padding: 8px 10px;
+      border-radius: 10px;
+      color: var(--muted);
+      font-size: 0.88rem;
+      text-decoration: none;
+    }
+
+    nav a:hover {
+      color: #fff;
+      background: rgba(83, 199, 255, 0.10);
+    }
+
+    header {
+      padding: 76px 0 34px;
+    }
+
+    .eyebrow,
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      border: 1px solid rgba(83, 199, 255, 0.28);
+      border-radius: 999px;
+      background: rgba(83, 199, 255, 0.08);
+      color: #bdeaff;
+      font-size: 0.78rem;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .eyebrow { padding: 6px 11px; }
+    .tag { padding: 4px 8px; }
+    .tag.official { border-color: rgba(72, 213, 151, .35); background: rgba(72, 213, 151, .10); color: #aef1d1; }
+    .tag.measured { border-color: rgba(181, 156, 255, .38); background: rgba(181, 156, 255, .10); color: #d8caff; }
+    .tag.observed { border-color: rgba(255, 191, 90, .38); background: rgba(255, 191, 90, .10); color: #ffd995; }
+    .tag.advice { border-color: rgba(83, 199, 255, .35); background: rgba(83, 199, 255, .10); color: #bdeaff; }
+
+    h1, h2, h3, h4 {
+      margin-top: 0;
+      color: #fff;
+      line-height: 1.18;
+      letter-spacing: -0.025em;
+    }
+
+    h1 {
+      max-width: 920px;
+      margin: 18px 0 16px;
+      font-size: clamp(2.35rem, 6vw, 4.9rem);
+      letter-spacing: -0.055em;
+    }
+
+    h2 {
+      margin-bottom: 18px;
+      font-size: clamp(1.7rem, 3.2vw, 2.55rem);
+    }
+
+    h3 { margin-bottom: 10px; font-size: 1.28rem; }
+    h4 { margin-bottom: 7px; font-size: 1rem; }
+
+    .lead {
+      max-width: 850px;
+      margin: 0;
+      color: #c5d0e1;
+      font-size: clamp(1.05rem, 2vw, 1.28rem);
+    }
+
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 9px;
+      margin-top: 24px;
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+
+    .meta span {
+      padding: 7px 10px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: rgba(255,255,255,.025);
+    }
+
+    main { padding-bottom: 72px; }
+
+    section {
+      padding: 38px 0;
+      border-top: 1px solid rgba(43, 58, 85, 0.72);
+    }
+
+    .section-intro {
+      max-width: 810px;
+      margin: -6px 0 22px;
+      color: var(--muted);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 16px;
+    }
+
+    .card {
+      grid-column: span 4;
+      padding: 22px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: linear-gradient(145deg, rgba(24, 35, 55, .95), rgba(14, 21, 34, .95));
+      box-shadow: var(--shadow);
+    }
+
+    .card.half { grid-column: span 6; }
+    .card.full { grid-column: 1 / -1; }
+    .card.accent { border-color: rgba(83, 199, 255, .38); }
+    .card.good { border-color: rgba(72, 213, 151, .34); }
+    .card.warn { border-color: rgba(255, 191, 90, .38); }
+
+    .big-number {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--blue);
+      font-size: 2.25rem;
+      font-weight: 900;
+      line-height: 1;
+    }
+
+    p { margin: 0 0 14px; }
+    p:last-child { margin-bottom: 0; }
+
+    ul, ol { margin: 10px 0 0; padding-left: 1.25rem; }
+    li + li { margin-top: 7px; }
+    li::marker { color: var(--blue); }
+
+    .verdict {
+      position: relative;
+      overflow: hidden;
+      padding: 26px;
+      border: 1px solid rgba(83, 199, 255, .40);
+      border-radius: 22px;
+      background: linear-gradient(125deg, rgba(33, 139, 255, .17), rgba(181, 156, 255, .08) 55%, rgba(72, 213, 151, .08));
+      box-shadow: var(--shadow);
+    }
+
+    .verdict::after {
+      content: "1.71";
+      position: absolute;
+      right: 18px;
+      bottom: -26px;
+      color: rgba(255,255,255,.045);
+      font-size: 8rem;
+      font-weight: 950;
+      line-height: 1;
+    }
+
+    .verdict blockquote {
+      max-width: 850px;
+      margin: 12px 0 0;
+      color: #fff;
+      font-size: clamp(1.15rem, 2.3vw, 1.55rem);
+      font-weight: 740;
+      line-height: 1.45;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 9px;
+      margin: 18px 0 0;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel);
+      box-shadow: var(--shadow);
+    }
+
+    table {
+      width: 100%;
+      min-width: 720px;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      padding: 15px 17px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      color: #fff;
+      background: rgba(83, 199, 255, .08);
+      font-size: .82rem;
+      letter-spacing: .045em;
+      text-transform: uppercase;
+    }
+
+    tr:last-child td { border-bottom: 0; }
+    td:first-child { color: #fff; font-weight: 720; }
+
+    .callout {
+      margin-top: 18px;
+      padding: 17px 19px;
+      border-left: 4px solid var(--blue);
+      border-radius: 5px 14px 14px 5px;
+      background: rgba(83, 199, 255, .075);
+      color: #dbe9fa;
+    }
+
+    .callout.warning { border-left-color: var(--amber); background: rgba(255,191,90,.075); }
+    .callout.danger { border-left-color: var(--red); background: rgba(255,107,116,.075); }
+    .callout.good { border-left-color: var(--green); background: rgba(72,213,151,.075); }
+
+    .chart {
+      margin-top: 15px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: rgba(6, 10, 17, .55);
+    }
+
+    .chart svg { display: block; width: 100%; height: auto; }
+    .chart-note { margin: 8px 0 0; color: var(--muted); font-size: .84rem; }
+
+    .steps {
+      display: grid;
+      gap: 12px;
+      counter-reset: steps;
+    }
+
+    .step {
+      position: relative;
+      padding: 18px 18px 18px 64px;
+      border: 1px solid var(--line);
+      border-radius: 15px;
+      background: var(--panel);
+    }
+
+    .step::before {
+      counter-increment: steps;
+      content: counter(steps);
+      position: absolute;
+      left: 17px;
+      top: 18px;
+      display: grid;
+      place-items: center;
+      width: 31px;
+      height: 31px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--blue-2), var(--blue));
+      color: #04111c;
+      font-weight: 900;
+    }
+
+    .step p { color: var(--muted); }
+
+    .device {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .device::after {
+      position: absolute;
+      right: 14px;
+      top: 7px;
+      color: rgba(255,255,255,.06);
+      font-size: 4.8rem;
+      font-weight: 900;
+    }
+
+    .device.rs::after { content: "DD"; }
+    .device.t300::after { content: "FFB"; }
+    .device.pad::after { content: "PAD"; }
+
+    .settings {
+      display: grid;
+      grid-template-columns: minmax(150px, 1fr) auto;
+      margin-top: 15px;
+      border-top: 1px solid var(--line);
+    }
+
+    .settings div {
+      padding: 9px 0;
+      border-bottom: 1px solid rgba(43,58,85,.62);
+    }
+
+    .settings div:nth-child(odd) { color: var(--muted); }
+    .settings div:nth-child(even) { color: #fff; font-weight: 780; text-align: right; }
+
+    .pill-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 13px;
+    }
+
+    .pill {
+      padding: 5px 9px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.055);
+      color: #cbd7e8;
+      font-size: .8rem;
+    }
+
+    .checklist {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px 16px;
+      margin-top: 16px;
+    }
+
+    .check {
+      position: relative;
+      padding-left: 28px;
+      color: #d7e2f1;
+    }
+
+    .check::before {
+      content: "✓";
+      position: absolute;
+      left: 0;
+      top: 0;
+      color: var(--green);
+      font-weight: 900;
+    }
+
+    details {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: var(--panel);
+    }
+
+    details + details { margin-top: 10px; }
+    summary { padding: 16px 18px; color: #fff; font-weight: 760; cursor: pointer; }
+    details > div { padding: 0 18px 18px; color: var(--muted); }
+
+    .source-list {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      gap: 10px;
+      padding: 0;
+      list-style: none;
+    }
+
+    .source-list li {
+      margin: 0;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: rgba(255,255,255,.025);
+    }
+
+    .source-list small { display: block; margin-top: 4px; color: var(--muted); }
+
+    footer {
+      padding: 30px 0 46px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: .87rem;
+    }
+
+    @media (max-width: 900px) {
+      .card, .card.half { grid-column: span 6; }
+      .device { grid-column: 1 / -1; }
+    }
+
+    @media (max-width: 650px) {
+      .wrap { width: min(calc(100% - 22px), var(--max)); }
+      header { padding-top: 54px; }
+      .topbar-inner { min-height: 56px; }
+      .brand { display: none; }
+      .card, .card.half { grid-column: 1 / -1; padding: 18px; }
+      .checklist, .source-list { grid-template-columns: 1fr; }
+      section { padding: 31px 0; }
+      .verdict { padding: 20px; }
+      .verdict::after { font-size: 5.7rem; }
+    }
+
+    @media print {
+      :root { --bg: #fff; --text: #111; --muted: #4c5668; --line: #cfd5df; }
+      body { color: #111; background: #fff; font-size: 11pt; }
+      .topbar { display: none; }
+      header { padding-top: 20px; }
+      h1, h2, h3, h4, strong, td:first-child { color: #111; }
+      .card, .verdict, .table-wrap, .step, details, .chart { box-shadow: none; background: #fff; break-inside: avoid; }
+      .device::after, .verdict::after { display: none; }
+      a { color: #111; }
+      section { break-before: auto; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="topbar">
+    <div class="wrap topbar-inner">
+      <a class="brand" href="#top">GT7 · Update 1.71</a>
+      <nav aria-label="Navigace článku">
+        <a href="#rychle">Rychlý přehled</a>
+        <a href="#fyzika">Fyzika</a>
+        <a href="#realita">Realita vs. GT7</a>
+        <a href="#technika">Jízdní styl</a>
+        <a href="#hardware">Hardware</a>
+        <a href="#trenink">Trénink</a>
+        <a href="#setup">Setup a BoP</a>
+        <a href="#zdroje">Zdroje</a>
+      </nav>
+    </div>
+  </div>
+
+  <header id="top">
+    <div class="wrap">
+      <span class="eyebrow">Gran Turismo 7 · verze 1.71</span>
+      <h1>Nová fyzika bez dohadů</h1>
+      <p class="lead">Co se skutečně změnilo, proč auta působí přilnavěji, i když naměřený maximální grip klesl, a jak se přizpůsobit na Logitech RS50, Thrustmaster T300, DualSense i DualShock 4.</p>
+      <div class="meta">
+        <span>Aktualizováno 30. srpna 2026</span>
+        <span>Pro naši pětičlennou ligu</span>
+        <span>2× RS50 · 1× T300 · 1× DualSense · 1× DualShock 4</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section id="rychle">
+      <div class="verdict">
+        <span class="tag advice">Hlavní závěr</span>
+        <blockquote>Update 1.71 nepřidal jednoduše „více gripu“. Auta mají širší a čitelnější oblast na limitu, ale chybu v podobě příliš nízké rychlosti nyní hůře dohánějí.</blockquote>
+      </div>
+
+      <div class="legend" aria-label="Vysvětlivky důvěryhodnosti">
+        <span class="tag official">Oficiálně potvrzeno</span>
+        <span class="tag measured">Naměřeno / data</span>
+        <span class="tag observed">Komunitní pozorování</span>
+        <span class="tag advice">Naše doporučení</span>
+      </div>
+
+      <div class="grid" style="margin-top:16px">
+        <article class="card good">
+          <span class="big-number">1</span>
+          <h3>Méně přibrzďovat</h3>
+          <p>Nejdůležitější je udržet minimální rychlost. Přílišné zpomalení se kvůli slabší následné akceleraci táhne celou rovinkou.</p>
+        </article>
+        <article class="card accent">
+          <span class="big-number">2</span>
+          <h3>Déle dokončit rotaci</h3>
+          <p>Auto snese více kombinace slábnoucí brzdy a řízení. Trail-braking je bezpečnější, nikoli zbytečný.</p>
+        </article>
+        <article class="card warn">
+          <span class="big-number">3</span>
+          <h3>Po rozhodnutí neotálet</h3>
+          <p>Jakmile je auto natočené a volant se otevírá, přejděte rozhodně na plyn. Opakované přidání–ubrání stojí čas.</p>
+        </article>
+      </div>
+
+      <div class="callout warning">
+        <strong>Pozor na zkratky:</strong> „brzdi vždy o 20 metrů později“, „toč volantem co nejvíc“ nebo „plyn je jen ON/OFF“ nejsou univerzální pravidla. Fungují pouze u některých aut, zatáček a pneumatik.
+      </div>
+    </section>
+
+    <section id="zmeny">
+      <h2>Co Polyphony skutečně změnilo</h2>
+      <p class="section-intro">Verze 1.71 zasáhla současně pneumatiky, podvozek, asistenty i způsob, jakým hra interpretuje ovladač a pedály. Proto dvěma hráčům může stejné auto připadat změněné z různých důvodů.</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Oblast</th><th>Oficiální změna</th><th>Praktický projev</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Pneumatiky</td>
+              <td>Chování při prokluzu, valivý odpor, zahřívání, opotřebení a grip mimo trať při nastavení Real.</td>
+              <td>Limit je často čitelnější a progresivnější. Směr a velikost změny opotřebení ale nejsou oficiálně kvantifikované.</td>
+            </tr>
+            <tr>
+              <td>Motor a plyn</td>
+              <td>Nové řízení momentu při částečném plynu a driftu.</td>
+              <td>Silniční auta se na částečném plynu lépe korigují; závodní auta často dovolí rozhodnější výjezd.</td>
+            </tr>
+            <tr>
+              <td>Řízení a tlumiče</td>
+              <td>Geometrie řízení pro jednotlivá auta a nové charakteristiky tlumičů.</td>
+              <td>Přirozenější pohyb karoserie a sledování povrchu, ale také jiné reakce starých setupů.</td>
+            </tr>
+            <tr>
+              <td>ABS a TCS</td>
+              <td>Změněný zásah TCS a slip control / brzdění v zatáčce s ABS.</td>
+              <td>Auto při trail-brakingu často snese více řízení; staré brzdné body nelze slepě kopírovat.</td>
+            </tr>
+            <tr>
+              <td>Výchozí setup</td>
+              <td>Nové výchozí hodnoty a rozsahy podvozku, LSD a aerodynamiky.</td>
+              <td>Starý tune může být pomalý nebo nestabilní, i když jeho číselné hodnoty vypadají podobně.</td>
+            </tr>
+            <tr>
+              <td>Ovladače a volanty</td>
+              <td>Nové mapování řízení, plynu a brzdy; upravená síla, tření a understeer vibrace FFB.</td>
+              <td>Je nutné znovu vybudovat cit pro střed řízení, brzdový pedál a okamžik ztráty předního gripu.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="grid" style="margin-top:16px">
+        <article class="card half">
+          <span class="tag measured">Data hlavně z Gr.3</span>
+          <h3 style="margin-top:12px">Maximální boční síla podle rychlosti</h3>
+          <div class="settings">
+            <div>Pomalé zatáčky</div><div>přibližně −4 %</div>
+            <div>Středně rychlé</div><div>přibližně −3 %</div>
+            <div>Rychlé</div><div>přibližně −2 %</div>
+          </div>
+          <p class="chart-note">Jde o porovnání herních dat a telemetrie vybraných skupinových aut, nikoli univerzální laboratorní hodnotu pro všechna vozidla.</p>
+        </article>
+        <article class="card half">
+          <span class="tag measured">Důležitá interpretace</span>
+          <h3 style="margin-top:12px">Nižší špička, větší stabilita</h3>
+          <p>Stejný výkon a téměř stejná hmotnost neznamenají stejnou akceleraci. Změněný valivý odpor, moment, aero a skryté parametry mohou vysvětlit, proč řada skupinových aut zrychluje pomaleji.</p>
+          <p>Subjektivní „více gripu“ tak vzniká hlavně tím, že auto na limitu méně náhle selže.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="fyzika">
+      <h2>Proč auto působí přilnavěji</h2>
+      <p class="section-intro">Pneumatika vytváří boční sílu, když se od směru jízdy mírně odchýlí. Tomu se říká slip angle. Nejde o viditelný drift, ale o malý rozdíl mezi směrem kola a skutečným pohybem auta.</p>
+
+      <div class="grid">
+        <article class="card half">
+          <h3>Starší pocit: výraznější vrchol</h3>
+          <p>Po dosažení maxima přilnavost rychleji odpadla. Přebytečný úhel volantu nebo prudký plyn mohl znamenat okamžitou nedotáčivost či přetáčivost.</p>
+        </article>
+        <article class="card half">
+          <h3>Verze 1.71: širší „plošina“</h3>
+          <p>Po překročení optimálního bodu zůstává delší oblast, ve které auto stále reaguje. Proto lze opravit stopu větším úhlem nebo mírným prokluzem.</p>
+        </article>
+      </div>
+
+      <div class="chart" role="img" aria-label="Schematické porovnání průběhu boční síly pneumatiky před a po aktualizaci">
+        <svg viewBox="0 0 860 330" aria-hidden="true">
+          <defs>
+            <linearGradient id="areaNow" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#53c7ff" stop-opacity=".28"/>
+              <stop offset="1" stop-color="#53c7ff" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          <line x1="74" y1="270" x2="820" y2="270" stroke="#667792" stroke-width="2"/>
+          <line x1="74" y1="270" x2="74" y2="36" stroke="#667792" stroke-width="2"/>
+          <path d="M74 270 C170 260 240 190 320 90 C365 35 410 72 455 130 C535 225 660 246 820 253" fill="none" stroke="#ffbf5a" stroke-width="5"/>
+          <path d="M74 270 C170 257 240 198 325 118 C375 72 450 78 540 97 C645 119 720 173 820 218 L820 270 Z" fill="url(#areaNow)"/>
+          <path d="M74 270 C170 257 240 198 325 118 C375 72 450 78 540 97 C645 119 720 173 820 218" fill="none" stroke="#53c7ff" stroke-width="5"/>
+          <text x="520" y="70" fill="#8edcff" font-size="18" font-weight="700">1.71: širší využitelný limit</text>
+          <text x="330" y="54" fill="#ffd58e" font-size="18" font-weight="700">dříve: ostřejší vrchol</text>
+          <text x="378" y="314" fill="#a7b4c9" font-size="17">slip angle / požadavek na pneumatiku →</text>
+          <text x="23" y="204" fill="#a7b4c9" font-size="17" transform="rotate(-90 23 204)">boční síla →</text>
+        </svg>
+        <p class="chart-note">Schéma vysvětluje chování, nikoli přesnou fyzikální křivku GT7. Polyphony nezveřejnilo parametry modelu.</p>
+      </div>
+
+      <div class="callout danger">
+        <strong>„Auto ještě zatočí“ neznamená „je to nejrychlejší“.</strong> Nadbytečný úhel může dál zahřívat přední pneumatiky, zvyšovat scrub a kazit následující zatáčku, i když vůz okamžitě nevyjede z tratě.
+      </div>
+    </section>
+
+    <section id="realita">
+      <h2>Je nová fyzika blíž realitě?</h2>
+      <p class="section-intro">Odpověď není čisté ano nebo ne. Silniční auta a práce podvozku jsou často přesvědčivější; některé závodní kombinace ale dovolují chování, které by skutečné pneumatiky více trestaly.</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Oblast</th><th>Blíž realitě</th><th>Dál od reality / sporné</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>Přechod do smyku</td>
+              <td>Progresivnější a lépe zachytitelný limit, zejména u silničních aut.</td>
+              <td>U některých Gr.3 aut může být použitelný slip angle až příliš široký.</td>
+            </tr>
+            <tr>
+              <td>Pohyb karoserie</td>
+              <td>Tlumiče a sledování nerovností působí přirozeněji; změna zatížení je čitelnější.</td>
+              <td>Některé vozy komunitě připadají příliš měkké i po přitvrzení setupu.</td>
+            </tr>
+            <tr>
+              <td>Částečný plyn</td>
+              <td>Lepší možnost auto vyvážit a korigovat, místo náhlé ztráty zadní nápravy.</td>
+              <td>U stabilních závodních aut lze někdy příliš brzy použít plný plyn bez odpovídajícího trestu.</td>
+            </tr>
+            <tr>
+              <td>Brzdění v zatáčce</td>
+              <td>Lepší simulace trail-brakingu a zatížení přední nápravy.</td>
+              <td>Kombinace vysoké brzdy a velkého rejdu může být tolerantnější, než dovoluje reálný friction circle.</td>
+            </tr>
+            <tr>
+              <td>Ztráta kontroly</td>
+              <td>Počátek smyku se často lépe čte a zachytává.</td>
+              <td>Jakmile některá auta širší limit překročí úplně, návrat gripu může být naopak nepřirozeně obtížný.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout good">
+        <strong>Celkový verdikt:</strong> základní principy práce pneumatiky, podvozku a přenosu hmotnosti udělaly krok správným směrem. Problém není v samotné progresivitě, ale v tom, že u části závodních aut hra nedává za překročení optimálního úhlu dostatečný časový nebo tepelný trest.
+      </div>
+    </section>
+
+    <section id="technika">
+      <h2>Jak změnit jezdecký styl</h2>
+      <p class="section-intro">Cílem není přepsat všechny návyky. Důležité je změnit pořadí priorit: nejdříve správná stopa a minimální rychlost, potom co nejpozdější brzdný bod.</p>
+
+      <div class="steps">
+        <article class="step">
+          <h3>Brzdný bod posouvejte po malých krocích</h3>
+          <p>Nezačínejte automaticky o 10–20 metrů později. Posouvejte bod přibližně po pěti metrech a sledujte také rychlost na začátku brzdění. Pozdější bod může být jen důsledkem nižší příjezdové rychlosti.</p>
+        </article>
+        <article class="step">
+          <h3>Brzdu uvolňujte podle rostoucího rejdu</h3>
+          <p>Na rovnějším volantu použijte maximum. Jak přidáváte řízení, brzdu plynule pouštějte. Verze 1.71 dovolí delší překryv, ale neznamená, že lze mít zároveň 100 % brzdy a 100 % zatáčení.</p>
+        </article>
+        <article class="step">
+          <h3>Chraňte minimální rychlost</h3>
+          <p>Přílišné zpomalení je dražší než dříve. Pokud jste o několik km/h pomalejší v apexu, ztrátu kvůli slabší akceleraci nesete dál po rovince.</p>
+        </article>
+        <article class="step">
+          <h3>Větší rejd používejte jako nástroj, ne reflex</h3>
+          <p>Když auto na vstupu potřebuje dokončit rotaci, lze přidat více úhlu. Pokud ale další rejd nezvýší rotaci a jen odlehčí volant, řízení povolte.</p>
+        </article>
+        <article class="step">
+          <h3>Jakmile přidáte, nevracejte se bez důvodu</h3>
+          <p>U stabilního Gr.3/Gr.4 auta na suchu přejděte po dokončení rotace rozhodně na plyn. Neustálé přidávání a ubírání ztrácí čas. Silniční auta, mokro a opotřebené pneumatiky stále vyžadují dávkování.</p>
+        </article>
+        <article class="step">
+          <h3>Po chybě zachraňte následující výjezd</h3>
+          <p>Když netrefíte nájezd, nesnažte se vše dohnat násilným rejdem a plynem. Srovnejte auto, posuňte apex a připravte rovný výjezd. Jedna malá ztráta je levnější než dlouhý scrub nebo smyk.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="hardware">
+      <h2>Nastavení pro naši sestavu</h2>
+      <p class="section-intro">Uvedené hodnoty jsou bezpečný výchozí bod pro verzi 1.71. Neměňte více parametrů současně a každou změnu ověřte alespoň pěti čistými koly.</p>
+
+      <div class="grid">
+        <article class="card device rs">
+          <span class="tag official">2× Logitech RS50</span>
+          <h3 style="margin-top:12px">Oficiální základ</h3>
+          <div class="settings">
+            <div>Compatibility Mode</div><div>RS</div>
+            <div>FFB Filter</div><div>6</div>
+            <div>Dampener</div><div>20</div>
+            <div>TF Audio</div><div>100</div>
+            <div>Úhel</div><div>řídí hra</div>
+            <div>GT7 citlivost FFB</div><div>1</div>
+            <div>GT7 Max Torque – Gr.x</div><div>5</div>
+            <div>GT7 Max Torque – road</div><div>10</div>
+          </div>
+          <div class="callout" style="margin-top:14px">
+            <strong>Náš závodní start:</strong> Dampener 15–20, TF Audio 65–75, Gr.3/Gr.4 Max Torque 5 a citlivost 1. TrueForce ponechat zapnutý, ale nepřehlušit jím základní zatížení řízení.
+          </div>
+        </article>
+
+        <article class="card device t300">
+          <span class="tag observed">1× Thrustmaster T300</span>
+          <h3 style="margin-top:12px">Doporučený start</h3>
+          <div class="settings">
+            <div>GT7 Max Torque</div><div>3–4</div>
+            <div>GT7 citlivost FFB</div><div>1–2</div>
+            <div>Úhel</div><div>automaticky / 900°</div>
+            <div>Režim základny</div><div>PS5 / PS4 dle konzole</div>
+          </div>
+          <div class="callout warning" style="margin-top:14px">
+            T300 je řemenový volant a při dlouhé vysoké zátěži může tepelně zeslabit FFB. Pokud po 20–40 minutách citelně změkne, snižte Max Torque na 3, zajistěte volné chlazení a ověřte firmware na PC.
+          </div>
+          <p class="chart-note">Hodnoty 3–4 / 1–2 jsou komunitní výchozí bod, nikoli nový oficiální preset Polyphony. Sílu nad 5 pro dlouhé závody nedoporučujeme.</p>
+        </article>
+
+        <article class="card device pad">
+          <span class="tag advice">DualSense + DualShock 4</span>
+          <h3 style="margin-top:12px">Doporučený start</h3>
+          <div class="settings">
+            <div>Citlivost řízení</div><div>0</div>
+            <div>Při kmitání kolem středu</div><div>−1 až −2</div>
+            <div>ABS</div><div>Default</div>
+            <div>TCS na suchu</div><div>0</div>
+            <div>Countersteer</div><div>Off</div>
+            <div>ASM / Auto-Drive</div><div>Off</div>
+          </div>
+          <div class="pill-row">
+            <span class="pill">DualSense: adaptivní L2/R2</span>
+            <span class="pill">DS4: stejné mapování, bez adaptivního odporu</span>
+          </div>
+          <div class="callout" style="margin-top:14px">
+            Na obou ovladačích lze zvýšit jemnost řízení tím, že páčku zatlačíte lehce dopředu a vedete ji po horním půlkruhu. Na výjezdu ji nenechte prudce odskočit do středu.
+          </div>
+        </article>
+      </div>
+
+      <h3 style="margin-top:24px">Co přesně přináší TrueForce na RS50</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Signál</th><th>Základní FFB</th><th>TrueForce / TF Audio</th></tr></thead>
+          <tbody>
+            <tr><td>Zatížení přední nápravy</td><td>Hlavní a rozhodující informace</td><td>Pouze doplňuje</td></tr>
+            <tr><td>Nedotáčivost</td><td>Odlehčení a změna odporu</td><td>Jemné vibrační upozornění</td></tr>
+            <tr><td>Motor a povrch</td><td>Omezeně</td><td>Výrazněji a ve vyšší frekvenci</td></tr>
+            <tr><td>Obrubníky</td><td>Ráz a síla do řízení</td><td>Textura a vibrační detail</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout warning">
+        Pokud TF Audio na 100 způsobí neustálé bzučení a zakryje odlehčení volantu, snižte jej. Pro závodní konzistenci je důležitější čistá informace o zatížení pneumatik než maximální množství vibrací.
+      </div>
+    </section>
+
+    <section id="trenink">
+      <h2>Trénink na 30–40 minut</h2>
+      <p class="section-intro">Použijte stejné auto, pneumatiku, množství paliva a výchozí setup. Ideální je trať se silným brzděním, pomalou i rychlou zatáčkou – například Suzuka, Fuji nebo Barcelona GP bez šikany.</p>
+
+      <div class="grid">
+        <article class="card">
+          <span class="big-number">5 kol</span>
+          <h3>Referenční série</h3>
+          <p>Jeďte bez změn a zapisujte čisté časy. Nehodnoťte jedno nejlepší kolo, ale rozdíl mezi nejrychlejším a nejpomalejším.</p>
+        </article>
+        <article class="card">
+          <span class="big-number">5 kol</span>
+          <h3>Práce s brzdou</h3>
+          <p>Brzdný bod neměňte. Soustřeďte se jen na plynulejší uvolnění brzdy a o trochu vyšší rychlost v apexu.</p>
+        </article>
+        <article class="card">
+          <span class="big-number">5 kol</span>
+          <h3>Rozhodný výjezd</h3>
+          <p>Po dokončení rotace přidejte jedním souvislým pohybem. Sledujte, zda se zlepšil následující mezičas.</p>
+        </article>
+        <article class="card half">
+          <h3>Test přebytečného rejdu</h3>
+          <p>V jedné bezpečné zatáčce vědomě přidejte trochu řízení. Vnímejte, zda auto více rotuje, nebo jen ztrácí odpor a rychlost. Na volantu sledujte FFB; na padu rychlost a chování přední části.</p>
+        </article>
+        <article class="card half">
+          <h3>Krátký race stint</h3>
+          <p>Na závěr odjeďte 8–10 kol. Ověřte, zda agresivnější úhel nebo nový setup nezhoršuje pneumatiky. Hotlap technika nemusí být nejlepší pro závod.</p>
+        </article>
+      </div>
+
+      <div class="checklist">
+        <div class="check">Časy jsou stabilnější, ne jen jednorázově rychlé.</div>
+        <div class="check">V apexu zůstává více rychlosti.</div>
+        <div class="check">Po přidání plynu už zbytečně neubíráte.</div>
+        <div class="check">Volant ani páčka na výjezdu nekmitají.</div>
+        <div class="check">Po pěti kolech se nezhoršují přední pneumatiky.</div>
+        <div class="check">FFB zůstává čitelné i v rychlé zatáčce.</div>
+      </div>
+    </section>
+
+    <section id="setup">
+      <h2>Setup, pneumatiky a BoP</h2>
+      <p class="section-intro">Protože 1.71 změnila výchozí hodnoty i jejich rozsahy, staré tune neposuzujte podle čísel. Uložte kopii, vraťte auto na výchozí stav a znovu proveďte základní test.</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Problém</th><th>Nejdříve technika</th><th>Potom setup</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>Nedotáčivost na vstupu</td>
+              <td>Plynuleji uvolnit brzdu, nepřibrzdit příliš.</td>
+              <td>Brzdový poměr o 1 krok dozadu; jemně upravit diferenciál nebo přední aero.</td>
+            </tr>
+            <tr>
+              <td>Nedotáčivost uprostřed</td>
+              <td>Zkontrolovat minimální rychlost a nadbytečný rejd.</td>
+              <td>Vyvážení světlé výšky, stabilizátorů a aero – vždy jen jedna změna.</td>
+            </tr>
+            <tr>
+              <td>Nedotáčivost na plynu</td>
+              <td>Dokončit rotaci před plným plynem.</td>
+              <td>Prověřit LSD acceleration; menší hodnota může pomoci rotaci, ale zhoršit trakci vnitřního kola.</td>
+            </tr>
+            <tr>
+              <td>Přetáčivý výjezd</td>
+              <td>Více otevřít volant a plyn přidat souvisleji.</td>
+              <td>Více zadního přítlaku nebo stabilnější LSD; pro diagnostiku krátce TCS 1.</td>
+            </tr>
+            <tr>
+              <td>Nestabilita přes obrubník</td>
+              <td>Méně agresivní nájezd a menší plyn na kontaktu.</td>
+              <td>Měkčí komprese / stabilizátor jen tam, kde je tuning povolen.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="grid" style="margin-top:16px">
+        <article class="card half warn">
+          <span class="tag observed">BoP</span>
+          <h3 style="margin-top:12px">Neexistuje jedno nejlepší auto</h3>
+          <p>Genesis Gr.3 nebo Elantra Gr.4 mohou být silné v určitém závodě, ale meta závisí na typu BoP, trati, pneumatikách, spotřebě a opotřebení. „FR je nyní vždy nejlepší“ ani „Porsche už nefunguje“ nejsou spolehlivá pravidla.</p>
+        </article>
+        <article class="card half accent">
+          <span class="tag advice">Výběr auta</span>
+          <h3 style="margin-top:12px">Pro ligový závod</h3>
+          <p>Nejdříve porovnejte leaderboard a replay rychlých jezdců. Potom zvažte, zda je rozdíl v čistém tempu větší než vaše vlastní konzistence, práce s pneumatikami a schopnost bezpečně předjíždět.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="dalsi">
+      <h2>Další důležité změny 1.71</h2>
+      <div class="grid">
+        <article class="card">
+          <h3>Mimo trať a obrubníky</h3>
+          <p>Polyphony potvrdilo úpravu ztráty gripu při nastavení Real, ale neuvedlo přesnou velikost ani univerzální směr. Komunita hlásí tvrdší trest na trávě a některých obrubnících.</p>
+        </article>
+        <article class="card">
+          <h3>Žebříčky a cílové časy</h3>
+          <p>Resetovaly se leaderboardy a změnily cíle i demonstrační jízdy licencí a Circuit Experience. Již získané zlato zůstává.</p>
+        </article>
+        <article class="card">
+          <h3>Poškození a penalizace</h3>
+          <p>Nová volba Championship aktivuje poškození už při menších kontaktech a délka opravy závisí na závažnosti. Posuzování zkratek bylo naopak zmírněno.</p>
+        </article>
+        <article class="card half">
+          <h3>Tokyo WTC 600</h3>
+          <p>Ve hře se změnil násobič spotřeby z 3× na 1× a opotřebení pneumatik z 12× na 14×. Jde o komunitou ověřenou, ale v oficiálních poznámkách nezmíněnou změnu eventu. No-stop strategie jsou proto výrazně dostupnější.</p>
+        </article>
+        <article class="card half">
+          <h3>PS5 Pro</h3>
+          <p>GT7 používá novější verzi PSSR. Jde o obrazovou změnu, nikoli fyziku; může zlepšit stabilitu obrazu a jemné detaily, ale neovlivní časy ani ovládání.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="problemy">
+      <h2>Rychlé řešení problémů</h2>
+
+      <details>
+        <summary>RS50 je po 1.71 příliš těžký nebo utlumený</summary>
+        <div>Nechte RS Mode. Snižte Dampener z 20 na 15 a potom případně na 10. Teprve následně zkuste Filter 6 → 5. PRO compatibility mode použijte jen jako srovnávací test, nikoli první řešení.</div>
+      </details>
+      <details>
+        <summary>RS50 vibruje více, ale limit pneumatiky cítím hůře</summary>
+        <div>Snižte TF Audio přibližně na 60–75. TrueForce má doplnit základní FFB, ne překrýt odlehčení volantu při nedotáčivosti.</div>
+      </details>
+      <details>
+        <summary>T300 během závodu zeslábne</summary>
+        <div>Jde pravděpodobně o tepelné zeslabení. Snižte Max Torque na 3, nechte základnu volně dýchat a zkontrolujte firmware. Thrustmaster uvádí, že menší úhel může v některých hrách snížit zátěž, ale GT7 by měl úhel řídit podle auta.</div>
+      </details>
+      <details>
+        <summary>Auto na ovladači po návratu páčky do středu zavlní</summary>
+        <div>Snižte citlivost řízení z 0 na −1, případně −2. Páčku vracejte plynule a nedělejte rychlé korekce vlevo–vpravo. Nastavení testujte na stejném autě.</div>
+      </details>
+      <details>
+        <summary>Po updatu jsou staré setupy nepoužitelné</summary>
+        <div>Uložte je jako kopii, obnovte výchozí hodnoty a znovu vyřešte největší problém auta. Nekopírujte automaticky staré světlé výšky, LSD ani aero – změnily se výchozí hodnoty i rozsahy.</div>
+      </details>
+      <details>
+        <summary>Máme všichni používat stejné asistenty?</summary>
+        <div>Pro srovnatelný ligový závod doporučujeme ABS Default, TCS 0, ASM Off, Countersteer Off a Auto-Drive Off. TCS 1 lze dovolit jako bezpečnostní volbu ve velmi silných autech nebo na mokru, pokud to pravidla ligy výslovně připouštějí.</div>
+      </details>
+    </section>
+
+    <section id="tahak">
+      <h2>Tahák před závodem</h2>
+      <div class="verdict">
+        <div class="checklist" style="margin-top:0">
+          <div class="check">Starý setup nejprve porovnat s defaultem.</div>
+          <div class="check">Brzdný bod posouvat po 5 metrech.</div>
+          <div class="check">Brzdu pouštět s rostoucím rejdem.</div>
+          <div class="check">Chránit minimální rychlost v apexu.</div>
+          <div class="check">Více rejdu jen tehdy, když auto více rotuje.</div>
+          <div class="check">Po rozhodném přidání zbytečně neubírat.</div>
+          <div class="check">Na padu plynule vracet páčku do středu.</div>
+          <div class="check">Na volantu oddělit FFB sílu od vibrací.</div>
+          <div class="check">Hotlap ověřit delším stintem na pneumatikách.</div>
+          <div class="check">BoP auto vybírat podle trati, ne pověsti.</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="zdroje">
+      <h2>Zdroje a míra jistoty</h2>
+      <p class="section-intro">Oficiální poznámky potvrzují oblasti změn, nikoli jejich přesné fyzikální parametry. Pro praktická doporučení proto používáme i datová porovnání a komunitní zkušenosti, které jsou na stránce výslovně označené.</p>
+
+      <ul class="source-list">
+        <li>
+          <a href="https://www.gran-turismo.com/us/gt7/news/00_3638095.html" target="_blank" rel="noopener">Polyphony Digital – Update Notice 1.71</a>
+          <small>Autoritativní seznam fyziky, ovládání, asistencí a dalších změn.</small>
+        </li>
+        <li>
+          <a href="https://www.gran-turismo.com/gb/news/00_4305265.html" target="_blank" rel="noopener">Polyphony Digital – obsah srpnové aktualizace</a>
+          <small>Nová auta, závody a další oficiální obsah.</small>
+        </li>
+        <li>
+          <a href="https://support.logi.com/hc/en-au/articles/34742210613655-Logitech-RS50-Racing-Wheel-In-Game-Settings" target="_blank" rel="noopener">Logitech – oficiální nastavení RS50</a>
+          <small>RS Mode, filtr, dampener, TF Audio a hodnoty FFB v GT7.</small>
+        </li>
+        <li>
+          <a href="https://support.thrustmaster.com/en/product/t300rsgtedition-en/" target="_blank" rel="noopener">Thrustmaster – podpora T300 RS GT</a>
+          <small>Firmware, kompatibilita a řešení problémů základny.</small>
+        </li>
+        <li>
+          <a href="https://forum.fanatec.com/news/gran-turismo-7-v171-update-adds-fullforce-support-for-gran-turismo%C2%AE-dd-pro-and-more-update-r595/" target="_blank" rel="noopener">Fanatec – stav problémů po 1.71</a>
+          <small>Potvrzené výpadky se týkají zejména GT DD Pro / FullForce, nikoli RS50.</small>
+        </li>
+        <li>
+          <a href="https://www.gtplanet.net/gran-turismo-7-players-have-big-feelings-about-new-physics-20260822/" target="_blank" rel="noopener">GTPlanet – souhrn reakcí hráčů</a>
+          <small>Controller centering, dirt, podvozek a rozdílné zkušenosti komunity.</small>
+        </li>
+        <li>
+          <a href="https://www.youtube.com/watch?v=6u3JtfxbCzo" target="_blank" rel="noopener">Digit Racing – datová analýza fyziky 1.71</a>
+          <small>BoP data od verze 1.59 a vlastní telemetrická porovnání.</small>
+        </li>
+        <li>
+          <a href="https://www.gran-turismo.com/gb/gt7/manual/drivingoption/04" target="_blank" rel="noopener">GT7 Manual – citlivost ovladače</a>
+          <small>Oficiální význam nastavení rychlosti a odezvy řízení na gamepadu.</small>
+        </li>
+      </ul>
+
+      <div class="callout">
+        Tato stránka bude doplňována po dalších aktualizacích GT7. Doporučení nejsou náhradou individuálního testu: stejné nastavení nemusí vyhovovat různým autům, tratím ani fyzické síle jezdce.
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <p><strong>Gran Turismo 7 – praktická analýza aktualizace 1.71</strong><br>Neoficiální informační stránka pro soukromou ligu. Gran Turismo a související označení jsou majetkem příslušných vlastníků.</p>
+    </div>
+  </footer>
+</body>
+</html>
