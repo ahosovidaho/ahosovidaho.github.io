@@ -2181,20 +2181,11 @@ $('#btnImport').addEventListener('click', async ()=>{
   await importJSONFile(file);
 });
 
-/* === Datalist: TRACKS (fallback + optional tracks.json) === */
-const GT7_TRACKS_FALLBACK = [
-  "Autódromo José Carlos Pace (Interlagos)", "Autopolis", "Bathurst (Mount Panorama)", "Brands Hatch", "Circuit de Barcelona-Catalunya", "Circuit de la Sarthe (Le Mans)",
-  "Daytona International Speedway", "Fuji Speedway", "Goodwood Motor Circuit", "WeatherTech Raceway Laguna Seca", "Autodromo Nazionale Monza", "Nürburgring",
-  "Michelin Raceway Road Atlanta", "Red Bull Ring", "Spa-Francorchamps", "Suzuka Circuit", "Tsukuba Circuit", "Watkins Glen International",
-  "Willow Springs International Raceway", "Alsace", "Autodrome Lago Maggiore", "Blue Moon Bay Speedway", "BB Raceway", "Deep Forest Raceway",
-  "Dragon Trail", "Eiger Nordwand", "Grand Valley - Highway 1", "High Speed Ring", "Kyoto Driving Park", "Northern Isle Speedway",
-  "Circuit de Sainte-Croix", "Sardegna - Road Track", "Special Stage Route X", "Tokyo Expressway", "Trial Mountain Circuit", "Circuit de Barcelona-Catalunya - rozvržení Rallycross",
-  "Colorado Springs", "Fishermans Ranch", "Lake Louise (Snow)", "Sardegna - Windmills (Dirt)", "Okruh Gilles Villeneuve", "Okruh Yas Marina"
-];
+/* === Datalist: TRACKS (jediný zdroj pravdy: tracks.json) === */
 async function installGt7TrackDatalist() {
   let tracks = null;
   try { const res = await fetch('./tracks.json', { cache: 'no-store' }); if (res.ok) { const json = await res.json(); if (Array.isArray(json) && json.length) tracks = json; } } catch {}
-  if (!tracks) tracks = GT7_TRACKS_FALLBACK.slice();
+  if (!tracks) { console.warn('tracks.json nedostupný, datalist tratí bude prázdný'); tracks = []; }
 
   const datalist = document.getElementById('gt7Tracks');
   function fill(options){ datalist.innerHTML=''; options.slice(0,300).forEach(name=>{ const opt=document.createElement('option'); opt.value=name; datalist.appendChild(opt); }); }
@@ -2210,25 +2201,7 @@ async function installGt7TrackDatalist() {
   });
 }
 
-/* === Datalist & Index: CARS === */
-const GT7_CARS_FALLBACK = [
-  "Toyota — GR Supra RZ '20","Toyota — 86 GT '15","Toyota — GR Yaris RZ '20","Toyota — FT-1","Toyota — S-FR",
-  "Nissan — GT-R NISMO '17","Nissan — Skyline GT-R V・spec II Nür (R34) '02","Nissan — Silvia spec-R Aero (S15) '02","Nissan — Fairlady Z (Z34) '08",
-  "Honda — NSX '17","Honda — Civic Type R (FK8) '20","Honda — S2000 '99",
-  "Mazda — RX-7 Spirit R Type A (FD) '02","Mazda — Roadster (ND) '15","Mazda — Atenza Gr.4",
-  "Subaru — WRX STI Type S '14","Subaru — BRZ S '21","Mitsubishi — Lancer Evolution Final Edition '15",
-  "Porsche — 911 GT3 RS (991) '16","Porsche — 911 Turbo (930) '81","Porsche — 911 RSR (991) '17","Porsche — Cayman GT4 Clubsport '16","Porsche — Taycan Turbo S '19",
-  "BMW — M3 Coupé '07","BMW — M4 Coupé '14","BMW — Z4 GT3 '11",
-  "Mercedes-AMG — GT S '15","Mercedes-AMG — AMG GT3 '16","Mercedes-Benz — SLS AMG Gr.4",
-  "Audi — R8 4.2 '07","Audi — R8 LMS (Audi Sport) '15","Audi — TT Cup '16",
-  "Ferrari — 458 Italia '09","Ferrari — 458 Italia GT3 '13","Ferrari — LaFerrari '13","Ferrari — 512 BB '76",
-  "Lamborghini — Huracán LP 610-4 '15","Lamborghini — Huracán GT3 '15","Lamborghini — Aventador LP 700-4 '11",
-  "Ford — Mustang GT '15","Ford — GT '06","Chevrolet — Corvette C7 Stingray '14","Chevrolet — Corvette C7 Gr.3","Dodge — SRT Tomahawk VGT",
-  "Aston Martin — V12 Vantage '12","Aston Martin — Vantage Gr.3","McLaren — 650S '14","McLaren — 650S GT3 '15",
-  "Alfa Romeo — 4C '14","Peugeot — RCZ Gr.3","Renault Sport — Mégane Trophy '11","Citroën — GT by Citroën Road Car",
-  "Bugatti — Veyron 16.4 '13","Pagani — Huayra '13"
-];
-
+/* === Datalist & Index: CARS (jediný zdroj pravdy: cars.json) === */
 async function installGt7CarDatalist() {
   let carsRaw = null;
   try {
@@ -2236,10 +2209,11 @@ async function installGt7CarDatalist() {
     if (res.ok) carsRaw = await res.json();
   } catch {}
   if (!Array.isArray(carsRaw) || !carsRaw.length) {
-    carsRaw = GT7_CARS_FALLBACK.slice();
+    console.warn('cars.json nedostupný, katalog vozů bude prázdný');
+    carsRaw = [];
     const notice = document.getElementById('catalogFallbackNotice');
     if (notice) {
-      notice.textContent = 'Úplný katalog vozů se nepodařilo načíst; našeptávač nabízí jen základní seznam. Vůz můžeš zadat ručně.';
+      notice.textContent = 'Katalog vozů se nepodařilo načíst. Zkus obnovit stránku, nebo zadej auto ručně — výběr v editoru výsledků nebude fungovat, dokud se katalog nenačte.';
       notice.hidden = false;
     }
   }
