@@ -6,7 +6,42 @@
   <!-- 1. VYLEPŠENÍ: SEO -->
   <title>Viktor Tamayo | Komunikace, Média & Automotive</title>
   <meta name="description" content="Osobní portfolio Viktora Tamaya. Profesionál v oblasti komunikace, PR a médií s vášní pro automotive.">
-  
+  <link rel="canonical" href="https://www.tamayo.cz/">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <meta name="theme-color" content="#000000">
+
+  <meta property="og:type" content="profile">
+  <meta property="og:locale" content="cs_CZ">
+  <meta property="og:site_name" content="Viktor Tamayo">
+  <meta property="og:title" content="Viktor Tamayo | Komunikace, Média & Automotive">
+  <meta property="og:description" content="Komunikace, PR, média a sponzoring. Více než 15 let zkušeností – od České televize po Scanii a UNIQA.">
+  <meta property="og:url" content="https://www.tamayo.cz/">
+  <meta property="og:image" content="https://www.tamayo.cz/profile_pic.jpeg">
+  <meta property="og:image:width" content="1600">
+  <meta property="og:image:height" content="940">
+  <meta property="og:image:alt" content="Viktor Tamayo">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@viktor_tamayo">
+  <meta name="twitter:creator" content="@viktor_tamayo">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    "name": "Viktor Tamayo",
+    "url": "https://www.tamayo.cz/",
+    "image": "https://www.tamayo.cz/vt.jpeg",
+    "jobTitle": "Komunikace, PR a média",
+    "sameAs": [
+      "https://www.linkedin.com/in/viktor-tamayo",
+      "https://x.com/viktor_tamayo",
+      "https://www.instagram.com/viktortamayo/",
+      "https://tiktok.com/@autodevadesatky"
+    ]
+  }
+  </script>
+  <script>document.documentElement.classList.add('js');</script>
+
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
     /* Reset */
@@ -158,16 +193,14 @@
       opacity: 0;
       animation: fadeInUp 1s ease 0.3s forwards;
       letter-spacing: -0.02em;
-      background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
+      color: #fff;
+      text-shadow: 0 2px 24px rgba(0, 0, 0, 0.45);
     }
 
     .hero-subtitle {
       font-size: clamp(1.2rem, 3vw, 1.8rem);
       margin-bottom: 40px;
-      opacity: 0.9;
+      text-shadow: 0 1px 12px rgba(0, 0, 0, 0.5);
       opacity: 0;
       animation: fadeInUp 1s ease 0.5s forwards;
       font-weight: 300;
@@ -515,7 +548,8 @@
     .form-group textarea:focus {
       outline: none;
       background: rgba(29, 29, 31, 0.1); /* VÝCHOZÍ STYL FORM (SVĚTLÝ) */
-      border-color: rgba(29, 29, 31, 0.4); /* VÝCHOZÍ STYL FORM (SVĚTLÝ) */
+      border-color: #007AFF;
+      box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.25);
     }
 
     .form-group input::placeholder,
@@ -523,168 +557,50 @@
       color: rgba(29, 29, 31, 0.6); /* VÝCHOZÍ STYL FORM (SVĚTLÝ) */
     }
 
-    /* Systémové téma - přepíšeme pozadí podle nastavení */
-    @media (prefers-color-scheme: light) {
-      .about, .experience, .automotive, .social-section, .contact {
-        /* background: #ffffff !important; */ /* TATO ŘÁDKA ODSTRANĚNA */
-        color: #1d1d1f !important;
-      }
-      
-      /* NOVÉ PRAVIDLO PRO APPLE STYL - ODSTRANĚNO, JIŽ NENÍ POTŘEBA */
-      /*
-      .automotive, .social-section, .contact {
-        background: #ffffff !important;
-      }
-      */
-
-      .about .section-title, .experience .section-title, .automotive .section-title, 
-      .social-section .section-title, .contact .section-title {
-        color: #1d1d1f !important;
-      }
-
-      .about-text h3, .timeline-content h3 {
-        color: #1d1d1f !important;
-      }
-
-      .about-text p, .timeline-content p {
-        color: rgba(29, 29, 31, 0.8) !important;
-      }
-
-      .timeline-year {
-        color: rgba(29, 29, 31, 0.6) !important;
-      }
-      
-      /* NÁSLEDUJÍCÍ PRAVIDLA JSOU ODSTRANĚNA, PROTOŽE JSOU NYNÍ VÝCHOZÍ */
-
-      /*
-      .automotive-card, .social-card {
-        background: rgba(29, 29, 31, 0.05) !important;
-        color: #1d1d1f !important;
-        border: 1px solid rgba(29, 29, 31, 0.1) !important;
-      }
-
-      .automotive-card:hover, .social-card:hover {
-        background: rgba(29, 29, 31, 0.1) !important;
-        color: #1d1d1f !important;
-      }
-
-      .automotive-card p, .social-card p {
-        color: rgba(29, 29, 31, 0.8) !important;
-      }
-
-      .automotive-card h3, .social-card h3 {
-        color: #1d1d1f !important;
-      }
-
-      .form-group input, .form-group textarea {
-        background: rgba(29, 29, 31, 0.05) !important;
-        color: #1d1d1f !important;
-        border: 1px solid rgba(29, 29, 31, 0.2) !important;
-      }
-
-      .form-group input:focus, .form-group textarea:focus {
-        background: rgba(29, 29, 31, 0.1) !important;
-        border-color: rgba(29, 29, 31, 0.4) !important;
-      }
-
-      .form-group input::placeholder, .form-group textarea::placeholder {
-        color: rgba(29, 29, 31, 0.6) !important;
-      }
-
-      .form-group label {
-        color: #1d1d1f !important;
-      }
-
-      .contact p {
-        color: rgba(29, 29, 31, 0.8) !important;
-      }
-
-      .social-section p {
-        color: rgba(29, 29, 31, 0.8) !important;
-      }
-      */
-
-      .timeline::before {
-        background: linear-gradient(to bottom, rgba(29,29,31,0.3), rgba(29,29,31,0.1)) !important;
-      }
-
-      .timeline-item::before {
-        border: 4px solid #1d1d1f !important;
-      }
-    }
-
-    @media (prefers-color-scheme: dark) {
-      .about, .experience {
-        color: white !important;
-      }
-      
-      .automotive, .social-section, .contact {
-          color: #1d1d1f !important; /* PONECHÁ TMAVÝ TEXT NA BÍLÉM POZADÍ */
-      }
-
-      /* NOVÉ PRAVIDLO PRO APPLE STYL - ODSTRANĚNO */
-      /*
-      .automotive, .social-section, .contact {
-        background: #000000 !important;
-      }
-      */
-
-      /* NÁSLEDUJÍCÍ PRAVIDLA JSOU ODSTRANĚNA, ABY SE POUŽIL VÝCHOZÍ (SVĚTLÝ) STYL */
-      
-      /*
-      .automotive-card, .social-card {
-        background: rgba(255, 255, 255, 0.05) !important;
-        color: white !important;
-        border: 1px solid rgba(255, 255, 255, 0.1) !important;
-      }
-
-      .automotive-card:hover, .social-card:hover {
-        background: rgba(255, 255, 255, 0.1) !important;
-        color: white !important;
-      }
-
-      .form-group input, .form-group textarea {
-        background: rgba(255, 255, 255, 0.05) !important;
-        color: white !important;
-        border: 1px solid rgba(255, 255, 255, 0.2) !important;
-      }
-
-      .form-group input:focus, .form-group textarea:focus {
-        background: rgba(255, 255, 255, 0.1) !important;
-        border-color: rgba(255, 255, 255, 0.4) !important;
-      }
-
-      .form-group input::placeholder, .form-group textarea::placeholder {
-        color: rgba(255, 255, 255, 0.6) !important;
-      }
-      */
-    }
-
     /* Společné styly pro sekce */
+    .section, .hero {
+      scroll-margin-top: 70px;
+    }
+
     .section-title {
       font-size: 3rem;
       text-align: center;
       margin-bottom: 60px;
       font-weight: 700;
+    }
+
+    /* Odkrývání jen se zapnutým JS – bez něj zůstane obsah viditelný */
+    .js .section-title {
       opacity: 0;
       transform: translateY(30px);
       transition: all 0.6s ease;
     }
 
-    .section-title.visible {
-      opacity: 1;
-      transform: translateY(0);
-    }
-
-    .section-content {
+    .js .section-content {
       opacity: 0;
       transform: translateY(50px);
       transition: all 0.8s ease;
     }
 
-    .section-content.visible {
+    .js .section-title.visible,
+    .js .section-content.visible {
       opacity: 1;
       transform: translateY(0);
+    }
+
+    /* Viditelný fokus pro ovládání klávesnicí */
+    a:focus-visible,
+    button:focus-visible {
+      outline: 2px solid #007AFF;
+      outline-offset: 3px;
+    }
+
+    .nav-links a.active {
+      color: #007AFF;
+    }
+
+    .nav-links a.active::after {
+      width: 100%;
     }
 
     /* Footer */
@@ -790,18 +706,32 @@
         order: -1;
       }
 
+      /* Na mobilu rok nad názvem, osa vlevo – rok se nepřekrývá s bodem */
       .timeline::before {
-        left: 100px;
+        left: 11px;
+      }
+
+      .timeline-item {
+        flex-direction: column;
+        padding-left: 44px;
+        margin-bottom: 32px;
       }
 
       .timeline-item::before {
-        left: 89px;
+        left: 0;
+        top: 2px;
       }
 
       .timeline-year {
-        min-width: 80px;
-        margin-right: 40px;
+        min-width: 0;
+        margin: 0 0 4px;
+        padding-top: 0;
+        text-align: left;
         font-size: 1rem;
+      }
+
+      .hero-background::after {
+        background: linear-gradient(180deg, rgba(0, 0, 0, 0.35) 0%, rgba(0, 0, 0, 0.65) 45%, rgba(0, 0, 0, 0.45) 100%);
       }
 
       .automotive-grid {
@@ -843,6 +773,34 @@
     body:hover .hero-background {
       transform: scale(1.02);
     }
+
+    /* Omezení pohybu podle nastavení systému */
+    @media (prefers-reduced-motion: reduce) {
+      html {
+        scroll-behavior: auto;
+      }
+
+      *, *::before, *::after {
+        animation: none !important;
+        transition: none !important;
+      }
+
+      .logo-nav, .nav-links, .hero h1, .hero-subtitle, .hero-buttons, .scroll-indicator,
+      .js .section-title, .js .section-content {
+        opacity: 1;
+        transform: none;
+      }
+
+      .scroll-indicator {
+        transform: translateX(-50%);
+      }
+
+      body:hover .hero-background,
+      .about-image:hover, .experience-image:hover,
+      .automotive-card:hover, .social-card:hover, .apple-button:hover {
+        transform: none;
+      }
+    }
   </style>
 </head>
 <body>
@@ -873,7 +831,7 @@
           <a href="#contact" class="apple-button secondary">Kontakt</a>
         </div>
       </div>
-      <div class="scroll-indicator">
+      <div class="scroll-indicator" aria-hidden="true">
         <i class="fas fa-chevron-down"></i>
       </div>
     </section>
@@ -884,7 +842,7 @@
         <h2 class="section-title">O mně</h2>
         <div class="section-content about-content">
           <div class="about-image">
-            <img src="vt.jpeg" alt="Viktor Tamayo">
+            <img src="vt.jpeg" alt="Viktor Tamayo" width="873" height="1280" loading="lazy" decoding="async">
           </div>
           <div class="about-text">
             <h3>Viktor Tamayo</h3>
@@ -941,7 +899,7 @@
             </div>
           </div>
           <div class="experience-image">
-            <img src="exp.jpg" alt="Viktor Tamayo - Zkušenosti">
+            <img src="exp.jpg" alt="Koláž z pracovních projektů – Česká televize, Scania, UNIQA, Survivor" width="1346" height="612" loading="lazy" decoding="async">
           </div>
         </div>
       </div>
@@ -954,7 +912,7 @@
         <div class="section-content">
           <div class="automotive-grid">
             <!-- 3. VYLEPŠENÍ: Sémantický HTML odkaz (dříve div) -->
-            <a href="https://ahosovidaho.github.io/vttv.html" target="_blank" rel="noopener noreferrer" class="automotive-card">
+            <a href="https://www.tamayo.cz/vttv.html" target="_blank" rel="noopener noreferrer" class="automotive-card">
               <i class="fas fa-car"></i>
               <h3>Autotesty - VTTV.cz</h3>
               <p>Testování a natáčení aut se věnuji již od roku 2013. Nejprve pro AutoPeriskop.cz a následně také na zakázku pro další klienty. V roce 2025 jsem pomáhal s rozvojem video obsahu na webu Usporne.info</p>
@@ -983,17 +941,17 @@
         <div class="section-content">
           <p style="font-size: 1.2rem; margin-bottom: 20px; opacity: 0.9;">Sledujte mě na sociálních sítích</p>
           <div class="social-grid">
-            <a href="https://www.linkedin.com/in/viktor-tamayo" target="_blank" class="social-card">
+            <a href="https://www.linkedin.com/in/viktor-tamayo" target="_blank" rel="noopener noreferrer" class="social-card">
               <i class="fab fa-linkedin"></i>
               <h3>LinkedIn</h3>
               <p>Objevte více o mé práci na LinkedIn</p>
             </a>
-            <a href="https://x.com/viktor_tamayo" target="_blank" class="social-card">
+            <a href="https://x.com/viktor_tamayo" target="_blank" rel="noopener noreferrer" class="social-card">
               <i class="fab fa-x-twitter"></i>
               <h3>X</h3>
               <p>Aktuálně, osobně a stručně — na X</p>
             </a>
-            <a href="https://www.instagram.com/viktortamayo/" target="_blank" class="social-card">
+            <a href="https://www.instagram.com/viktortamayo/" target="_blank" rel="noopener noreferrer" class="social-card">
               <i class="fab fa-instagram"></i>
               <h3>Instagram</h3>
               <p>Střípky ze soukromého a pracovního života</p>
@@ -1028,15 +986,15 @@
               <textarea id="message" name="message" rows="5" placeholder="Vaše zpráva..." required></textarea>
             </div>
             <!-- Skryté pole pro přesměrování -->
-            <input type="hidden" name="_next" value="https://ahosovidaho.github.io/dekuji.html">
+            <input type="hidden" name="_next" value="https://www.tamayo.cz/dekuji.html">
             <!-- Honeypot pole proti spamu -->
-            <input type="text" name="_gotcha" style="display:none">
+            <input type="text" name="_gotcha" style="display:none" tabindex="-1" autocomplete="off" aria-hidden="true">
             
             <!-- 4. VYLEPŠENÍ: Přidáno ID tlačítka pro JS -->
             <button type="submit" id="contact-submit-btn" class="apple-button" style="margin-top: 20px;">Odeslat zprávu</button>
             
             <!-- 4. VYLEPŠENÍ: Přidán element pro stavovou/chybovou hlášku -->
-            <p id="contact-form-status" style="margin-top: 15px; font-size: 0.9rem; color: #ff6b6b;"></p>
+            <p id="contact-form-status" role="alert" style="margin-top: 15px; font-size: 0.9rem; color: #ff6b6b;"></p>
           </form>
         </div>
       </div>
@@ -1051,6 +1009,8 @@
 
   <script>
     document.addEventListener('DOMContentLoaded', function() {
+      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
       // Smooth scroll pro navigaci
       document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', function (e) {
@@ -1058,7 +1018,7 @@
           const target = document.querySelector(this.getAttribute('href'));
           if (target) {
             target.scrollIntoView({
-              behavior: 'smooth',
+              behavior: reduceMotion ? 'auto' : 'smooth',
               block: 'start'
             });
           }
@@ -1076,12 +1036,14 @@
       });
 
       // Parallax efekt pro pozadí
-      document.addEventListener('mousemove', function(e) {
-        const background = document.querySelector('.hero-background');
-        const x = (e.clientX / window.innerWidth) * 10;
-        const y = (e.clientY / window.innerHeight) * 10;
-        background.style.transform = `translate(${x}px, ${y}px) scale(1.02)`;
-      });
+      if (!reduceMotion) {
+        document.addEventListener('mousemove', function(e) {
+          const background = document.querySelector('.hero-background');
+          const x = (e.clientX / window.innerWidth) * 10;
+          const y = (e.clientY / window.innerHeight) * 10;
+          background.style.transform = `translate(${x}px, ${y}px) scale(1.02)`;
+        });
+      }
 
       // Animace při scrollování
       const observerOptions = {
@@ -1089,18 +1051,24 @@
         rootMargin: '0px 0px -50px 0px'
       };
 
-      const observer = new IntersectionObserver(function(entries) {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('visible');
-          }
-        });
-      }, observerOptions);
+      const revealEls = document.querySelectorAll('.section-title, .section-content');
 
-      // Sledování všech sekcí pro animace
-      document.querySelectorAll('.section-title, .section-content').forEach(el => {
-        observer.observe(el);
-      });
+      if (!('IntersectionObserver' in window)) {
+        revealEls.forEach(el => el.classList.add('visible'));
+      } else {
+        const observer = new IntersectionObserver(function(entries) {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('visible');
+            }
+          });
+        }, observerOptions);
+
+        // Sledování všech sekcí pro animace
+        revealEls.forEach(el => {
+          observer.observe(el);
+        });
+      }
 
       // 4. VYLEPŠENÍ: Kontaktní formulář - Formspree s přesměrováním a lepším hlášením chyb
       const contactForm = document.getElementById('contact-form'); // Opraven selektor
