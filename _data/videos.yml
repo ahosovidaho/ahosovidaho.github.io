@@ -7,7 +7,8 @@
 #   youtube:     ID videa – 11 znaků za "youtu.be/" nebo za "watch?v="
 #   playlist:    ID playlistu (místo youtube) – text za "list=" v odkazu
 #   title:       nadpis karty
-#   date:        datum publikace RRRR-MM-DD
+#   date:        datum zveřejnění RRRR-MM-DD (rok = rok natočení; filtr roků na webu)
+#   uploaded:    (volitelné) skutečné datum nahrání na YouTube, když je v jiném roce než date
 #   short:       krátký popis na kartě (1–2 věty); když chybí, použije se description
 #   description: delší popis v okně s přehrávačem; když chybí, použije se short
 #   tags:        štítky pro hledání, malými písmeny; na kartě se ukážou první 3
@@ -24,42 +25,42 @@
 
 - youtube: "rpiZP8cnFi4"
   title: "Citroën C3 Aircross Electric 2025"
-  date: 2025-10-14
+  date: 2025-10-12
   short: "Test elektrické verze Citroenu C3 Aircross. Jak si vede francouzský crossover s elektrickým pohonem?"
   description: "Test elektrické verze Citroenu C3 Aircross. Testujeme elektrický pohon, dojezd, praktičnost a francouzský komfort. Jak si vede francouzský crossover s elektrickým pohonem?"
   tags: ["citroën", "aircross", "c3", "test", "recenze", "electric", "crossover", "2025"]
 
 - youtube: "XCq03fZ1v4A"
   title: "Opel Corsa Hybrid 2025"
-  date: 2025-10-04
+  date: 2025-09-29
   short: "Hybridní Opel Corsa? Bude lepší, než premiant Toyota Yaris?"
   description: "Test hybridního hatchbacku Opel Corsa. Testujeme hybridní systém, spotřebu, jízdní vlastnosti a praktičnost městského vozu. Jak si vede malý Opel s hybridním pohonem?"
   tags: ["opel", "corsa", "hybrid", "test", "hatchback", "recenze", "2025"]
 
 - youtube: "nU-0XtNCtJw"
   title: "KGM Torres EVX 2025"
-  date: 2025-09-25
+  date: 2025-09-22
   short: "Test elektrického SUV KGM Torres EVX. Jak si vede nový elektrický model od korejské značky?"
   description: "Test elektrického SUV KGM Torres EVX. Testujeme elektrický pohon, dojezd, výkon a praktičnost. Jak si vede nový elektrický model od korejské značky KGM?"
   tags: ["kgm", "torres", "evx", "test", "90s", "electric", "suv", "recenze", "2025"]
 
 - youtube: "iYvZteSm9wQ"
   title: "Toyota C-HR 2.0 PHEV"
-  date: 2025-09-16
+  date: 2025-09-15
   short: "Podvozek jako nějaký „hot hatch\", ale s vyšší karoserií. Toyota C-HR v nejsilnější motorizaci nabídne 223 koní a ujede přes 60 km čistě na elektřinu."
   description: "Podvozek jako nějaký „hot hatch\", ale s vyšší karoserií. Toyota C-HR v nejsilnější motorizaci nabídne 223 koní a ujede přes 60 km čistě na elektřinu. Test plug-in hybridního SUV s důrazem na výkon a elektrický dojezd."
   tags: ["toyota", "c-hr", "phev", "plug-in", "hybrid", "test", "recenze", "2025"]
 
 - youtube: "l-owJpQbPDA"
   title: "Seat Arona 1.0 TSI VAMOS"
-  date: 2025-09-09
+  date: 2025-09-08
   short: "Auto, které zraje jako víno? Seat Arona! Tento model španělské automobilky je pro všechny, kdo chtějí klasiku: manuál, litrový tříválec a klasické ovládání."
   description: "Auto, které zraje jako víno? Seat Arona! Tento model španělské automobilky je pro všechny, kdo chtějí klasiku: manuál, litrový tříválec a klasické ovládání. Test kompaktního SUV s důrazem na praktičnost a spolehlivost."
   tags: ["seat", "arona", "tsi", "1.0", "vamos", "test", "recenze", "2025"]
 
 - youtube: "Wvp0mWN0nKU"
   title: "Ford e-Tourneo Custom 2024"
-  date: 2025-09-06
+  date: 2025-09-05
   short: "Test elektrického MPV Ford e-Tourneo Custom."
   description: "Test elektrického MPV Ford e-Tourneo Custom. Testujeme elektrický pohon, dojezd, praktičnost a prostornost. Jak si vede elektrická verze populární dodávky pro větší rodiny?"
   tags: ["ford", "e-tourneo", "custom", "electric", "mpv", "test", "recenze", "2024"]
@@ -78,6 +79,13 @@
   description: "Test nového hybridního SUV Hyundai Santa Fe. Testujeme výkon, spotřebu a praktičnost. Jak se osvědčuje kombinace benzínu a elektřiny?"
   tags: ["hyundai", "santa fe", "hybrid", "suv", "test", "recenze", "2025"]
 
+- youtube: "aqo_495cZw8"
+  title: "Opel Combo XL 2025"
+  date: 2025-08-24
+  short: "Test praktického užitkového vozu Opel Combo XL. Jak si vede v praxi pro práci i rodinu?"
+  description: "Test praktického užitkového vozu Opel Combo XL. Testujeme prostornost, praktičnost a jízdní vlastnosti. Jak si vede v praxi pro práci i rodinu?"
+  tags: ["opel", "combo", "xl", "užitkové", "test", "recenze", "2025"]
+
 - youtube: "9FTqOMy1XKA"
   title: "Mazda CX-80 PHEV 2025"
   date: 2025-08-20
@@ -85,16 +93,10 @@
   description: "Test nového plug-in hybridního SUV od Mazda. CX-80 s možností nabíjení ze sítě. Testujeme elektrický dojezd a spotřebu."
   tags: ["mazda", "cx-80", "phev", "plug-in", "hybrid", "suv", "test", "recenze", "2025"]
 
-- youtube: "aqo_495cZw8"
-  title: "Opel Combo XL 2025"
-  date: 2025-01-01
-  short: "Test praktického užitkového vozu Opel Combo XL. Jak si vede v praxi pro práci i rodinu?"
-  description: "Test praktického užitkového vozu Opel Combo XL. Testujeme prostornost, praktičnost a jízdní vlastnosti. Jak si vede v praxi pro práci i rodinu?"
-  tags: ["opel", "combo", "xl", "užitkové", "test", "recenze", "2025"]
-
 - youtube: "Y1XgsbQpI1M"
   title: "Toyota Prius PHEV 2024"
   date: 2024-12-01
+  uploaded: 2025-08-24
   short: "Test nové generace Toyota Prius s plug-in hybridním pohonem. Jak se vyvinula ikona hybridů?"
   description: "Test nové generace Toyota Prius s plug-in hybridním pohonem. Testujeme elektrický dojezd, spotřebu a jízdní vlastnosti. Jak se vyvinula ikona hybridů?"
   tags: ["toyota", "prius", "phev", "plug-in", "hybrid", "test", "recenze", "2024"]
@@ -102,6 +104,7 @@
 - youtube: "Thls9pBTJ6Y"
   title: "Toyota Yaris 1.5 Hybrid 2024"
   date: 2024-11-01
+  uploaded: 2025-08-24
   short: "Test malého hybridního hatchbacku Toyota Yaris. Jak si vede v městském provozu?"
   description: "Test malého hybridního hatchbacku Toyota Yaris. Testujeme spotřebu, jízdní vlastnosti a praktičnost. Jak si vede v městském provozu?"
   tags: ["toyota", "yaris", "hybrid", "test", "recenze", "hatchback", "2024"]
@@ -116,6 +119,7 @@
 - youtube: "XRsT38d_ujI"
   title: "Mitsubishi Outlander 2018"
   date: 2018-10-30
+  uploaded: 2019-01-31
   short: "Test velkého SUV od Mitsubishi. Jak si vede Outlander v konkurenci sedmimístných vozů?"
   description: "Test velkého SUV od Mitsubishi. Testujeme prostornost, jízdní vlastnosti a praktičnost sedmi míst. Jak si vede Outlander v konkurenci sedmimístných vozů?"
   tags: ["mitsubishi", "outlander", "suv", "test", "recenze", "2018"]
@@ -123,27 +127,28 @@
 - youtube: "o2dheFK1OEw"
   title: "Mitsubishi ASX 2018"
   date: 2018-10-25
+  uploaded: 2019-01-29
   short: "Test kompaktního crossoveru Mitsubishi ASX. Jak se osvědčuje v městském provozu?"
   description: "Test kompaktního crossoveru Mitsubishi ASX. Testujeme jízdní vlastnosti, komfort a praktičnost. Jak se osvědčuje v městském provozu?"
   tags: ["mitsubishi", "asx", "suv", "crossover", "test", "recenze", "2018"]
 
 - youtube: "HpXe9RBb-3E"
   title: "Mazda CX-5 2018"
-  date: 2018-10-24
+  date: 2018-09-24
   short: "Test druhé generace Mazda CX-5. Jak si vede v konkurenci kompaktních SUV?"
   description: "Test druhé generace Mazda CX-5. Testujeme jízdní vlastnosti, komfort a technologie. Jak si vede v konkurenci kompaktních SUV?"
   tags: ["mazda", "cx-5", "suv", "test", "recenze", "2018"]
 
 - youtube: "JysRDjaXblY"
   title: "Mazda CX-3 2018"
-  date: 2018-10-01
+  date: 2018-09-19
   short: "Test malého crossoveru Mazda CX-3. Sportovní jízdní vlastnosti v kompaktním balení."
   description: "Test malého crossoveru Mazda CX-3. Testujeme jízdní vlastnosti, spotřebu a praktičnost. Sportovní jízdní vlastnosti v kompaktním balení."
   tags: ["mazda", "cx-3", "crossover", "test", "recenze", "2018"]
 
 - youtube: "gp9QY9HpJ2U"
   title: "Opel Grandland 2018"
-  date: 2018-09-14
+  date: 2018-09-15
   short: "Test velkého SUV od Opelu. Grandland X v konkurenci kompaktních SUV."
   description: "Test velkého SUV od Opelu. Testujeme prostornost, jízdní vlastnosti a technologie. Grandland X v konkurenci kompaktních SUV."
   tags: ["opel", "grandland", "suv", "test", "recenze", "2018"]
@@ -158,7 +163,7 @@
 
 - youtube: "AdjrozyNiCE"
   title: "Mitsubishi Eclipse Cross 2018"
-  date: 2018-07-12
+  date: 2018-07-11
   short: "Test nového crossoveru Mitsubishi Eclipse Cross. Návrat legendární značky Eclipse."
   description: "Test nového crossoveru Mitsubishi Eclipse Cross. Testujeme design, jízdní vlastnosti a technologie. Návrat legendární značky Eclipse."
   tags: ["mitsubishi", "eclipse", "cross", "suv", "test", "recenze", "2018"]
@@ -207,28 +212,28 @@
 
 - youtube: "7BNg4LfkQ1g"
   title: "Audi Q5 TDI 2017"
-  date: 2017-05-20
+  date: 2017-08-15
   short: "Test nové generace Audi Q5 s dieselovým motorem. Luxus a efektivita v jednom."
   description: "Test nové generace Audi Q5 s dieselovým motorem. Testujeme luxusní výbavu, jízdní komfort a spotřebu. Luxus a efektivita v jednom."
   tags: ["audi", "q5", "tdi", "suv", "luxury", "test", "recenze", "2017"]
 
 - youtube: "rkmLRtb1qFI"
   title: "Škoda Fabia a konkurenti - největší porovnání v ČR"
-  date: 2017-05-01
+  date: 2017-05-06
   short: "Velký srovnávací test Škoda Fabia proti hlavním konkurentům. Kdo vyhraje?"
   description: "Velký srovnávací test Škoda Fabia proti hlavním konkurentům v segmentu malých vozů. Testujeme praktičnost, spotřebu, cenu a kvalitu. Kdo vyhraje?"
   tags: ["škoda", "fabia", "porovnání", "test", "recenze", "hatchback", "2017"]
 
 - youtube: "816GizCL3sg"
   title: "Toyota C-HR 2017"
-  date: 2017-04-25
+  date: 2017-04-24
   short: "Test futuristického crossoveru Toyota C-HR. Odvážný design a hybridní technologie."
   description: "Test futuristického crossoveru Toyota C-HR. Testujeme odvážný design, hybridní pohon a jízdní vlastnosti. Odvážný design a hybridní technologie."
   tags: ["toyota", "c-hr", "crossover", "hybrid", "test", "recenze", "2017"]
 
 - youtube: "5w5EKAXT9R0"
   title: "Peugeot 3008 2.0 HDi 2017"
-  date: 2017-04-01
+  date: 2017-03-27
   short: "Test nové generace Peugeot 3008. Z MPV se stalo SUV - jak si vede?"
   description: "Test nové generace Peugeot 3008. Z MPV se stalo SUV - testujeme změny v designu, komfortu a jízdních vlastnostech. Jak si vede?"
   tags: ["peugeot", "3008", "suv", "test", "recenze", "2017"]
@@ -246,6 +251,14 @@
   short: "Test nové generace Hyundai i30. Jak si vede proti evropské konkurenci?"
   description: "Test nové generace Hyundai i30. Testujeme kvalitu, komfort a jízdní vlastnosti. Jak si vede proti evropské konkurenci?"
   tags: ["hyundai", "i30", "hatchback", "test", "recenze", "2017"]
+
+- youtube: "7_qhbw8IJVM"
+  title: "Hyundai Ioniq 2017"
+  date: 2017-03-13
+  short: "Test Hyundai Ioniq."
+  description: "Test Hyundai Ioniq."
+  tags: ["hyundai", "ioniq", "hybrid", "electric", "test", "recenze", "2017"]
+  thumb: hq
 
 - youtube: "v_z_tznMP7A"
   title: "Volvo S90 2017"
@@ -268,17 +281,9 @@
   description: "Reportáže z Autosalonu Ženeva 2017. Série videí z prestižního evropského autosalonu s nejnovějšími automobilovými trendy a koncepčními vozy."
   tags: ["autosalon", "ženeva", "novinky", "test", "reportáž", "2017"]
 
-- youtube: "7_qhbw8IJVM"
-  title: "Hyundai Ioniq 2017"
-  date: 2017-02-02
-  short: "Test Hyundai Ioniq."
-  description: "Test Hyundai Ioniq."
-  tags: ["hyundai", "ioniq", "hybrid", "electric", "test", "recenze", "2017"]
-  thumb: hq
-
 - youtube: "n4ewH8bUNFM"
   title: "Audi Q7 E-TRON 2017"
-  date: 2017-02-02
+  date: 2017-02-26
   short: "Test plug-in hybridního SUV Audi Q7 E-TRON. Luxus s možností elektrické jízdy."
   description: "Test plug-in hybridního SUV Audi Q7 E-TRON. Testujeme luxusní výbavu, elektrický dojezd a jízdní vlastnosti. Luxus s možností elektrické jízdy."
   tags: ["audi", "q7", "e-tron", "hybrid", "plug-in", "luxury", "suv", "test", "recenze", "2017"]
@@ -286,7 +291,7 @@
 
 - youtube: "fCO4tnd9q6E"
   title: "Kia Niro 2017"
-  date: 2017-01-01
+  date: 2017-02-21
   short: "Test hybridního crossoveru Kia Niro. Praktičnost a úspornost v jednom balení."
   description: "Test hybridního crossoveru Kia Niro. Testujeme praktičnost, spotřebu a hybridní systém. Praktičnost a úspornost v jednom balení."
   tags: ["kia", "niro", "hybrid", "crossover", "test", "recenze", "2017"]
@@ -294,14 +299,14 @@
 
 - youtube: "JrR331do3lE"
   title: "Audi A4 Allroad 3.0 TDI 2016"
-  date: 2016-12-02
+  date: 2016-12-01
   short: "Test terénního kombi Audi A4 Allroad. Elegance pro všechny cesty."
   description: "Test terénního kombi Audi A4 Allroad. Testujeme jízdní vlastnosti na silnici i v terénu, luxusní výbavu a praktičnost. Elegance pro všechny cesty."
   tags: ["audi", "a4", "allroad", "tdi", "quattro", "kombi", "luxury", "test", "recenze", "2016"]
 
 - youtube: "Y3TVc2gRYn4"
   title: "Mercedes-Benz E 220d 2016"
-  date: 2016-12-01
+  date: 2016-11-21
   short: "Test nové generace Mercedes E-Class. Německý luxus v plné kráse."
   description: "Test nové generace Mercedes E-Class. Testujeme luxusní výbavu, komfort, technologie a jízdní vlastnosti. Německý luxus v plné kráse."
   tags: ["mercedes", "e-class", "220d", "sedan", "luxury", "test", "recenze", "2016"]
@@ -329,7 +334,7 @@
 
 - youtube: "40HN0WZwaxM"
   title: "Audi Museum Mobile Ingolstadt 2015"
-  date: 2015-11-28
+  date: 2015-12-04
   short: "Reportáž z muzea Audi v Ingolstadtu. Historie čtyř kruhů od počátku."
   description: "Reportáž z muzea Audi v Ingolstadtu. Prohlídka historie značky s čtyřmi kruhy od samého počátku až po současnost."
   tags: ["audi", "museum", "ingolstadt", "reportáž", "historie", "2015"]
@@ -350,21 +355,21 @@
 
 - youtube: "4BeXoJfD3M8"
   title: "Audi A3 G-tron 2015"
-  date: 2015-09-21
+  date: 2015-09-18
   short: "Test Audi A3 na zemní plyn. Ekologická alternativa s luxusní výbavou."
   description: "Test Audi A3 na zemní plyn. Testujeme ekologický pohon, praktičnost a náklady na provoz. Ekologická alternativa s luxusní výbavou."
   tags: ["audi", "a3", "g-tron", "cng", "zemní plyn", "test", "recenze", "2015"]
 
 - youtube: "ITjnRr5r64M"
   title: "Škoda Rapid 1.2 TSI 2015"
-  date: 2015-09-20
+  date: 2015-09-18
   short: "Test kompaktního sedanu Škoda Rapid s motorem TSI. Praktičnost za rozumnou cenu."
   description: "Test kompaktního sedanu Škoda Rapid s motorem TSI. Testujeme praktičnost, spotřebu a poměr ceny a výkonu. Praktičnost za rozumnou cenu."
   tags: ["škoda", "rapid", "tsi", "sedan", "test", "recenze", "2015"]
 
 - youtube: "PngPhtxP-yQ"
   title: "Peugeot 308 1.6 e-HDi 2015"
-  date: 2015-09-19
+  date: 2015-09-18
   short: "Test francouzského hatchbacku Peugeot 308. Elegance a úspornost v jednom."
   description: "Test francouzského hatchbacku Peugeot 308. Testujeme design, komfort a úsporný dieselový motor. Elegance a úspornost v jednom."
   tags: ["peugeot", "308", "hdi", "diesel", "hatchback", "test", "recenze", "2015"]
@@ -385,7 +390,7 @@
 
 - youtube: "s3e0xn62OL4"
   title: "Vlastní reklama na Seat Leon X-Perience 2015"
-  date: 2015-07-08
+  date: 2015-07-12
   short: "Kreativní reklama na Seat Leon X-Perience. Netradiční pohled na crossover."
   description: "Kreativní vlastní reklama na Seat Leon X-Perience. Netradiční a zábavný pohled na crossover od Seatu."
   tags: ["seat", "leon", "x-perience", "reklama", "crossover", "test", "2015"]
@@ -399,7 +404,7 @@
 
 - youtube: "jDwjphR0y7U"
   title: "Ojetina vs nové auto. Mercedes-Benz CL vs Hyundai Genesis 2015"
-  date: 2015-04-14
+  date: 2015-03-12
   short: "Zajímavé porovnání ojetin vs nových aut. Co nabídne více luxusu za stejnou cenu?"
   description: "Zajímavé porovnání ojetin vs nových aut. Mercedes-Benz CL jako ojetina vs nový Hyundai Genesis. Co nabídne více luxusu za stejnou cenu?"
   tags: ["mercedes", "cl", "hyundai", "genesis", "ojetina", "nové auto", "porovnání", "luxury", "2015"]
@@ -414,28 +419,28 @@
 
 - youtube: "t7g9Z-FjtLg"
   title: "Mercedes-Benz ML 2014"
-  date: 2014-11-01
+  date: 2014-11-10
   short: "Test luxusního SUV Mercedes-Benz ML. Německá preciznost v terénním balení."
   description: "Test luxusního SUV Mercedes-Benz ML. Testujeme komfort, výkon a terénní schopnosti. Německá preciznost v terénním balení."
   tags: ["mercedes", "ml", "suv", "luxury", "test", "recenze", "2014"]
 
 - youtube: "qInbOk4MHRo"
   title: "Autosalon Paříž 2014"
-  date: 2014-10-07
+  date: 2014-10-12
   short: "Reportáže z Autosalonu Paříž 2014. Francouzský styl a automobilové novinky."
   description: "Reportáže z Autosalonu Paříž 2014. Přehled nejnovějších francouzských a světových automobilových novinek ve francouzském stylu."
   tags: ["autosalon", "paříž", "novinky", "test", "reportáž", "2014"]
 
 - youtube: "kqr5q0FgDhM"
   title: "Peugeot 308 a Subaru BRZ v pořadu Autoperiskop 2014"
-  date: 2014-10-02
+  date: 2014-10-01
   short: "Speciální díl pořadu Autoperiskop s testy Peugeot 308 a Subaru BRZ."
   description: "Speciální díl pořadu Autoperiskop s detailními testy Peugeot 308 a sportovního Subaru BRZ. Dva rozdílné přístupy k automobilové filozofii."
   tags: ["peugeot", "308", "subaru", "brz", "autoperiskop", "test", "pořad", "2014"]
 
 - youtube: "YlMDrswT7NA"
   title: "Škoda Rapid 1.2 2014"
-  date: 2014-06-14
+  date: 2014-09-20
   short: "Test kompaktního sedanu Škoda Rapid s atmosférickým motorem 1.2."
   description: "Test kompaktního sedanu Škoda Rapid s atmosférickým motorem 1.2. Testujeme praktičnost, spotřebu a poměr ceny a výkonu."
   tags: ["škoda", "rapid", "sedan", "test", "recenze", "2014"]
@@ -449,21 +454,21 @@
 
 - youtube: "Dm4bGEEWoMc"
   title: "Seat Leon 2014"
-  date: 2014-05-01
+  date: 2014-04-30
   short: "Test španělského hatchbacku Seat Leon. Sportovní design a dynamické vlastnosti."
   description: "Test španělského hatchbacku Seat Leon. Testujeme sportovní design, jízdní vlastnosti a praktičnost. Sportovní design a dynamické vlastnosti."
   tags: ["seat", "leon", "hatchback", "test", "recenze", "2014"]
 
 - youtube: "_kRlZhsOxL4"
   title: "Citroën Jumper 2014"
-  date: 2014-04-04
+  date: 2014-04-09
   short: "Test užitkového vozu Citroën Jumper. Velká dodávka pro velké úkoly."
   description: "Test užitkového vozu Citroën Jumper. Testujeme prostornost, praktičnost a jízdní vlastnosti. Velká dodávka pro velké úkoly."
   tags: ["citroën", "jumper", "užitkové", "dodávka", "test", "recenze", "2014"]
 
 - youtube: "9xSNi-i2CY8"
   title: "Lada Niva 2014"
-  date: 2014-03-15
+  date: 2014-03-11
   short: "Test legendárního terénního vozu Lada Niva. Ruská klasika stále v akci."
   description: "Test legendárního terénního vozu Lada Niva. Testujeme terénní schopnosti, jednoduchost a spolehlivost. Ruská klasika stále v akci."
   tags: ["lada", "niva", "terénní", "offroad", "test", "recenze", "2014"]
@@ -477,7 +482,7 @@
 
 - youtube: "mTXD9T_trMo"
   title: "Citroën Grand C4 Picasso 2014"
-  date: 2014-01-14
+  date: 2014-01-21
   short: "Test rodinného MPV Citroën Grand C4 Picasso. Francouzský přístup k rodinným vozům."
   description: "Test rodinného MPV Citroën Grand C4 Picasso. Testujeme prostornost, komfort a praktičnost pro velké rodiny. Francouzský přístup k rodinným vozům."
   tags: ["citroën", "grand c4 picasso", "mpv", "test", "recenze", "2014"]
@@ -491,14 +496,14 @@
 
 - youtube: "XMER08w5yxo"
   title: "Volkswagen Golf Variant 2013"
-  date: 2013-10-10
+  date: 2013-11-18
   short: "Test praktického kombi od Volkswagenu. Jak se osvědčil Golf Variant v dlouhodobém testu?"
   description: "Test praktického kombi od Volkswagenu. Testujeme prostornost, jízdní vlastnosti a celkovou praktičnost Golf Variantu. Jak se osvědčil v dlouhodobém testu?"
   tags: ["volkswagen", "golf", "variant", "kombi", "test", "recenze", "2013"]
 
 - youtube: "dsd-Hw44dzk"
   title: "Honda CR-V 2013"
-  date: 2013-10-01
+  date: 2013-10-14
   short: "Detailní test nové generace Honda CR-V. Jak si vede v praxi a co nabízí za svoje peníze?"
   description: "Detailní test nové generace Honda CR-V. Testujeme výkon, spotřebu, komfort a praktičnost tohoto oblíbeného SUV. Jak si vede v praxi a co nabízí za svoje peníze?"
   tags: ["honda", "cr-v", "suv", "test", "recenze", "2013"]
