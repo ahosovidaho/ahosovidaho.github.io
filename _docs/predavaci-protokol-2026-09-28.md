@@ -1,0 +1,145 @@
+# Předávací protokol – 28. 9. 2026
+
+Souhrn změn webu `www.tamayo.cz` (repo `ahosovidaho/ahosovidaho.github.io`) provedených 28. 9. 2026
+v session Claude Code. Určeno pro Codex a další agenty, kteří na změny navazují.
+
+> Složka `_docs/` začíná podtržítkem, Jekyll ji proto **nepublikuje** na web. Soubor je jen v repozitáři.
+
+---
+
+## 1. Jak web funguje (ověřeno)
+
+| Co | Skutečnost |
+|---|---|
+| Hosting `www.tamayo.cz` | **GitHub Pages**, klasický build z větve `main` (`pages-build-deployment`, `jekyll-build-pages v1.0.13` = Jekyll 3.10, Liquid 4) |
+| Jekyll | aktivní (není `.nojekyll`); theme `pages-themes/cayman` přes `remote_theme` |
+| Firebase Hosting | workflow `.github/workflows/firebase-hosting-deploy.yml` nasazuje **jen složku `poplatky/`** (projekt `ct-vyzva`), s VTTV nesouvisí |
+| Hlavní stránka | `index.html` (soubor `index.md` byl mrtvý – smazán) |
+| Složky s `_` | Jekyll je nepublikuje (`_data`, `_includes`, `_docs`) |
+| URL bez přípony | `https://www.tamayo.cz/vttv` funguje stejně jako `/vttv.html` (ověřeno uživatelem) |
+
+**Pracovní postup, který uživatel používá:** agent pracuje na větvi → PR do `main` → **sloučení dělá uživatel sám** → agent zkontroluje, že `pages build and deployment` doběhl zeleně.
+
+---
+
+## 2. Sloučené PR (chronologicky)
+
+| PR | Obsah |
+|---|---|
+| #3 | VTTV: opravy chyb, přístupnost, lazy loading, SEO; **přesun videí do `_data/videos.yml`** a Jekyll šablona |
+| #4 | VTTV: **nový design** (tmavý Apple-like, akcent `#FF3B30`), filtry, deep linky, sdílení |
+| #5 | `sitemap.xml` lastmod; **úklid 25 nepoužívaných souborů**; `noindex` na 2 stránkách |
+| #6 | VTTV: **data videí podle YouTube** + pole `uploaded` |
+| #7 | VTTV: **obrázek pro sdílení** `assets/vttv-og.png`; karta VTTV na hlavní stránce bez `target="_blank"` |
+
+---
+
+## 3. VTTV stránka (`vttv.html`) – architektura
+
+### Soubory
+- **`_data/videos.yml`** – jediný zdroj dat (68 položek: 64 videí + 4 playlisty). Návod je v hlavičce souboru.
+- **`vttv.html`** – Jekyll šablona (`layout: null`), generuje karty, filtry, JSON-LD. **Karty se nepíšou ručně do HTML.**
+- **`assets/vttv-og.png`** – Open Graph obrázek 1200×630.
+
+### Datový formát (`_data/videos.yml`)
+```yaml
+- youtube: "rpiZP8cnFi4"          # nebo playlist: "PL…" (pak bez youtube)
+  title: "Citroën C3 Aircross Electric 2025"
+  date: 2025-10-12                 # rok = rok NATOČENÍ; určuje filtr roků a zobrazené datum
+  uploaded: 2025-08-24             # volitelné – jen když se YouTube nahrání liší rokem od date
+  short: "Krátký popis na kartu."  # když chybí, použije se description
+  description: "Delší popis do okna s přehrávačem."   # když chybí, použije se short
+  tags: ["citroën", "c3", "test", "recenze", "2025"]
+  thumb: hq                        # volitelné – když YouTube nemá maxres/sd náhled
+```
+
+**Pravidla dat (domluvená s uživatelem):**
+- Pořadí na webu = **pořadí v souboru** (nahoře nejnovější). Šablona **záměrně neřadí** – Liquid `sort` není stabilní u stejných dat.
+- `date` = datum zveřejnění na YouTube, **pokud je ve stejném roce jako natočení**. Pokud bylo video nahráno až v dalším roce, `date` drží rok natočení a skutečné datum je v `uploaded` (aktuálně: Toyota Yaris 2024, Toyota Prius 2024, Mitsubishi ASX 2018, Mitsubishi Outlander 2018).
+- JSON-LD `uploadDate` = `uploaded` nebo `date`.
+- **Názvy karet (`title`) neměnit** podle YouTube; zejména **nepřidávat značku pořadu „Světem SUV s Martinem Prokopem"** (výslovné přání uživatele).
+- Data 64 videí byla ověřena přes `yt-dlp` (`upload_date`) 28. 9. 2026 – všechna videa jsou veřejně dostupná.
+
+### Funkce stránky
+- Nahoře „Nejnovější" = **první položka** v `videos.yml`.
+- Lišta (sticky): hledání bez diakritiky (`normalize('NFD')`), filtr roků (Liquid `group_by_exp`), řazení nejnovější/nejstarší (přes `data-index`).
+- Přehrávač v modalu přes `youtube-nocookie.com`, playlisty přes `embed/videoseries?list=`.
+- **Deep link:** `vttv.html#<youtubeID>` nebo `#<playlistID>` otevře video; hash se nastavuje při otevření a maže při zavření.
+- Tlačítko **Sdílet**: `navigator.share`, jinak kopie do schránky.
+- Náhledy: karty `sddefault`, hero `maxresdefault`; fallback řetězec → `hqdefault` → grafická náhrada (YouTube vrací pro chybějící náhled šedý obrázek 120×90, proto kontrola `naturalWidth <= 120`).
+- Přístupnost: karty `role="button"`, `tabindex="0"`, Enter/mezerník; focus trap v modalu, návrat fokusu.
+- Ikony jsou inline SVG `<symbol>` (Font Awesome odstraněn).
+- JSON-LD `ItemList` + `VideoObject` (jen videa, ne playlisty).
+
+### Známé otevřené body obsahu
+- **54 popisů je šablonovitých** („Test… Testujeme… Jak si vede…?"). Plán: stáhnout originální popisy přes `yt-dlp`, navrhnout nové, **schválí uživatel** (obsah pod jeho jménem – neměnit bez schválení).
+- Hyundai Ioniq (`7_qhbw8IJVM`) má provizorní popis „Test Hyundai Ioniq." – čeká na text od uživatele.
+
+---
+
+## 4. Úklid (PR #5) – co bylo smazáno a proč
+
+Na žádný soubor nic neodkazovalo (ověřeno `rg` přes repo, `sw.js`, `manifest.webmanifest` **a konfiguraci Homepage na `home.tamayo.cz`**).
+
+- Domácí infrastruktura zbytečně publikovaná: `ucg-heartbeat.js`, `ucg-heartbeat_.js`, `ucg-heartbeat_old.js`, `startpage_test.html`, `startpage_test_ct24.html`, `startpage_test_ct24_ct24fix.html`
+- Stará administrace / formuláře nad ostrými Firestore projekty: `GT7/sezona2025_testGPT.html`, `poplatky/index_old.html`, `poplatky/index_old_old.html`, `poplatky/index_old_old_old.html`, `poplatky/index_podpisy_old.html`
+- Duplicity a mrtvé: `test.html` (stará kopie VTTV), `index.md`, `GranTurismo/test`, `GT7/GT7script_old.js`, `GT7/GT7sezona2025_old.html`, `GT7/GT7style_old.css`, `GT7/data_old.json`, `GT7/data_old_old.json`, `GT7/sezona2025_old.html`, `GT7/sezona2025_old_old.html`
+- Obrázky: `ios-glass-dark_old.jpg`, `ios-glass-light_old.jpg`, `poplatky/bgr_clean_old.png`, `poplatky/share-image_old.png`
+
+**`noindex, nofollow` přidán:** `startpage.html` (osobní PWA, zůstává funkční) a `GranTurismo/sezona2026_admin_test.html`.
+
+**Záměrně ponecháno:** `GranTurismo/archive/`, `GranTurismo/sezona2026_.html`, `GT7/GT7_firestore_seed.js`, všechny aktuální `poplatky/*`.
+
+---
+
+## 5. Bezpečnostní poznámky (bez tajných hodnot)
+
+- **`startpage.html`** je stále veřejná a obsahuje adresu Cloudflare Workeru a tokeny pro stav domácích služeb + 1 privátní IP. Návrh (neschváleno): přesunout na domácí server. Tokeny zůstávají v historii gitu – uživatel má ověřit, co Worker s tokenem umožňuje, případně je rotovat.
+- **GT7:** `sezona2026_admin_test.html` používá **stejný Firebase projekt (`test-gt7`) jako ostrá `sezona2026.html`** – „test" zapisuje do ostrých dat. Firestore Rules nejsou v repu; uživatel je má ověřit ve Firebase Console.
+- **Firebase Web API klíče** v HTML jsou veřejné identifikátory (ne tajemství); ochranu dělají Firestore Rules.
+- Agent **nesmí** spouštět `GT7_firestore_seed.js` ani zapisovat do Firestore (viz `AGENTS.md`).
+
+---
+
+## 6. Mimo repozitář (domácí server uživatele – jen pro kontext)
+
+Homepage (`home.tamayo.cz`, Docker kontejner `homepage` na Mac mini M4):
+- odkaz na Playlisty změněn na `https://`,
+- widget Nextcloud přepnut z uživatelského jména/hesla na **serverinfo token** (`NC-Token`); staré heslo aplikace „Homepage" v Nextcloudu odvoláno,
+- **otevřené (odloženo uživatelem):** rotace tokenu (hodnota byla omylem vidět na screenshotu) a smazání záloh `services.yaml.bak-*`.
+
+Tyto věci agent nemá jak ověřit z cloudu – řeší je uživatel ručně.
+
+---
+
+## 7. Ověřování změn (jak to dělat)
+
+### Lokální build jako GitHub Pages
+Plný build s `github-pages` gemem v sandboxu padá na `jekyll-github-metadata` (volá GitHub API). Pro ověření stačí Jekyll 3.10.0 + theme bez metadata pluginu:
+```bash
+# Gemfile (mimo repo): jekyll 3.10.0, kramdown-parser-gfm, jekyll-theme-cayman 0.2.0, jekyll-seo-tag 2.8.0
+# override.yml:  remote_theme: null   plugins: [jekyll-seo-tag]
+bundle exec jekyll build --source <repo> --destination <out> --config <repo>/_config.yml,override.yml
+```
+Kontroly po buildu: v `vttv.html` nesmí zůstat `{{` / `{%`; počet `class="video-card"` = počet položek v `videos.yml`; JSON-LD musí projít `json.loads`.
+
+### Náhled větve
+`raw.githack.com` zobrazí soubor z větve, ale **nezpracuje Liquid**. Pro náhled šablony se sestavená stránka dočasně ukládala do `_preview/vttv.html` (Jekyll ji nepublikuje) a **před sloučením se maže**.
+
+### Po sloučení
+- zkontrolovat běh `pages build and deployment` na `main`,
+- při změně OG obrázku obnovit cache: LinkedIn Post Inspector, Facebook Sharing Debugger.
+
+---
+
+## 8. Otevřené úkoly (stav ke konci dne)
+
+| Úkol | Stav |
+|---|---|
+| Indexování `vttv.html` v Google Search Console | připomínka nastavena na 29. 9. 2026 8:52 (dělá uživatel) |
+| Popisy videí z YouTube | odloženo – vyžaduje schválení uživatele |
+| Popis a případně datum natočení Hyundai Ioniq | čeká na uživatele |
+| Rotace Nextcloud tokenu + smazání `services.yaml.bak-*` | odloženo uživatelem |
+| Firestore Rules `test-gt7` a `ct-vyzva` | ověří uživatel |
+| Cloudflare Worker `ucg-heartbeat` – rozsah tokenů | ověří uživatel |
+| Analytika Umami na domácím serveru | nápad na později |
