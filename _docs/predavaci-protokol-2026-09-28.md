@@ -13,7 +13,7 @@ v session Claude Code. Určeno pro Codex a další agenty, kteří na změny nav
 |---|---|
 | Hosting `www.tamayo.cz` | **GitHub Pages**, klasický build z větve `main` (`pages-build-deployment`, `jekyll-build-pages v1.0.13` = Jekyll 3.10, Liquid 4) |
 | Jekyll | aktivní (není `.nojekyll`); theme `pages-themes/cayman` přes `remote_theme` |
-| Firebase Hosting | workflow `.github/workflows/firebase-hosting-deploy.yml` nasazuje **jen složku `poplatky/`** (starý projekt `ct-vyzva`) – nepoužívaný pozůstatek, s VTTV ani s živým projektem `verejnopravne-cz` nesouvisí |
+| Firebase Hosting | **z repa odstraněno** (28. 9. 2026): složka `poplatky/`, `firebase.json` a workflow `.github/workflows/firebase-hosting-deploy.yml` (nasazoval do starého projektu `ct-vyzva`). Repo nemá žádné GitHub Actions workflow; web staví jen GitHub Pages. |
 | Hlavní stránka | `index.html` (soubor `index.md` byl mrtvý – smazán) |
 | Složky s `_` | Jekyll je nepublikuje (`_data`, `_includes`, `_docs`) |
 | URL bez přípony | `https://www.tamayo.cz/vttv` funguje stejně jako `/vttv.html` (ověřeno uživatelem) |
@@ -32,7 +32,8 @@ v session Claude Code. Určeno pro Codex a další agenty, kteří na změny nav
 | #6 | VTTV: **data videí podle YouTube** + pole `uploaded` |
 | #7 | VTTV: **obrázek pro sdílení** `assets/vttv-og.png`; karta VTTV na hlavní stránce bez `target="_blank"` |
 | #8 | tento předávací protokol + odkaz v `AGENTS.md` |
-| (další) | smazání staré složky `GT7/` + aktualizace protokolu |
+| #9 | smazání staré složky `GT7/` + aktualizace protokolu |
+| (další) | smazání nepoužívané složky `poplatky/`, `firebase.json` a Firebase workflow |
 
 ---
 
@@ -90,7 +91,7 @@ Na žádný soubor nic neodkazovalo (ověřeno `rg` přes repo, `sw.js`, `manife
 
 **`noindex, nofollow` přidán:** `startpage.html` (osobní PWA, zůstává funkční) a `GranTurismo/sezona2026_admin_test.html`.
 
-**Záměrně ponecháno:** `GranTurismo/archive/`, `GranTurismo/sezona2026_.html`, všechny aktuální `poplatky/*`.
+**Záměrně ponecháno:** `GranTurismo/archive/`, `GranTurismo/sezona2026_.html`.
 
 **Dodatek (PR „GT7: odstranění staré složky"):** smazána celá složka `GT7/` – stará sezóna 2025 před `GranTurismo/`.
 Firestore verze (`GT7sezona2025.html`, `GT7script.js`, `GT7style.css`, `GT7_firestore_seed.js`) četla kolekci `races`,
@@ -107,9 +108,10 @@ kterou Firestore Rules zakazují (stránka byla prázdná); statický prototyp (
 - **Firebase Web API klíče** v HTML jsou veřejné identifikátory (ne tajemství); ochranu dělají Firestore Rules.
 - Agent **nesmí** zapisovat do Firestore (viz `AGENTS.md`). `GT7_firestore_seed.js` byl smazán spolu se složkou `GT7/`.
 - **Projekt „poplatky" / veřejnoprávní média:** živý projekt uživatele běží **mimo GitHub** (web na Forpsi) a je napojen na Firebase projekt **`verejnopravne-cz`**. **Do něj nezasahovat.**
-  Složka `poplatky/` v tomto repu je **nepoužívaný pozůstatek** (potvrzeno uživatelem 28. 9. 2026). Workflow `firebase-hosting-deploy.yml`
-  ji při každém pushi do `main` nasazuje na Firebase Hosting jiného, starého projektu `ct-vyzva` – s živým projektem `verejnopravne-cz` to nesouvisí.
-  Případné odstranění `poplatky/`, `firebase.json` a workflow jen po výslovném souhlasu uživatele (zatím neschváleno).
+  Nepoužívaný pozůstatek v tomto repu – složka `poplatky/`, `firebase.json` a workflow `firebase-hosting-deploy.yml`
+  (nasazoval do starého Firebase projektu `ct-vyzva`) – byl **se souhlasem uživatele smazán 28. 9. 2026**.
+  Na straně uživatele zbývá (mimo repo): smazat GitHub secret `FIREBASE_SERVICE_ACCOUNT`, zrušit servisní účet
+  a případně vypnout Hosting / smazat projekt `ct-vyzva` ve Firebase Console.
 
 ---
 
@@ -153,6 +155,6 @@ Kontroly po buildu: v `vttv.html` nesmí zůstat `{{` / `{%`; počet `class="vid
 | Popis a případně datum natočení Hyundai Ioniq | čeká na uživatele |
 | Rotace Nextcloud tokenu + smazání `services.yaml.bak-*` | odloženo uživatelem |
 | Firestore Rules `test-gt7` | ✅ ověřeno 28. 9. (viz sekce 5) |
-| `poplatky/` + workflow na `ct-vyzva` | nepoužívané; případný úklid jen se souhlasem uživatele. Živý projekt `verejnopravne-cz` **neřešit** |
+| `poplatky/`, `firebase.json`, workflow | ✅ smazáno z repa. Zbývá u uživatele: secret `FIREBASE_SERVICE_ACCOUNT`, servisní účet a Hosting projektu `ct-vyzva`. Živý projekt `verejnopravne-cz` **neřešit** |
 | Cloudflare Worker `ucg-heartbeat` – rozsah tokenů | ověří uživatel |
 | Analytika Umami na domácím serveru | nápad na později |
