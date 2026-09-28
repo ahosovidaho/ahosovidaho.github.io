@@ -1,7 +1,13 @@
 ---
 # Stránka se generuje Jekyllem z _data/videos.yml (GitHub Pages).
+# Nová videa přidávej do _data/videos.yml, ne sem.
 layout: null
 ---
+{%- assign videos = site.data.videos -%}
+{%- assign featured = videos.first -%}
+{%- assign oldest = videos.last -%}
+{%- assign years = videos | group_by_exp: "v", "v.date | date: '%Y'" -%}
+{%- assign months = "ledna,února,března,dubna,května,června,července,srpna,září,října,listopadu,prosince" | split: "," -%}
 <!DOCTYPE html>
 <html lang="cs">
 <head>
@@ -12,6 +18,7 @@ layout: null
   <link rel="canonical" href="https://www.tamayo.cz/vttv.html">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <meta name="theme-color" content="#000000">
+  <meta name="color-scheme" content="dark">
   <meta property="og:type" content="website">
   <meta property="og:locale" content="cs_CZ">
   <meta property="og:site_name" content="Viktor Tamayo">
@@ -26,696 +33,314 @@ layout: null
   <meta name="twitter:site" content="@viktor_tamayo">
   <meta name="twitter:creator" content="@viktor_tamayo">
   <link rel="preconnect" href="https://img.youtube.com">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
-    /* Reset */
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
+    :root {
+      --bg: #000;
+      --surface: #111113;
+      --surface-2: #1c1c1f;
+      --line: rgba(255, 255, 255, 0.08);
+      --line-strong: rgba(255, 255, 255, 0.16);
+      --text: #f5f5f7;
+      --muted: #a1a1a6;
+      --dim: #6e6e73;
+      --accent: #ff3b30;
+      --accent-hover: #ff5a50;
+      --radius: 16px;
+      --radius-sm: 10px;
+      --nav-h: 64px;
+      --max: 1240px;
+      --gutter: clamp(16px, 4vw, 40px);
+      --ease: cubic-bezier(0.25, 0.1, 0.25, 1);
     }
 
-    html {
-      scroll-behavior: smooth;
-    }
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      color: white;
-      background: #000;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
       overflow-x: hidden;
-      line-height: 1.6;
     }
 
-    /* Pozadí s gradientem jako na hlavní stránce */
-    .background-gradient {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100vh;
-      background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #667eea 100%);
-      z-index: -1;
-      opacity: 0.95;
+    a { color: inherit; text-decoration: none; }
+    button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+    img { display: block; max-width: 100%; }
+    [hidden] { display: none !important; }
+    .icon { width: 1em; height: 1em; fill: currentColor; flex-shrink: 0; }
+
+    :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 6px; }
+
+    .wrap { max-width: var(--max); margin: 0 auto; padding: 0 var(--gutter); }
+
+    .sr-only {
+      position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+      overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
     }
 
-    /* Header s Apple stylem jako na hlavní stránce */
+    /* ---------- Navigace (stejný skleněný styl jako hlavní stránka) ---------- */
     nav {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      padding: 20px 40px;
-      background: rgba(0, 0, 0, 0.1);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-      z-index: 1000;
-      transition: all 0.3s ease;
+      position: fixed; inset: 0 0 auto 0; z-index: 100;
+      height: var(--nav-h);
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: saturate(180%) blur(20px);
+      -webkit-backdrop-filter: saturate(180%) blur(20px);
+      border-bottom: 1px solid var(--line);
+    }
+    .nav-inner { height: 100%; display: flex; align-items: center; justify-content: space-between; }
+    .logo-nav { font-weight: 600; font-size: 1.05rem; letter-spacing: -0.01em; }
+    .back-link {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: 0.9rem; color: var(--muted);
+      transition: color 0.2s var(--ease);
+    }
+    .back-link:hover { color: var(--text); }
+
+    /* ---------- Úvod ---------- */
+    .intro { padding-top: calc(var(--nav-h) + clamp(40px, 8vw, 88px)); padding-bottom: clamp(28px, 5vw, 48px); }
+    .eyebrow {
+      font-size: 0.8rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--accent);
+    }
+    .intro h1 {
+      margin-top: 12px;
+      font-size: clamp(2.4rem, 7vw, 4.75rem);
+      font-weight: 700; line-height: 1.02; letter-spacing: -0.035em;
+    }
+    .intro p { margin-top: 16px; max-width: 620px; font-size: clamp(1.05rem, 2vw, 1.25rem); color: var(--muted); }
+    .intro-stats { margin-top: 20px; font-size: 0.9rem; color: var(--dim); font-variant-numeric: tabular-nums; }
+
+    /* ---------- Nejnovější video ---------- */
+    .featured {
+      display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
+      gap: clamp(20px, 3vw, 40px); align-items: center;
+      padding: clamp(12px, 1.6vw, 16px);
+      background: var(--surface); border: 1px solid var(--line); border-radius: calc(var(--radius) + 6px);
+    }
+    .featured .thumb { border-radius: var(--radius); }
+    .featured-body { padding: 8px clamp(4px, 1.5vw, 16px) 8px 0; }
+    .badge {
+      display: inline-block; padding: 4px 10px; border-radius: 999px;
+      font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+      background: rgba(255, 59, 48, 0.14); color: var(--accent);
+    }
+    .featured h2 { margin-top: 14px; font-size: clamp(1.5rem, 3vw, 2.25rem); line-height: 1.12; letter-spacing: -0.025em; }
+    .featured-date { margin-top: 8px; font-size: 0.9rem; color: var(--dim); }
+    .featured-desc { margin-top: 14px; color: var(--muted); }
+    .actions { margin-top: 24px; display: flex; flex-wrap: wrap; gap: 10px; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      height: 44px; padding: 0 20px; border-radius: 999px;
+      font-size: 0.95rem; font-weight: 600;
+      transition: background-color 0.2s var(--ease), border-color 0.2s var(--ease);
+    }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { background: var(--accent-hover); }
+    .btn-ghost { border: 1px solid var(--line-strong); color: var(--text); }
+    .btn-ghost:hover { border-color: rgba(255, 255, 255, 0.4); }
+
+    /* ---------- Lišta: hledání, roky, řazení ---------- */
+    .toolbar {
+      position: sticky; top: var(--nav-h); z-index: 50;
+      margin-top: clamp(40px, 6vw, 72px);
+      padding: 14px 0;
+      background: rgba(0, 0, 0, 0.82);
+      backdrop-filter: saturate(180%) blur(20px);
+      -webkit-backdrop-filter: saturate(180%) blur(20px);
+      border-bottom: 1px solid var(--line);
+    }
+    .toolbar-row { display: flex; align-items: center; gap: 12px; }
+    .search {
+      position: relative; flex: 1 1 280px; max-width: 360px;
+    }
+    .search .icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--dim); }
+    .search input {
+      width: 100%; height: 40px; padding: 0 14px 0 38px;
+      background: var(--surface-2); border: 1px solid transparent; border-radius: 999px;
+      color: var(--text); font: inherit; font-size: 0.95rem;
+      transition: border-color 0.2s var(--ease);
+    }
+    .search input::placeholder { color: var(--dim); }
+    .search input:focus { outline: none; border-color: var(--line-strong); }
+    .sort {
+      margin-left: auto; height: 40px; padding: 0 34px 0 14px;
+      background: var(--surface-2) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23a1a1a6' stroke-width='1.5'/%3E%3C/svg%3E") no-repeat right 14px center;
+      border: 1px solid transparent; border-radius: 999px;
+      color: var(--text); font: inherit; font-size: 0.9rem;
+      -webkit-appearance: none; appearance: none; cursor: pointer;
+    }
+    .chips {
+      display: flex; gap: 8px; margin-top: 12px;
+      overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch;
+    }
+    .chips::-webkit-scrollbar { display: none; }
+    .chip {
+      flex: 0 0 auto; height: 32px; padding: 0 14px; border-radius: 999px;
+      font-size: 0.85rem; font-weight: 500; color: var(--muted);
+      border: 1px solid var(--line-strong);
+      font-variant-numeric: tabular-nums;
+      transition: color 0.2s var(--ease), background-color 0.2s var(--ease), border-color 0.2s var(--ease);
+    }
+    .chip:hover { color: var(--text); border-color: rgba(255, 255, 255, 0.35); }
+    .chip[aria-pressed="true"] { background: var(--text); border-color: var(--text); color: #000; }
+    .chip .count { margin-left: 6px; opacity: 0.55; }
+
+    /* ---------- Mřížka videí ---------- */
+    .results { padding: 20px 0 8px; font-size: 0.9rem; color: var(--dim); font-variant-numeric: tabular-nums; }
+    .grid {
+      display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: clamp(28px, 3vw, 40px) clamp(16px, 2vw, 24px);
+      padding-bottom: 96px;
     }
 
-    .nav-content {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      max-width: 1200px;
-      margin: 0 auto;
+    .video-card { cursor: pointer; border-radius: var(--radius); }
+    .video-card:focus-visible { outline-offset: 6px; }
+
+    .thumb {
+      position: relative; display: block; width: 100%; aspect-ratio: 16 / 9; overflow: hidden;
+      border-radius: var(--radius-sm); background: var(--surface-2);
+    }
+    .thumb img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s var(--ease); }
+    .thumb-placeholder {
+      width: 100%; height: 100%; display: grid; place-items: center;
+      background: linear-gradient(135deg, #1c1c1f 0%, #2a1512 100%);
+      color: var(--dim); font-size: 2rem;
+    }
+    .play {
+      position: absolute; left: 50%; top: 50%;
+      width: 56px; height: 56px; margin: -28px 0 0 -28px; border-radius: 50%;
+      display: grid; place-items: center;
+      background: rgba(0, 0, 0, 0.55); color: #fff; font-size: 20px;
+      backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+      opacity: 0; transform: scale(0.9);
+      transition: opacity 0.25s var(--ease), transform 0.25s var(--ease), background-color 0.25s var(--ease);
+    }
+    .play .icon { margin-left: 3px; }
+    .featured .play { width: 72px; height: 72px; margin: -36px 0 0 -36px; font-size: 26px; opacity: 1; transform: none; background: var(--accent); }
+    .thumb-label {
+      position: absolute; left: 10px; bottom: 10px;
+      padding: 3px 8px; border-radius: 6px;
+      font-size: 0.68rem; font-weight: 700; letter-spacing: 0.08em;
+      background: rgba(0, 0, 0, 0.75); color: #fff;
     }
 
-    .logo-nav {
-      font-size: 18px;
-      font-weight: 600;
-      color: white;
-      text-decoration: none;
-      opacity: 0;
-      animation: fadeInDown 1s ease 0.5s forwards;
+    .video-card:hover .thumb img, .featured .thumb:hover img { transform: scale(1.04); }
+    .video-card:hover .play, .video-card:focus-visible .play { opacity: 1; transform: scale(1); background: var(--accent); }
+
+    .card-body { padding: 14px 2px 0; }
+    .video-title {
+      font-size: 1.05rem; font-weight: 600; line-height: 1.3; letter-spacing: -0.01em;
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+      transition: color 0.2s var(--ease);
+    }
+    .video-card:hover .video-title { color: #fff; }
+    .card-meta { margin-top: 6px; font-size: 0.85rem; color: var(--dim); font-variant-numeric: tabular-nums; }
+    .card-meta .sep { margin: 0 6px; opacity: 0.6; }
+    .card-desc {
+      margin-top: 6px; font-size: 0.9rem; line-height: 1.45; color: var(--muted);
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
     }
 
-    .nav-right {
-      display: flex;
-      align-items: center;
-      gap: 20px;
-      opacity: 0;
-      animation: fadeInDown 1s ease 0.7s forwards;
+    .video-data { display: none; }
+
+    .empty { padding: 72px 0 120px; text-align: center; color: var(--muted); }
+    .empty h3 { color: var(--text); font-size: 1.25rem; margin-bottom: 6px; }
+    .empty button { margin-top: 20px; }
+
+    footer { border-top: 1px solid var(--line); padding: 28px 0 40px; font-size: 0.85rem; color: var(--dim); }
+    footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+    footer a:hover { color: var(--text); }
+
+    /* ---------- Přehrávač ---------- */
+    .modal {
+      position: fixed; inset: 0; z-index: 1000;
+      display: none; align-items: center; justify-content: center;
+      padding: var(--gutter);
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+      opacity: 0; transition: opacity 0.25s var(--ease);
+    }
+    .modal.active { opacity: 1; }
+    .modal-content {
+      position: relative; width: 100%; max-height: 100%; overflow-y: auto;
+      /* video + informace se vejdou na výšku okna bez posouvání */
+      max-width: min(1040px, calc((100vh - 290px) * 16 / 9));
+      min-width: min(100%, 560px);
+      background: var(--surface); border: 1px solid var(--line); border-radius: calc(var(--radius) + 4px);
+      transform: translateY(12px) scale(0.98); transition: transform 0.3s var(--ease);
+    }
+    .modal.active .modal-content { transform: none; }
+    .modal-video { display: block; width: 100%; aspect-ratio: 16 / 9; border: 0; background: #000; }
+    .modal-info {
+      display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px 32px; align-items: start;
+      padding: clamp(20px, 3vw, 32px);
+    }
+    .modal .actions { margin-top: 0; flex-direction: column; align-items: stretch; }
+    .modal-title { font-size: clamp(1.3rem, 2.6vw, 1.75rem); line-height: 1.2; letter-spacing: -0.02em; }
+    .modal-meta { margin-top: 6px; font-size: 0.9rem; color: var(--dim); }
+    .modal-description { margin-top: 14px; color: var(--muted); max-width: 760px; }
+    .modal-close {
+      position: absolute; top: 12px; right: 12px; z-index: 2;
+      width: 40px; height: 40px; border-radius: 50%;
+      display: grid; place-items: center; font-size: 16px;
+      background: rgba(0, 0, 0, 0.6); color: #fff;
+      backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+      transition: background-color 0.2s var(--ease);
+    }
+    .modal-close:hover { background: rgba(0, 0, 0, 0.85); }
+
+    .toast {
+      position: fixed; left: 50%; bottom: 32px; z-index: 1100;
+      padding: 10px 18px; border-radius: 999px;
+      background: var(--text); color: #000; font-size: 0.9rem; font-weight: 600;
+      transform: translate(-50%, 20px); opacity: 0; pointer-events: none;
+      transition: opacity 0.25s var(--ease), transform 0.25s var(--ease);
+    }
+    .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+    /* ---------- Responzivita ---------- */
+    @media (max-width: 1024px) {
+      .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 820px) {
+      .featured { grid-template-columns: 1fr; }
+      .featured-body { padding: 4px 8px 12px; }
+    }
+    @media (max-width: 600px) {
+      :root { --nav-h: 56px; }
+      .grid { grid-template-columns: 1fr; }
+      .toolbar-row { flex-wrap: wrap; }
+      .search { max-width: none; flex-basis: 100%; }
+      .sort { display: none; }
+      .modal { padding: 0; align-items: flex-end; }
+      .modal-content { border-radius: calc(var(--radius) + 4px) calc(var(--radius) + 4px) 0 0; max-height: 92vh; }
+      .back-text { display: none; }
+      .back-link { padding: 10px; margin-right: -10px; }
+      .modal-content { max-width: none; min-width: 0; }
+      .modal-info { grid-template-columns: 1fr; gap: 20px; }
+      .modal .actions { flex-direction: row; }
     }
 
-    .search-container {
-      position: relative;
-    }
-
-    .search-box {
-      padding: 8px 35px 8px 15px;
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      border-radius: 20px;
-      font-size: 14px;
-      background: rgba(255, 255, 255, 0.1);
-      color: white;
-      transition: all 0.3s ease;
-      width: 200px;
-    }
-
-    .search-box:focus {
-      outline: none;
-      border-color: rgba(255, 255, 255, 0.5);
-      background: rgba(255, 255, 255, 0.15);
-      width: 250px;
-    }
-
-    .search-box::placeholder {
-      color: rgba(255, 255, 255, 0.6);
-    }
-
-    .search-icon {
-      position: absolute;
-      right: 12px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: rgba(255, 255, 255, 0.6);
-      font-size: 14px;
-    }
-
-    .back-btn {
-      background: rgba(255, 255, 255, 0.1);
-      color: white;
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      padding: 8px 16px;
-      border-radius: 20px;
-      text-decoration: none;
-      font-weight: 500;
-      transition: all 0.3s ease;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .back-btn:hover {
-      background: rgba(255, 255, 255, 0.2);
-      border-color: rgba(255, 255, 255, 0.5);
-      color: white;
-    }
-
-    /* Main container */
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 120px 40px 80px;
-    }
-
-    /* Hero section stejně jako na hlavní stránce */
-    .hero {
-      text-align: center;
-      margin-bottom: 80px;
-    }
-
-    .hero h1 {
-      font-size: clamp(3rem, 8vw, 6rem);
-      font-weight: 700;
-      margin-bottom: 20px;
-      opacity: 0;
-      animation: fadeInUp 1s ease 0.3s forwards;
-      letter-spacing: -0.02em;
-      background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    .hero-subtitle {
-      font-size: clamp(1.2rem, 3vw, 1.8rem);
-      margin-bottom: 40px;
-      opacity: 0.9;
-      opacity: 0;
-      animation: fadeInUp 1s ease 0.5s forwards;
-      font-weight: 300;
-      line-height: 1.4;
-    }
-
-    /* Počítadlo videí */
-    .video-stats {
-      text-align: center;
-      margin-bottom: 60px;
-      opacity: 0;
-      animation: fadeInUp 1s ease 0.7s forwards;
-    }
-
-    .stats {
-      color: rgba(255, 255, 255, 0.7);
-      font-size: 14px;
-    }
-
-    /* Video grid s Apple kartami */
-    .video-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-      gap: 40px;
-      margin-bottom: 80px;
-    }
-
-    .video-card {
-      background: rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(20px);
-      border-radius: 20px;
-      overflow: hidden;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      transition: all 0.3s ease;
-      cursor: pointer;
-      animation: fadeInUp 0.6s ease both;
-      animation-delay: 1.5s;
-    }
-
-    .video-card:nth-child(1) { animation-delay: 0.9s; }
-    .video-card:nth-child(2) { animation-delay: 1.0s; }
-    .video-card:nth-child(3) { animation-delay: 1.1s; }
-    .video-card:nth-child(4) { animation-delay: 1.2s; }
-    .video-card:nth-child(5) { animation-delay: 1.3s; }
-    .video-card:nth-child(6) { animation-delay: 1.4s; }
-
-    /* Po doběhnutí úvodní animace ji vypnout, jinak blokuje hover efekt
-       a při filtrování by se znovu přehrávala */
-    .video-card.is-shown {
-      animation: none;
-    }
-
-    .video-card:focus-visible {
-      outline: 2px solid rgba(0, 122, 255, 0.9);
-      outline-offset: 4px;
+    @media (hover: none) {
+      .play { opacity: 1; transform: none; width: 44px; height: 44px; margin: -22px 0 0 -22px; font-size: 16px; }
     }
 
     @media (prefers-reduced-motion: reduce) {
-      .video-card {
-        animation: none;
-      }
-    }
-
-    .video-card:hover {
-      transform: translateY(-10px);
-      background: rgba(255, 255, 255, 0.15);
-      border-color: rgba(255, 255, 255, 0.3);
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-    }
-
-    .video-thumbnail {
-      position: relative;
-      width: 100%;
-      height: 200px;
-      overflow: hidden;
-    }
-
-    .video-thumbnail img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      transition: transform 0.3s ease;
-    }
-
-    .thumb-placeholder {
-      width: 100%;
-      height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: rgba(255, 255, 255, 0.7);
-      font-size: 2rem;
-    }
-
-    .video-card:hover .video-thumbnail img {
-      transform: scale(1.05);
-    }
-
-    .play-overlay {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: rgba(0, 0, 0, 0.7);
-      backdrop-filter: blur(10px);
-      border-radius: 50%;
-      width: 60px;
-      height: 60px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      font-size: 20px;
-      transition: all 0.3s ease;
-    }
-
-    .video-card:hover .play-overlay {
-      background: rgba(0, 122, 255, 0.9);
-      transform: translate(-50%, -50%) scale(1.1);
-    }
-
-    .platform-badge {
-      position: absolute;
-      top: 15px;
-      right: 15px;
-      background: rgba(0, 0, 0, 0.8);
-      color: white;
-      padding: 4px 10px;
-      border-radius: 10px;
-      font-size: 11px;
-      font-weight: 600;
-      backdrop-filter: blur(10px);
-    }
-
-    .platform-badge.youtube {
-      background: rgba(255, 0, 0, 0.9);
-    }
-
-    .platform-badge.tiktok {
-      background: rgba(0, 0, 0, 0.9);
-    }
-
-    .video-info {
-      padding: 25px;
-    }
-
-    .video-title {
-      font-size: 1.2rem;
-      font-weight: 600;
-      margin-bottom: 10px;
-      color: white;
-      line-height: 1.4;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-    }
-
-    .video-description {
-      color: rgba(255, 255, 255, 0.8);
-      font-size: 0.95rem;
-      margin-bottom: 15px;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-      line-height: 1.5;
-    }
-
-    .video-tags {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 4px;
-      margin-bottom: 8px;
-      max-height: 18px;
-      overflow: hidden;
-      position: relative;
-      align-items: flex-start;
-    }
-
-    .video-tag {
-      background: rgba(0, 122, 255, 0.15);
-      color: rgba(0, 122, 255, 0.9);
-      padding: 1px 5px;
-      border-radius: 6px;
-      font-size: 9px;
-      font-weight: 500;
-      white-space: nowrap;
-      opacity: 0.8;
-      line-height: 1.2;
-      height: 14px;
-      display: inline-flex;
-      align-items: center;
-    }
-
-    .video-card:hover .video-tag {
-      opacity: 1;
-    }
-
-    /* Zobrazit pouze první 3 tagy, zbytek skrýt */
-    .video-tag:nth-child(n+4) {
-      display: none !important;
-    }
-
-    /* Indikátor pro více tagů */
-    .video-tags::after {
-      content: attr(data-more);
-      background: rgba(255, 255, 255, 0.1);
-      color: rgba(255, 255, 255, 0.6);
-      padding: 1px 5px;
-      border-radius: 6px;
-      font-size: 9px;
-      font-weight: 500;
-      white-space: nowrap;
-      display: none;
-      line-height: 1.2;
-      height: 14px;
-      align-items: center;
-    }
-
-    .video-tags.has-more::after {
-      display: inline-flex;
-    }
-
-    .video-meta {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 0.85rem;
-      color: rgba(255, 255, 255, 0.6);
-    }
-
-    /* Modal s Apple stylem */
-    .modal {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.95);
-      backdrop-filter: blur(20px);
-      z-index: 2000;
-      overflow-y: auto;
-      opacity: 0;
-      transition: opacity 0.3s ease;
-    }
-
-    .modal.active {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 40px;
-      opacity: 1;
-    }
-
-    .modal-content {
-      background: rgba(255, 255, 255, 0.05);
-      backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 20px;
-      max-width: 1000px;
-      width: 100%;
-      max-height: 90vh;
-      overflow: hidden;
-      position: relative;
-      transform: scale(0.9);
-      transition: transform 0.3s ease;
-    }
-
-    .modal.active .modal-content {
-      transform: scale(1);
-    }
-
-    .modal-close {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      background: rgba(0, 0, 0, 0.7);
-      color: white;
-      border: none;
-      border-radius: 50%;
-      width: 40px;
-      height: 40px;
-      cursor: pointer;
-      font-size: 18px;
-      z-index: 10;
-      transition: all 0.3s ease;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .modal-close:hover {
-      background: rgba(0, 0, 0, 0.9);
-      transform: scale(1.1);
-    }
-
-    .modal-video {
-      width: 100%;
-      aspect-ratio: 16/9;
-      border-radius: 20px 20px 0 0;
-    }
-
-    .modal-info {
-      padding: 30px;
-    }
-
-    .modal-title {
-      font-size: 1.8rem;
-      font-weight: 700;
-      margin-bottom: 15px;
-      color: white;
-    }
-
-    .modal-description {
-      color: rgba(255, 255, 255, 0.8);
-      margin-bottom: 25px;
-      line-height: 1.6;
-      font-size: 1.1rem;
-    }
-
-    .modal-tags {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-bottom: 25px;
-    }
-
-    .modal-tag {
-      background: rgba(0, 122, 255, 0.2);
-      color: #007AFF;
-      padding: 8px 16px;
-      border-radius: 15px;
-      font-size: 14px;
-      font-weight: 500;
-    }
-
-    .modal-meta {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: 20px;
-      padding-top: 20px;
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
-    }
-
-    .modal-meta-item {
-      text-align: center;
-    }
-
-    .modal-meta-label {
-      font-size: 0.9rem;
-      color: rgba(255, 255, 255, 0.6);
-      margin-bottom: 5px;
-    }
-
-    .modal-meta-value {
-      font-weight: 600;
-      color: white;
-    }
-
-    /* Empty state */
-    .empty-state {
-      text-align: center;
-      padding: 100px 20px;
-      opacity: 0;
-      animation: fadeInUp 1s ease 1.5s forwards;
-    }
-
-    .empty-state i {
-      font-size: 4rem;
-      color: rgba(255, 255, 255, 0.3);
-      margin-bottom: 20px;
-    }
-
-    .empty-state h3 {
-      font-size: 1.5rem;
-      color: rgba(255, 255, 255, 0.7);
-      margin-bottom: 10px;
-    }
-
-    .empty-state p {
-      color: rgba(255, 255, 255, 0.5);
-    }
-
-    /* Animace stejné jako na hlavní stránce */
-    @keyframes fadeInUp {
-      from {
-        opacity: 0;
-        transform: translateY(30px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    @keyframes fadeInDown {
-      from {
-        opacity: 0;
-        transform: translateY(-30px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    /* Scroll efekty */
-    nav.scrolled {
-      background: rgba(0, 0, 0, 0.9);
-      border-bottom-color: rgba(255, 255, 255, 0.2);
-    }
-
-    /* Responsive design */
-    @media (max-width: 1024px) {
-      .container {
-        padding: 100px 30px 60px;
-      }
-      
-      .video-grid {
-        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-        gap: 30px;
-      }
-    }
-
-    @media (max-width: 768px) {
-      nav {
-        padding: 15px 20px;
-      }
-
-      .nav-content {
-        flex-direction: column;
-        gap: 15px;
-      }
-
-      .nav-right {
-        width: 100%;
-        justify-content: space-between;
-      }
-
-      .search-box {
-        width: 180px;
-      }
-
-      .search-box:focus {
-        width: 200px;
-      }
-
-      .container {
-        padding: 140px 20px 60px;
-      }
-
-      .hero {
-        margin-bottom: 50px;
-      }
-
-      .video-grid {
-        grid-template-columns: 1fr;
-        gap: 25px;
-      }
-
-      .modal.active {
-        padding: 20px;
-      }
-
-      .modal-content {
-        max-height: 95vh;
-      }
-
-      .modal-info {
-        padding: 20px;
-      }
-
-      .modal-title {
-        font-size: 1.4rem;
-      }
-    }
-
-    @media (max-width: 480px) {
-      .nav-content {
-        gap: 10px;
-      }
-
-      .search-box {
-        width: 150px;
-        font-size: 13px;
-      }
-
-      .search-box:focus {
-        width: 170px;
-      }
-
-      .back-btn {
-        padding: 6px 12px;
-        font-size: 13px;
-      }
-
-      .hero h1 {
-        font-size: 2.5rem;
-      }
-
-      .hero-subtitle {
-        font-size: 1.1rem;
-      }
-
-      .video-info {
-        padding: 20px;
-      }
-
-      .video-title {
-        font-size: 1.1rem;
-      }
-
-      .modal-close {
-        top: 15px;
-        right: 15px;
-        width: 35px;
-        height: 35px;
-      }
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { transition-duration: 0.01ms !important; }
     }
   </style>
   <script type="application/ld+json">
-  {%- assign ld_videos = site.data.videos %}
   {
     "@context": "https://schema.org",
     "@type": "ItemList",
     "name": "VTTV.cz – autotesty a videa",
     "itemListElement": [
       {%- assign pos = 0 %}
-      {%- for v in ld_videos %}{% if v.youtube %}
+      {%- for v in videos %}{% if v.youtube %}
       {%- assign pos = pos | plus: 1 %}
       {%- if pos > 1 %},{% endif %}
       {
@@ -728,7 +353,7 @@ layout: null
           "thumbnailUrl": "https://img.youtube.com/vi/{{ v.youtube }}/hqdefault.jpg",
           "uploadDate": "{{ v.date | date: '%Y-%m-%d' }}",
           "embedUrl": "https://www.youtube-nocookie.com/embed/{{ v.youtube }}",
-          "url": "https://www.youtube.com/watch?v={{ v.youtube }}"
+          "url": "https://www.tamayo.cz/vttv.html#{{ v.youtube }}"
         }
       }
       {%- endif %}{% endfor %}
@@ -737,160 +362,236 @@ layout: null
   </script>
 </head>
 <body>
-  <div class="background-gradient"></div>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5.14v13.72a1 1 0 0 0 1.52.85l10.96-6.86a1 1 0 0 0 0-1.7L9.52 4.29A1 1 0 0 0 8 5.14z"/></symbol>
+    <symbol id="i-back" viewBox="0 0 24 24"><path d="M15.7 4.3a1 1 0 0 1 0 1.4L9.4 12l6.3 6.3a1 1 0 1 1-1.4 1.4l-7-7a1 1 0 0 1 0-1.4l7-7a1 1 0 0 1 1.4 0z"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><path d="M10.5 3a7.5 7.5 0 0 1 5.96 12.05l4.25 4.24a1 1 0 0 1-1.42 1.42l-4.24-4.25A7.5 7.5 0 1 1 10.5 3zm0 2a5.5 5.5 0 1 0 0 11 5.5 5.5 0 0 0 0-11z"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="M6.7 5.3 12 10.6l5.3-5.3a1 1 0 1 1 1.4 1.4L13.4 12l5.3 5.3a1 1 0 0 1-1.4 1.4L12 13.4l-5.3 5.3a1 1 0 0 1-1.4-1.4l5.3-5.3-5.3-5.3a1 1 0 0 1 1.4-1.4z"/></symbol>
+    <symbol id="i-share" viewBox="0 0 24 24"><path d="M12 2.6a1 1 0 0 1 .7.3l3.5 3.5a1 1 0 1 1-1.4 1.4L13 6v9a1 1 0 1 1-2 0V6L9.2 7.8a1 1 0 0 1-1.4-1.4l3.5-3.5a1 1 0 0 1 .7-.3zM5 11a1 1 0 0 1 1 1v7a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1v-7a1 1 0 1 1 2 0v7a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3v-7a1 1 0 0 1 1-1z"/></symbol>
+    <symbol id="i-external" viewBox="0 0 24 24"><path d="M14 3h6a1 1 0 0 1 1 1v6a1 1 0 1 1-2 0V6.4l-7.3 7.3a1 1 0 0 1-1.4-1.4L17.6 5H14a1 1 0 1 1 0-2zM5 6h5a1 1 0 1 1 0 2H6v10h10v-4a1 1 0 1 1 2 0v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1z"/></symbol>
+    <symbol id="i-list" viewBox="0 0 24 24"><path d="M4 6h12a1 1 0 1 1 0 2H4a1 1 0 0 1 0-2zm0 5h12a1 1 0 1 1 0 2H4a1 1 0 1 1 0-2zm0 5h8a1 1 0 1 1 0 2H4a1 1 0 1 1 0-2zm14-1.5 4 2.5-4 2.5v-5z"/></symbol>
+    <symbol id="i-video" viewBox="0 0 24 24"><path d="M4 6h11a2 2 0 0 1 2 2v1.5l3.4-2.3A1 1 0 0 1 22 8v8a1 1 0 0 1-1.6.8L17 14.5V16a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z"/></symbol>
+  </svg>
 
-  <nav id="navbar">
-    <div class="nav-content">
+  <nav>
+    <div class="wrap nav-inner">
       <a href="https://www.tamayo.cz/" class="logo-nav">Viktor Tamayo</a>
-      <div class="nav-right">
-        <div class="search-container">
-          <input type="text" class="search-box" id="searchBox" placeholder="Hledat videa..." aria-label="Hledat videa">
-          <i class="fas fa-search search-icon"></i>
-        </div>
-        <a href="index.html" class="back-btn">
-          <i class="fas fa-arrow-left"></i>
-          <span class="back-text">Zpět</span>
-        </a>
-      </div>
+      <a href="index.html" class="back-link">
+        <svg class="icon" aria-hidden="true"><use href="#i-back"/></svg>
+        <span class="back-text">Hlavní stránka</span>
+      </a>
     </div>
   </nav>
 
-  <div class="container">
-    <!-- Hero sekce -->
-    <div class="hero">
-      <h1>VTTV.CZ</h1>
-      <p class="hero-subtitle">Všechna má videa z YouTube na jednom místě</p>
-    </div>
+  <main>
+    <header class="wrap intro">
+      <div class="eyebrow">VTTV.cz</div>
+      <h1>Autotesty &amp; videa</h1>
+      <p>Testování a natáčení aut se věnuji od roku 2013 – nejprve pro AutoPeriskop.cz, později na zakázku pro další klienty. Testy, srovnání a reportáže z autosalonů na jednom místě.</p>
+      <div class="intro-stats">{{ videos.size }} videí · {{ oldest.date | date: "%Y" }}–{{ featured.date | date: "%Y" }}</div>
+    </header>
 
-    <!-- Počítadlo videí -->
-    <div class="video-stats">
-      <div class="stats">
-        Zobrazeno <span id="visibleVideos">0</span> z <span id="totalVideos">0</span> videí
+    {%- if featured %}
+    {%- if featured.playlist %}{% assign featured_id = featured.playlist %}{% else %}{% assign featured_id = featured.youtube %}{% endif %}
+    {%- assign fm = featured.date | date: "%-m" | minus: 1 %}
+    <section class="wrap" aria-labelledby="featuredTitle">
+      <div class="featured">
+        <button type="button" class="thumb js-open" data-target="{{ featured_id }}" aria-label="Přehrát: {{ featured.title | escape }}">
+          {%- if featured.playlist %}
+          <div class="thumb-placeholder" aria-hidden="true"><svg class="icon"><use href="#i-list"/></svg></div>
+          {%- else %}
+          <img src="https://img.youtube.com/vi/{{ featured.youtube }}/{% if featured.thumb == 'hq' %}hqdefault{% else %}maxresdefault{% endif %}.jpg" alt="" width="1280" height="720" fetchpriority="high" decoding="async">
+          {%- endif %}
+          <span class="play" aria-hidden="true"><svg class="icon"><use href="#i-play"/></svg></span>
+        </button>
+        <div class="featured-body">
+          <span class="badge">Nejnovější</span>
+          <h2 id="featuredTitle">{{ featured.title | escape }}</h2>
+          <div class="featured-date">{{ featured.date | date: "%-d" }}. {{ months[fm] }} {{ featured.date | date: "%Y" }}</div>
+          <p class="featured-desc">{{ featured.short | default: featured.description | escape }}</p>
+          <div class="actions">
+            <button type="button" class="btn btn-primary js-open" data-target="{{ featured_id }}">
+              <svg class="icon" aria-hidden="true"><use href="#i-play"/></svg> Přehrát
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+    {%- endif %}
+
+    <div class="toolbar">
+      <div class="wrap">
+        <div class="toolbar-row">
+          <label class="search">
+            <span class="sr-only">Hledat videa</span>
+            <svg class="icon" aria-hidden="true"><use href="#i-search"/></svg>
+            <input type="text" id="searchBox" placeholder="Hledat značku, model, téma…" autocomplete="off" spellcheck="false">
+          </label>
+          <select class="sort" id="sortSelect" aria-label="Řazení">
+            <option value="new">Nejnovější</option>
+            <option value="old">Nejstarší</option>
+          </select>
+        </div>
+        <div class="chips" role="group" aria-label="Filtrovat podle roku">
+          <button type="button" class="chip" data-year="all" aria-pressed="true">Vše<span class="count">{{ videos.size }}</span></button>
+          {%- for y in years %}
+          <button type="button" class="chip" data-year="{{ y.name }}" aria-pressed="false">{{ y.name }}<span class="count">{{ y.size }}</span></button>
+          {%- endfor %}
+        </div>
       </div>
     </div>
 
-    <!-- Video mřížka -->
-    <div class="video-grid" id="videoGrid">
-      {%- comment -%}
-        Karty se generují z _data/videos.yml – nová videa přidávej tam, ne sem.
-      {%- endcomment -%}
-      {%- assign months = "ledna,února,března,dubna,května,června,července,srpna,září,října,listopadu,prosince" | split: "," -%}
-      {%- assign videos = site.data.videos -%}
+    <section class="wrap" aria-label="Všechna videa">
+      <div class="results" id="results" aria-live="polite">{{ videos.size }} videí</div>
+
+      <div class="grid" id="videoGrid">
       {%- for v in videos %}
-      {%- assign month_index = v.date | date: "%-m" | minus: 1 %}
       {%- if v.playlist %}
+        {%- assign vid = v.playlist %}
         {%- capture url %}https://www.youtube.com/playlist?list={{ v.playlist }}{% endcapture %}
       {%- else %}
-        {%- capture url %}https://youtu.be/{{ v.youtube }}{% endcapture %}
+        {%- assign vid = v.youtube %}
+        {%- capture url %}https://www.youtube.com/watch?v={{ v.youtube }}{% endcapture %}
       {%- endif %}
-      <div class="video-card" data-tags="{{ v.tags | join: ',' | escape }}" tabindex="0" role="button" aria-label="Přehrát: {{ v.title | escape }}">
-        <div class="video-thumbnail">
-          {%- if v.playlist %}
-          <div class="thumb-placeholder" aria-hidden="true">
-            <i class="fas fa-list"></i>
+      {%- assign year = v.date | date: "%Y" %}
+      {%- assign mi = v.date | date: "%-m" | minus: 1 %}
+        <div class="video-card" data-id="{{ vid }}" data-year="{{ year }}" data-index="{{ forloop.index0 }}" data-tags="{{ v.tags | join: ',' | escape }}" tabindex="0" role="button" aria-label="Přehrát: {{ v.title | escape }}">
+          <div class="thumb">
+            {%- if v.playlist %}
+            <div class="thumb-placeholder" aria-hidden="true"><svg class="icon"><use href="#i-list"/></svg></div>
+            <span class="thumb-label">PLAYLIST</span>
+            {%- else %}
+            <img src="https://img.youtube.com/vi/{{ v.youtube }}/{% if v.thumb == 'hq' %}hqdefault{% else %}sddefault{% endif %}.jpg" alt="" width="640" height="360"{% if forloop.index > 6 %} loading="lazy"{% endif %} decoding="async">
+            {%- endif %}
+            <span class="play" aria-hidden="true"><svg class="icon"><use href="#i-play"/></svg></span>
           </div>
-          {%- else %}
-          <img src="https://img.youtube.com/vi/{{ v.youtube }}/{% if v.thumb == 'hq' %}hqdefault{% else %}maxresdefault{% endif %}.jpg" alt="{{ v.title | escape }}" width="480" height="270"{% if forloop.index > 6 %} loading="lazy"{% endif %} decoding="async">
-          {%- endif %}
-          <div class="play-overlay">
-            <i class="fas fa-play"></i>
+          <div class="card-body">
+            <h3 class="video-title">{{ v.title | escape }}</h3>
+            <div class="card-meta">{{ v.date | date: "%-d. %-m. %Y" }}{% if v.playlist %}<span class="sep">·</span>Playlist{% endif %}</div>
+            <p class="card-desc">{{ v.short | default: v.description | escape }}</p>
           </div>
-          <div class="platform-badge youtube">{% if v.playlist %}PLAYLIST{% else %}YOUTUBE{% endif %}</div>
-        </div>
-        <div class="video-info">
-          <h3 class="video-title">{{ v.title | escape }}</h3>
-          <p class="video-description">{{ v.short | default: v.description | escape }}</p>
-          <div class="video-tags">
-            {%- for t in v.tags %}
-            <span class="video-tag">{{ t | escape }}</span>
-            {%- endfor %}
-          </div>
-          <div class="video-meta">
-            <span>{{ v.date | date: "%-d" }}. {{ months[month_index] }} {{ v.date | date: "%Y" }}</span>
-            <span><i class="fab fa-youtube"></i></span>
+          <div class="video-data" hidden>
+            <span class="video-url">{{ url }}</span>
+            <span class="video-kind">{% if v.playlist %}playlist{% else %}video{% endif %}</span>
+            <span class="video-date-long">{{ v.date | date: "%-d" }}. {{ months[mi] }} {{ year }}</span>
+            <span class="video-short">{{ v.short | default: v.description | escape }}</span>
+            <span class="video-full-description">{{ v.description | default: v.short | escape }}</span>
           </div>
         </div>
-        <div class="video-data" hidden>
-          <span class="video-url">{{ url }}</span>
-          <span class="video-platform">youtube</span>
-          <span class="video-date">{{ v.date | date: "%Y-%m-%d" }}</span>
-          <span class="video-full-description">{{ v.description | default: v.short | escape }}</span>
-        </div>
-      </div>
       {%- endfor %}
+      </div>
 
-   </div>
+      <div class="empty" id="emptyState" hidden>
+        <h3>Nic jsem nenašel</h3>
+        <p>Zkuste jiný výraz nebo jiný rok.</p>
+        <button type="button" class="btn btn-ghost" id="resetFilters">Zrušit filtry</button>
+      </div>
+    </section>
+  </main>
 
-    <!-- Prázdný stav -->
-    <div class="empty-state" id="emptyState" style="display: none;">
-      <i class="fas fa-video"></i>
-      <h3>Žádná videa nenalezena</h3>
-      <p>Zkuste změnit vyhledávací kritéria.</p>
+  <footer>
+    <div class="wrap">
+      <span>© Viktor Tamayo · VTTV.cz</span>
+      <a href="index.html">Zpět na hlavní stránku</a>
     </div>
-  </div>
+  </footer>
 
-  <!-- Modal pro přehrání videa -->
   <div class="modal" id="videoModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
     <div class="modal-content">
-      <button type="button" class="modal-close" aria-label="Zavřít">&times;</button>
+      <button type="button" class="modal-close" aria-label="Zavřít"><svg class="icon" aria-hidden="true"><use href="#i-close"/></svg></button>
       <div id="modalVideoContainer"></div>
       <div class="modal-info">
-        <h2 class="modal-title" id="modalTitle"></h2>
-        <p class="modal-description" id="modalDescription"></p>
-        <div class="modal-tags" id="modalTags"></div>
-        <div class="modal-meta">
-          <div class="modal-meta-item">
-            <div class="modal-meta-label">Platforma</div>
-            <div class="modal-meta-value" id="modalPlatform"></div>
-          </div>
-          <div class="modal-meta-item">
-            <div class="modal-meta-label">Publikováno</div>
-            <div class="modal-meta-value" id="modalDate"></div>
-          </div>
+        <div>
+          <h2 class="modal-title" id="modalTitle"></h2>
+          <div class="modal-meta" id="modalMeta"></div>
+          <p class="modal-description" id="modalDescription"></p>
+        </div>
+        <div class="actions">
+          <button type="button" class="btn btn-primary" id="shareBtn">
+            <svg class="icon" aria-hidden="true"><use href="#i-share"/></svg> Sdílet
+          </button>
+          <a class="btn btn-ghost" id="youtubeLink" target="_blank" rel="noopener noreferrer">
+            <svg class="icon" aria-hidden="true"><use href="#i-external"/></svg> Otevřít na YouTube
+          </a>
         </div>
       </div>
     </div>
   </div>
 
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
   <script>
-    let searchQuery = '';
+    const state = { query: '', year: 'all', sort: 'new' };
     let lastFocused = null;
+    let currentCard = null;
+    let toastTimer = null;
+
+    const $ = id => document.getElementById(id);
+    const cards = Array.from(document.querySelectorAll('.video-card'));
 
     // Vyhledávání bez ohledu na diakritiku a velikost písmen ("skoda" najde "škoda")
     function normalizeText(text) {
       return text.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
     }
 
-    // Inicializace
-    document.addEventListener('DOMContentLoaded', function() {
-      loadVideos();
-      setupEventListeners();
-    });
+    function pluralVideos(n) {
+      if (n === 1) return '1 video';
+      if (n >= 2 && n <= 4) return n + ' videa';
+      return n + ' videí';
+    }
 
-    function setupEventListeners() {
-      // Vyhledávání
-      document.getElementById('searchBox').addEventListener('input', function(e) {
-        searchQuery = normalizeText(e.target.value.trim());
-        filterVideos();
+    function data(card, name) {
+      return card.querySelector('.video-data .' + name).textContent.trim();
+    }
+
+    function findCard(id) {
+      return cards.find(card => card.dataset.id === id) || null;
+    }
+
+    // ---------- Inicializace ----------
+    document.addEventListener('DOMContentLoaded', () => {
+      cards.forEach(card => {
+        card.dataset.search = normalizeText([
+          card.querySelector('.video-title').textContent,
+          data(card, 'video-short'),
+          data(card, 'video-full-description'),
+          card.dataset.tags
+        ].join(' '));
       });
 
-      // Scroll efekty pro navigaci
-      window.addEventListener('scroll', function() {
-        const nav = document.getElementById('navbar');
-        if (window.scrollY > 50) {
-          nav.classList.add('scrolled');
-        } else {
-          nav.classList.remove('scrolled');
-        }
-      }, { passive: true });
+      document.querySelectorAll('.thumb img').forEach(setupThumbnail);
+      setupEvents();
+      openFromHash();
+    });
 
-      // Otevření videa kliknutím nebo klávesou Enter / mezerník
-      const grid = document.getElementById('videoGrid');
-      grid.addEventListener('click', function(e) {
+    function setupEvents() {
+      $('searchBox').addEventListener('input', e => {
+        state.query = normalizeText(e.target.value.trim());
+        applyFilters();
+      });
+
+      $('sortSelect').addEventListener('change', e => {
+        state.sort = e.target.value;
+        applyFilters();
+      });
+
+      document.querySelectorAll('.chip').forEach(chip => {
+        chip.addEventListener('click', () => {
+          state.year = chip.dataset.year;
+          document.querySelectorAll('.chip').forEach(c => c.setAttribute('aria-pressed', String(c === chip)));
+          applyFilters();
+        });
+      });
+
+      $('resetFilters').addEventListener('click', resetFilters);
+
+      // Karty: klik, Enter, mezerník
+      const grid = $('videoGrid');
+      grid.addEventListener('click', e => {
         const card = e.target.closest('.video-card');
         if (card) openModal(card);
       });
-      grid.addEventListener('keydown', function(e) {
+      grid.addEventListener('keydown', e => {
         const card = e.target.closest('.video-card');
         if (card && (e.key === 'Enter' || e.key === ' ')) {
           e.preventDefault();
@@ -898,19 +599,24 @@ layout: null
         }
       });
 
-      // Zavření modalu tlačítkem nebo kliknutím mimo obsah
-      document.querySelector('.modal-close').addEventListener('click', closeModal);
-      document.getElementById('videoModal').addEventListener('click', function(e) {
-        if (e.target === this) {
-          closeModal();
-        }
+      // Nejnovější video
+      document.querySelectorAll('.js-open').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const card = findCard(btn.dataset.target);
+          if (card) openModal(card);
+        });
       });
 
-      // ESC zavře modal, Tab zůstává uvnitř otevřeného modalu
-      document.addEventListener('keydown', function(e) {
-        const modal = document.getElementById('videoModal');
-        if (!modal.classList.contains('active')) return;
+      // Přehrávač
+      document.querySelector('.modal-close').addEventListener('click', closeModal);
+      $('videoModal').addEventListener('click', e => {
+        if (e.target === e.currentTarget) closeModal();
+      });
+      $('shareBtn').addEventListener('click', shareCurrent);
 
+      document.addEventListener('keydown', e => {
+        const modal = $('videoModal');
+        if (!modal.classList.contains('active')) return;
         if (e.key === 'Escape') {
           closeModal();
         } else if (e.key === 'Tab') {
@@ -926,199 +632,145 @@ layout: null
           }
         }
       });
+
+      window.addEventListener('hashchange', openFromHash);
     }
 
-    function loadVideos() {
-      const cards = document.querySelectorAll('.video-card');
-
+    // ---------- Filtry a řazení ----------
+    function applyFilters() {
+      let visible = 0;
       cards.forEach(card => {
-        const tags = card.dataset.tags.split(',');
-        const tagsContainer = card.querySelector('.video-tags');
-
-        // Indikátor "+N" pro tagy, které se na kartě nevejdou
-        if (tags.length > 3) {
-          tagsContainer.setAttribute('data-more', `+${tags.length - 3}`);
-          tagsContainer.classList.add('has-more');
-        }
-
-        // Předpočítaný text pro vyhledávání
-        card.dataset.search = normalizeText([
-          card.querySelector('.video-title').textContent,
-          card.querySelector('.video-description').textContent,
-          card.querySelector('.video-full-description').textContent,
-          card.dataset.tags
-        ].join(' '));
-
-        // Po úvodní animaci ji vypnout (viz CSS .is-shown)
-        card.addEventListener('animationend', () => card.classList.add('is-shown'), { once: true });
+        const matches = (state.year === 'all' || card.dataset.year === state.year) &&
+                        (!state.query || card.dataset.search.includes(state.query));
+        card.hidden = !matches;
+        if (matches) visible++;
       });
 
-      document.querySelectorAll('.video-thumbnail img').forEach(setupThumbnail);
+      const grid = $('videoGrid');
+      const sorted = cards.slice().sort((a, b) => {
+        const diff = Number(a.dataset.index) - Number(b.dataset.index);
+        return state.sort === 'old' ? -diff : diff;
+      });
+      sorted.forEach(card => grid.appendChild(card));
 
-      filterVideos();
+      $('results').textContent = pluralVideos(visible);
+      $('emptyState').hidden = visible !== 0;
+      grid.hidden = visible === 0;
     }
 
-    // Náhledy: maxresdefault → hqdefault → grafická náhrada.
-    // YouTube pro chybějící maxresdefault vrací šedý obrázek 120×90, ne vždy chybu.
+    function resetFilters() {
+      state.query = '';
+      state.year = 'all';
+      $('searchBox').value = '';
+      document.querySelectorAll('.chip').forEach(c => c.setAttribute('aria-pressed', String(c.dataset.year === 'all')));
+      applyFilters();
+      $('searchBox').focus();
+    }
+
+    // ---------- Náhledy: sd/maxres → hq → grafická náhrada ----------
+    // YouTube pro chybějící náhled často vrací šedý obrázek 120×90 místo chyby.
     function setupThumbnail(img) {
-      const fallback = function() {
-        if (img.src.includes('/maxresdefault.')) {
-          img.src = img.src.replace('/maxresdefault.', '/hqdefault.');
+      const fallback = () => {
+        if (/\/(maxresdefault|sddefault)\./.test(img.src)) {
+          img.src = img.src.replace(/\/(maxresdefault|sddefault)\./, '/hqdefault.');
         } else {
           const placeholder = document.createElement('div');
           placeholder.className = 'thumb-placeholder';
           placeholder.setAttribute('aria-hidden', 'true');
-          placeholder.innerHTML = '<i class="fas fa-video"></i>';
+          placeholder.innerHTML = '<svg class="icon"><use href="#i-video"/></svg>';
           img.replaceWith(placeholder);
         }
       };
-      const check = function() {
+      const check = () => {
         if (img.naturalWidth === 0 || img.naturalWidth <= 120) fallback();
       };
-
       img.addEventListener('error', fallback);
       img.addEventListener('load', check);
       if (img.complete && img.naturalWidth > 0) check();
     }
 
-    function filterVideos() {
-      const cards = document.querySelectorAll('.video-card');
-      let visibleCount = 0;
+    // ---------- Přehrávač ----------
+    function openModal(card) {
+      const modal = $('videoModal');
+      const container = $('modalVideoContainer');
+      const id = card.dataset.id;
+      const isPlaylist = data(card, 'video-kind') === 'playlist';
+      const title = card.querySelector('.video-title').textContent;
 
-      cards.forEach(card => {
-        const matchesSearch = !searchQuery || card.dataset.search.includes(searchQuery);
-
-        if (searchQuery) card.classList.add('is-shown');
-
-        if (matchesSearch) {
-          card.style.display = 'block';
-          visibleCount++;
-        } else {
-          card.style.display = 'none';
-        }
-      });
-
-      // Zobrazení prázdného stavu
-      const emptyState = document.getElementById('emptyState');
-      const videoGrid = document.getElementById('videoGrid');
-
-      if (visibleCount === 0) {
-        emptyState.style.display = 'block';
-        videoGrid.style.display = 'none';
-      } else {
-        emptyState.style.display = 'none';
-        videoGrid.style.display = 'grid';
-      }
-
-      updateStats(visibleCount);
-    }
-
-    function updateStats(visible = null) {
-      const totalCards = document.querySelectorAll('.video-card').length;
-      document.getElementById('totalVideos').textContent = totalCards;
-      document.getElementById('visibleVideos').textContent = visible !== null ? visible : totalCards;
-    }
-
-    function extractYouTubeId(url) {
-      const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/);
-      return match ? match[1] : null;
-    }
-
-    function extractPlaylistId(url) {
-      const match = url.match(/[?&]list=([^&#]+)/);
-      return match ? match[1] : null;
-    }
-
-    function openModal(cardElement) {
-      const modal = document.getElementById('videoModal');
-      const container = document.getElementById('modalVideoContainer');
-
-      // Získání dat z karty
-      const title = cardElement.querySelector('.video-title').textContent;
-      const description = cardElement.querySelector('.video-data .video-full-description').textContent;
-      const url = cardElement.querySelector('.video-data .video-url').textContent.trim();
-      const platform = cardElement.querySelector('.video-data .video-platform').textContent.trim();
-      const date = cardElement.querySelector('.video-data .video-date').textContent.trim();
-      const tags = cardElement.dataset.tags.split(',').map(tag => tag.trim());
-
-      // Přehrávač (youtube-nocookie = bez sledovacích cookies do spuštění videa)
       container.innerHTML = '';
-      const playlistId = extractPlaylistId(url);
-      const videoId = extractYouTubeId(url);
-      let embedSrc = null;
-      if (platform === 'youtube' && playlistId && !videoId) {
-        embedSrc = `https://www.youtube-nocookie.com/embed/videoseries?list=${encodeURIComponent(playlistId)}&autoplay=1&rel=0`;
-      } else if (platform === 'youtube' && videoId) {
-        embedSrc = `https://www.youtube-nocookie.com/embed/${encodeURIComponent(videoId)}?autoplay=1&rel=0`;
-      }
+      const iframe = document.createElement('iframe');
+      iframe.className = 'modal-video';
+      iframe.src = isPlaylist
+        ? `https://www.youtube-nocookie.com/embed/videoseries?list=${encodeURIComponent(id)}&autoplay=1&rel=0`
+        : `https://www.youtube-nocookie.com/embed/${encodeURIComponent(id)}?autoplay=1&rel=0`;
+      iframe.title = title;
+      iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+      iframe.referrerPolicy = 'strict-origin-when-cross-origin';
+      iframe.allowFullscreen = true;
+      container.appendChild(iframe);
 
-      if (embedSrc) {
-        const iframe = document.createElement('iframe');
-        iframe.className = 'modal-video';
-        iframe.src = embedSrc;
-        iframe.title = title;
-        iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
-        iframe.referrerPolicy = 'strict-origin-when-cross-origin';
-        iframe.allowFullscreen = true;
-        container.appendChild(iframe);
-      } else {
-        // Ostatní platformy (např. TikTok): odkaz do nového okna
-        const icon = platform === 'tiktok' ? 'fab fa-tiktok' : 'fas fa-external-link-alt';
-        const box = document.createElement('div');
-        box.className = 'modal-video';
-        box.style.cssText = 'display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.05); color: white;';
-        box.innerHTML = `<div style="text-align: center;">
-            <i class="${icon}" style="font-size: 3rem; margin-bottom: 20px;"></i>
-            <p style="margin-bottom: 20px;">Video se otevře v novém okně</p>
-            <a target="_blank" rel="noopener noreferrer" style="background: #000; color: white; padding: 12px 24px; border-radius: 25px; text-decoration: none; font-weight: 600;">Otevřít video</a>
-          </div>`;
-        box.querySelector('a').href = url;
-        container.appendChild(box);
-      }
+      $('modalTitle').textContent = title;
+      $('modalMeta').textContent = data(card, 'video-date-long') + (isPlaylist ? ' · Playlist' : '');
+      $('modalDescription').textContent = data(card, 'video-full-description');
+      $('youtubeLink').href = data(card, 'video-url');
 
-      // Naplnění informací o videu
-      document.getElementById('modalTitle').textContent = title;
-      document.getElementById('modalDescription').textContent = description;
-      document.getElementById('modalPlatform').textContent = platform.toUpperCase();
-      // "T00:00:00" = místní čas; samotné "YYYY-MM-DD" se bere jako UTC
-      document.getElementById('modalDate').textContent = new Date(date + 'T00:00:00').toLocaleDateString('cs-CZ');
+      currentCard = card;
+      if (location.hash !== '#' + id) history.replaceState(null, '', '#' + id);
 
-      // Tagy
-      const modalTags = document.getElementById('modalTags');
-      modalTags.innerHTML = '';
-      tags.forEach(tag => {
-        const span = document.createElement('span');
-        span.className = 'modal-tag';
-        span.textContent = tag;
-        modalTags.appendChild(span);
-      });
-
-      // Zobrazení modalu s animací
-      lastFocused = document.activeElement;
+      if (!modal.classList.contains('active')) lastFocused = document.activeElement;
       modal.style.display = 'flex';
-      setTimeout(() => {
-        modal.classList.add('active');
-      }, 10);
+      requestAnimationFrame(() => modal.classList.add('active'));
       document.body.style.overflow = 'hidden';
       modal.querySelector('.modal-close').focus();
     }
 
     function closeModal() {
-      const modal = document.getElementById('videoModal');
+      const modal = $('videoModal');
       if (!modal.classList.contains('active')) return;
       modal.classList.remove('active');
+      currentCard = null;
+      history.replaceState(null, '', location.pathname + location.search);
 
       setTimeout(() => {
         modal.style.display = 'none';
         document.body.style.overflow = '';
-        // Vyčištění obsahu pro zastavení přehrávání
-        document.getElementById('modalVideoContainer').innerHTML = '';
-      }, 300);
+        $('modalVideoContainer').innerHTML = '';   // zastaví přehrávání
+      }, 250);
 
       if (lastFocused) lastFocused.focus();
     }
 
-  </script>
+    // Odkaz na konkrétní video: vttv.html#ID
+    function openFromHash() {
+      const id = decodeURIComponent(location.hash.slice(1));
+      if (!id) return;
+      const card = findCard(id);
+      if (card && card !== currentCard) openModal(card);
+    }
 
+    async function shareCurrent() {
+      if (!currentCard) return;
+      const url = location.origin + location.pathname + '#' + currentCard.dataset.id;
+      const title = currentCard.querySelector('.video-title').textContent + ' | VTTV.cz';
+      if (navigator.share) {
+        try { await navigator.share({ title, url }); } catch (e) { /* zrušeno uživatelem */ }
+        return;
+      }
+      try {
+        await navigator.clipboard.writeText(url);
+        showToast('Odkaz zkopírován');
+      } catch (e) {
+        window.prompt('Zkopírujte odkaz:', url);
+      }
+    }
+
+    function showToast(text) {
+      const toast = $('toast');
+      toast.textContent = text;
+      toast.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.remove('show'), 2000);
+    }
+  </script>
 </body>
 </html>
