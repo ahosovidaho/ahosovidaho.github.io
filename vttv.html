@@ -351,7 +351,7 @@ layout: null
           "name": {{ v.title | jsonify }},
           "description": {{ v.description | default: v.short | default: v.title | jsonify }},
           "thumbnailUrl": "https://img.youtube.com/vi/{{ v.youtube }}/hqdefault.jpg",
-          "uploadDate": "{{ v.date | date: '%Y-%m-%d' }}",
+          "uploadDate": "{{ v.uploaded | default: v.date | date: '%Y-%m-%d' }}",
           "embedUrl": "https://www.youtube-nocookie.com/embed/{{ v.youtube }}",
           "url": "https://www.tamayo.cz/vttv.html#{{ v.youtube }}"
         }
