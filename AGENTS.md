@@ -114,3 +114,11 @@ Použij `qwen3.5:9b`, pokud je úloha:
 - snadno ověřitelná.
 
 Jinak úlohu ponech hlavnímu Codex modelu.
+
+## Projektová dokumentace a předávací protokoly
+
+Před prací na webu si přečti předávací protokoly ve složce `_docs/` (Jekyll ji nepublikuje), zejména:
+
+- `_docs/predavaci-protokol-2026-09-28.md` – VTTV stránka (`vttv.html` + `_data/videos.yml`), pravidla dat videí, úklid souborů, ověřování buildu, otevřené úkoly.
+
+Klíčové zásady z protokolu: videa se přidávají jen do `_data/videos.yml` (ne do HTML), pořadí v souboru = pořadí na webu, názvy karet neměnit podle YouTube, změny jdou přes PR a sloučení provádí uživatel.
