@@ -371,7 +371,7 @@
     "brand": "BVLGARI",
     "model": "BVLGARI Aluminium Vision Gran Turismo"
   },
-   {
+  {
     "brand": "CATERHAM",
     "model": "CATERHAM Seven Superlight R500 '08"
   },
@@ -490,6 +490,10 @@
   {
     "brand": "Citroën",
     "model": "GT by Citroën Race Car (Gr.3)"
+  },
+  {
+    "brand": "Citroën",
+    "model": "Citroën 2 CV 6 Charleston '86"
   },
   {
     "brand": "Daihatsu",
@@ -627,7 +631,7 @@
     "brand": "Ferrari",
     "model": "Ferrari 458 Italia GT3 '13"
   },
-    {
+  {
     "brand": "Ferrari",
     "model": "Ferrari 499P '23"
   },
@@ -690,6 +694,10 @@
   {
     "brand": "Ferrari",
     "model": "Ferrari Vision Gran Turismo"
+  },
+  {
+    "brand": "Ferrari",
+    "model": "Ferrari F355 Berlinetta '94"
   },
   {
     "brand": "FIAT",
@@ -970,6 +978,14 @@
   {
     "brand": "Honda",
     "model": "Honda Sports Vision Gran Turismo"
+  },
+  {
+    "brand": "Honda",
+    "model": "Honda Civic Si Group A version '87"
+  },
+  {
+    "brand": "Honda",
+    "model": "Honda Step WGN Spada Premium Line '23"
   },
   {
     "brand": "Hyundai",
@@ -1290,6 +1306,10 @@
   {
     "brand": "Mazda",
     "model": "ɛ̃fini RX-7 Type R (FD) '91"
+  },
+  {
+    "brand": "Mazda",
+    "model": "MAZDA RX-VISION GT3 EVO '26"
   },
   {
     "brand": "McLaren",
@@ -1767,7 +1787,7 @@
     "brand": "Porsche",
     "model": "Porsche 919 Hybrid '16"
   },
-    {
+  {
     "brand": "Porsche",
     "model": "Porsche 963 '24"
   },
@@ -1787,7 +1807,7 @@
     "brand": "Porsche",
     "model": "Porsche Carrera GTS (904) '64"
   },
-   {
+  {
     "brand": "Porsche",
     "model": "Porsche 911 GT3 R (992) '22"
   },
@@ -2298,6 +2318,10 @@
   {
     "brand": "Xiaomi",
     "model": "Xiaomi SU7 Ultra '25"
+  },
+  {
+    "brand": "Xiaomi",
+    "model": "Xiaomi Vision Gran Turismo"
   },
   {
     "brand": "Yangwang",
