@@ -159,3 +159,20 @@ Kontroly po buildu: v `vttv.html` nesmí zůstat `{{` / `{%`; počet `class="vid
 | `poplatky/`, `firebase.json`, workflow | ✅ smazáno z repa. Firebase projekt `ct-vyzva` (= `verejnopravne-cz`) **nechat beze změny**; volitelně smazat jen GitHub secret `FIREBASE_SERVICE_ACCOUNT` |
 | Cloudflare Worker `ucg-heartbeat` – rozsah tokenů | ověří uživatel |
 | Analytika Umami na domácím serveru | nápad na později |
+
+---
+
+## 9. Dodatek 23. 10. 2026 – indexace ve vyhledávání
+
+Search Console (export 23. 10.): 12 známých adres, 1 indexovaná. Hlavní příčina duplicit: GitHub Pages servíruje
+každou stránku na `/stranka.html` i `/stranka`, a většina stránek neměla kanonickou adresu.
+
+- **Kanonická adresa** (`.html` varianta) doplněna: `o-mne.html`, `kontakt.html`, `autodevadesatky.html`,
+  `GranTurismo/sezona2026.html` (dříve ji měly jen `index.html` a `vttv.html`).
+- **`noindex`** (rozhodnutí uživatele): `ct/cena_paliv.html`, `ct/porovnani_elektro_vs_benzin.html`, `ct/vyplatisemitamdojet.html`,
+  `GranTurismo/sezona2025.html`, `GranTurismo/zmeny171.html`, `GranTurismo/gt7-update-analyza.html`, `dekuji.html`,
+  `akce/Maty40.html`, `GranTurismo/sezona2026_.html`, `GranTurismo/sezona2026_15_1_2026.html`, `GranTurismo/archive/*`.
+- **`sitemap.xml`**: `/`, `vttv.html`, `GranTurismo/sezona2026.html`, `o-mne.html`, `kontakt.html`, `autodevadesatky.html`.
+- **Pravidlo pro nové stránky:** veřejná stránka = kanonická adresa + záznam v `sitemap.xml`; pomocná/soukromá = `noindex`.
+- Neověřeno (agent v cloudu nemá přístup do Search Console): konkrétní adresy u důvodů „Chyba přesměrování" a
+  „Objeveno/Procházeno – momentálně neindexováno". Ověřit v Search Console → Indexování → Stránky.
