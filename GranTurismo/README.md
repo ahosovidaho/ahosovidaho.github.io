@@ -12,6 +12,7 @@ Web pro soukromý šampionát GT7. Stránky jsou statické a jsou publikované z
 | `archive/` | Starší kopie stránek sezóny 2026. Původní adresy se do archivu přesměrují. |
 | `cars.json` | Seznam vozů pro našeptávač v administraci. |
 | `tracks.json` | Seznam tratí pro našeptávač v administraci. |
+| `layouts.json` | Varianty tratí GT7 ke každé trati z `tracks.json` (výběr „Varianta trati“, pole `varianta` u závodu). Zdroj: databáze gt7info. |
 | `zmeny171.html` | Poznámky k aktualizaci GT7 1.71. |
 
 ## Adresy
