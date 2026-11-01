@@ -526,6 +526,9 @@ tbody tr:hover{ background: rgba(255,255,255,0.04); }
         <label for="add_track">Trať</label>
         <input id="add_track" autocomplete="off" data-track-input/>
 
+        <label for="add_variant">Varianta trati</label>
+        <select id="add_variant" data-variant-for="add_track"><option value="">— neurčeno —</option></select>
+
         <label for="add_laps">Počet kol</label>
         <input id="add_laps" autocomplete="off" placeholder="např. 20 kol (nebo 30 min)"/>
 
@@ -630,6 +633,9 @@ tbody tr:hover{ background: rgba(255,255,255,0.04); }
 
           <label for="edit_track">Trať</label>
           <input id="edit_track" data-track-input/>
+
+          <label for="edit_variant">Varianta trati</label>
+          <select id="edit_variant" data-variant-for="edit_track"><option value="">— neurčeno —</option></select>
 
           <label for="edit_laps">Počet kol</label>
           <input id="edit_laps" placeholder="např. 20 kol (nebo 30 min)"/>
@@ -1101,7 +1107,7 @@ function getNextScheduledRace(){
 function nextRaceDetailsHTML(r){
   const dt = r.datum||r.date ? new Date(r.datum||r.date) : null;
   const title = escapeHtml(r.nazev||r.name||'');
-  const track = escapeHtml(r.trat||r.track||'');
+  const track = escapeHtml(trackLabel(r));
   const cat = escapeHtml(r.kategorie||r.category||'');
   const veh = escapeHtml(r.vozidla||r.vehicles||'');
   const tuning = escapeHtml(r.tuning||'');
@@ -1142,7 +1148,7 @@ function renderNextRace(){
   if(!next){
     const plannedNoDate = racesCache.find(r=>!hasNonDnsResult(r) && !(r.datum||r.date));
     if(plannedNoDate){
-      el.innerHTML = `<strong>${escapeHtml(plannedNoDate.nazev||plannedNoDate.name||'')}</strong> / ${escapeHtml(plannedNoDate.trat||plannedNoDate.track||'')}`;
+      el.innerHTML = `<strong>${escapeHtml(plannedNoDate.nazev||plannedNoDate.name||'')}</strong> / ${escapeHtml(trackLabel(plannedNoDate))}`;
     }else{
       el.textContent='Žádný nadcházející závod.';
     }
@@ -1207,7 +1213,7 @@ $('#btnRemind30').addEventListener('click', ()=>{
   const start = new Date(next.datum||next.date).getTime();
   const when = start - 30*60*1000;
   const arr = loadReminders();
-  arr.push({id: next.id||null, name: next.nazev||next.name||'Závod', track: next.trat||next.track||'', start, when, triggered:false});
+  arr.push({id: next.id||null, name: next.nazev||next.name||'Závod', track: trackLabel(next), start, when, triggered:false});
   saveReminders(arr);
   scheduleReminderIfDue();
   alert('Připomenutí nastaveno.');
@@ -1257,7 +1263,7 @@ function renderResultsTable(){
   // ... zbytek funkce beze změn
   completed.forEach(r=>{
     const dateStr = r.datum||r.date ? new Date(r.datum||r.date).toLocaleString() : '';
-    const nameTrack = `${escapeHtml(r.nazev||r.name||'')} / ${escapeHtml(r.trat||r.track||'')}`;
+    const nameTrack = `${escapeHtml(r.nazev||r.name||'')} / ${escapeHtml(trackLabel(r))}`;
     const qualiFrontRowHTML = (getQualiArray(r).length? getQualiArray(r) : []).slice(0,2).map(n=>{
       const clean = normName(n); const col = driverColors[clean]|| (n==='DNS' ? '#aaa' : '#ccc');
       return `<span class="name-chip" style="border-color:${col};color:${col}">${escapeHtml(n)}</span>`;
@@ -1288,7 +1294,7 @@ function renderPlannedTable(){
   planned.forEach(r=>{
     const dateStr = r.datum||r.date ? new Date(r.datum||r.date).toLocaleString() : '';
     const title = escapeHtml(r.nazev||r.name||'');
-    const track = escapeHtml(r.trat||r.track||'');
+    const track = escapeHtml(trackLabel(r));
     const cat = escapeHtml(r.kategorie||r.category||'');
     const veh = escapeHtml(r.vozidla||r.vehicles||'');
     const tuning = escapeHtml(r.tuning||'');
@@ -1664,7 +1670,7 @@ function h2hCompute(A,B){
 
     rows.push({
       date: r.datum||r.date ? new Date(r.datum||r.date).toLocaleString() : '',
-      label: `${r.nazev||r.name||''} / ${r.trat||r.track||''}`,
+      label: `${r.nazev||r.name||''} / ${trackLabel(r)}`,
       posA: pA, posB: pB, ptsA: ptsRa, ptsB: ptsRb, diff, result: resultTxt
     });
   });
@@ -1755,7 +1761,7 @@ function buildICS(){
     const end = toICSDate(endDate);
     const uid = (r.id||Math.random().toString(36).slice(2))+'@tamayo.cz';
     const title = (r.nazev||r.name||'Závod').replace(/[\r\n]/g,' ');
-    const location = (r.trat||r.track||'').replace(/[\r\n]/g,' ').replace(/,/g,'\\,');
+    const location = trackLabel(r).replace(/[\r\n]/g,' ').replace(/,/g,'\\,');
     const descParts = [];
     if(r.kategorie) descParts.push('Kategorie: '+r.kategorie);
     if(r.vozidla) descParts.push('Vozidla: '+r.vozidla);
@@ -1787,13 +1793,14 @@ $('#btnDownloadICS').addEventListener('click', ()=>{
 });
 
 /* === Admin: Přidat nový závod === */
-$('#add_clear').addEventListener('click', ()=> $('#addRaceForm').reset());
+$('#add_clear').addEventListener('click', ()=> { $('#addRaceForm').reset(); gt7FillVariant($('#add_variant'), ''); });
 $('#addRaceForm').addEventListener('submit', async (e)=>{
   e.preventDefault();
   const payload = {
     nazev: $('#add_name').value.trim(),
     datum: $('#add_date').value || null,
     trat: $('#add_track').value.trim(),
+    varianta: $('#add_variant').value,
     pocet_kol: $('#add_laps').value.trim(),
     vozidla: $('#add_vehicles').value.trim(),
     kategorie: $('#add_category').value,
@@ -1867,6 +1874,7 @@ $('#edit_select').addEventListener('change', async ()=>{
   $('#edit_name').value=r.nazev||r.name||'';
   $('#edit_date').value=(r.datum||r.date)||'';
   $('#edit_track').value=r.trat||r.track||'';
+  gt7FillVariant($('#edit_variant'), r.varianta||'');
   $('#edit_laps').value=r.pocet_kol||r.laps||'';
   $('#edit_vehicles').value=r.vozidla||r.vehicles||'';
   $('#edit_category').value=r.kategorie||r.category||'Open';
@@ -2078,6 +2086,7 @@ $('#editRaceForm').addEventListener('submit', async (e)=>{
     nazev: $('#edit_name').value.trim(),
     datum: $('#edit_date').value || null,
     trat: $('#edit_track').value.trim(),
+    varianta: $('#edit_variant').value,
     pocet_kol: $('#edit_laps').value.trim(),
     vozidla: $('#edit_vehicles').value.trim(),
     kategorie: $('#edit_category').value,
@@ -2116,7 +2125,7 @@ $('#editRaceForm').addEventListener('submit', async (e)=>{
   try{
     await db.collection('zavody').doc(id).set(payload,{merge:true});
     const diffs = [];
-    const keys = ['nazev','datum','trat','pocet_kol','vozidla','kategorie','tuning','bop','pneumatiky','smes','opotrebovani','spotreba','rychlost_doplneni','pitstop','info','youtube'];
+    const keys = ['nazev','datum','trat','varianta','pocet_kol','vozidla','kategorie','tuning','bop','pneumatiky','smes','opotrebovani','spotreba','rychlost_doplneni','pitstop','info','youtube'];
     keys.forEach(k=>{
       const beforeVal = before[k] ?? '';
       const afterVal = payload[k] ?? '';
@@ -2147,7 +2156,7 @@ function toCSVValue(v){
   return `"${s.replace(/"/g,'""')}"`;
 }
 function exportCSV(){
-  const headers = ['id','datum','nazev','trat','pocet_kol','kategorie','vozidla','tuning','bop','pneumatiky','smes','opotrebovani','spotreba','rychlost_doplneni','pitstop','info','youtube','kvalifikace','vysledky','result_cars','penalties'];
+  const headers = ['id','datum','nazev','trat','varianta','pocet_kol','kategorie','vozidla','tuning','bop','pneumatiky','smes','opotrebovani','spotreba','rychlost_doplneni','pitstop','info','youtube','kvalifikace','vysledky','result_cars','penalties'];
   const lines = [headers.join(',')];
   racesCache.forEach(r=>{
     const row = [
@@ -2155,6 +2164,7 @@ function exportCSV(){
       r.datum||r.date||'',
       r.nazev||r.name||'',
       r.trat||r.track||'',
+      r.varianta||'',
       r.pocet_kol||r.laps||'',
       r.kategorie||r.category||'',
       r.vozidla||r.vehicles||'',
@@ -2223,6 +2233,44 @@ const GT7_TRACKS_FALLBACK = [
   "Circuit de Sainte-Croix", "Sardegna - Road Track", "Special Stage Route X", "Tokyo Expressway", "Trial Mountain Circuit", "Circuit de Barcelona-Catalunya - rozvržení Rallycross",
   "Colorado Springs", "Fishermans Ranch", "Lake Louise (Snow)", "Sardegna - Windmills (Dirt)", "Okruh Gilles Villeneuve", "Okruh Yas Marina"
 ];
+/* === Varianty tratí (layouts.json: varianty GT7 ke každé trati z tracks.json, databáze gt7info) === */
+var GT7_LAYOUTS = {};
+var GT7_LAYOUT_LABEL = {};
+/** Trať pro zobrazení: „Circuit de Barcelona-Catalunya · GP Layout No Chicane“ (bez varianty jako dřív). */
+function trackLabel(r){
+  const t = (r && (r.trat||r.track)) || '';
+  const v = r && r.varianta;
+  if(!v) return t;
+  const label = (GT7_LAYOUT_LABEL || {})[v];
+  return label ? (label === 'hlavní varianta' ? t : `${t} · ${label}`) : `${t} · ${v}`;
+}
+/** Naplní výběr varianty podle zvolené trati; `want` = varianta, která má zůstat vybraná. */
+function gt7FillVariant(sel, want){
+  if(!sel) return;
+  if(want !== undefined) sel.dataset.want = want;
+  const keep = sel.dataset.want !== undefined ? sel.dataset.want : sel.value;
+  const inp = document.getElementById(sel.dataset.variantFor);
+  const list = GT7_LAYOUTS[(inp && inp.value.trim()) || ''] || [];
+  const km = m => (m/1000).toFixed(2).replace('.', ',') + ' km';
+  sel.innerHTML = '<option value="">— neurčeno —</option>' + list.map(l =>
+    `<option value="${escapeHtml(l.name)}">${escapeHtml(l.label)} · ${km(l.length_m)}${l.reverse ? ' · opačný směr' : ''}</option>`).join('');
+  // Varianta uložená u závodu, ale mimo seznam (jiná trať, starší data): ponechat
+  if(keep && !list.some(l => l.name === keep)) sel.insertAdjacentHTML('beforeend', `<option value="${escapeHtml(keep)}">${escapeHtml(keep)}</option>`);
+  sel.value = keep || '';
+  sel.disabled = !list.length && !keep;
+}
+async function installGt7LayoutSelects(){
+  try { const res = await fetch('./layouts.json', { cache: 'no-store' }); if (res.ok) GT7_LAYOUTS = await res.json(); } catch {}
+  Object.values(GT7_LAYOUTS).forEach(list => list.forEach(l => { GT7_LAYOUT_LABEL[l.name] = l.label; }));
+  document.querySelectorAll('select[data-variant-for]').forEach(sel => {
+    const inp = document.getElementById(sel.dataset.variantFor);
+    sel.addEventListener('change', () => { sel.dataset.want = sel.value; });
+    if(inp) ['input','change','blur'].forEach(ev => inp.addEventListener(ev, () => { delete sel.dataset.want; gt7FillVariant(sel); }));
+    gt7FillVariant(sel);
+  });
+  if(racesCache.length && typeof renderAll === 'function') renderAll();
+}
+
 async function installGt7TrackDatalist() {
   let tracks = null;
   try { const res = await fetch('./tracks.json', { cache: 'no-store' }); if (res.ok) { const json = await res.json(); if (Array.isArray(json) && json.length) tracks = json; } } catch {}
@@ -2735,7 +2783,7 @@ function renderDriverProfile(name){
     }
 
     const dateStr = r.datum||r.date ? new Date(r.datum||r.date).toLocaleString() : '';
-    const label = `${r.nazev||r.name||''} / ${r.trat||r.track||''}`;
+    const label = `${r.nazev||r.name||''} / ${trackLabel(r)}`;
     const qPos = (qidx>-1) ? (qidx+1) : '—';
     const fPos = (idx>-1 && final[idx]!=='DNS' && final[idx]!=='—') ? (idx+1) : 'DNS';
     const pts = (typeof fPos==='number' && fPos>=1 && fPos<=5) ? (pointsMap[fPos-1]||0) : 0;
@@ -2887,7 +2935,7 @@ function renderArchive(){
 
     const rows = races.map(r=>{
       const dateStr = r.datum||r.date ? new Date(r.datum||r.date).toLocaleString() : '';
-      const nameTrack = `${escapeHtml(r.nazev||r.name||'')} / ${escapeHtml(r.trat||r.track||'')}`;
+      const nameTrack = `${escapeHtml(r.nazev||r.name||'')} / ${escapeHtml(trackLabel(r))}`;
 
       const qualiFront = (getQualiArray(r).length? getQualiArray(r) : [])
         .slice(0,2)
@@ -2952,6 +3000,7 @@ function initTabs(){
 }
 
 installGt7TrackDatalist();
+installGt7LayoutSelects();
 installGt7CarDatalist();
 initTabs();
 startRealtime();

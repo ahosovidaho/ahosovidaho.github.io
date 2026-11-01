@@ -1,0 +1,842 @@
+{
+ "Autódromo José Carlos Pace (Interlagos)": [
+  {
+   "name": "Autodromo de Interlagos",
+   "label": "hlavní varianta",
+   "length_m": 4309,
+   "reverse": false
+  }
+ ],
+ "Autopolis": [
+  {
+   "name": "Autopolis International Racing Course",
+   "label": "International Racing Course",
+   "length_m": 4674,
+   "reverse": false
+  },
+  {
+   "name": "Autopolis International Racing Course - Short Course",
+   "label": "International Racing Course - Short Course",
+   "length_m": 3022,
+   "reverse": false
+  }
+ ],
+ "Bathurst (Mount Panorama)": [
+  {
+   "name": "Mount Panorama Motor Racing Circuit",
+   "label": "Mount Panorama Motor Racing Circuit",
+   "length_m": 6213,
+   "reverse": false
+  }
+ ],
+ "Brands Hatch": [
+  {
+   "name": "Brands Hatch Grand Prix Circuit",
+   "label": "Grand Prix Circuit",
+   "length_m": 3946,
+   "reverse": false
+  },
+  {
+   "name": "Brands Hatch Indy Circuit",
+   "label": "Indy Circuit",
+   "length_m": 1944,
+   "reverse": false
+  }
+ ],
+ "Circuit de Barcelona-Catalunya": [
+  {
+   "name": "Circuit de Barcelona-Catalunya Grand Prix Layout",
+   "label": "Grand Prix Layout",
+   "length_m": 4655,
+   "reverse": false
+  },
+  {
+   "name": "Circuit de Barcelona-Catalunya GP Layout No Chicane",
+   "label": "GP Layout No Chicane",
+   "length_m": 4730,
+   "reverse": false
+  },
+  {
+   "name": "Circuit de Barcelona-Catalunya National",
+   "label": "National",
+   "length_m": 2977,
+   "reverse": false
+  },
+  {
+   "name": "Circuit de Barcelona-Catalunya Rallycross",
+   "label": "Rallycross",
+   "length_m": 1133,
+   "reverse": false
+  }
+ ],
+ "Circuit de la Sarthe (Le Mans)": [
+  {
+   "name": "24 Heures du Mans Racing Circuit",
+   "label": "hlavní varianta",
+   "length_m": 13629,
+   "reverse": false
+  },
+  {
+   "name": "24 Heures du Mans Racing Circuit No Chicane",
+   "label": "No Chicane",
+   "length_m": 13567,
+   "reverse": false
+  }
+ ],
+ "Daytona International Speedway": [
+  {
+   "name": "Daytona Tri-Oval",
+   "label": "Daytona Tri-Oval",
+   "length_m": 4023,
+   "reverse": false
+  },
+  {
+   "name": "Daytona Road Course",
+   "label": "Daytona Road Course",
+   "length_m": 5729,
+   "reverse": false
+  }
+ ],
+ "Fuji Speedway": [
+  {
+   "name": "Fuji International Speedway",
+   "label": "hlavní varianta",
+   "length_m": 4563,
+   "reverse": false
+  },
+  {
+   "name": "Fuji International Speedway (Short)",
+   "label": "(Short)",
+   "length_m": 4526,
+   "reverse": false
+  }
+ ],
+ "Goodwood Motor Circuit": [
+  {
+   "name": "Goodwood Motor Circuit",
+   "label": "Motor Circuit",
+   "length_m": 3809,
+   "reverse": false
+  }
+ ],
+ "WeatherTech Raceway Laguna Seca": [
+  {
+   "name": "WeatherTech Raceway Laguna Seca",
+   "label": "hlavní varianta",
+   "length_m": 3602,
+   "reverse": false
+  }
+ ],
+ "Autodromo Nazionale Monza": [
+  {
+   "name": "Autodromo Nazionale Monza",
+   "label": "hlavní varianta",
+   "length_m": 5793,
+   "reverse": false
+  },
+  {
+   "name": "Autodromo Nazionale Monza No Chicane",
+   "label": "No Chicane",
+   "length_m": 5755,
+   "reverse": false
+  }
+ ],
+ "Nürburgring": [
+  {
+   "name": "Nurburgring Nordschleife",
+   "label": "Nordschleife",
+   "length_m": 20832,
+   "reverse": false
+  },
+  {
+   "name": "Nurburgring Nordschleife Tourist Layout",
+   "label": "Nordschleife Tourist Layout",
+   "length_m": 20832,
+   "reverse": false
+  },
+  {
+   "name": "Nurburgring 24h",
+   "label": "24h",
+   "length_m": 25378,
+   "reverse": false
+  },
+  {
+   "name": "Nurburgring GP",
+   "label": "GP",
+   "length_m": 5148,
+   "reverse": false
+  },
+  {
+   "name": "Nurburgring Endurance",
+   "label": "Endurance",
+   "length_m": 23864,
+   "reverse": false
+  },
+  {
+   "name": "Nurburgring Sprint",
+   "label": "Sprint",
+   "length_m": 3629,
+   "reverse": false
+  }
+ ],
+ "Michelin Raceway Road Atlanta": [
+  {
+   "name": "Michelin Raceway Road Atlanta",
+   "label": "Michelin Raceway Road Atlanta",
+   "length_m": 4088,
+   "reverse": false
+  }
+ ],
+ "Red Bull Ring": [
+  {
+   "name": "Red Bull Ring",
+   "label": "hlavní varianta",
+   "length_m": 4318,
+   "reverse": false
+  },
+  {
+   "name": "Red Bull Ring Short Track",
+   "label": "Short Track",
+   "length_m": 2336,
+   "reverse": false
+  }
+ ],
+ "Spa-Francorchamps": [
+  {
+   "name": "Circuit de Spa-Francorchamps",
+   "label": "hlavní varianta",
+   "length_m": 7004,
+   "reverse": false
+  },
+  {
+   "name": "Spa 24h Layout",
+   "label": "Spa 24h Layout",
+   "length_m": 7004,
+   "reverse": false
+  }
+ ],
+ "Suzuka Circuit": [
+  {
+   "name": "Suzuka Circuit",
+   "label": "hlavní varianta",
+   "length_m": 5807,
+   "reverse": false
+  },
+  {
+   "name": "Suzuka Circuit East Course",
+   "label": "East Course",
+   "length_m": 2243,
+   "reverse": false
+  }
+ ],
+ "Tsukuba Circuit": [
+  {
+   "name": "Tsukuba Circuit",
+   "label": "hlavní varianta",
+   "length_m": 2045,
+   "reverse": false
+  }
+ ],
+ "Watkins Glen International": [
+  {
+   "name": "Watkins Glen Long Course",
+   "label": "Long Course",
+   "length_m": 5423,
+   "reverse": false
+  },
+  {
+   "name": "Watkins Glen Short Course",
+   "label": "Short Course",
+   "length_m": 3942,
+   "reverse": false
+  }
+ ],
+ "Willow Springs International Raceway": [
+  {
+   "name": "Willow Springs International Raceway: Big Willow",
+   "label": "Big Willow",
+   "length_m": 3951,
+   "reverse": false
+  },
+  {
+   "name": "Willow Springs International Raceway: Horse Thief Mile",
+   "label": "Horse Thief Mile",
+   "length_m": 1624,
+   "reverse": false
+  },
+  {
+   "name": "Willow Springs International Raceway: Streets of Willow Springs",
+   "label": "Streets of Willow Springs",
+   "length_m": 2675,
+   "reverse": false
+  },
+  {
+   "name": "Willow Springs International Raceway: Horse Thief Mile Reverse",
+   "label": "Horse Thief Mile Reverse",
+   "length_m": 1624,
+   "reverse": true
+  },
+  {
+   "name": "Willow Springs International Raceway: Streets of Willow Springs Reverse",
+   "label": "Streets of Willow Springs Reverse",
+   "length_m": 2675,
+   "reverse": true
+  }
+ ],
+ "Alsace": [
+  {
+   "name": "Alsace - Village",
+   "label": "Village",
+   "length_m": 5423,
+   "reverse": false
+  },
+  {
+   "name": "Alsace - Village Reverse",
+   "label": "Village Reverse",
+   "length_m": 5423,
+   "reverse": true
+  },
+  {
+   "name": "Alsace - Test Course",
+   "label": "Test Course",
+   "length_m": 2118,
+   "reverse": false
+  },
+  {
+   "name": "Alsace - Test Course Reverse",
+   "label": "Test Course Reverse",
+   "length_m": 2118,
+   "reverse": true
+  }
+ ],
+ "Autodrome Lago Maggiore": [
+  {
+   "name": "Autodrome Lago Maggiore - Full Course",
+   "label": "Full Course",
+   "length_m": 5809,
+   "reverse": false
+  },
+  {
+   "name": "Autodrome Lago Maggiore - Full Course Reverse",
+   "label": "Full Course Reverse",
+   "length_m": 5809,
+   "reverse": true
+  },
+  {
+   "name": "Autodrome Lago Maggiore - Centre",
+   "label": "Centre",
+   "length_m": 1706,
+   "reverse": false
+  },
+  {
+   "name": "Autodrome Lago Maggiore - Centre Reverse",
+   "label": "Centre Reverse",
+   "length_m": 1706,
+   "reverse": true
+  },
+  {
+   "name": "Autodrome Lago Maggiore - East End",
+   "label": "East End",
+   "length_m": 2010,
+   "reverse": false
+  },
+  {
+   "name": "Autodrome Lago Maggiore - East End Reverse",
+   "label": "East End Reverse",
+   "length_m": 2010,
+   "reverse": true
+  },
+  {
+   "name": "Autodrome Lago Maggiore - West End",
+   "label": "West End",
+   "length_m": 2444,
+   "reverse": false
+  },
+  {
+   "name": "Autodrome Lago Maggiore - West End Reverse",
+   "label": "West End Reverse",
+   "length_m": 2444,
+   "reverse": true
+  },
+  {
+   "name": "Autodrome Lago Maggiore - East",
+   "label": "East",
+   "length_m": 3643,
+   "reverse": false
+  },
+  {
+   "name": "Autodrome Lago Maggiore - East Reverse",
+   "label": "East Reverse",
+   "length_m": 3643,
+   "reverse": true
+  },
+  {
+   "name": "Autodrome Lago Maggiore - West",
+   "label": "West",
+   "length_m": 4168,
+   "reverse": false
+  },
+  {
+   "name": "Autodrome Lago Maggiore - West Reverse",
+   "label": "West Reverse",
+   "length_m": 4168,
+   "reverse": true
+  }
+ ],
+ "Blue Moon Bay Speedway": [
+  {
+   "name": "Blue Moon Bay Speedway",
+   "label": "hlavní varianta",
+   "length_m": 3200,
+   "reverse": false
+  },
+  {
+   "name": "Blue Moon Bay Speedway Reverse",
+   "label": "Reverse",
+   "length_m": 3200,
+   "reverse": true
+  },
+  {
+   "name": "Blue Moon Bay Speedway - Infield A",
+   "label": "Infield A",
+   "length_m": 3350,
+   "reverse": false
+  },
+  {
+   "name": "Blue Moon Bay Speedway - Infield B",
+   "label": "Infield B",
+   "length_m": 2860,
+   "reverse": false
+  },
+  {
+   "name": "Blue Moon Bay Speedway - Infield A Reverse",
+   "label": "Infield A Reverse",
+   "length_m": 3350,
+   "reverse": true
+  },
+  {
+   "name": "Blue Moon Bay Speedway - Infield B Reverse",
+   "label": "Infield B Reverse",
+   "length_m": 2860,
+   "reverse": true
+  }
+ ],
+ "BB Raceway": [
+  {
+   "name": "BB Raceway",
+   "label": "BB Raceway",
+   "length_m": 1665,
+   "reverse": false
+  },
+  {
+   "name": "BB Raceway Reverse",
+   "label": "BB Raceway Reverse",
+   "length_m": 1665,
+   "reverse": true
+  }
+ ],
+ "Deep Forest Raceway": [
+  {
+   "name": "Deep Forest Raceway",
+   "label": "hlavní varianta",
+   "length_m": 4253,
+   "reverse": false
+  },
+  {
+   "name": "Deep Forest Raceway Reverse",
+   "label": "Reverse",
+   "length_m": 4253,
+   "reverse": true
+  }
+ ],
+ "Dragon Trail": [
+  {
+   "name": "Dragon Trail - Gardens",
+   "label": "Gardens",
+   "length_m": 4352,
+   "reverse": false
+  },
+  {
+   "name": "Dragon Trail - Seaside",
+   "label": "Seaside",
+   "length_m": 5209,
+   "reverse": false
+  },
+  {
+   "name": "Dragon Trail - Gardens Reverse",
+   "label": "Gardens Reverse",
+   "length_m": 4352,
+   "reverse": true
+  },
+  {
+   "name": "Dragon Trail - Seaside Reverse",
+   "label": "Seaside Reverse",
+   "length_m": 5209,
+   "reverse": true
+  }
+ ],
+ "Eiger Nordwand": [
+  {
+   "name": "Eiger Nordwand",
+   "label": "hlavní varianta",
+   "length_m": 2436,
+   "reverse": false
+  },
+  {
+   "name": "Eiger Nordwand Reverse",
+   "label": "Reverse",
+   "length_m": 2436,
+   "reverse": true
+  }
+ ],
+ "Grand Valley - Highway 1": [
+  {
+   "name": "Grand Valley - Highway 1",
+   "label": "Highway 1",
+   "length_m": 5099,
+   "reverse": false
+  },
+  {
+   "name": "Grand Valley - Highway 1 Reverse",
+   "label": "Highway 1 Reverse",
+   "length_m": 5099,
+   "reverse": true
+  },
+  {
+   "name": "Grand Valley - South",
+   "label": "South",
+   "length_m": 3076,
+   "reverse": false
+  },
+  {
+   "name": "Grand Valley - South Reverse",
+   "label": "South Reverse",
+   "length_m": 3076,
+   "reverse": true
+  }
+ ],
+ "High Speed Ring": [
+  {
+   "name": "High Speed Ring",
+   "label": "hlavní varianta",
+   "length_m": 4345,
+   "reverse": false
+  },
+  {
+   "name": "High Speed Ring Reverse",
+   "label": "Reverse",
+   "length_m": 4345,
+   "reverse": true
+  }
+ ],
+ "Kyoto Driving Park": [
+  {
+   "name": "Kyoto Driving Park - Yamagiwa",
+   "label": "Yamagiwa",
+   "length_m": 4912,
+   "reverse": false
+  },
+  {
+   "name": "Kyoto Driving Park - Miyabi",
+   "label": "Miyabi",
+   "length_m": 1953,
+   "reverse": false
+  },
+  {
+   "name": "Kyoto Driving Park - Yamagiwa Reverse",
+   "label": "Yamagiwa Reverse",
+   "length_m": 4912,
+   "reverse": true
+  },
+  {
+   "name": "Kyoto Driving Park - Yamagiwa+Miyabi",
+   "label": "Yamagiwa+Miyabi",
+   "length_m": 6846,
+   "reverse": false
+  },
+  {
+   "name": "Kyoto Driving Park - Yamagiwa+Miyabi Reverse",
+   "label": "Yamagiwa+Miyabi Reverse",
+   "length_m": 6846,
+   "reverse": true
+  }
+ ],
+ "Northern Isle Speedway": [
+  {
+   "name": "Northern Isle Speedway",
+   "label": "hlavní varianta",
+   "length_m": 900,
+   "reverse": false
+  }
+ ],
+ "Circuit de Sainte-Croix": [
+  {
+   "name": "Circuit de Sainte-Croix - A",
+   "label": "A",
+   "length_m": 9477,
+   "reverse": false
+  },
+  {
+   "name": "Circuit de Sainte-Croix - A Reverse",
+   "label": "A Reverse",
+   "length_m": 9477,
+   "reverse": true
+  },
+  {
+   "name": "Circuit de Sainte-Croix - B",
+   "label": "B",
+   "length_m": 7062,
+   "reverse": false
+  },
+  {
+   "name": "Circuit de Sainte-Croix - B Reverse",
+   "label": "B Reverse",
+   "length_m": 7062,
+   "reverse": true
+  },
+  {
+   "name": "Circuit de Sainte-Croix - C",
+   "label": "C",
+   "length_m": 10825,
+   "reverse": false
+  },
+  {
+   "name": "Circuit de Sainte-Croix - C Reverse",
+   "label": "C Reverse",
+   "length_m": 10825,
+   "reverse": true
+  }
+ ],
+ "Sardegna - Road Track": [
+  {
+   "name": "Sardegna - Road Track - A",
+   "label": "A",
+   "length_m": 5113,
+   "reverse": false
+  },
+  {
+   "name": "Sardegna - Road Track - A Reverse",
+   "label": "A Reverse",
+   "length_m": 5113,
+   "reverse": true
+  },
+  {
+   "name": "Sardegna - Road Track - B",
+   "label": "B",
+   "length_m": 3893,
+   "reverse": false
+  },
+  {
+   "name": "Sardegna - Road Track - B Reverse",
+   "label": "B Reverse",
+   "length_m": 3893,
+   "reverse": true
+  },
+  {
+   "name": "Sardegna - Road Track - C",
+   "label": "C",
+   "length_m": 2661,
+   "reverse": false
+  },
+  {
+   "name": "Sardegna - Road Track - C Reverse",
+   "label": "C Reverse",
+   "length_m": 2661,
+   "reverse": true
+  }
+ ],
+ "Special Stage Route X": [
+  {
+   "name": "Special Stage Route X",
+   "label": "hlavní varianta",
+   "length_m": 30283,
+   "reverse": false
+  },
+  {
+   "name": "Special Stage Route X 400",
+   "label": "400",
+   "length_m": 30283,
+   "reverse": false
+  },
+  {
+   "name": "Special Stage Route X 1000",
+   "label": "1000",
+   "length_m": 30283,
+   "reverse": false
+  }
+ ],
+ "Tokyo Expressway": [
+  {
+   "name": "Tokyo Expressway - Central Clockwise",
+   "label": "Central Clockwise",
+   "length_m": 4405,
+   "reverse": false
+  },
+  {
+   "name": "Tokyo Expressway - East Clockwise",
+   "label": "East Clockwise",
+   "length_m": 7301,
+   "reverse": false
+  },
+  {
+   "name": "Tokyo Expressway - South Clockwise",
+   "label": "South Clockwise",
+   "length_m": 5201,
+   "reverse": false
+  },
+  {
+   "name": "Tokyo Expressway - Central Counterclockwise",
+   "label": "Central Counterclockwise",
+   "length_m": 4369,
+   "reverse": false
+  },
+  {
+   "name": "Tokyo Expressway - East Counterclockwise",
+   "label": "East Counterclockwise",
+   "length_m": 7192,
+   "reverse": false
+  },
+  {
+   "name": "Tokyo Expressway - South Counterclockwise",
+   "label": "South Counterclockwise",
+   "length_m": 6560,
+   "reverse": false
+  }
+ ],
+ "Trial Mountain Circuit": [
+  {
+   "name": "Trial Mountain Circuit",
+   "label": "hlavní varianta",
+   "length_m": 5434,
+   "reverse": false
+  },
+  {
+   "name": "Trial Mountain Circuit - Reverse",
+   "label": "Reverse",
+   "length_m": 5434,
+   "reverse": true
+  }
+ ],
+ "Circuit de Barcelona-Catalunya - rozvržení Rallycross": [
+  {
+   "name": "Circuit de Barcelona-Catalunya Grand Prix Layout",
+   "label": "Grand Prix Layout",
+   "length_m": 4655,
+   "reverse": false
+  },
+  {
+   "name": "Circuit de Barcelona-Catalunya GP Layout No Chicane",
+   "label": "GP Layout No Chicane",
+   "length_m": 4730,
+   "reverse": false
+  },
+  {
+   "name": "Circuit de Barcelona-Catalunya National",
+   "label": "National",
+   "length_m": 2977,
+   "reverse": false
+  },
+  {
+   "name": "Circuit de Barcelona-Catalunya Rallycross",
+   "label": "Rallycross",
+   "length_m": 1133,
+   "reverse": false
+  }
+ ],
+ "Colorado Springs": [
+  {
+   "name": "Colorado Springs - Lake",
+   "label": "Lake",
+   "length_m": 2990,
+   "reverse": false
+  },
+  {
+   "name": "Colorado Springs - Lake Reverse",
+   "label": "Lake Reverse",
+   "length_m": 2990,
+   "reverse": true
+  }
+ ],
+ "Fishermans Ranch": [
+  {
+   "name": "Fishermans Ranch",
+   "label": "hlavní varianta",
+   "length_m": 6893,
+   "reverse": false
+  },
+  {
+   "name": "Fishermans Ranch Reverse",
+   "label": "Reverse",
+   "length_m": 6893,
+   "reverse": true
+  }
+ ],
+ "Lake Louise (Snow)": [
+  {
+   "name": "Lake Louise Tri-Oval",
+   "label": "Tri-Oval",
+   "length_m": 3068,
+   "reverse": false
+  },
+  {
+   "name": "Lake Louise Short Track",
+   "label": "Short Track",
+   "length_m": 2577,
+   "reverse": false
+  },
+  {
+   "name": "Lake Louise Long Track",
+   "label": "Long Track",
+   "length_m": 3694,
+   "reverse": false
+  },
+  {
+   "name": "Lake Louise Tri-Oval Reverse",
+   "label": "Tri-Oval Reverse",
+   "length_m": 3068,
+   "reverse": true
+  },
+  {
+   "name": "Lake Louise Short Track Reverse",
+   "label": "Short Track Reverse",
+   "length_m": 2577,
+   "reverse": true
+  },
+  {
+   "name": "Lake Louise Long Track Reverse",
+   "label": "Long Track Reverse",
+   "length_m": 3694,
+   "reverse": true
+  }
+ ],
+ "Sardegna - Windmills (Dirt)": [
+  {
+   "name": "Sardegna - Windmills",
+   "label": "hlavní varianta",
+   "length_m": 3310,
+   "reverse": false
+  },
+  {
+   "name": "Sardegna - Windmills Reverse",
+   "label": "Reverse",
+   "length_m": 3310,
+   "reverse": true
+  }
+ ],
+ "Okruh Gilles Villeneuve": [
+  {
+   "name": "Circuit Gilles-Villeneuve",
+   "label": "hlavní varianta",
+   "length_m": 4361,
+   "reverse": false
+  }
+ ],
+ "Okruh Yas Marina": [
+  {
+   "name": "Yas Marina Circuit",
+   "label": "hlavní varianta",
+   "length_m": 5281,
+   "reverse": false
+  }
+ ]
+}
