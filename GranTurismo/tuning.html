@@ -68,6 +68,13 @@ input[type=number],select{width:100%;font:inherit;font-size:15px;font-variant-nu
 .toe{display:grid;gap:4px}
 .toe select{font-size:12px;padding:3px 4px}
 .hint{font-size:13px;color:var(--muted)}
+.explain{display:grid;grid-template-columns:1fr 1fr;gap:8px 16px;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--surface);font-size:15px}
+.explain .hint{grid-column:1/-1}
+.explain b.ov{color:var(--accent)}
+.explain b.un{color:var(--warn)}
+@media (max-width:600px){.explain{grid-template-columns:1fr}}
+.log ol{margin:0;padding-left:20px;display:grid;gap:4px;font-size:14px}
+.log .v{font-family:var(--font-mono);color:var(--accent)}
 .anim{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:6px 0 8px}
 .anim-panel{border:1px solid var(--line);border-radius:8px;background:var(--surface);padding:6px;display:grid;gap:4px}
 .anim-panel svg{width:100%;height:auto;display:block}
@@ -214,15 +221,26 @@ footer{margin-top:36px;padding-top:18px;border-top:1px solid var(--line);color:v
       <option value="ff">Přední (FF)</option>
       <option value="awd">4×4</option>
     </select>
+    <label class="phase-lbl" for="sel-dev">Ovládání:</label>
+    <select id="sel-dev" style="width:auto">
+      <option value="wheel">Volant (RS50, T300)</option>
+      <option value="pad">Gamepad (DualSense, DualShock 4)</option>
+    </select>
     <button type="button" class="btn" id="btn-clear">Vymazat formulář</button>
     <button type="button" class="btn" id="btn-example">Ukázkové hodnoty</button>
   </div>
+  <p class="hint" style="margin:0">Nevíš, odkud začít? Vezmi výchozí nastavení auta ze hry a lad od něj. Setupy z internetu a ze starších verzí hry (před 1.71) nemusí sedět. A co funguje na jednom autě, na jiné nepřenášej: přenáší se princip, ne čísla.</p>
   <div class="groups" id="form"></div>
 </section>
 
 <section aria-labelledby="s2">
   <h2 id="s2"><span class="no">2</span>Co auto dělá?</h2>
   <p class="lead">Místa v doporučení se řídí tratí vybranou v kroku 1. Pro trať, která v seznamu není, zvol Obecnou trať.</p>
+  <div class="explain">
+    <div><b class="ov">Přetáčivost</b> = zadek ujíždí. Auto se točí víc, než chceš, a musíš kontrovat (točit volantem na druhou stranu).</div>
+    <div><b class="un">Nedotáčivost</b> = předek nedrží. Točíš víc a víc, ale auto jede rovně nebo ven.</div>
+    <div class="hint">Pomůcka: když bys do bariéry narazil zadkem, je to přetáčivost. Když předkem, nedotáčivost.</div>
+  </div>
   <div class="seg" role="group" aria-label="Fáze zatáčky" id="seg-phase"></div>
   <div class="sym" role="group" aria-label="Příznak" id="sym"></div>
 </section>
@@ -234,7 +252,7 @@ footer{margin-top:36px;padding-top:18px;border-top:1px solid var(--line);color:v
 
 <footer>
   <div>Pro partu: Viktor a Ondra (RS50), Maty (T300), Mára (DualSense), Hardy (DualShock 4, PS4). GT7 1.71 a novější, jakékoli auto a trať. Jezdíme jen s ABS, ostatní asistenty vypnuté.</div>
-  <div>Změny jsou testovací kroky, ne hotový setup pro konkrétní auto. Pokud hra hodnotu nepustí (jsi na maximu nebo minimu), použij „Další krok“. Názvy v menu se mohou podle jazyka hry mírně lišit.</div>
+  <div>Změny jsou testovací kroky, ne hotový setup pro konkrétní auto. Pokud hra hodnotu nepustí (jsi na maximu nebo minimu), použij „Další krok“. Názvy v menu se mohou podle jazyka hry mírně lišit. Názvy zatáček u některých tratí (Nürburgring, Fuji, Interlagos) se mohou lišit od těch ve hře.</div>
 </footer>
 </div>
 
@@ -432,16 +450,34 @@ function trackWhere(p){
   return names.join(", ");
 }
 
+/* ---------- Volant × gamepad: je to setup, nebo ovladač? ---------- */
+const DEVNOTE = {
+ "entry-over":{wheel:"Pokud začátek smyku ve volantu necítíš včas, může jít o FFB, ne o setup. RS50: zkus PRO Mode nebo nižší Dampener. T300: síla FFB tak, aby volant nebyl ztuhlý. Setup kvůli tomu neměň.", pad:"Na gamepadu smyk často způsobí prudký pohyb páčky. Zkus ve hře nižší citlivost řízení. DualShock 4 nemá adaptivní triggery, odpor brzdy necítíš, proto ji dávkuj jemněji."},
+ "entry-under":{wheel:"Úhel řízení ve hře nech automatický podle auta.", pad:"Páčkou toč postupně, ne hned na doraz. Při plné výchylce hra rejd stejně omezí a přední kola začnou klouzat."},
+ "brake-wobble":{wheel:"Brzdový pedál nastav tak, abys zvládl plné brzdění bez křeče a plynulé povolování. To se ladí v ovladači, ne v setupu auta.", pad:"Trigger zmáčkni naplno a pak pomalu povoluj. ABS nech zapnuté."},
+ "mid-under":{wheel:"Nedotáčivost cítíš jako lehnutí volantu. Když volant zůstává těžký i při klouzání, zkontroluj nastavení FFB.", pad:"Drž páčku v jedné poloze, nepřidávej postupně víc a víc."},
+ "mid-over":{wheel:"Když kontruješ pozdě, zkontroluj FFB (RS50 a tlumení po 1.71). Setup kvůli tomu neměň.", pad:"Bez asistentů je kontra na gamepadu těžká. Plynulý plyn pomůže víc než setup."},
+ "exit-spin":{wheel:"Plynový pedál potřebuje plynulý pohyb, ne vypínač.", pad:"Trigger plynu je citlivý: drž ho do poloviny a naplno ho zmáčkni až s rovnými koly."},
+ "exit-over":{wheel:"Plynový pedál potřebuje plynulý pohyb, ne vypínač. Když auto ujede bez varování ve volantu, zkontroluj FFB.", pad:"Trigger plynu je citlivý: drž ho do poloviny a naplno ho zmáčkni až s rovnými koly."},
+ "exit-under":{wheel:"", pad:"Na gamepadu se plyn často přidává naráz, auto pak vynáší ven. Přidávej ho pomaleji."},
+ "fast-unstable":{wheel:"Úhel řízení nech automatický, rozhoduje plynulost.", pad:"Nižší citlivost řízení výrazně pomůže právě v rychlých zatáčkách."},
+ "fast-under":{wheel:"", pad:"Drž páčku plynule, bez cukání."},
+ "kerbs":{wheel:"Rázy z obrubníků ve volantu jsou normální. Nesnižuj kvůli nim FFB, raději se vyhni vysokým obrubníkům.", pad:""},
+ "tyres":{wheel:"", pad:"Ostré pohyby páčky dělají drobné smyky a ohřívají pneu. Nižší citlivost řízení pneu šetří."}
+};
+
 /* ---------- Stav ---------- */
-const state = {track:"spa", drive:"rwd", rules:"tune", phase:"entry", prob:"entry-over", skip:0, setup:{...EXAMPLE}};
+const state = {log:[], dev:"wheel", track:"spa", drive:"rwd", rules:"tune", phase:"entry", prob:"entry-over", skip:0, setup:{...EXAMPLE}};
 try{
   const s = JSON.parse(localStorage.getItem("gt7-setup-v2")||"null");
   if(s && typeof s==="object") state.setup = s;
   const r = localStorage.getItem("gt7-rules-v1"); if(r) state.rules = r;
   const tr = localStorage.getItem("gt7-track-v1"); if(tr) state.track = tr;
   const dr = localStorage.getItem("gt7-drive-v1"); if(dr) state.drive = dr;
+  const dv = localStorage.getItem("gt7-dev-v1"); if(dv) state.dev = dv;
+  const lg = JSON.parse(localStorage.getItem("gt7-log-v1")||"null"); if(Array.isArray(lg)) state.log = lg;
 }catch(e){}
-function save(){ try{ localStorage.setItem("gt7-setup-v2", JSON.stringify(state.setup)); localStorage.setItem("gt7-rules-v1", state.rules); localStorage.setItem("gt7-track-v1", state.track); localStorage.setItem("gt7-drive-v1", state.drive);}catch(e){} }
+function save(){ try{ localStorage.setItem("gt7-setup-v2", JSON.stringify(state.setup)); localStorage.setItem("gt7-rules-v1", state.rules); localStorage.setItem("gt7-track-v1", state.track); localStorage.setItem("gt7-drive-v1", state.drive); localStorage.setItem("gt7-dev-v1", state.dev); localStorage.setItem("gt7-log-v1", JSON.stringify(state.log));}catch(e){} }
 
 const fmt = (v,d)=> (v===null||v===undefined||isNaN(v)) ? "–" : Number(v).toLocaleString("cs-CZ",{minimumFractionDigits:d,maximumFractionDigits:d});
 function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c]));}
@@ -541,13 +577,27 @@ function applyCand(c){
     if(f.min!==undefined && nv<f.min) continue;
     if(f.max!==undefined && nv>f.max) continue;
     if(!f.toe && f.min===undefined && nv<0) continue;
+    if(k==="bb" && Math.abs(nv)>4) continue;
     out.push({k, from:cur, to:nv});
   }
   return out.length ? out : null;
 }
+function usedSteps(probId, k){ return state.log.filter(e=>e.prob===probId).reduce((n,e)=>n+e.items.filter(i=>i.k===k).length,0); }
 function candidates(p){
   const bop = state.rules==="bop";
-  return p.c.filter(c=>!bop || c.bop).filter(c=>state.drive==="rwd" || !(c.k||"").startsWith("lsd")).map(c=>({c, ch:applyCand(c)})).filter(x=>x.ch);
+  return p.c.filter(c=>!bop || c.bop).filter(c=>state.drive==="rwd" || !(c.k||"").startsWith("lsd"))
+    .map(c=>({c, ch:applyCand(c)})).filter(x=>x.ch)
+    .filter(x=>x.ch.every(i=>usedSteps(p.id,i.k)<2));
+}
+function logHTML(){
+  if(!state.log.length) return "";
+  return '<div class="box log"><h4>Tvůj deník změn</h4><ol>'+state.log.map(e=>'<li>'+e.items.map(i=>esc(fieldName(i.k))+' <span class="v">'+esc(valText(i.k,i.from))+' → '+esc(valText(i.k,i.to))+'</span>').join(", ")+' <span class="hint">· '+esc(e.title)+'</span></li>').join("")+'</ol>'+
+    '<div class="actions" style="margin-top:10px"><button type="button" class="btn" id="btn-undo">Vrátit poslední změnu</button><button type="button" class="btn" id="btn-logclear">Vymazat deník</button></div>'+
+    '<div class="hint" style="margin-top:6px">Stejné nastavení ti nástroj u jednoho problému nabídne nejvýš dvakrát. Pak je lepší sáhnout na jiné nastavení než jedno přetáhnout do extrému.</div></div>';
+}
+function bindLog(){
+  const u=document.getElementById("btn-undo"); if(u) u.onclick=()=>{ const e=state.log.pop(); if(e) e.items.forEach(i=>state.setup[i.k]=i.from); state.skip=0; save(); renderForm(); renderResult(); };
+  const c=document.getElementById("btn-logclear"); if(c) c.onclick=()=>{ state.log=[]; save(); renderResult(); };
 }
 
 /* ---------- Nákres auta ---------- */
@@ -667,8 +717,9 @@ function renderResult(){
       ? "V BoP závodě bez ladění a bez asistentů se tady nedá nic nastavit. Zbývá jízda: plyn, brzda a výběr převodu."
       : (list.length===0 ? "Chybí hodnoty v kroku 1 (nebo jsou na hranici rozsahu). Doplň svůj setup a doporučení se objeví." : "Prošel jsi všechny kroky. Vrať se k setupu, který jel nejlíp, a soustřeď se na jízdu.");
     r.innerHTML = '<h3>'+esc(p.title)+'</h3><div class="box warn"><h4>Žádná další změna</h4>'+esc(msg)+'</div>'+techHTML+
-      (state.skip>0?'<div class="actions"><button type="button" class="btn" id="btn-restart">Začít znovu od prvního kroku</button></div>':'');
+      (state.skip>0?'<div class="actions"><button type="button" class="btn" id="btn-restart">Začít znovu od prvního kroku</button></div>':'')+logHTML();
     const b=document.getElementById("btn-restart"); if(b) b.onclick=()=>{state.skip=0;renderResult();};
+    bindLog();
     return;
   }
 
@@ -689,6 +740,8 @@ function renderResult(){
 
   let h = '<div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;align-items:baseline"><h3>'+esc(p.title)+'</h3><span class="phase-lbl">Krok '+(state.skip+1)+' z '+list.length+' · '+esc(trackName())+': '+esc(trackWhere(p))+'</span></div>';
   h += techHTML;
+  const dn = (DEVNOTE[p.id]||{})[state.dev];
+  if(dn) h += '<div class="box"><h4>'+(state.dev==="wheel"?"Volant":"Gamepad")+': je to setup, nebo ovladač?</h4>'+esc(dn)+'</div>';
   if(state.drive!=="rwd" && p.c.some(c=>(c.k||"").startsWith("lsd"))) h += '<div class="box warn"><h4>Pohon '+(state.drive==="ff"?"přední":"4×4")+'</h4>Změny diferenciálu jsem vynechal. U '+(state.drive==="ff"?"předokolky je diferenciál vpředu":"čtyřkolky jsou diferenciály dva a rozdělení momentu")+' a reagují jinak než u auta se zadním pohonem. Ostatní rady platí.</div>';
   h += '<div class="res-grid"><div class="car">'+carSVG(zones)+'</div><div class="change">';
   h += '<div class="big"><span class="name">'+esc(name)+(isLive?'<span class="tag">jde i v BoP</span>':'')+'</span></div>';
@@ -698,7 +751,7 @@ function renderResult(){
   h += '<div class="box anim-box"><h4>Jak se změní chování (schéma)</h4><div class="anim" id="anim"></div><div class="hint">Zjednodušené schéma pravotočivé zatáčky. Ukazuje, kterým směrem se chování změní, ne přesně o kolik.</div></div>';
   h += '<p class="why"><b>Proč:</b> '+esc(whyOf(cur.c))+'</p>';
   h += '<p class="risk"><b>Na co si dát pozor:</b> '+esc(riskOf(cur.c))+'</p>';
-  h += '<div class="box"><h4>Jak to otestovat</h4><ul><li>Změň jen tuhle jednu hodnotu.</li><li>Zajeď 3–5 kol a sleduj hlavně '+esc(trackWhere(p))+'.</li><li>Pomohlo, když je průměr stejný nebo lepší a problém se zmenšil. Jedno rychlé kolo nestačí.</li></ul></div>';
+  h += '<div class="box"><h4>Jak to otestovat</h4><ul><li>Změň jen tuhle jednu hodnotu.</li><li>Před změnou i po ní jeď za stejných podmínek: stejné pneu, podobně paliva, bez soupeřů kolem (trénink nebo volná jízda v lobby).</li><li>Zajeď 3–5 kol a sleduj hlavně '+esc(trackWhere(p).split(", ").slice(0,3).join(", "))+'.</li><li>Pomohlo, když je průměr stejný nebo lepší a problém se zmenšil. Jedno rychlé kolo nestačí.</li><li>Když se změnou auto zhorší jinde (třeba lépe zatáčí, ale ujíždí na výjezdu), vrať ji. Výměna jednoho problému za jiný není zisk.</li></ul></div>';
   h += '<div class="actions"><button type="button" class="btn primary" id="btn-ok">Pomohlo: uložit novou hodnotu</button><button type="button" class="btn dark" id="btn-next">Nepomohlo: vrátit a další krok</button><button type="button" class="btn" id="btn-copy">Zkopírovat</button></div>';
   if(rest.length){
     h += '<div class="next"><span class="phase-lbl">Co přijde potom, když to nepomůže</span>'+rest.map(x=>{
@@ -716,16 +769,20 @@ function renderResult(){
     h += '<tr class="'+(c?"chg":"")+'"><td class="sec">'+esc(FIELD[k].sec)+'</td><td>'+esc(fieldName(k))+'</td><td>'+esc(valText(k,v))+'</td><td>'+esc(valText(k,c?toMap[k]:v))+'</td></tr>';
   });
   h += '</tbody></table></div></details>';
+  h += logHTML();
   r.innerHTML = h;
   mountAnim(p.id);
+  bindLog();
 
   document.getElementById("btn-ok").onclick=()=>{
-    ch.forEach(x=>state.setup[x.k]=x.to); state.skip=0; save(); renderForm(); renderResult();
+    ch.forEach(x=>state.setup[x.k]=x.to);
+    state.log.push({prob:p.id, title:p.title, items:ch.map(x=>({k:x.k, from:x.from, to:x.to}))});
+    state.skip=0; save(); renderForm(); renderResult();
     const b=document.getElementById("btn-ok"); if(b){ b.textContent="Uloženo. Další doporučení vychází z nového setupu"; }
   };
   document.getElementById("btn-next").onclick=()=>{ state.skip++; renderResult(); };
   document.getElementById("btn-copy").onclick=async (ev)=>{
-    const t = "GT7 Spa – "+p.title+"\nZměna: "+name+" "+ch.map(x=>valText(x.k,x.from)+" → "+valText(x.k,x.to)).join(", ")+"\nKde: "+pathParts.join(" → ")+"\nProč: "+whyOf(cur.c)+"\nPozor: "+riskOf(cur.c)+"\nNejdřív jízda: "+p.tech.join(" ");
+    const t = "GT7 "+trackName()+" – "+p.title+"\nZměna: "+name+" "+ch.map(x=>valText(x.k,x.from)+" → "+valText(x.k,x.to)).join(", ")+"\nKde: "+pathParts.join(" → ")+"\nProč: "+whyOf(cur.c)+"\nPozor: "+riskOf(cur.c)+"\nNejdřív jízda: "+p.tech.join(" ");
     const b=ev.currentTarget;
     try{ await navigator.clipboard.writeText(t); b.textContent="Zkopírováno"; }catch(e){ b.textContent="Kopírování nejde"; }
     setTimeout(()=>{b.textContent="Zkopírovat";},2000);
@@ -758,8 +815,8 @@ function renderRules(){
     b.onclick=()=>{ state.rules=b.dataset.v; state.skip=0; save(); renderRules(); renderResult(); };
   });
 }
-document.getElementById("btn-clear").onclick=()=>{ Object.keys(FIELD).forEach(k=>state.setup[k]=null); state.setup.gearSlow=null; state.setup.gearLim=null; state.skip=0; save(); renderForm(); renderResult(); };
-document.getElementById("btn-example").onclick=()=>{ state.setup={...EXAMPLE}; state.skip=0; save(); renderForm(); renderResult(); };
+document.getElementById("btn-clear").onclick=()=>{ Object.keys(FIELD).forEach(k=>state.setup[k]=null); state.setup.gearSlow=null; state.setup.gearLim=null; state.log=[]; state.skip=0; save(); renderForm(); renderResult(); };
+document.getElementById("btn-example").onclick=()=>{ state.setup={...EXAMPLE}; state.log=[]; state.skip=0; save(); renderForm(); renderResult(); };
 
 (function(){
   const st=document.getElementById("sel-track");
@@ -767,6 +824,8 @@ document.getElementById("btn-example").onclick=()=>{ state.setup={...EXAMPLE}; s
   st.value=state.track; st.onchange=()=>{state.track=st.value; save(); renderResult();};
   const sd=document.getElementById("sel-drive"); sd.value=state.drive;
   sd.onchange=()=>{state.drive=sd.value; state.skip=0; save(); renderResult();};
+  const sv=document.getElementById("sel-dev"); sv.value=state.dev;
+  sv.onchange=()=>{state.dev=sv.value; save(); renderResult();};
 })();
 renderRules(); renderForm(); renderPhases(); renderSymptoms(); renderResult();
 </script>
