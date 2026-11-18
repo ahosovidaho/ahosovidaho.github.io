@@ -108,6 +108,17 @@ details.grp[open]{display:grid;gap:8px}
 .car .hot{fill:var(--accent)}
 .car .lbl{font-family:var(--font-mono);font-size:10px;fill:var(--muted)}
 .car .lbl.hot-l{fill:var(--accent);font-weight:500}
+.car .lbl.in.on{fill:#fff;font-weight:500}
+.bbscale{display:grid;gap:8px}
+.bb-track{position:relative;height:34px;margin:0 12px;border-bottom:2px solid var(--line)}
+.bb-tick{position:absolute;bottom:-6px;width:1px;height:10px;background:var(--muted);transform:translateX(-50%)}
+.bb-tick.mid{height:16px;background:var(--ink)}
+.bb-tick i{position:absolute;top:14px;left:50%;transform:translateX(-50%);font-style:normal;font-family:var(--font-mono);font-size:11px;color:var(--muted)}
+.bb-m{position:absolute;bottom:4px;width:16px;height:16px;border-radius:50%;transform:translateX(-50%);border:2px solid var(--surface)}
+.bb-m.old{background:var(--muted)}
+.bb-m.new{background:var(--accent);bottom:8px}
+.bb-legend{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;font-size:13px;color:var(--muted);margin-top:14px}
+.bb-legend b{color:var(--ink);font-weight:600}
 .change{display:grid;gap:14px}
 .big{display:flex;flex-wrap:wrap;align-items:baseline;gap:14px}
 .big .name{font-family:var(--font-display);font-size:30px;font-weight:800;font-style:italic;text-transform:uppercase;line-height:1}
@@ -248,7 +259,7 @@ const GROUPS = [
     {k:"lsdB", label:"Citlivost při brzdění", u:"", step:5, d:0, min:0, max:100}
   ]},
   {id:"oth", title:"Brzdy", en:"i za jízdy", single:true, rows:[
-    {k:"bb",  label:"Brzdová balance", u:"−5 až +5", step:1, d:0, min:-5, max:5}
+    {k:"bb",  label:"Brzdová balance", u:"− dopředu, + dozadu", step:1, d:0, min:-5, max:5}
   ]},
   {id:"gear", title:"Převodovka", en:"volitelné", single:true, optional:true, rows:[
     {k:"g1", label:"1. stupeň", u:"", step:0.001, d:3, min:0.3, max:8},
@@ -435,7 +446,23 @@ function save(){ try{ localStorage.setItem("gt7-setup-v2", JSON.stringify(state.
 const fmt = (v,d)=> (v===null||v===undefined||isNaN(v)) ? "–" : Number(v).toLocaleString("cs-CZ",{minimumFractionDigits:d,maximumFractionDigits:d});
 function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c]));}
 function toeText(v){ if(v===null||v===undefined||isNaN(v)) return "–"; if(Math.abs(v)<0.0001) return "0,00"; return fmt(Math.abs(v),2)+(v>0?" sbíhavost":" rozbíhavost"); }
-function valText(k,v){ return k.startsWith("toe") ? toeText(v) : fmt(v, FIELD[k].d) + (FIELD[k].u && !FIELD[k].u.includes("–") ? " "+FIELD[k].u : ""); }
+const UNITS = ["mm","%","Hz","°"];
+function bbNum(v){ return v>0 ? "+"+fmt(v,0) : (v<0 ? "−"+fmt(-v,0) : "0"); }
+function bbText(v){ if(v===null||v===undefined||isNaN(v)) return "–"; return v===0 ? "0 (vyvážená)" : bbNum(v)+(v<0?" (víc dopředu)":" (víc dozadu)"); }
+function valText(k,v){
+  if(k.startsWith("toe")) return toeText(v);
+  if(k==="bb") return bbText(v);
+  return fmt(v, FIELD[k].d) + (UNITS.includes(FIELD[k].u) ? " "+FIELD[k].u : "");
+}
+function valShort(k,v){ return k==="bb" ? bbNum(v) : valText(k,v); }
+function bbScale(from,to){
+  const pos=v=>((v+5)/10*100).toFixed(1)+"%";
+  let ticks=""; for(let i=-5;i<=5;i++) ticks+='<span class="bb-tick'+(i===0?' mid':'')+'" style="left:'+pos(i)+'"><i>'+(i>0?"+"+i:(i<0?"−"+(-i):"0"))+'</i></span>';
+  return '<div class="bbscale" aria-label="Brzdová balance: z '+bbText(from)+' na '+bbText(to)+'">'+
+    '<div class="bb-track">'+ticks+'<span class="bb-m old" style="left:'+pos(from)+'"></span><span class="bb-m new" style="left:'+pos(to)+'"></span></div>'+
+    '<div class="bb-legend"><span><b>◀ víc na přední kola</b><br>stabilnější při brzdění, hůř zatáčí</span><span style="text-align:center"><b>0</b><br>vyvážená</span><span style="text-align:right"><b>víc na zadní kola ▶</b><br>ochotněji zatáčí, zadek neklidnější</span></div>'+
+    '<div class="hint">Šedá značka = teď, červená = po změně. Jeden krok je malá změna, víc než 2 kroky od středu se obvykle nevyplatí.</div></div>';
+}
 function fieldName(k){ const f=FIELD[k]; return f.label + (f.axle ? " "+f.axle : ""); }
 
 /* ---------- Formulář ---------- */
@@ -539,16 +566,16 @@ function carSVG(zones){
    '<rect x="22" y="272" width="28" height="60" rx="6" class="'+(wheels?"part hot":hot("ra"))+'"/>'+
    '<rect x="150" y="272" width="28" height="60" rx="6" class="'+(wheels?"part hot":hot("ra"))+'"/>'+
    '<rect x="50" y="298" width="100" height="8" rx="3" class="'+hot("ra")+'"/>'+
-   '<rect x="86" y="248" width="28" height="20" rx="3" class="'+hot("gear")+'"/>'+
+   '<rect x="86" y="232" width="28" height="18" rx="3" class="'+hot("gear")+'"/>'+
    '<circle cx="100" cy="302" r="14" class="'+hot("diff")+'"/>'+
    '<rect x="30" y="368" width="140" height="16" rx="4" class="'+hot("rw")+'"/>'+
    '<text x="100" y="398" text-anchor="middle" class="lbl">ZADEK</text>'+
    '<text x="100" y="58" text-anchor="middle" class="'+lbl("fw")+'">křídlo</text>'+
    '<text x="100" y="88" text-anchor="middle" class="'+lbl("fa")+'">náprava</text>'+
-   '<text x="100" y="236" text-anchor="middle" class="'+lbl("cockpit")+'">kokpit</text>'+
+   '<text x="100" y="189" text-anchor="middle" class="lbl in'+(zones.includes("cockpit")?' on':'')+'">kokpit</text>'+
    '<text x="100" y="330" text-anchor="middle" class="'+lbl("diff")+'">diferenciál</text>'+
-   '<text x="100" y="280" text-anchor="middle" class="'+lbl("gear")+'">převodovka</text>'+
-   '<text x="100" y="292" text-anchor="middle" class="'+lbl("ra")+'">náprava</text>'+
+   '<text x="100" y="262" text-anchor="middle" class="'+lbl("gear")+'">převodovka</text>'+
+   '<text x="100" y="290" text-anchor="middle" class="'+lbl("ra")+'">náprava</text>'+
    '<text x="100" y="362" text-anchor="middle" class="'+lbl("rw")+'">křídlo</text>'+
   '</svg>';
 }
@@ -650,7 +677,7 @@ function renderResult(){
   const zones = [...new Set(ch.map(x=>zoneOf(x.k)))];
   const f0 = FIELD[ch[0].k];
   const name = ch.length>1 ? f0.label+" vpředu i vzadu" : fieldName(ch[0].k);
-  const valsHTML = ch.map(x=>'<span class="old">'+esc(valText(x.k,x.from))+'</span><span class="arr">→</span><span class="new">'+esc(valText(x.k,x.to))+'</span>').join('<span style="margin:0 10px;color:var(--muted)">·</span>');
+  const valsHTML = ch.map(x=>'<span class="old">'+esc(valShort(x.k,x.from))+'</span><span class="arr">→</span><span class="new">'+esc(valShort(x.k,x.to))+'</span>').join('<span style="margin:0 10px;color:var(--muted)">·</span>');
   const isLive = cur.c.bop;
   const pathParts = isLive
     ? (ch[0].k==="bb" ? ["Nastavení auta","Brzdová balance","nebo za jízdy v rychlém menu"] : ["Za jízdy","rychlé menu","TCS"])
@@ -666,6 +693,7 @@ function renderResult(){
   h += '<div class="res-grid"><div class="car">'+carSVG(zones)+'</div><div class="change">';
   h += '<div class="big"><span class="name">'+esc(name)+(isLive?'<span class="tag">jde i v BoP</span>':'')+'</span></div>';
   h += '<div class="big"><span class="vals">'+valsHTML+'</span></div>';
+  if(ch[0].k==="bb") h += bbScale(ch[0].from, ch[0].to);
   h += '<div class="path" aria-label="Kde to najdeš">'+pathParts.map(x=>'<span>'+esc(x)+'</span>').join("")+'</div>';
   h += '<div class="box anim-box"><h4>Jak se změní chování (schéma)</h4><div class="anim" id="anim"></div><div class="hint">Zjednodušené schéma pravotočivé zatáčky. Ukazuje, kterým směrem se chování změní, ne přesně o kolik.</div></div>';
   h += '<p class="why"><b>Proč:</b> '+esc(whyOf(cur.c))+'</p>';
