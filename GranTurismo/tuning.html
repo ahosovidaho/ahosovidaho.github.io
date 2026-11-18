@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ladění auta v GT7</title>
+<script>
+try{ if(new URLSearchParams(location.search).has("embed") || window.self!==window.top){ document.documentElement.setAttribute("data-embed",""); document.documentElement.setAttribute("data-theme","dark"); } }catch(e){ document.documentElement.setAttribute("data-embed",""); document.documentElement.setAttribute("data-theme","dark"); }
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,600;0,700;0,800;1,700;1,800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&family=Rajdhani:wght@600;700&family=Inter:wght@400;500;600&display=swap&subset=latin-ext" rel="stylesheet">
+<style>
+/* Layout: 3 kroky pod sebou (setup → příznak → změna). Výsledek = karta s nákresem auta a tabulkou před/po. */
+:root{
+  --bg:#f4f4f2; --surface:#ffffff; --ink:#16171a; --muted:#62656c; --line:#dcdcd8;
+  --accent:#d3121e; --soft:#f9e7e8; --ok:#1d7a46; --warn:#a86400; --car:#c9cac6;
+  --font-display:"Barlow Condensed","Arial Narrow",sans-serif;
+  --font-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --font-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0f1012;--surface:#18191c;--ink:#eeeeec;--muted:#9a9ca3;--line:#2b2d31;
+    --accent:#ff3b3f;--soft:#2a1416;--ok:#4cc184;--warn:#e6a53c;--car:#3a3c41;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0f1012;--surface:#18191c;--ink:#eeeeec;--muted:#9a9ca3;--line:#2b2d31;
+  --accent:#ff3b3f;--soft:#2a1416;--ok:#4cc184;--warn:#e6a53c;--car:#3a3c41;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1000px;margin:0 auto;padding:0 20px 80px}
+header.hero{padding:40px 0 26px;border-bottom:1px solid var(--line);display:grid;gap:12px}
+.kicker{font-family:var(--font-mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+h1,h2,h3{font-family:var(--font-display);font-weight:800;text-transform:uppercase;line-height:1;margin:0;text-wrap:balance}
+h1{font-size:clamp(40px,7vw,66px);font-style:italic}
+h1 span{color:var(--accent)}
+h2{font-size:32px;font-style:italic;display:flex;align-items:baseline;gap:12px}
+h2 .no{font-size:15px;font-family:var(--font-mono);font-style:normal;color:#fff;background:var(--accent);padding:3px 8px;transform:skewX(-12deg);display:inline-block}
+h3{font-size:22px;font-weight:700}
+.lead{max-width:66ch;color:var(--muted);margin:0}
+section{padding:36px 0 6px;display:grid;gap:16px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:20px}
+
+/* Formulář setupu */
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.btn{font:inherit;font-size:14px;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:8px 14px;cursor:pointer}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.dark{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.groups{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
+.grp{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;display:grid;gap:8px;align-content:start}
+.grp h3{font-size:19px;display:flex;justify-content:space-between;align-items:baseline}
+.grp h3 small{font-family:var(--font-mono);font-size:11px;color:var(--muted);text-transform:none;font-weight:500;font-style:normal}
+.frow{display:grid;grid-template-columns:1fr 92px 92px;gap:8px;align-items:center}
+.frow.single{grid-template-columns:1fr 92px}
+.frow.head{font-family:var(--font-mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.frow label{font-size:14px}
+.frow label .u{color:var(--muted);font-size:12px}
+input[type=number],select{width:100%;font:inherit;font-size:15px;font-variant-numeric:tabular-nums;padding:6px 8px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink)}
+.toe{display:grid;gap:4px}
+.toe select{font-size:12px;padding:3px 4px}
+.hint{font-size:13px;color:var(--muted)}
+
+/* Příznaky */
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg button{font:inherit;font-size:15px;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:8px 14px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.sym{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:8px}
+.sym button{font:inherit;text-align:left;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:10px;padding:12px 14px;cursor:pointer;display:grid;gap:3px}
+.sym button:hover{border-color:var(--accent)}
+.sym button small{color:var(--muted);font-size:13px}
+.sym button[aria-pressed="true"]{border-color:var(--accent);background:var(--soft);box-shadow:inset 4px 0 0 var(--accent)}
+.phase-lbl{font-family:var(--font-mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+
+/* Výsledek */
+.result{border-top:6px solid var(--accent);display:grid;gap:20px}
+.res-grid{display:grid;grid-template-columns:200px 1fr;gap:24px;align-items:start}
+.car svg{width:100%;height:auto;display:block}
+.car .part{fill:var(--car);transition:fill .2s}
+.car .body{fill:var(--surface);stroke:var(--line);stroke-width:2}
+.car .hot{fill:var(--accent)}
+.car .lbl{font-family:var(--font-mono);font-size:10px;fill:var(--muted)}
+.car .lbl.hot-l{fill:var(--accent);font-weight:500}
+.change{display:grid;gap:14px}
+.big{display:flex;flex-wrap:wrap;align-items:baseline;gap:14px}
+.big .name{font-family:var(--font-display);font-size:30px;font-weight:800;font-style:italic;text-transform:uppercase;line-height:1}
+.big .vals{font-family:var(--font-display);font-size:44px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1}
+.big .vals .old{color:var(--muted);text-decoration:line-through;text-decoration-thickness:2px}
+.big .vals .arr{color:var(--accent);margin:0 8px}
+.big .vals .new{color:var(--accent)}
+.path{font-family:var(--font-mono);font-size:13px;background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:8px 10px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.path span:not(:last-child)::after{content:"→";margin-left:6px;color:var(--accent)}
+.why{margin:0;max-width:62ch}
+.risk{font-size:14px;color:var(--muted);margin:0}
+.box{padding:12px 14px;border-radius:8px;border:1px solid var(--line);background:var(--bg);font-size:15px}
+.box h4{margin:0 0 6px;font-size:14px;font-family:var(--font-mono);text-transform:uppercase;letter-spacing:.06em;font-weight:500;color:var(--muted)}
+.box ul{margin:0;padding-left:18px;display:grid;gap:4px}
+.box.warn{border-color:var(--warn)}
+.box.warn h4{color:var(--warn)}
+.actions{display:flex;flex-wrap:wrap;gap:8px}
+.next{display:grid;gap:6px}
+.next-row{display:grid;grid-template-columns:1fr auto;gap:12px;font-size:14px;padding:8px 12px;border:1px dashed var(--line);border-radius:8px}
+.next-row .v{font-family:var(--font-mono);color:var(--accent);white-space:nowrap}
+.tag{display:inline-block;font-family:var(--font-mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:4px;border:1px solid var(--ok);color:var(--ok);vertical-align:3px;margin-left:8px}
+
+/* Tabulka před/po */
+.tbl-wrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:520px;font-size:14px;font-variant-numeric:tabular-nums}
+th,td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--line)}
+th{font-family:var(--font-mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:500}
+tr.chg td{background:var(--soft);font-weight:600}
+tr.chg td:last-child{color:var(--accent)}
+td.sec{color:var(--muted);font-size:12px;font-family:var(--font-mono)}
+
+.empty{color:var(--muted)}
+.rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
+.rule{display:grid;gap:2px;padding:12px 14px;background:var(--surface);border:1px solid var(--line);border-radius:10px;font-size:14px;color:var(--muted)}
+.rule b{font-family:var(--font-display);font-size:19px;text-transform:uppercase;font-style:italic;color:var(--ink)}
+footer{margin-top:36px;padding-top:18px;border-top:1px solid var(--line);color:var(--muted);font-size:13px;display:grid;gap:6px}
+
+
+/* Vložení do záložky Tuning na webu šampionátu (tuning.html?embed=1) */
+:root[data-embed]{
+  --bg:#0a0c12;--surface:rgba(18,18,22,.85);--ink:#ffffff;--muted:#9aa1ad;--line:rgba(255,255,255,.09);
+  --accent:#e53935;--soft:rgba(198,40,40,.16);--ok:#4cc184;--warn:#e6a53c;--car:#3a3f4a;
+  --font-display:Rajdhani,"Barlow Condensed",sans-serif;--font-body:Inter,"IBM Plex Sans",system-ui,sans-serif;
+  color-scheme:dark;
+}
+:root[data-embed] body{background:transparent}
+:root[data-embed] .wrap{padding:0 0 24px}
+:root[data-embed] header.hero{padding-top:12px}
+.back{font-family:var(--font-mono);font-size:12px;color:var(--muted);text-decoration:none}
+.back:hover{color:var(--accent)}
+:root[data-embed] .back{display:none}
+
+@media (max-width:680px){
+  .res-grid{grid-template-columns:1fr}
+  .car{max-width:170px;margin:0 auto}
+  .big .vals{font-size:36px}
+  .frow{grid-template-columns:1fr 80px 80px}
+}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hero">
+  <a class="back" href="sezona2026.html#tuning">← Šampionát GT7</a>
+  <div class="kicker">GT7 · všechna auta a tratě · pro partu tamayo.cz</div>
+  <h1>Co změnit <span>a proč</span></h1>
+  <p class="lead">Funguje pro jakékoli auto a trať. Opiš si svůj setup z hry, vyber trať a co auto dělá, a dostaneš jednu konkrétní změnu. Uvidíš, kde ji v menu najdeš, které části auta se týká a proč pomůže. Pak 3–5 kol a rozhodneš: pomohlo, nebo další krok.</p>
+  <div class="rules">
+    <div class="rule"><b>1 · Ulož si kopii</b>Ve hře nový seznam nastavení, ať se máš kam vrátit.</div>
+    <div class="rule"><b>2 · Jedna změna</b>Víc změn naráz = nepoznáš, co pomohlo.</div>
+    <div class="rule"><b>3 · Průměr, ne jedno kolo</b>3–5 čistých kol, sleduj jistotu v zatáčce.</div>
+    <div class="rule"><b>4 · Hlídej PP</b>Přítlak mění PP. Zkontroluj limit závodu.</div>
+    <div class="rule"><b>5 · Jen ABS</b>Bez TCS a dalších asistentů. Rady s tím počítají, trakci hlídá plyn a setup.</div>
+  </div>
+</header>
+
+<section aria-labelledby="s1">
+  <h2 id="s1"><span class="no">1</span>Tvůj současný setup</h2>
+  <p class="lead">Najdeš ho ve hře v <b>Nastavení auta</b>. Předvyplněný je příklad (Viktorovo Ferrari 296 GT3 z Barcelony), přepiš ho svými hodnotami. Co neznáš, nech prázdné. Prohlížeč si hodnoty zapamatuje.</p>
+  <div class="toolbar">
+    <span class="phase-lbl" id="lbl-rules">Pravidla závodu:</span>
+    <div class="seg" role="group" aria-labelledby="lbl-rules" id="seg-rules">
+      <button type="button" id="r-tune" data-v="tune" aria-pressed="true">Ladění povoleno</button>
+      <button type="button" id="r-bop" data-v="bop" aria-pressed="false">BoP, ladění zakázáno</button>
+    </div>
+    <label class="phase-lbl" for="sel-track">Trať:</label>
+    <select id="sel-track" style="width:auto"></select>
+    <label class="phase-lbl" for="sel-drive">Pohon:</label>
+    <select id="sel-drive" style="width:auto">
+      <option value="rwd">Zadní (FR, MR, RR)</option>
+      <option value="ff">Přední (FF)</option>
+      <option value="awd">4×4</option>
+    </select>
+    <button type="button" class="btn" id="btn-clear">Vymazat formulář</button>
+    <button type="button" class="btn" id="btn-example">Vrátit příklad</button>
+  </div>
+  <div class="groups" id="form"></div>
+</section>
+
+<section aria-labelledby="s2">
+  <h2 id="s2"><span class="no">2</span>Co auto dělá?</h2>
+  <p class="lead">Místa v doporučení se řídí tratí vybranou v kroku 1. Pro trať, která v seznamu není, zvol Obecnou trať.</p>
+  <div class="seg" role="group" aria-label="Fáze zatáčky" id="seg-phase"></div>
+  <div class="sym" role="group" aria-label="Příznak" id="sym"></div>
+</section>
+
+<section aria-labelledby="s3" id="s3wrap">
+  <h2 id="s3"><span class="no">3</span>Zkus tohle</h2>
+  <div class="card result" id="result" aria-live="polite"></div>
+</section>
+
+<footer>
+  <div>Pro partu: Viktor a Ondra (RS50), Maty (T300), Mára (DualSense), Hardy (DualShock 4, PS4). GT7 1.71 a novější, jakékoli auto a trať. Jezdíme jen s ABS, ostatní asistenty vypnuté.</div>
+  <div>Změny jsou testovací kroky, ne hotový setup pro konkrétní auto. Pokud hra hodnotu nepustí (jsi na maximu nebo minimu), použij „Další krok“. Názvy v menu se mohou podle jazyka hry mírně lišit.</div>
+</footer>
+</div>
+
+<script>
+/* ---------- Pole setupu ---------- */
+const GROUPS = [
+  {id:"pod", title:"Podvozek", en:"Suspension", rows:[
+    {k:"h",   label:"Světlá výška", u:"mm", step:5, d:0},
+    {k:"arb", label:"Stabilizátor", u:"1–10", step:1, d:0, min:1, max:10},
+    {k:"comp",label:"Tlumení komprese", u:"%", step:5, d:0, min:0, max:100},
+    {k:"exp", label:"Tlumení expanze", u:"%", step:5, d:0, min:0, max:100},
+    {k:"freq",label:"Vlastní frekvence", u:"Hz", step:0.1, d:2, min:0.5},
+    {k:"cam", label:"Odklon", u:"°", step:0.1, d:1, min:0, max:6},
+    {k:"toe", label:"Sbíhavost / rozbíhavost", u:"°", step:0.01, d:2, toe:true}
+  ]},
+  {id:"aero", title:"Aerodynamika", en:"Downforce", rows:[
+    {k:"df", label:"Přítlak", u:"", step:25, d:0, min:0}
+  ]},
+  {id:"lsd", title:"Diferenciál", en:"LSD, zadní", single:true, rows:[
+    {k:"lsdI", label:"Počáteční moment", u:"", step:5, d:0, min:0, max:100},
+    {k:"lsdA", label:"Citlivost při akceleraci", u:"", step:5, d:0, min:0, max:100},
+    {k:"lsdB", label:"Citlivost při brzdění", u:"", step:5, d:0, min:0, max:100}
+  ]},
+  {id:"oth", title:"Brzdy", en:"i za jízdy", single:true, rows:[
+    {k:"bb",  label:"Brzdová balance", u:"−5 až +5", step:1, d:0, min:-5, max:5}
+  ]}
+];
+
+/* Meta pro každé konkrétní pole: kde v menu, část auta */
+const FIELD = {};
+GROUPS.forEach(g=>g.rows.forEach(r=>{
+  if(g.single){ FIELD[r.k]={...r, sec:g.title, axle:""}; }
+  else { FIELD[r.k+"F"]={...r, sec:g.title, axle:"vpředu"}; FIELD[r.k+"R"]={...r, sec:g.title, axle:"vzadu"}; }
+}));
+function zoneOf(k){
+  if(k==="dfF") return "fw";
+  if(k==="dfR") return "rw";
+  if(k.startsWith("lsd")) return "diff";
+  if(k==="bb") return "brakes";
+  if(k==="tcs") return "cockpit";
+  return k.endsWith("F") ? "fa" : "ra";
+}
+const ZONE_NAME = {fa:"přední náprava", ra:"zadní náprava", fw:"přední křídlo", rw:"zadní křídlo", diff:"diferenciál", brakes:"brzdy všech kol", cockpit:"za jízdy z kokpitu"};
+
+/* Příklad: Ferrari 296 GT3 '23, Barcelona (ladeni-aut.md, 8. 10. 2026). Toe: + = sbíhavost, − = rozbíhavost */
+const EXAMPLE = {hF:55,hR:65,arbF:10,arbR:7,compF:30,compR:30,expF:60,expR:60,freqF:4.8,freqR:5.0,camF:3.0,camR:3.0,toeF:-0.07,toeR:0.13,dfF:450,dfR:700,lsdI:5,lsdA:10,lsdB:70,bb:-3};
+
+/* ---------- Problémy a kandidátní změny ----------
+   op: {k, by} = přičti; {k, zero:0.05} = posuň k nule; ks: více polí stejně.
+   bop: true = jde i v BoP závodě. */
+const PHASES = [
+  {id:"entry", label:"Brzdění a nájezd"},
+  {id:"mid", label:"Střed zatáčky"},
+  {id:"exit", label:"Výjezd na plynu"},
+  {id:"fast", label:"Rychlé zatáčky"},
+  {id:"other", label:"Obrubníky, rovinka, pneu"}
+];
+
+const PROBLEMS = [
+ {id:"entry-over", phase:"entry", title:"Při brzdění ujíždí zadek", hint:"Auto se při brzdění nebo zatáčení stáčí, musíš kontrovat.",
+  tech:["Většinu brzdění udělej v přímce, brzdu povoluj tak, jak přidáváš volant.","Nepodřazuj moc brzy: když otáčky vyletí k omezovači, motor přibrzdí zadní kola a auto se otočí."],
+  c:[
+   {k:"bb", by:-1, bop:true, why:"Víc brzdné síly dopředu. Zadní kola méně brzdí, a tak se při brzdění neutrhnou. Ucítíš to hned v nejtvrdších brzděních, hlavně z kopce.", risk:"Auto bude s brzdou o něco hůř zatáčet."},
+   {k:"lsdB", by:10, why:"Diferenciál při brzdění drží obě zadní kola pohromadě. Zadek pak jede za předkem jako po kolejích. Na Ferrari 296 nám přesně tohle zklidnilo nájezdy.", risk:"Nájezd bude o chlup línější."},
+   {k:"toeR", by:0.05, why:"Zadní kola se natočí mírně k sobě (jako když lyžař dělá pluh). Zadek se přirozeně drží směru.", risk:"Trochu menší rychlost na rovince a víc tepla v zadních pneu."},
+   {k:"arbR", by:-1, why:"Měkčí zadní stabilizátor nechá zadní kola víc přitlačená k zemi, takže mají víc gripu.", risk:"Auto bude línější v šikanách."},
+   {k:"dfR", by:25, why:"Víc přítlaku vzadu přitlačí zadek k zemi. Pomáhá jen v rychlých nájezdech.", risk:"Nižší rychlost na rovinkách a vyšší PP."}
+  ]},
+ {id:"entry-under", phase:"entry", title:"Na nájezdu nechce zatočit", hint:"Točíš volantem, auto jede rovně dál.",
+  tech:["Brzdi o kousek dřív a nech trochu brzdy až do nájezdu. Zatížený předek zatáčí líp.","Víc volantu nepomůže, když přední pneu kloužou. Povol ho o kousek."],
+  c:[
+   {k:"bb", by:1, bop:true, why:"Víc brzdné síly dozadu. Zadek se při brzdění trochu uvolní a pomůže autu natočit se do zatáčky. Typicky ve vracečce po dlouhé rovince.", risk:"Víc než o 1–2 kroky nechoď, zadek pak začne ujíždět."},
+   {k:"lsdB", by:-10, why:"Zadní kola se při brzdění můžou točit každé jinak rychle, auto ochotněji zatočí.", risk:"Zadek bude při brzdění neklidnější."},
+   {k:"arbF", by:-1, why:"Měkčí přední stabilizátor = víc gripu na předních kolech v nájezdu.", risk:"Pomalejší reakce v šikanách."},
+   {k:"toeF", by:-0.05, why:"Víc přední rozbíhavosti (kola míří od sebe). Auto ostřeji reaguje na první pohyb volantu.", risk:"Neklidnější v přímce a při brzdění."},
+   {k:"dfF", by:25, why:"Víc přítlaku vpředu pomůže v rychlejších nájezdech.", risk:"Vyšší PP, nižší rychlost na rovince."}
+  ]},
+ {id:"brake-wobble", phase:"entry", title:"Při brzdění se auto vlní", hint:"V přímém brzdění je neklidné, zadek se hýbe.",
+  tech:["Brzdi naplno hned na začátku a pak brzdu postupně povoluj.","ABS nech zapnuté."],
+  c:[
+   {k:"bb", by:-1, bop:true, why:"Víc brzdy dopředu uklidní zadek v přímém brzdění.", risk:"Hůř zatáčí s brzdou."},
+   {k:"lsdB", by:5, why:"Diferenciál při brzdění zklidní zadní nápravu.", risk:"Línější nájezd."},
+   {k:"freqF", by:0.2, why:"Tužší přední pružiny. Předek se při brzdění tolik nepotopí, auto se méně houpe.", risk:"Horší přejíždění obrubníků."}
+  ]},
+ {id:"mid-under", phase:"mid", title:"Ve středu zatáčky tlačí ven", hint:"Auto nezatáčí víc, i když přidáš volant.",
+  tech:["Neber zatáčku moc rychle, vyšší minimální rychlost se nevyplatí, když pak později přidáš plyn.","Plyn až po vrcholu, plyn odlehčí předek."],
+  c:[
+   {k:"arbF", by:-1, why:"Měkčí přední stabilizátor: přední kola se v zatáčce víc opřou o asfalt a mají víc gripu.", risk:"Línější přechody v šikanách."},
+   {k:"arbR", by:1, why:"Tužší zadní stabilizátor má podobný efekt z druhé strany: zadek se víc točí a pomůže autu dotočit.", risk:"Zadek může začít ujíždět."},
+   {k:"lsdI", by:-5, why:"Méně zamčený diferenciál nechá auto ve středu zatáčky ochotněji zatočit.", risk:"Horší trakce na výjezdu."},
+   {k:"camF", by:0.3, why:"Víc odklonu vpředu: kolo se v zatáčce opře celou plochou pneu.", risk:"Horší brzdění v přímce, rychlejší opotřebení."},
+   {k:"dfF", by:25, why:"Víc přítlaku vpředu, pomůže hlavně v rychlých dlouhých zatáčkách.", risk:"Vyšší PP, nižší rychlost na rovinkách."}
+  ]},
+ {id:"mid-over", phase:"mid", title:"Ve středu zatáčky se uvolní zadek", hint:"V zatáčce je auto nervózní, zadek se sám stáčí.",
+  tech:["Plyn neuber naráz. V zatáčce ho drž stabilní.","Volantem jeden plynulý pohyb, žádné cukání."],
+  c:[
+   {k:"arbR", by:-1, why:"Měkčí zadní stabilizátor: zadní kola mají v zatáčce víc gripu.", risk:"Auto méně ochotně zatáčí."},
+   {k:"arbF", by:1, why:"Tužší předek přesune vyvážení dopředu, zadek se uklidní.", risk:"Víc nedotáčivosti."},
+   {k:"dfR", by:25, why:"Víc přítlaku vzadu. V rychlých zatáčkách nejúčinnější.", risk:"Vyšší PP, nižší rychlost."},
+   {k:"lsdI", by:5, why:"Zadní kola víc spolupracují, zadek je stabilnější.", risk:"Víc nedotáčivosti ve středu."},
+   {k:"toeR", by:0.05, why:"Zadní kola mírně k sobě = klidnější zadek.", risk:"Víc tepla v zadních pneu."}
+  ]},
+ {id:"exit-spin", phase:"exit", title:"Na plynu hrabe vnitřní kolo", hint:"Otáčky vyletí, auto nezrychluje, kouř z jednoho kola.",
+  tech:["Bez TCS je kontrolou trakce tvůj plyn (pedál i trigger): přidávej ho postupně, naplno až s rovnými koly.","V pomalé zatáčce zkus o stupeň vyšší převod nebo dřív přeřadit nahoru."],
+  c:[
+   {k:"lsdA", by:10, why:"Diferenciál na plynu spojí obě zadní kola. Výkon nejde do odlehčeného vnitřního kola, ale do obou. Klíčové na výjezdu z pomalých zatáček.", risk:"Moc vysoká hodnota: auto na plynu tlačí ven."},
+   {k:"arbR", by:-1, why:"Měkčí zadek: vnitřní kolo se tolik nezvedá a líp drží asfalt.", risk:"Línější v šikanách."}
+  ]},
+ {id:"exit-over", phase:"exit", title:"Na plynu ujíždí celý zadek", hint:"Přidáš plyn a auto se stáčí do strany.",
+  tech:["Bez TCS hlídá trakci jen plyn: přidávej ho postupně, naplno až s rovnými koly.","Na opotřebených pneu buď s plynem opatrnější."],
+  c:[
+   {k:"lsdA", by:-5, why:"Méně zamčený diferenciál: zadní kola nejsou spojená natvrdo, takže se zadek neutrhne najednou.", risk:"Může se víc protáčet vnitřní kolo."},
+   {k:"arbR", by:-1, why:"Měkčí zadní stabilizátor dá zadním kolům víc gripu na výjezdu.", risk:"Línější v šikanách."},
+   {k:"toeR", by:0.05, why:"Zadní kola mírně k sobě, zadek je na plynu stabilnější.", risk:"Víc tepla v zadních pneu."},
+   {k:"dfR", by:25, why:"Víc přítlaku vzadu, pro rychlé výjezdy.", risk:"Vyšší PP."}
+  ]},
+ {id:"exit-under", phase:"exit", title:"Na plynu vynáší ven", hint:"Přidáš plyn a auto nedotočí, jede ven z trati.",
+  tech:["Plyn až když auto míří k výjezdu, ne před vrcholem."],
+  c:[
+   {k:"lsdA", by:-5, why:"Méně zamčený diferenciál nechá auto na plynu dotočit.", risk:"Víc protáčení vnitřního kola."},
+   {k:"arbR", by:1, why:"Tužší zadek pomůže autu na výjezdu dotočit.", risk:"Zadek může na plynu ujet."},
+   {k:"arbF", by:-1, why:"Měkčí předek drží na výjezdu víc.", risk:"Línější reakce."},
+   {k:"dfF", by:25, why:"Víc přítlaku vpředu pro rychlé výjezdy.", risk:"Vyšší PP."}
+  ]},
+ {id:"fast-unstable", phase:"fast", title:"Ve vysoké rychlosti je nervózní", hint:"V rychlých zatáčkách se zadek hýbe, nemáš důvěru.",
+  tech:["Ve vysoké rychlosti jen malé, plynulé pohyby volantem.","V rychlé zatáčce plyn neuber naráz."],
+  c:[
+   {k:"dfR", by:25, why:"Zadní křídlo přitlačí zadek k zemi tím víc, čím rychleji jedeš. Přesně to chtějí zatáčky na plný plyn.", risk:"Nižší rychlost na rovinkách, vyšší PP."},
+   {k:"toeR", by:0.05, why:"Zadní kola mírně k sobě, klidnější zadek ve vysoké rychlosti.", risk:"Víc tepla v pneu."},
+   {k:"hR", by:-5, why:"Zadek níž = auto méně skloněné dopředu, stabilnější a méně ochotně zatáčí.", risk:"Pozor, aby dno nedrhlo v kompresích a na obrubnících."}
+  ]},
+ {id:"fast-under", phase:"fast", title:"V rychlých zatáčkách nedotáčí", hint:"V dlouhé rychlé zatáčce tlačí auto ven, musíš ubrat.",
+  tech:["Do dlouhé rychlé zatáčky najeď o kousek dřív a plynuleji, jeden oblouk místo dvou."],
+  c:[
+   {k:"dfF", by:25, why:"Přední křídlo přitlačí předek. V dlouhých rychlých zatáčkách má přítlak největší cenu.", risk:"Vyšší PP, nižší rychlost."},
+   {k:"arbF", by:-1, why:"Měkčí předek, víc gripu v dlouhé zatáčce.", risk:"Línější v šikanách."},
+   {k:"hR", by:5, why:"Zadek výš = auto skloněné dopředu, víc přítlaku na předek.", risk:"Nervóznější zadek v rychlých zatáčkách."}
+  ]},
+ {id:"kerbs", phase:"other", title:"Odskakuje na obrubnících, drhne o zem", hint:"Na obrubníku ztrácí směr, v kompresích jiskří.",
+  tech:["V šikanách ber jen nízké obrubníky."],
+  c:[
+   {ks:["hF","hR"], by:5, why:"Auto výš o 5 mm vpředu i vzadu: dno nedrhne a obrubníky ho tolik nerozhodí.", risk:"Vyšší těžiště, trochu horší aerodynamika."},
+   {ks:["freqF","freqR"], by:-0.2, why:"Měkčí pružiny lépe spolknou obrubník.", risk:"Víc náklonu, pomalejší reakce."},
+   {ks:["compF","compR"], by:-5, why:"Měkčí komprese tlumičů: kolo rychleji povolí přes nerovnost.", risk:"Méně stabilní při prudkých přejezdech."}
+  ]},
+ {id:"topspeed", phase:"other", title:"Na rovinkách ztrácím rychlost", hint:"Ostatní mě na rovince předjíždějí.",
+  tech:["Rovinku rozhoduje výjezd ze zatáčky před ní: plný plyn co nejdřív a s co nejmenším natočením volantu.","Závětří využij na rovince, ne v zatáčce, kde ti bere přítlak."],
+  c:[
+   {ks:["dfF","dfR"], by:-25, why:"Méně přítlaku vpředu i vzadu stejným dílem = menší odpor a vyvážení zůstane stejné.", risk:"Méně gripu v rychlých zatáčkách."}
+  ]},
+ {id:"tyres", phase:"other", title:"Ke konci stintu klouže, pneu se přehřívají", hint:"Prvních pár kol dobré, pak přibývá smyků.",
+  tech:["Každý smyk a protáčení ohřívá pneu. Plynulý plyn je nejlepší ochrana.","S opotřebením brzdi o kousek dřív."],
+  c:[
+   {k:"bb", by:-1, bop:true, why:"Když ke konci stintu ujíždí zadek při brzdění. Jde za jízdy.", risk:"Hůř zatáčí s brzdou."},
+   {ks:["camF","camR"], by:-0.3, why:"Méně odklonu: pneu se zahřívá rovnoměrněji po celé šířce.", risk:"Méně gripu v zatáčce."},
+   {ks:["toeF","toeR"], zero:0.05, why:"Sbíhavost blíž k nule: kola se méně smýkají a míň se zahřívají.", risk:"Méně stability vzadu, pomalejší reakce vpředu."}
+  ]}
+];
+
+
+const TYPES = {heavyBrake:"tvrdá brzdění do pomalých zatáček", slowExit:"pomalé zatáčky s výjezdem na rovinku", medium:"středně rychlé zatáčky a šikany", fast:"rychlé zatáčky", kerbs:"šikany s obrubníky a komprese", straight:"dlouhé rovinky"};
+const TRACKS = [
+ {id:"generic", n:"Obecná trať", c:{}},
+ {id:"spa", n:"Spa-Francorchamps", c:{heavyBrake:"La Source, Les Combes, Bruxelles, Bus Stop", slowExit:"La Source, Bruxelles, Bus Stop", medium:"Les Combes, Fagnes, Campus", fast:"Eau Rouge a Raidillon, Pouhon, Blanchimont", kerbs:"Bus Stop, Fagnes, dno Eau Rouge", straight:"Kemmel, cílová rovinka"}},
+ {id:"bcn", n:"Barcelona-Catalunya", c:{heavyBrake:"T1 Elf, T10 La Caixa, šikana", slowExit:"T5 Seat, T10 La Caixa, poslední zatáčka", medium:"T4 Repsol, T7, T12, T13", fast:"T3 Renault, T9 Campsa", kerbs:"šikana T14–T15", straight:"cílová rovinka"}},
+ {id:"monza", n:"Monza", c:{heavyBrake:"první šikana (Rettifilo), Roggia, Ascari", slowExit:"první šikana, Roggia", medium:"Lesmo 1 a 2, Ascari", fast:"Curva Grande, Parabolica", kerbs:"první šikana, Roggia", straight:"cílová rovinka, rovinka k Ascari"}},
+ {id:"suzuka", n:"Suzuka", c:{heavyBrake:"T1, vlásenka, šikana Casio", slowExit:"vlásenka, Spoon, šikana Casio", medium:"Degner, Dunlop", fast:"S-zatáčky, 130R", kerbs:"šikana Casio", straight:"cílová a zadní rovinka"}},
+ {id:"nur", n:"Nürburgring GP", c:{heavyBrake:"T1, Dunlop vlásenka, šikana Veedol (NGK)", slowExit:"Dunlop vlásenka, šikana Veedol", medium:"Mercedes Arena, Ford", fast:"Schumacher S, Bit Kurve", kerbs:"šikana Veedol", straight:"rovinka k šikaně Veedol"}},
+ {id:"fuji", n:"Fuji Speedway", c:{heavyBrake:"T1, vlásenka, šikana Dunlop", slowExit:"vlásenka, poslední zatáčka", medium:"Coca-Cola, sekce před cílem", fast:"100R, 300R", kerbs:"šikana Dunlop", straight:"dlouhá cílová rovinka"}},
+ {id:"interlagos", n:"Interlagos", c:{heavyBrake:"S do Senna, Descida do Lago", slowExit:"Junção, Bico de Pato", medium:"Ferradura, Laranjinha", fast:"Curva do Sol, Subida dos Boxes", kerbs:"S do Senna", straight:"Reta Oposta, cílová rovinka"}},
+ {id:"lemans", n:"Le Mans", c:{heavyBrake:"šikany na Hunaudières, Mulsanne, Arnage", slowExit:"Mulsanne, Arnage, Ford šikany", medium:"Dunlop šikana, Tertre Rouge", fast:"Porsche zatáčky, nájezd do Indianapolis", kerbs:"Ford a Dunlop šikany", straight:"Hunaudières, rovinka k Indianapolis"}}
+];
+const PTYPE = {"entry-over":["heavyBrake"],"entry-under":["heavyBrake","medium"],"brake-wobble":["heavyBrake"],"mid-under":["medium","fast"],"mid-over":["medium","fast"],"exit-spin":["slowExit"],"exit-over":["slowExit"],"exit-under":["slowExit"],"fast-unstable":["fast"],"fast-under":["fast"],"kerbs":["kerbs"],"topspeed":["straight"],"tyres":["slowExit"]};
+function trackName(){ return (TRACKS.find(x=>x.id===state.track)||TRACKS[0]).n; }
+function trackWhere(p){
+  const t = TRACKS.find(x=>x.id===state.track) || TRACKS[0];
+  const types = PTYPE[p.id]||[];
+  if(t.id==="generic") return types.map(x=>TYPES[x]).join(", ");
+  const names = [...new Set(types.map(x=>t.c[x]).filter(Boolean).join(", ").split(", "))];
+  return names.join(", ");
+}
+
+/* ---------- Stav ---------- */
+const state = {track:"spa", drive:"rwd", rules:"tune", phase:"entry", prob:"entry-over", skip:0, setup:{...EXAMPLE}};
+try{
+  const s = JSON.parse(localStorage.getItem("gt7-setup-v1")||"null");
+  if(s && typeof s==="object") state.setup = s;
+  const r = localStorage.getItem("gt7-rules-v1"); if(r) state.rules = r;
+  const tr = localStorage.getItem("gt7-track-v1"); if(tr) state.track = tr;
+  const dr = localStorage.getItem("gt7-drive-v1"); if(dr) state.drive = dr;
+}catch(e){}
+function save(){ try{ localStorage.setItem("gt7-setup-v1", JSON.stringify(state.setup)); localStorage.setItem("gt7-rules-v1", state.rules); localStorage.setItem("gt7-track-v1", state.track); localStorage.setItem("gt7-drive-v1", state.drive);}catch(e){} }
+
+const fmt = (v,d)=> (v===null||v===undefined||isNaN(v)) ? "–" : Number(v).toLocaleString("cs-CZ",{minimumFractionDigits:d,maximumFractionDigits:d});
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c]));}
+function toeText(v){ if(v===null||v===undefined||isNaN(v)) return "–"; if(Math.abs(v)<0.0001) return "0,00"; return fmt(Math.abs(v),2)+(v>0?" sbíhavost":" rozbíhavost"); }
+function valText(k,v){ return k.startsWith("toe") ? toeText(v) : fmt(v, FIELD[k].d) + (FIELD[k].u && !FIELD[k].u.includes("–") ? " "+FIELD[k].u : ""); }
+function fieldName(k){ const f=FIELD[k]; return f.label + (f.axle ? " "+f.axle : ""); }
+
+/* ---------- Formulář ---------- */
+function numInput(k){
+  const f = FIELD[k], v = state.setup[k];
+  if(f.toe){
+    const mag = (v===undefined||v===null||isNaN(v)) ? "" : Math.abs(v);
+    const dir = (v<0) ? "out" : "in";
+    return '<div class="toe"><input type="number" id="in-'+k+'" data-k="'+k+'" step="0.01" min="0" value="'+mag+'" aria-label="'+esc(fieldName(k))+'"><select id="dir-'+k+'" data-k="'+k+'" aria-label="Směr '+esc(fieldName(k))+'"><option value="in"'+(dir==="in"?" selected":"")+'>sbíhavost</option><option value="out"'+(dir==="out"?" selected":"")+'>rozbíhavost</option></select></div>';
+  }
+  return '<input type="number" id="in-'+k+'" data-k="'+k+'" step="'+f.step+'"'+(f.min!==undefined?' min="'+f.min+'"':'')+(f.max!==undefined?' max="'+f.max+'"':'')+' value="'+(v===undefined||v===null||isNaN(v)?"":v)+'" aria-label="'+esc(fieldName(k))+'">';
+}
+function renderForm(){
+  const el = document.getElementById("form");
+  el.innerHTML = GROUPS.map(g=>{
+    let h = '<div class="grp"><h3>'+esc(g.title)+' <small>'+esc(g.en)+'</small></h3>';
+    if(!g.single) h += '<div class="frow head"><span></span><span>Vpředu</span><span>Vzadu</span></div>';
+    g.rows.forEach(r=>{
+      const lab = '<label for="in-'+(g.single?r.k:r.k+"F")+'">'+esc(r.label)+(r.u?' <span class="u">'+esc(r.u)+'</span>':'')+'</label>';
+      h += g.single ? '<div class="frow single">'+lab+numInput(r.k)+'</div>' : '<div class="frow">'+lab+numInput(r.k+"F")+numInput(r.k+"R")+'</div>';
+    });
+    if(g.id==="pod") h += '<div class="hint">Sbíhavost = kola míří k sobě, rozbíhavost = od sebe. Ve hře to ukazují šipky u hodnoty.</div>';
+    if(g.id==="aero") h += '<div class="hint">Některá auta mají přední přítlak pevný. Pak nech pole prázdné.</div>';
+    return h+'</div>';
+  }).join("");
+  el.querySelectorAll("input,select").forEach(inp=>inp.addEventListener("input",readField));
+}
+function readField(ev){
+  const k = ev.target.dataset.k, f = FIELD[k];
+  const raw = document.getElementById("in-"+k).value;
+  let v = raw==="" ? null : parseFloat(raw.replace(",","."));
+  if(v!==null && isNaN(v)) v=null;
+  if(f.toe && v!==null){ v = Math.abs(v) * (document.getElementById("dir-"+k).value==="out" ? -1 : 1); }
+  state.setup[k]=v; state.skip=0; save(); renderResult();
+}
+
+/* ---------- Výpočet doporučení ---------- */
+function round(v,d){ const p=Math.pow(10,d); return Math.round(v*p)/p; }
+function applyCand(c){
+  const keys = c.ks || [c.k];
+  const out = [];
+  for(const k of keys){
+    const f = FIELD[k], cur = state.setup[k];
+    if(cur===null||cur===undefined||isNaN(cur)) continue;
+    let nv;
+    if(c.zero!==undefined){
+      if(Math.abs(cur)<0.0001) continue;
+      nv = Math.abs(cur)<=c.zero ? 0 : cur - Math.sign(cur)*c.zero;
+    } else nv = cur + c.by;
+    nv = round(nv, f.d);
+    if(f.min!==undefined && nv<f.min) continue;
+    if(f.max!==undefined && nv>f.max) continue;
+    if(!f.toe && f.min===undefined && nv<0) continue;
+    out.push({k, from:cur, to:nv});
+  }
+  return out.length ? out : null;
+}
+function candidates(p){
+  const bop = state.rules==="bop";
+  return p.c.filter(c=>!bop || c.bop).filter(c=>state.drive==="rwd" || !(c.k||"").startsWith("lsd")).map(c=>({c, ch:applyCand(c)})).filter(x=>x.ch);
+}
+
+/* ---------- Nákres auta ---------- */
+function carSVG(zones){
+  const hot = z => zones.includes(z) ? "part hot" : "part";
+  const lbl = z => zones.includes(z) ? "lbl hot-l" : "lbl";
+  const wheels = zones.includes("brakes");
+  return '<svg viewBox="0 0 200 400" role="img" aria-label="Nákres auta shora, vyznačená část: '+esc(zones.map(z=>ZONE_NAME[z]).join(", "))+'">'+
+   '<text x="100" y="12" text-anchor="middle" class="lbl">PŘEDEK</text>'+
+   '<rect x="35" y="22" width="130" height="16" rx="4" class="'+hot("fw")+'"/>'+
+   '<path d="M70 40 Q100 30 130 40 L150 110 L152 300 Q150 350 130 360 L70 360 Q50 350 48 300 L50 110 Z" class="body"/>'+
+   '<rect x="22" y="70" width="26" height="54" rx="6" class="'+(wheels?"part hot":hot("fa"))+'"/>'+
+   '<rect x="152" y="70" width="26" height="54" rx="6" class="'+(wheels?"part hot":hot("fa"))+'"/>'+
+   '<rect x="48" y="92" width="104" height="8" rx="3" class="'+hot("fa")+'"/>'+
+   '<ellipse cx="100" cy="185" rx="26" ry="38" class="'+hot("cockpit")+'"/>'+
+   '<rect x="22" y="272" width="28" height="60" rx="6" class="'+(wheels?"part hot":hot("ra"))+'"/>'+
+   '<rect x="150" y="272" width="28" height="60" rx="6" class="'+(wheels?"part hot":hot("ra"))+'"/>'+
+   '<rect x="50" y="298" width="100" height="8" rx="3" class="'+hot("ra")+'"/>'+
+   '<circle cx="100" cy="302" r="14" class="'+hot("diff")+'"/>'+
+   '<rect x="30" y="368" width="140" height="16" rx="4" class="'+hot("rw")+'"/>'+
+   '<text x="100" y="398" text-anchor="middle" class="lbl">ZADEK</text>'+
+   '<text x="100" y="58" text-anchor="middle" class="'+lbl("fw")+'">křídlo</text>'+
+   '<text x="100" y="88" text-anchor="middle" class="'+lbl("fa")+'">náprava</text>'+
+   '<text x="100" y="236" text-anchor="middle" class="'+lbl("cockpit")+'">kokpit</text>'+
+   '<text x="100" y="330" text-anchor="middle" class="'+lbl("diff")+'">diferenciál</text>'+
+   '<text x="100" y="292" text-anchor="middle" class="'+lbl("ra")+'">náprava</text>'+
+   '<text x="100" y="362" text-anchor="middle" class="'+lbl("rw")+'">křídlo</text>'+
+  '</svg>';
+}
+
+/* ---------- Výsledek ---------- */
+function renderResult(){
+  const r = document.getElementById("result");
+  const p = PROBLEMS.find(x=>x.id===state.prob);
+  if(!p){ r.innerHTML='<p class="empty">Vyber příznak v kroku 2.</p>'; return; }
+  const list = candidates(p);
+  const bop = state.rules==="bop";
+  const techHTML = '<div class="box"><h4>Nejdřív zkus jízdu (nic to nestojí)</h4><ul>'+p.tech.map(t=>"<li>"+esc(t)+"</li>").join("")+'</ul></div>';
+
+  if(state.skip >= list.length){
+    let msg = bop
+      ? "V BoP závodě bez ladění a bez asistentů se tady nedá nic nastavit. Zbývá jízda: plyn, brzda a výběr převodu."
+      : (list.length===0 ? "Chybí hodnoty v kroku 1 (nebo jsou na hranici rozsahu). Doplň svůj setup a doporučení se objeví." : "Prošel jsi všechny kroky. Vrať se k setupu, který jel nejlíp, a soustřeď se na jízdu.");
+    r.innerHTML = '<h3>'+esc(p.title)+'</h3><div class="box warn"><h4>Žádná další změna</h4>'+esc(msg)+'</div>'+techHTML+
+      (state.skip>0?'<div class="actions"><button type="button" class="btn" id="btn-restart">Začít znovu od prvního kroku</button></div>':'');
+    const b=document.getElementById("btn-restart"); if(b) b.onclick=()=>{state.skip=0;renderResult();};
+    return;
+  }
+
+  const cur = list[state.skip];
+  const ch = cur.ch;
+  const zones = [...new Set(ch.map(x=>zoneOf(x.k)))];
+  const f0 = FIELD[ch[0].k];
+  const name = ch.length>1 ? f0.label+" vpředu i vzadu" : fieldName(ch[0].k);
+  const valsHTML = ch.map(x=>'<span class="old">'+esc(valText(x.k,x.from))+'</span><span class="arr">→</span><span class="new">'+esc(valText(x.k,x.to))+'</span>').join('<span style="margin:0 10px;color:var(--muted)">·</span>');
+  const isLive = cur.c.bop;
+  const pathParts = isLive
+    ? (ch[0].k==="bb" ? ["Nastavení auta","Brzdová balance","nebo za jízdy v rychlém menu"] : ["Za jízdy","rychlé menu","TCS"])
+    : ["Nastavení auta", f0.sec, f0.label + (ch.length>1 ? " (vpředu i vzadu)" : (f0.axle?" – "+f0.axle:""))];
+
+  const rest = list.slice(state.skip+1, state.skip+3);
+  const changed = new Set(ch.map(x=>x.k));
+  const toMap = Object.fromEntries(ch.map(x=>[x.k,x.to]));
+
+  let h = '<div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;align-items:baseline"><h3>'+esc(p.title)+'</h3><span class="phase-lbl">Krok '+(state.skip+1)+' z '+list.length+' · '+esc(trackName())+': '+esc(trackWhere(p))+'</span></div>';
+  h += techHTML;
+  if(state.drive!=="rwd" && p.c.some(c=>(c.k||"").startsWith("lsd"))) h += '<div class="box warn"><h4>Pohon '+(state.drive==="ff"?"přední":"4×4")+'</h4>Změny diferenciálu jsem vynechal. U '+(state.drive==="ff"?"předokolky je diferenciál vpředu":"čtyřkolky jsou diferenciály dva a rozdělení momentu")+' a reagují jinak než u auta se zadním pohonem. Ostatní rady platí.</div>';
+  h += '<div class="res-grid"><div class="car">'+carSVG(zones)+'</div><div class="change">';
+  h += '<div class="big"><span class="name">'+esc(name)+(isLive?'<span class="tag">jde i v BoP</span>':'')+'</span></div>';
+  h += '<div class="big"><span class="vals">'+valsHTML+'</span></div>';
+  h += '<div class="path" aria-label="Kde to najdeš">'+pathParts.map(x=>'<span>'+esc(x)+'</span>').join("")+'</div>';
+  h += '<p class="why"><b>Proč:</b> '+esc(cur.c.why)+'</p>';
+  h += '<p class="risk"><b>Na co si dát pozor:</b> '+esc(cur.c.risk)+'</p>';
+  h += '<div class="box"><h4>Jak to otestovat</h4><ul><li>Změň jen tuhle jednu hodnotu.</li><li>Zajeď 3–5 kol a sleduj hlavně '+esc(trackWhere(p))+'.</li><li>Pomohlo, když je průměr stejný nebo lepší a problém se zmenšil. Jedno rychlé kolo nestačí.</li></ul></div>';
+  h += '<div class="actions"><button type="button" class="btn primary" id="btn-ok">Pomohlo: uložit novou hodnotu</button><button type="button" class="btn dark" id="btn-next">Nepomohlo: vrátit a další krok</button><button type="button" class="btn" id="btn-copy">Zkopírovat</button></div>';
+  if(rest.length){
+    h += '<div class="next"><span class="phase-lbl">Co přijde potom, když to nepomůže</span>'+rest.map(x=>{
+      const n = x.ch.length>1 ? FIELD[x.ch[0].k].label+" vpředu i vzadu" : fieldName(x.ch[0].k);
+      return '<div class="next-row"><span>'+esc(n)+'</span><span class="v">'+esc(x.ch.map(y=>valText(y.k,y.from)+" → "+valText(y.k,y.to)).join(" · "))+'</span></div>';
+    }).join("")+'</div>';
+  }
+  h += '</div></div>';
+
+  // tabulka před/po
+  h += '<details><summary style="cursor:pointer;font-weight:600">Celý setup: před a po změně</summary><div class="tbl-wrap" style="margin-top:10px"><table><thead><tr><th>Část</th><th>Nastavení</th><th>Teď</th><th>Po změně</th></tr></thead><tbody>';
+  Object.keys(FIELD).forEach(k=>{
+    const v = state.setup[k]; if(v===null||v===undefined||isNaN(v)) return;
+    const c = changed.has(k);
+    h += '<tr class="'+(c?"chg":"")+'"><td class="sec">'+esc(FIELD[k].sec)+'</td><td>'+esc(fieldName(k))+'</td><td>'+esc(valText(k,v))+'</td><td>'+esc(valText(k,c?toMap[k]:v))+'</td></tr>';
+  });
+  h += '</tbody></table></div></details>';
+  r.innerHTML = h;
+
+  document.getElementById("btn-ok").onclick=()=>{
+    ch.forEach(x=>state.setup[x.k]=x.to); state.skip=0; save(); renderForm(); renderResult();
+    const b=document.getElementById("btn-ok"); if(b){ b.textContent="Uloženo. Další doporučení vychází z nového setupu"; }
+  };
+  document.getElementById("btn-next").onclick=()=>{ state.skip++; renderResult(); };
+  document.getElementById("btn-copy").onclick=async (ev)=>{
+    const t = "GT7 Spa – "+p.title+"\nZměna: "+name+" "+ch.map(x=>valText(x.k,x.from)+" → "+valText(x.k,x.to)).join(", ")+"\nKde: "+pathParts.join(" → ")+"\nProč: "+cur.c.why+"\nPozor: "+cur.c.risk+"\nNejdřív jízda: "+p.tech.join(" ");
+    const b=ev.currentTarget;
+    try{ await navigator.clipboard.writeText(t); b.textContent="Zkopírováno"; }catch(e){ b.textContent="Kopírování nejde"; }
+    setTimeout(()=>{b.textContent="Zkopírovat";},2000);
+  };
+}
+
+/* ---------- Příznaky ---------- */
+function renderPhases(){
+  const w = document.getElementById("seg-phase");
+  w.innerHTML = PHASES.map(p=>'<button type="button" id="ph-'+p.id+'" data-v="'+p.id+'" aria-pressed="'+(state.phase===p.id)+'">'+esc(p.label)+'</button>').join("");
+  w.querySelectorAll("button").forEach(b=>b.onclick=()=>{
+    state.phase=b.dataset.v; state.prob=PROBLEMS.find(x=>x.phase===state.phase).id; state.skip=0;
+    renderPhases(); renderSymptoms(); renderResult();
+  });
+}
+function renderSymptoms(){
+  const w = document.getElementById("sym");
+  w.innerHTML = PROBLEMS.filter(p=>p.phase===state.phase).map(p=>'<button type="button" id="sy-'+p.id+'" data-v="'+p.id+'" aria-pressed="'+(state.prob===p.id)+'"><span>'+esc(p.title)+'</span><small>'+esc(p.hint)+'</small></button>').join("");
+  w.querySelectorAll("button").forEach(b=>b.onclick=()=>{
+    state.prob=b.dataset.v; state.skip=0; renderSymptoms(); renderResult();
+    const s=document.getElementById("s3wrap");
+    if(s && s.getBoundingClientRect().top > window.innerHeight*0.6){
+      s.scrollIntoView({behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto":"smooth", block:"start"});
+    }
+  });
+}
+function renderRules(){
+  document.querySelectorAll("#seg-rules button").forEach(b=>{
+    b.setAttribute("aria-pressed", String(b.dataset.v===state.rules));
+    b.onclick=()=>{ state.rules=b.dataset.v; state.skip=0; save(); renderRules(); renderResult(); };
+  });
+}
+document.getElementById("btn-clear").onclick=()=>{ Object.keys(FIELD).forEach(k=>state.setup[k]=null); state.skip=0; save(); renderForm(); renderResult(); };
+document.getElementById("btn-example").onclick=()=>{ state.setup={...EXAMPLE}; state.skip=0; save(); renderForm(); renderResult(); };
+
+(function(){
+  const st=document.getElementById("sel-track");
+  st.innerHTML=TRACKS.map(t=>'<option value="'+t.id+'">'+esc(t.n)+'</option>').join("");
+  st.value=state.track; st.onchange=()=>{state.track=st.value; save(); renderResult();};
+  const sd=document.getElementById("sel-drive"); sd.value=state.drive;
+  sd.onchange=()=>{state.drive=sd.value; state.skip=0; save(); renderResult();};
+})();
+renderRules(); renderForm(); renderPhases(); renderSymptoms(); renderResult();
+</script>
+</body>
+</html>
