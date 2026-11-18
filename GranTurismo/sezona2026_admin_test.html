@@ -207,6 +207,7 @@ tbody tr:hover{ background: rgba(255,255,255,0.04); }
     <button class="tablink" data-tab="stats">Statistiky</button>
     <button class="tablink" data-tab="archive">Archiv sezón</button>
     <button class="tablink" data-tab="profile">Profil závodníka</button>
+    <button class="tablink" data-tab="tuning">Tuning</button>
     <button class="tablink" data-tab="admin">Admin</button>
   </nav>
 
@@ -490,6 +491,28 @@ tbody tr:hover{ background: rgba(255,255,255,0.04); }
 </div>
 
 
+  </section>
+
+  <!-- TUNING: interaktivní průvodce laděním (GranTurismo/tuning.html) -->
+  <section id="tuning">
+    <iframe id="tuningFrame" src="tuning.html?embed=1" title="Ladění auta v GT7" loading="lazy" style="width:100%;border:0;display:block;min-height:900px;background:transparent"></iframe>
+    <p style="font-size:13px;opacity:.7;margin:8px 0 0">Samostatně na celou obrazovku: <a href="tuning.html" style="color:inherit">tamayo.cz/GranTurismo/tuning.html</a></p>
+    <script>
+    (function(){
+      var f=document.getElementById('tuningFrame');
+      function fit(){ try{ var d=f.contentDocument; if(d&&d.documentElement){ f.style.height=d.documentElement.scrollHeight+'px'; } }catch(e){} }
+      f.addEventListener('load',function(){
+        fit();
+        try{ new ResizeObserver(fit).observe(f.contentDocument.documentElement); }catch(e){ setInterval(fit,1000); }
+      });
+      if(location.hash==='#tuning'){
+        window.addEventListener('DOMContentLoaded',function(){
+          document.querySelectorAll('section').forEach(function(s){ s.classList.toggle('active', s.id==='tuning'); });
+          document.querySelectorAll('.tablink').forEach(function(b){ b.classList.toggle('active', b.dataset.tab==='tuning'); });
+        });
+      }
+    })();
+    </script>
   </section>
 
   <!-- ADMIN -->
